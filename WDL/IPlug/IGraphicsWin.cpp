@@ -688,7 +688,7 @@ bool IGraphicsWin::OpenURL(const char* url,
 
 bool IGraphicsWin::DrawIText(IText* pText, char* str, IRECT* pR)
 {
-  if (!str || str == '\0') {
+  if (!str || str[0] == '\0') {
       return true;
   }
 

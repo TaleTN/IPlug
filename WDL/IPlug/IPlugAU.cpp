@@ -873,7 +873,7 @@ ComponentResult IPlugAU::SetProperty(AudioUnitPropertyID propID, AudioUnitScope 
         AUHostIdentifier* pHostID = (AUHostIdentifier*) pData;
         CStrLocal hostStr(pHostID->hostName);
         int hostVer = (pHostID->hostVersion.majorRev << 16) + (pHostID->hostVersion.minorAndBugRev << 8);
-        SetHost("", hostStr.mCStr, hostVer);
+        SetHost(hostStr.mCStr, hostVer);
         return noErr;
       }
       NO_OP(kAudioUnitProperty_MIDIOutputCallbackInfo);   // 47,

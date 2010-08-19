@@ -44,7 +44,7 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef pHandler
             GetEventParameter(pEvent, kEventParamCGContextRef, typeCGContextRef, 0, sizeof(CGContextRef), 0, &(_this->mCGC));         
             CGContextTranslateCTM(_this->mCGC, 0, gfxH);
             CGContextScaleCTM(_this->mCGC, 1.0, -1.0);     
-            pGraphicsMac->Draw(&r);
+            //pGraphicsMac->Draw(&r);
           }
           else {
             #pragma REMINDER("not swapping gfx ports in non-composited mode")
