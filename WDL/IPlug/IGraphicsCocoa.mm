@@ -78,7 +78,7 @@ inline IMouseMod GetMouseMod(NSEvent* pEvent)
 
 - (void) drawRect: (NSRect) rect 
 {
-  mGraphics->Draw(&ToIRECT(mGraphics, &rect));
+  if (mGraphics) mGraphics->Draw(&ToIRECT(mGraphics, &rect));
 }
 
 - (void) onTimer: (NSTimer*) pTimer
