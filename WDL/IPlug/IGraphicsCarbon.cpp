@@ -106,6 +106,19 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef pHandler
       
       switch (eventKind) {
         case kEventMouseDown: {
+          if (_this->mParamEditView)
+          {
+            HIViewRef view;
+            HIViewGetViewForMouseEvent(_this->mView, pEvent, &view);
+            if (view == _this->mParamEditView) break;
+            if (button == kEventMouseButtonSecondary)
+            {
+              _this->EndUserInput(false);
+              break;
+            }
+            _this->EndUserInput(true);
+          }
+
           CallNextEventHandler(pHandlerCall, pEvent);   // Activates the window, if inactive.
           
           UInt32 clickCount = 0;
@@ -164,6 +177,38 @@ pascal void IGraphicsCarbon::CarbonTimerHandler(EventLoopTimerRef pTimer, void* 
   } 
 }
 
+// static
+pascal OSStatus IGraphicsCarbon::CarbonParamEditHandler(EventHandlerCallRef pHandlerCall, EventRef pEvent, void* pGraphicsCarbon)
+{
+  IGraphicsCarbon* _this = (IGraphicsCarbon*) pGraphicsCarbon;
+  UInt32 eventClass = GetEventClass(pEvent);
+  UInt32 eventKind = GetEventKind(pEvent);
+
+  switch (eventClass)
+  {
+    case kEventClassKeyboard:
+    {
+      switch (eventKind)
+      {
+        case kEventRawKeyDown:
+        case kEventRawKeyRepeat:
+        {
+          char ch;
+          GetEventParameter(pEvent, kEventParamKeyMacCharCodes, typeChar, NULL, sizeof(ch), NULL, &ch);
+          if (ch == 13)
+          {
+            _this->EndUserInput(true);
+            return noErr;
+          }
+          break;
+        }
+      }
+      break;
+    }
+  }
+  return eventNotHandledErr;
+}
+
 void ResizeWindow(WindowRef pWindow, int w, int h)
 {
   Rect gr;  // Screen.
@@ -175,7 +220,7 @@ void ResizeWindow(WindowRef pWindow, int w, int h)
 
 IGraphicsCarbon::IGraphicsCarbon(IGraphicsMac* pGraphicsMac, WindowRef pWindow, ControlRef pParentControl)
 : mGraphicsMac(pGraphicsMac), mWindow(pWindow), mView(0), mTimer(0), mControlHandler(0), mWindowHandler(0), mCGC(0),
-  mContentXOffset(0), mContentYOffset(0)
+  mContentXOffset(0), mContentYOffset(0), mParamEditView(0), mParamEditHandler(0), mEdControl(0), mEdParam(0)
 { 
   TRACE;
   
@@ -244,6 +289,15 @@ IGraphicsCarbon::IGraphicsCarbon(IGraphicsMac* pGraphicsMac, WindowRef pWindow, 
 IGraphicsCarbon::~IGraphicsCarbon()
 {
   // Called from IGraphicsMac::CloseWindow.
+  if (mParamEditView)
+  {
+    RemoveEventHandler(mParamEditHandler);
+    mParamEditHandler = 0;
+    HIViewRemoveFromSuperview(mParamEditView);
+    mParamEditView = 0;
+    mEdControl = 0;
+    mEdParam = 0;
+  }
   RemoveEventLoopTimer(mTimer);
   RemoveEventHandler(mControlHandler);
   RemoveEventHandler(mWindowHandler);
@@ -264,4 +318,139 @@ bool IGraphicsCarbon::Resize(int w, int h)
     return (HIViewSetFrame(mView, &CGRectMake(0, 0, w, h)) == noErr);
   }
   return false;
+}
+
+#define MAX_PARAM_LEN 32
+
+#define PARAM_EDIT_W 32
+#define PARAM_EDIT_H 14
+#define PARAM_LIST_MIN_W 24
+#define PARAM_LIST_W_PER_CHAR 8
+#define PARAM_LIST_H 22
+
+void IGraphicsCarbon::PromptUserInput(IControl* pControl, IParam* pParam)
+{
+  if (!pControl || !pParam || mParamEditView) return;
+
+  IRECT* pR = pControl->GetRECT();
+  int cX = pR->MW(), cY = pR->MH();
+  char currentText[MAX_PARAM_LEN];
+  pParam->GetDisplayForHost(currentText);
+
+  ControlRef control = 0;
+  int n = pParam->GetNDisplayTexts();
+  if (n)
+  {
+    int i, currentIdx = -1;
+    int w = PARAM_LIST_MIN_W, h = PARAM_LIST_H;
+    for (i = 0; i < n; ++i)
+    {
+      const char* str = pParam->GetDisplayText(i);
+      w = MAX(w, PARAM_LIST_MIN_W + strlen(str) * PARAM_LIST_W_PER_CHAR);
+      if (!strcmp(str, currentText)) currentIdx = i;
+    }
+
+    HIRect r = CGRectMake(cX - w/2, cY, w, h);
+    if (HIComboBoxCreate(&r, NULL, NULL, NULL, kHIComboBoxStandardAttributes, &control) != noErr) return;
+
+    for (i = 0; i < n; ++i)
+    {
+      CFStringRef str = CFStringCreateWithCString(NULL, pParam->GetDisplayText(i), kCFStringEncodingUTF8);
+      if (str)
+      {
+        HIComboBoxAppendTextItem(control, str, NULL);
+        CFRelease(str);
+      }
+    }
+  }
+  else
+  {
+    const int w = PARAM_EDIT_W, h = PARAM_EDIT_H;
+    Rect r = { cY - h/2, cX - w/2, cY + h/2, cX + w/2 };
+    if (CreateEditUnicodeTextControl(NULL, &r, NULL, false, NULL, &control) != noErr) return;
+  }
+  HIViewAddSubview(mView, control);
+
+  const EventTypeSpec events[] = {
+    { kEventClassKeyboard, kEventRawKeyDown },
+    { kEventClassKeyboard, kEventRawKeyRepeat }
+  };
+  InstallControlEventHandler(control, CarbonParamEditHandler, GetEventTypeCount(events), events, this, &mParamEditHandler);
+  mParamEditView = control;
+
+  if (currentText[0] != '\0')
+  {
+    CFStringRef str = CFStringCreateWithCString(NULL, currentText, kCFStringEncodingUTF8);
+    if (str)
+    {
+      SetControlData(mParamEditView, kControlEditTextPart, kControlEditTextCFStringTag, sizeof(str), &str);
+      CFRelease(str);
+    }
+    ControlEditTextSelectionRec sel;
+    sel.selStart = 0;
+    sel.selEnd = strlen(currentText);
+    SetControlData(mParamEditView, kControlEditTextPart, kControlEditTextSelectionTag, sizeof(sel), &sel);
+  }
+
+  ControlFontStyleRec font = { kControlUseJustMask | kControlUseSizeMask | kControlUseFontMask, 0, 11, 0, 0, teCenter, 0, 0 };
+  font.font = ATSFontFamilyFindFromName(CFSTR("Arial"), kATSOptionFlagsDefault);
+  SetControlData(mParamEditView, kControlEditTextPart, kControlFontStyleTag, sizeof(font), &font);
+
+  HIViewSetVisible(mParamEditView, true);
+  HIViewAdvanceFocus(mParamEditView, 0);
+  SetKeyboardFocus(mWindow, mParamEditView, kControlEditTextPart);
+  SetUserFocusWindow(mWindow);
+
+  mEdControl = pControl;
+  mEdParam = pParam;
+}
+
+void IGraphicsCarbon::EndUserInput(bool commit)
+{
+  RemoveEventHandler(mParamEditHandler);
+  mParamEditHandler = 0;
+
+  if (commit)
+  {
+    CFStringRef str;
+    if (GetControlData(mParamEditView, kControlEditTextPart, kControlEditTextCFStringTag, sizeof(str), &str, NULL) == noErr)
+    {
+      char txt[MAX_PARAM_LEN];
+      double v;
+      CFStringGetCString(str, txt, MAX_PARAM_LEN, kCFStringEncodingUTF8);
+      CFRelease(str);
+      if (mEdParam->GetNDisplayTexts())
+      {
+        int vi = 0;
+        mEdParam->MapDisplayText(txt, &vi);
+        v = (double)vi;
+      }
+      else
+      {
+        v = atof(txt);
+        if (mEdParam->DisplayIsNegated()) v = -v;
+      }
+      mEdControl->SetValueFromUserInput(mEdParam->GetNormalized(v));
+    }
+  }
+
+  HIViewSetVisible(mParamEditView, false);
+  HIViewRemoveFromSuperview(mParamEditView);
+  if (mIsComposited)
+  {
+    //IRECT* pR = mEdControl->GetRECT();
+    //HIViewSetNeedsDisplayInRect(mView, &CGRectMake(pR->L, pR->T, pR->W(), pR->H()), true);
+    HIViewSetNeedsDisplay(mView, true);
+  }
+  else
+  {
+    mEdControl->SetDirty(false);
+    mEdControl->Redraw();
+  }
+  SetThemeCursor(kThemeArrowCursor);
+  SetUserFocusWindow(kUserFocusAuto);
+
+  mParamEditView = 0;
+  mEdControl = 0;
+  mEdParam = 0;
 }

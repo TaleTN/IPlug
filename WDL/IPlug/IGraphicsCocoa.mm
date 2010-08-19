@@ -29,6 +29,15 @@ inline IMouseMod GetRightMouseMod(NSEvent* pEvent)
   return IMouseMod(false, true, (mods & NSShiftKeyMask), (mods & NSControlKeyMask), (mods & NSAlternateKeyMask));
 }
 
+inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
+{
+  [pGraphicsCocoa->mParamEditView setDelegate: nil];
+  [pGraphicsCocoa->mParamEditView removeFromSuperview];
+  pGraphicsCocoa->mParamEditView = 0;
+  pGraphicsCocoa->mEdControl = 0;
+  pGraphicsCocoa->mEdParam = 0;
+}
+
 @implementation IGRAPHICS_COCOA
 
 - (id) init
@@ -172,12 +181,102 @@ inline IMouseMod GetRightMouseMod(NSEvent* pEvent)
 
 - (void) removeFromSuperview
 {
+  if (mParamEditView) EndUserInput(self);
   if (mGraphics)
   {
     IGraphics* graphics = mGraphics;
     mGraphics = 0;
     graphics->CloseWindow();
   }
+}
+
+- (void) controlTextDidEndEditing: (NSNotification*) aNotification
+{
+  const char* txt;
+  double v;
+
+  txt = [[mParamEditView stringValue] UTF8String];
+  if (mEdParam->GetNDisplayTexts())
+  {
+    int vi = (int)[mParamEditView indexOfSelectedItem];
+    if (vi == -1)
+    {
+      vi = 0;
+      mEdParam->MapDisplayText((char *)txt, &vi);
+    }
+    v = (double)vi;
+  }
+  else
+  {
+    v = atof(txt);
+    if (mEdParam->DisplayIsNegated()) v = -v;
+  }
+  mEdControl->SetValueFromUserInput(mEdParam->GetNormalized(v));
+
+  EndUserInput(self);
+  [self setNeedsDisplay: YES];
+}
+
+#define MAX_PARAM_LEN 32
+
+#define PARAM_EDIT_W 42
+#define PARAM_EDIT_H 21
+#define PARAM_LIST_MIN_W 24
+#define PARAM_LIST_W_PER_CHAR 8
+#define PARAM_LIST_H 26
+
+- (void) promptUserInput: (IControl*) pControl param: (IParam*) pParam
+{
+  if (!pControl || !pParam || mParamEditView) return;
+
+  IRECT* pR = pControl->GetRECT();
+  int cX = pR->MW(), cY = pR->MH();
+  char currentText[MAX_PARAM_LEN];
+  pParam->GetDisplayForHost(currentText);
+
+  int n = pParam->GetNDisplayTexts();
+  if (n)
+  {
+    int i, currentIdx = -1;
+    int w = PARAM_LIST_MIN_W, h = PARAM_LIST_H;
+    for (i = 0; i < n; ++i)
+    {
+      const char* str = pParam->GetDisplayText(i);
+      w = MAX(w, PARAM_LIST_MIN_W + strlen(str) * PARAM_LIST_W_PER_CHAR);
+      if (!strcmp(str, currentText)) currentIdx = i;
+    }
+
+    NSRect r = { cX - w/2, mGraphics->Height() - cY - h, w, h };
+    mParamEditView = [[NSComboBox alloc] initWithFrame: r];
+    [mParamEditView setFont: [NSFont fontWithName: @"Arial" size: 11.]];
+    [mParamEditView setNumberOfVisibleItems: n];
+
+    for (i = 0; i < n; ++i)
+    {
+      const char* str = pParam->GetDisplayText(i);
+      [mParamEditView addItemWithObjectValue: ToNSString(str)];
+    }
+    [mParamEditView selectItemAtIndex: currentIdx];
+  }
+  else
+  {
+    const int w = PARAM_EDIT_W, h = PARAM_EDIT_H;
+    NSRect r = { cX - w/2, mGraphics->Height() - cY - h/2, w, h };
+    mParamEditView = [[NSTextField alloc] initWithFrame: r];
+    [mParamEditView setFont: [NSFont fontWithName: @"Arial" size: 11.]];
+    [mParamEditView setAlignment: NSCenterTextAlignment];
+    [[mParamEditView cell] setLineBreakMode: NSLineBreakByTruncatingTail];
+    [mParamEditView setStringValue: ToNSString(currentText)];
+  }
+
+  [mParamEditView setDelegate: self];
+  [self addSubview: mParamEditView];
+  NSWindow* pWindow = [self window];
+  [pWindow makeKeyAndOrderFront:nil];
+  [pWindow makeFirstResponder: mParamEditView];
+
+  mEdControl = pControl;
+  mEdParam = pParam;
 }
 
 @end

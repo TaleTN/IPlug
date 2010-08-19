@@ -15,6 +15,11 @@ public:
   CGContextRef GetCGContext() { return mCGC; }
   void OffsetContentRect(CGRect* pR);
   bool Resize(int w, int h);
+  void PromptUserInput(IControl* pControl, IParam* pParam);
+
+protected:
+
+  void EndUserInput(bool commit);
   
 private:
   
@@ -27,11 +32,18 @@ private:
   EventLoopTimerRef mTimer;
   EventHandlerRef mControlHandler, mWindowHandler;
   CGContextRef mCGC;
+
+  ControlRef mParamEditView;
+  EventHandlerRef mParamEditHandler;
+  // Ed = being edited manually.
+  IControl* mEdControl;
+  IParam* mEdParam;
   
 public:
   
   static pascal OSStatus CarbonEventHandler(EventHandlerCallRef pHandlerCall, EventRef pEvent, void* pGraphicsCarbon);
   static pascal void CarbonTimerHandler(EventLoopTimerRef pTimer, void* pGraphicsCarbon);
+  static pascal OSStatus CarbonParamEditHandler(EventHandlerCallRef pHandlerCall, EventRef pEvent, void* pGraphicsCarbon);
 };
 
 #endif

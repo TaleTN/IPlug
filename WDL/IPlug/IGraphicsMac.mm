@@ -225,6 +225,10 @@ bool IGraphicsMac::PromptForColor(IColor* pColor, char* prompt)
 
 void IGraphicsMac::PromptUserInput(IControl* pControl, IParam* pParam)
 {
+  if (mGraphicsCocoa)
+    [mGraphicsCocoa promptUserInput: pControl param: pParam];
+  else if (mGraphicsCarbon)
+    mGraphicsCarbon->PromptUserInput(pControl, pParam);
 }
 
 bool IGraphicsMac::OpenURL(const char* url,
