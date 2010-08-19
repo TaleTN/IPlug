@@ -38,6 +38,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
     SetWindowLongPtr(hWnd, GWLP_USERDATA, (LPARAM) (lpcs->lpCreateParams));
 		int mSec = int(1000.0 / sFPS);
 		SetTimer(hWnd, IPLUG_TIMER_ID, mSec, NULL);
+		SetFocus(hWnd);
 		return 0;
 	}
 
@@ -161,6 +162,10 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
       }
 			return 0;
     }
+		case WM_MOUSEACTIVATE: {
+			SetFocus(hWnd);
+			return MA_ACTIVATE;
+		}
 		case WM_MOUSEWHEEL: {
 			int d = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
 			int x = GET_X_LPARAM(lParam), y = GET_Y_LPARAM(lParam);
