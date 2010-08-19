@@ -262,7 +262,7 @@ IGraphicsCarbon::IGraphicsCarbon(IGraphicsMac* pGraphicsMac, WindowRef pWindow, 
   };
   InstallWindowEventHandler(mWindow, CarbonEventHandler, GetEventTypeCount(windowEvents), windowEvents, this, &mWindowHandler);  
   
-  double t = 2.0*kEventDurationSecond/(double)pGraphicsMac->FPS();
+  double t = 0.5*kEventDurationSecond/(double)pGraphicsMac->FPS();
   OSStatus s = InstallEventLoopTimer(GetMainEventLoop(), 0.0, t, CarbonTimerHandler, this, &mTimer);
   
   if (mIsComposited) {
