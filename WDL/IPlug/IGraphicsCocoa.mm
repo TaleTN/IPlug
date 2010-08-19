@@ -20,7 +20,13 @@ NSString* ToNSString(const char* cStr)
 inline IMouseMod GetMouseMod(NSEvent* pEvent)
 {
   int mods = [pEvent modifierFlags];
-  return IMouseMod(true, (mods & NSRightMouseDownMask) || (mods & NSCommandKeyMask), (mods & NSShiftKeyMask), (mods & NSControlKeyMask), (mods & NSAlternateKeyMask));
+  return IMouseMod(true, (mods & NSCommandKeyMask), (mods & NSShiftKeyMask), (mods & NSControlKeyMask), (mods & NSAlternateKeyMask));
+}
+
+inline IMouseMod GetRightMouseMod(NSEvent* pEvent)
+{
+  int mods = [pEvent modifierFlags];
+  return IMouseMod(false, true, (mods & NSShiftKeyMask), (mods & NSControlKeyMask), (mods & NSAlternateKeyMask));
 }
 
 @implementation IGRAPHICS_COCOA
@@ -120,6 +126,27 @@ inline IMouseMod GetMouseMod(NSEvent* pEvent)
   int x, y;
   [self getMouseXY:pEvent x:&x y:&y];
   mGraphics->OnMouseDrag(x, y, &GetMouseMod(pEvent));
+}
+
+- (void) rightMouseDown: (NSEvent*) pEvent
+{
+  int x, y;
+  [self getMouseXY:pEvent x:&x y:&y];
+  mGraphics->OnMouseDown(x, y, &GetRightMouseMod(pEvent));
+}
+
+- (void) rightMouseUp: (NSEvent*) pEvent
+{
+  int x, y;
+  [self getMouseXY:pEvent x:&x y:&y];
+  mGraphics->OnMouseUp(x, y, &GetRightMouseMod(pEvent));
+}
+
+- (void) rightMouseDragged: (NSEvent*) pEvent
+{
+  int x, y;
+  [self getMouseXY:pEvent x:&x y:&y];
+  mGraphics->OnMouseDrag(x, y, &GetRightMouseMod(pEvent));
 }
 
 - (void) mouseMoved: (NSEvent*) pEvent
