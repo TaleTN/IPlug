@@ -139,6 +139,11 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
 - (void) rightMouseDown: (NSEvent*) pEvent
 {
+  if (mParamEditView)
+  {
+    EndUserInput(self);
+    return;
+  }
   int x, y;
   [self getMouseXY:pEvent x:&x y:&y];
   mGraphics->OnMouseDown(x, y, &GetRightMouseMod(pEvent));
