@@ -23,7 +23,7 @@
   #define EXPORT __declspec(dllexport)
 #elif defined __APPLE__
   #include "IGraphicsMac.h"
-  #define EXPORT
+  #define EXPORT __attribute__((visibility("default")))
   #define BUNDLE_ID "com." BUNDLE_MFR "." API_EXT "." BUNDLE_NAME
 #else
   #error "No OS defined!"
