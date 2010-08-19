@@ -65,7 +65,15 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 					switch (pGraphics->mParamEditMsg) {
             case kUpdate: {
 							pGraphics->mEdParam->GetDisplayForHost(txt);
-							SendMessage(pGraphics->mParamEditWnd, WM_SETTEXT, 0, (LPARAM) txt);
+							char currentText[MAX_PARAM_LEN];
+							SendMessage(pGraphics->mParamEditWnd, WM_GETTEXT, MAX_PARAM_LEN, (LPARAM) currentText);
+							if (strcmp(txt, currentText))
+							{
+								if (pGraphics->mEdParam->GetNDisplayTexts())
+									SendMessage(pGraphics->mParamEditWnd, CB_SELECTSTRING, -1, (LPARAM) txt);
+								else
+									SendMessage(pGraphics->mParamEditWnd, WM_SETTEXT, 0, (LPARAM) txt);
+							}
 							break;
             }
             case kCommit: {
@@ -96,7 +104,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
             break;            
           }
 					pGraphics->mParamEditMsg = kNone;
-					return 0;
+					//return 0;
 				}
 
         IRECT dirtyR;
@@ -119,6 +127,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 			// Else fall through.
     }
     case WM_LBUTTONDOWN: {
+			if (pGraphics->mParamEditWnd) pGraphics->mParamEditMsg = kCommit;
 			SetCapture(hWnd);
 			pGraphics->OnMouseDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), &GetMouseMod(wParam));
 			return 0;
@@ -506,7 +515,9 @@ void IGraphicsWin::PromptUserInput(IControl* pControl, IParam* pParam)
 		int w = PARAM_EDIT_W, h = PARAM_EDIT_H;
 		mParamEditWnd = CreateWindow("EDIT", currentText, WS_CHILD | WS_VISIBLE | ES_CENTER | ES_MULTILINE,
 			cX - w/2, cY - h/2, w, h, mPlugWnd, (HMENU) PARAM_EDIT_ID, mHInstance, 0);
+		SendMessage(mParamEditWnd, EM_SETSEL, 0, -1);
 	}
+	SetFocus(mParamEditWnd);
 
 	mDefEditProc = (WNDPROC) SetWindowLongPtr(mParamEditWnd, GWLP_WNDPROC, (LONG_PTR) ParamEditProc);
   SetWindowLong(mParamEditWnd, GWLP_USERDATA, (LPARAM) this);
