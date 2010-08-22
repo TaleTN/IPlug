@@ -19,6 +19,10 @@
 #include "../wdlstring.h"
 #include "../ptrlist.h"
 
+#if defined __APPLE__ && defined __BIG_ENDIAN__ 
+#include <CoreServices/CoreServices.h>  // for endian conversion functions
+#endif
+
 #define FREE_NULL(p) {free(p);p=0;}
 #define DELETE_NULL(p) {delete(p); p=0;}
 #define MIN(x,y) ((x)<(y)?(x):(y))
@@ -83,29 +87,11 @@ public:
     return -1;
 	}
 
-	inline int PutStr(const char* str) 
-  {
-    int slen = strlen(str);
-		Put(&slen);
-		int n = mBytes.GetSize();
-		mBytes.Resize(n + slen);
-		memcpy(mBytes.Get() + n, (BYTE*) str, slen);
-		return mBytes.GetSize();
-	}
-
-	inline int GetStr(WDL_String* pStr, int startPos)
-  {
-		int len;
-    int strStartPos = Get(&len, startPos);
-    if (strStartPos >= 0) {
-      int strEndPos = strStartPos + len;
-      if (strEndPos <= mBytes.GetSize() && len > 0) {
-        pStr->Set((char*) (mBytes.Get() + strStartPos), len);
-      }
-      return strEndPos;
-    }
-    return -1;
-	}
+	// can not be defined here as on apple bigendian they use
+	//  specialisations of the Get and Put functions which are
+	//  defined below
+	inline int PutStr(const char* str);
+	inline int GetStr(WDL_String* pStr, int startPos);
 
   inline int PutBool(bool b)
   {
@@ -169,5 +155,60 @@ private:
 
   WDL_TypedBuf<unsigned char> mBytes;
 };
+
+
+#if defined __APPLE__ && defined __BIG_ENDIAN__ 
+// Handle endian conversion for int and double (the two types IPlug uses internally)
+// Data is always stored in the chunk in little endian format, so nothing needs
+//  changing on Intel x86 platforms.
+// (specializations must be defined outside the class according to gcc and the standard)
+template <> inline int ByteChunk::Get<int>(int* pVal, int startPos) {
+		int32_t t;
+		int endPos = Get((uint *)&t,startPos); // cast to uint* so it calls the normal Get
+		*pVal =  EndianS32_LtoB( t );
+		return endPos;
+}
+template <> inline int ByteChunk::Put<int>(const int* pVal) {
+	int32_t t = EndianS32_BtoL( *pVal );
+	return Put((uint *)&t); // cast to uint* so it calls the normal Put
+}
+template <> inline int ByteChunk::Get<double>(double* pVal, int startPos) {
+		uint64_t t;
+		int endPos = Get(&t,startPos);
+		uint64_t *pVuint64 = (uint64_t *)pVal;
+		*pVuint64 =  EndianU64_LtoB( t );
+		return endPos;
+}
+template <> inline int ByteChunk::Put<double>(const double* pVal) {
+	uint64_t *pVuint64 = (uint64_t *)pVal;
+	uint64_t t = EndianU64_BtoL( *pVuint64 );
+	return Put(&t);
+}
+#endif
+
+
+inline int ByteChunk::PutStr(const char* str) 
+  {
+    int slen = strlen(str);
+		Put(&slen);
+		int n = mBytes.GetSize();
+		mBytes.Resize(n + slen);
+		memcpy(mBytes.Get() + n, (BYTE*) str, slen);
+		return mBytes.GetSize();
+	}
+
+inline int ByteChunk::GetStr(WDL_String* pStr, int startPos)
+  {
+		int len;
+    int strStartPos = Get(&len, startPos);
+    if (strStartPos >= 0) {
+      int strEndPos = strStartPos + len;
+      if (strEndPos <= mBytes.GetSize() && len > 0) {
+        pStr->Set((char*) (mBytes.Get() + strStartPos), len);
+      }
+      return strEndPos;
+    }
+    return -1;
+	}
 
 #endif
