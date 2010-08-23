@@ -37,6 +37,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		339B7B711221FE7100EB24D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 52DC4B560D29B54E00DD0B91 /* IPlug.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC07D0554694100DB518D /* IPlug */;
+			remoteInfo = IPlug;
+		};
+		339B7B731221FE8200EB24D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 52DC4B560D29B54E00DD0B91 /* IPlug.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC07D0554694100DB518D /* IPlug */;
+			remoteInfo = IPlug;
+		};
 		45BFA2571060DDDB00307BE8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 52DC4B560D29B54E00DD0B91 /* IPlug.xcodeproj */;
@@ -270,6 +284,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				339B7B741221FE8200EB24D1 /* PBXTargetDependency */,
 			);
 			name = IPlugExampleAU;
 			productName = IPlugExampleAU;
@@ -287,6 +302,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				339B7B721221FE7100EB24D1 /* PBXTargetDependency */,
 			);
 			name = IPlugExample;
 			productInstallPath = "$(HOME)/Library/Bundles";
@@ -387,6 +403,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		339B7B721221FE7100EB24D1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = IPlug;
+			targetProxy = 339B7B711221FE7100EB24D1 /* PBXContainerItemProxy */;
+		};
+		339B7B741221FE8200EB24D1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = IPlug;
+			targetProxy = 339B7B731221FE8200EB24D1 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1DEB913B08733D840010E9CD /* Debug */ = {
