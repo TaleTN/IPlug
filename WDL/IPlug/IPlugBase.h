@@ -63,8 +63,10 @@ public:
 
   // Implementations should set a mutex lock.
 	virtual bool SerializeState(ByteChunk* pChunk) { return SerializeParams(pChunk); }
+	virtual bool SerializePresetsState(ByteChunk* pChunk) { return SerializeState(pChunk); }
   // Return the new chunk position (endPos).
 	virtual int UnserializeState(ByteChunk* pChunk, int startPos) { return UnserializeParams(pChunk, startPos); }
+	virtual int UnserializePresetsState(ByteChunk* pChunk, int startPos) { return UnserializeState(pChunk, startPos); }
 
   // ----------------------------------------
   // Your plugin class, or a control class, can call these functions.
@@ -177,9 +179,9 @@ protected:
   bool RestorePreset(const char* name);
   const char* GetPresetName(int idx);
   void ModifyCurrentPreset(const char* name = 0);     // Sets the currently active preset to whatever current params are.
-  virtual bool SerializePresets(ByteChunk* pChunk);
+  bool SerializePresets(ByteChunk* pChunk);
   // Returns the new chunk position (endPos).
-  virtual int UnserializePresets(ByteChunk* pChunk, int startPos);
+  int UnserializePresets(ByteChunk* pChunk, int startPos);
 
   // Dump the current state as source code for a call to MakePresetFromNamedParams.
   void DumpPresetSrcCode(const char* filename, const char* paramEnumNames[]);
