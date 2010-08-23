@@ -817,6 +817,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					_DEBUG,
 					VST_FORCE_DEPRECATED,
+					IPLUG_NO_JPEG_SUPPORT,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_SEARCH_PATHS = (
@@ -841,6 +842,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NDEBUG,
 					VST_FORCE_DEPRECATED,
+					IPLUG_NO_JPEG_SUPPORT,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				LIBRARY_SEARCH_PATHS = (
@@ -917,6 +919,7 @@
 					TRACER_BUILD,
 					NDEBUG,
 					VST_FORCE_DEPRECATED,
+					IPLUG_NO_JPEG_SUPPORT,
 				);
 				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/lib;
@@ -958,6 +961,7 @@
 					REAPER_SPECIAL,
 					NDEBUG,
 					VST_FORCE_DEPRECATED,
+					IPLUG_NO_JPEG_SUPPORT,
 				);
 				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/lib;
@@ -999,6 +1003,7 @@
 					REAPER_SPECIAL,
 					NDEBUG,
 					VST_FORCE_DEPRECATED,
+					IPLUG_NO_JPEG_SUPPORT,
 				);
 				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/lib;
