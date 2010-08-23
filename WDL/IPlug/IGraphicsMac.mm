@@ -56,8 +56,12 @@ LICE_IBitmap* LoadImgFromResourceOSX(const char* bundleID, const char* filename)
   ++ext;
   
   bool ispng = !stricmp(ext, "png");
+#ifdef IPLUG_NO_JPEG_SUPPORT
+  if (!ispng) return 0;
+#else
   bool isjpg = !stricmp(ext, "jpg");
-  if (!ispng && !isjpg) return 0;
+  if (!isjpg && !ispng) return 0;
+#endif
   
   NSBundle* pBundle = [NSBundle bundleWithIdentifier:ToNSString(bundleID)];
   NSString* pFile = [[[NSString stringWithCString:filename] lastPathComponent] stringByDeletingPathExtension];
@@ -65,7 +69,9 @@ LICE_IBitmap* LoadImgFromResourceOSX(const char* bundleID, const char* filename)
   {
     NSString* pPath = 0;
     if (ispng) pPath = [pBundle pathForResource:pFile ofType:@"png"];  
+#ifndef IPLUG_NO_JPEG_SUPPORT
     if (isjpg) pPath = [pBundle pathForResource:pFile ofType:@"jpg"];  
+#endif
 
     if (pPath) 
     {
@@ -73,7 +79,9 @@ LICE_IBitmap* LoadImgFromResourceOSX(const char* bundleID, const char* filename)
       if (CSTR_NOT_EMPTY(resourceFileName))
       {
         if (ispng) return LICE_LoadPNG(resourceFileName);
+#ifndef IPLUG_NO_JPEG_SUPPORT
         if (isjpg) return LICE_LoadJPG(resourceFileName);
+#endif
       }
     }
   }

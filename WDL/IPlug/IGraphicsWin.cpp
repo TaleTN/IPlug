@@ -286,7 +286,9 @@ LICE_IBitmap* IGraphicsWin::OSLoadBitmap(int ID, const char* name)
   ++ext;
 
   if (!stricmp(ext, "png")) return _LICE::LICE_LoadPNGFromResource(mHInstance, ID, 0);
+#ifndef IPLUG_NO_JPEG_SUPPORT
   if (!stricmp(ext, "jpg") || !stricmp(ext, "jpeg")) return _LICE::LICE_LoadJPGFromResource(mHInstance, ID, 0);
+#endif
   return 0;
 }
 
