@@ -84,7 +84,7 @@ INTDIR = $(OUTDIR)
 !MESSAGE
 
 
-CPPFLAGS = $(CPPFLAGS) /EHsc /GS- /GR- /D "_LIB" /D "_MBCS" /Oi /Ot /fp:fast /MT /c /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /W3 /WX /wd4996 /wd4244 /nologo
+CPPFLAGS = $(CPPFLAGS) /EHsc /GS- /GR- /D "_LIB" /D "_MBCS" /D "IPLUG_NO_JPEG_SUPPORT" /Oi /Ot /fp:fast /MT /c /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /W3 /WX /wd4996 /wd4244 /nologo
 
 !IF "$(CONFIGURATION)" == "Debug"
 CPPFLAGS = $(CPPFLAGS) /D "_DEBUG" /RTCsu
