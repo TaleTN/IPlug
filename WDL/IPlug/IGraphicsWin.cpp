@@ -11,7 +11,6 @@ static int nWndClassReg = 0;
 static const char* wndClassName = "IPlugWndClass";
 static double sFPS = 0.0;
 
-#define MAX_PARAM_LEN 32
 #define PARAM_EDIT_ID 99
 
 enum EParamEditMsg {
@@ -494,7 +493,7 @@ void IGraphicsWin::PromptUserInput(IControl* pControl, IParam* pParam)
 
 	IRECT* pR = pControl->GetRECT();
 	int cX = int(pR->MW()), cY = int(pR->MH());
-  char currentText[MAX_PARAM_NAME_LEN];
+  char currentText[MAX_PARAM_LEN];
   pParam->GetDisplayForHost(currentText);
 
   int n = pParam->GetNDisplayTexts();

@@ -320,8 +320,6 @@ bool IGraphicsCarbon::Resize(int w, int h)
   return false;
 }
 
-#define MAX_PARAM_LEN 32
-
 #define PARAM_EDIT_W 32
 #define PARAM_EDIT_H 14
 #define PARAM_LIST_MIN_W 24

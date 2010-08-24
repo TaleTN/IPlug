@@ -3,6 +3,8 @@
 
 #include "IPlugStructs.h"
 
+#define MAX_PARAM_LEN 32
+
 class IPlugBase;
 class IControl;
 class IParam;

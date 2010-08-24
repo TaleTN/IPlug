@@ -222,8 +222,6 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
   [self setNeedsDisplay: YES];
 }
 
-#define MAX_PARAM_LEN 32
-
 #define PARAM_EDIT_W 42
 #define PARAM_EDIT_H 21
 #define PARAM_LIST_MIN_W 24
