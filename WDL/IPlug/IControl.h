@@ -324,8 +324,13 @@ public:
   }
 	~ITextControl() {}
 
+	// GetText returns a pointer to a 0 char if the text has zero length
+	// (see wdlstring.h).
+	const char *GetText() { return mStr.Get(); }
 	void SetTextFromPlug(char* str);
 	void ClearTextFromPlug() { SetTextFromPlug(""); }
+
+	const IText* GetIText() const { return &mText; }
 
 	bool Draw(IGraphics* pGraphics);
 
@@ -347,6 +352,36 @@ public:
 
 protected:
     bool mShowParamLabel;
+};
+
+// An editable text control, single click starts the editing.
+// Setting editable false means the text can't be changed, but can be
+// selected and copied to the clipboard.
+// Setting secure true means the text isn't displayed, eg for password entry.
+// Call SetBGColor() if you want it to draw a filled rectangle behind
+// the text.
+// Note: there's no dummy parameter so if you need notification when the 
+// text is editted you'll have to use the observer interface in ISubject.h
+class IEditableTextControl: public ITextControl
+{
+public:
+	IEditableTextControl(IPlugBase* pPlug, IRECT* pR, IText* pText, const char* str = "", bool editable = true, bool secure = false):
+	ITextControl(pPlug, pR, pText, str), mBGColor(0), mEditable(editable), mSecure(secure) { mDblAsSingleClick = true; }
+	~IEditableTextControl() {}
+
+	inline bool IsEditable() const { return mEditable; }
+	inline bool IsSecure() const { return mSecure; }
+
+	void SetBGColor(const IColor *pBGColor);
+
+	void OnMouseDown(int x, int y, IMouseMod* pMod);
+
+	bool Draw(IGraphics* pGraphics);
+
+protected:
+	IColor mBGColor;
+	bool mEditable;
+	bool mSecure;
 };
 
 #define MAX_URL_LEN 256

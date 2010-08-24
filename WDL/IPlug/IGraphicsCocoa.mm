@@ -113,6 +113,7 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
 - (void) mouseDown: (NSEvent*) pEvent
 {
+  if (mParamEditView) EndUserInput(self);
   int x, y;
   [self getMouseXY:pEvent x:&x y:&y];
   if ([pEvent clickCount] > 1) {
@@ -197,26 +198,15 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
 - (void) controlTextDidEndEditing: (NSNotification*) aNotification
 {
-  const char* txt;
-  double v;
+  char* txt = (char*)[[mParamEditView stringValue] UTF8String];
 
-  txt = [[mParamEditView stringValue] UTF8String];
-  if (mEdParam->GetNDisplayTexts())
-  {
-    int vi = (int)[mParamEditView indexOfSelectedItem];
-    if (vi == -1)
-    {
-      vi = 0;
-      mEdParam->MapDisplayText((char *)txt, &vi);
-    }
-    v = (double)vi;
-  }
+  int vi = -1;
+  if (mEdParam && mEdParam->GetNDisplayTexts())
+    vi = (int)[mParamEditView indexOfSelectedItem];
+  if (vi != -1)
+    mEdControl->SetValueFromUserInput(mEdParam->GetNormalized((double)vi));
   else
-  {
-    v = atof(txt);
-    if (mEdParam->DisplayIsNegated()) v = -v;
-  }
-  mEdControl->SetValueFromUserInput(mEdParam->GetNormalized(v));
+    mGraphics->SetFromStringAfterPrompt(mEdControl, mEdParam, txt);
 
   EndUserInput(self);
   [self setNeedsDisplay: YES];
@@ -280,6 +270,47 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
   mEdControl = pControl;
   mEdParam = pParam;
+}
+
+- (void) promptUserInput: (IEditableTextControl*) pControl
+{
+  if (!pControl || mParamEditView) return;
+
+  IRECT* pR = pControl->GetRECT();
+
+  NSRect r = { pR->L, mGraphics->Height() - pR->B, pR->W(), pR->H() };
+  if (pControl->IsSecure())
+    mParamEditView = [[NSSecureTextField alloc] initWithFrame: r];
+  else
+    mParamEditView = [[NSTextField alloc] initWithFrame: r];
+  if (!pControl->IsEditable())
+  {
+    [mParamEditView setEditable: NO]; 
+    [mParamEditView setSelectable: YES];
+  }
+
+  const IText* txt = pControl->GetIText();
+  [mParamEditView setFont: [NSFont fontWithName: ToNSString(txt->mFont) size: AdjustFontSize(txt->mSize)]];
+  NSTextAlignment align;
+  switch (txt->mAlign)
+  {
+    case IText::kAlignNear:   align = NSLeftTextAlignment;   break;
+    case IText::kAlignFar:    align = NSRightTextAlignment;  break;
+    case IText::kAlignCenter:
+    default:                  align = NSCenterTextAlignment; break;
+  }
+  [mParamEditView setAlignment: align];
+  [[mParamEditView cell] setLineBreakMode: NSLineBreakByTruncatingTail];
+  [mParamEditView setStringValue: ToNSString(pControl->GetText())];
+
+  [mParamEditView setDelegate: self];
+  [self addSubview: mParamEditView];
+  NSWindow* pWindow = [self window];
+  [pWindow makeKeyAndOrderFront:nil];
+  [pWindow makeFirstResponder: mParamEditView];
+
+  mEdControl = pControl;
+  mEdParam = 0;
 }
 
 @end

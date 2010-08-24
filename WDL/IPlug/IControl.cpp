@@ -374,6 +374,37 @@ bool ICaptionControl::Draw(IGraphics* pGraphics)
     return ITextControl::Draw(pGraphics);
 }
 
+void IEditableTextControl::SetBGColor(const IColor *pBGColor)
+{
+	if (pBGColor)
+		mBGColor = *pBGColor;
+	else
+		mBGColor.A = 0;
+}
+
+void IEditableTextControl::OnMouseDown(int x, int y, IMouseMod* pMod)
+{
+	if (!mDisablePrompt)
+	{
+		mPlug->GetGUI()->PromptUserInput(this);
+		Redraw();
+	}
+}
+
+bool IEditableTextControl::Draw(IGraphics* pGraphics)
+{
+	if (mBGColor.A && !pGraphics->FillIRect(&mBGColor, &mRECT)) return false;
+	if (!mSecure) return ITextControl::Draw(pGraphics);
+
+	int n = mStr.GetLength();
+	if (!n) return true;
+	char str[100];
+	n = MIN(n, sizeof(str) - 1);
+	memset(str, '*', n);
+	str[n] = '\0';
+	return pGraphics->DrawIText(&mText, str, &mRECT);
+}
+
 IURLControl::IURLControl(IPlugBase* pPlug, IRECT* pR, const char* url, const char* backupURL, const char* errMsgOnFailure)
 : IControl(pPlug, pR)
 {

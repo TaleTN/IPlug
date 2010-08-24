@@ -42,8 +42,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 	}
 
 	IGraphicsWin* pGraphics = (IGraphicsWin*) GetWindowLongPtr(hWnd, GWLP_USERDATA);
-	char txt[MAX_PARAM_LEN];
-	double v;
+	char txt[MAX_EDIT_LEN];
 
 	if (!pGraphics || hWnd != pGraphics->mPlugWnd) {
 		return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -64,6 +63,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 				if (pGraphics->mParamEditWnd && pGraphics->mParamEditMsg != kNone) {
 					switch (pGraphics->mParamEditMsg) {
             case kUpdate: {
+            				if (!pGraphics->mEdParam) break;
 							pGraphics->mEdParam->GetDisplayForHost(txt);
 							char currentText[MAX_PARAM_LEN];
 							SendMessage(pGraphics->mParamEditWnd, WM_GETTEXT, MAX_PARAM_LEN, (LPARAM) currentText);
@@ -77,19 +77,8 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 							break;
             }
             case kCommit: {
-							SendMessage(pGraphics->mParamEditWnd, WM_GETTEXT, MAX_PARAM_LEN, (LPARAM) txt);
-              if (pGraphics->mEdParam->GetNDisplayTexts()) {
-                int vi = 0;
-                pGraphics->mEdParam->MapDisplayText(txt, &vi);
-                v = (double) vi;
-							}
-							else {
-								v = atof(txt);
-								if (pGraphics->mEdParam->DisplayIsNegated()) {
-									v = -v;
-								}
-							}
-							pGraphics->mEdControl->SetValueFromUserInput(pGraphics->mEdParam->GetNormalized(v));
+							SendMessage(pGraphics->mParamEditWnd, WM_GETTEXT, MAX_EDIT_LEN, (LPARAM) txt);
+							pGraphics->SetFromStringAfterPrompt(pGraphics->mEdControl, pGraphics->mEdParam, txt);
 							// Fall through.
             }
             case kCancel:
@@ -245,6 +234,19 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND hWnd, UINT msg, WPARAM wParam,
 			case WM_KILLFOCUS: {
 				pGraphics->mParamEditMsg = kNone;
 				break;
+			}
+			// handle WM_GETDLGCODE so that we can say that we want the return key message
+			//  (normally single line edit boxes don't get sent return key messages)
+			case WM_GETDLGCODE: {
+				if (pGraphics->mEdParam) break;
+				LPARAM lres;
+				// find out if the original control wants it
+				lres = CallWindowProc(pGraphics->mDefEditProc, hWnd, WM_GETDLGCODE, wParam, lParam);
+				// add in that we want it if it is a return keydown
+				if (lParam  &&	 ((MSG*)lParam)->message == WM_KEYDOWN  &&  wParam == VK_RETURN) {
+					lres |= DLGC_WANTMESSAGE;
+				}
+				return lres;
 			}
 			case WM_COMMAND: {
 				switch HIWORD(wParam) {
@@ -535,6 +537,42 @@ void IGraphicsWin::PromptUserInput(IControl* pControl, IParam* pParam)
 
 	mEdControl = pControl;
 	mEdParam = pParam;	
+}
+
+void IGraphicsWin::PromptUserInput(IEditableTextControl* pControl)
+{
+	if (!pControl || mParamEditWnd) return;
+
+	IRECT* pR = pControl->GetRECT();
+
+	const IText* txt = pControl->GetIText();
+	DWORD editStyle;
+	switch (txt->mAlign)
+	{
+		case IText::kAlignNear:   editStyle = ES_LEFT;   break;
+		case IText::kAlignFar:    editStyle = ES_RIGHT;  break;
+		case IText::kAlignCenter:
+		default:                  editStyle = ES_CENTER; break;
+	}
+	if (!pControl->IsEditable()) editStyle |= ES_READONLY;
+	if (pControl->IsSecure())
+		editStyle |= ES_PASSWORD;
+	else
+		editStyle |= ES_MULTILINE;
+	mParamEditWnd = CreateWindow("EDIT", pControl->GetText(), WS_CHILD | WS_VISIBLE | editStyle,
+		pR->L, pR->T, pR->W(), pR->H(), mPlugWnd, (HMENU) PARAM_EDIT_ID, mHInstance, 0);
+	SendMessage(mParamEditWnd, EM_SETSEL, 0, -1);
+	SetFocus(mParamEditWnd);
+
+	mDefEditProc = (WNDPROC) SetWindowLongPtr(mParamEditWnd, GWLP_WNDPROC, (LONG_PTR) ParamEditProc);
+  SetWindowLong(mParamEditWnd, GWLP_USERDATA, (LPARAM) this);
+
+	HFONT font = CreateFont(txt->mSize, 0, 0, 0, txt->mStyle == IText::kStyleBold ? FW_BOLD : 0, txt->mStyle == IText::kStyleItalic ? TRUE : 0, 0, 0, 0, 0, 0, 0, 0, txt->mFont);
+	SendMessage(mParamEditWnd, WM_SETFONT, (WPARAM) font, 0);
+	//DeleteObject(font);	
+
+	mEdControl = pControl;
+	mEdParam = 0;
 }
 
 #define MAX_PATH_LEN 256

@@ -369,16 +369,81 @@ void IGraphicsCarbon::PromptUserInput(IControl* pControl, IParam* pParam)
   }
   HIViewAddSubview(mView, control);
 
+  InstallParamEditHandler(control);
+  mParamEditView = control;
+  SetParamEditText(currentText);
+
+  ControlFontStyleRec font = { kControlUseJustMask | kControlUseSizeMask | kControlUseFontMask, 0, 11, 0, 0, teCenter, 0, 0 };
+  font.font = ATSFontFamilyFindFromName(CFSTR("Arial"), kATSOptionFlagsDefault);
+  SetControlData(mParamEditView, kControlEditTextPart, kControlFontStyleTag, sizeof(font), &font);
+
+  ShowParamEditView();
+  mEdControl = pControl;
+  mEdParam = pParam;
+}
+
+void IGraphicsCarbon::PromptUserInput(IEditableTextControl* pControl)
+{
+  if (!pControl || mParamEditView) return;
+
+  IRECT* pR = pControl->GetRECT();
+
+  ControlRef control = 0;
+  Rect r = { pR->T, pR->L, pR->B, pR->R };
+  if (CreateEditUnicodeTextControl(NULL, &r, NULL, pControl->IsSecure(), NULL, &control) != noErr) return;
+  HIViewAddSubview(mView, control);
+
+  InstallParamEditHandler(control);
+  mParamEditView = control;
+  SetParamEditText(pControl->GetText());
+  if (!pControl->IsEditable())
+  {
+    const Boolean locked = true;
+    SetControlData(mParamEditView, kControlEntireControl, kControlEditTextLockedTag, sizeof(locked), &locked);
+  }
+
+  const IText* txt = pControl->GetIText();
+  //SInt16 style;
+  //switch (txt->mStyle)
+  //{
+  //  case IText::kStyleBold:   style = 1; break;
+  //  case IText::kStyleItalic: style = 2; break;
+  //  case IText::kStyleNormal:
+  //  default:                  style = 0; break;
+  //}
+  SInt16 just;
+  switch (txt->mAlign)
+  {
+    case IText::kAlignNear:   just = teFlushLeft;  break;
+    case IText::kAlignFar:    just = teFlushRight; break;
+    case IText::kAlignCenter:
+    default:                  just = teCenter;     break;
+  }
+  ControlFontStyleRec font = { kControlUseJustMask | kControlUseSizeMask | kControlUseFontMask, 0, AdjustFontSize(txt->mSize), 0, 0, just, 0, 0 };
+  CFStringRef str = CFStringCreateWithCString(NULL, txt->mFont, kCFStringEncodingUTF8);
+  font.font = ATSFontFamilyFindFromName(str ? str : CFSTR("Arial"), kATSOptionFlagsDefault);
+  SetControlData(mParamEditView, kControlEditTextPart, kControlFontStyleTag, sizeof(font), &font);
+  if (str) CFRelease(str);
+
+  ShowParamEditView();
+  mEdControl = pControl;
+  mEdParam = 0;
+}
+
+void IGraphicsCarbon::InstallParamEditHandler(ControlRef control)
+{
   const EventTypeSpec events[] = {
     { kEventClassKeyboard, kEventRawKeyDown },
     { kEventClassKeyboard, kEventRawKeyRepeat }
   };
   InstallControlEventHandler(control, CarbonParamEditHandler, GetEventTypeCount(events), events, this, &mParamEditHandler);
-  mParamEditView = control;
+}
 
-  if (currentText[0] != '\0')
+void IGraphicsCarbon::SetParamEditText(const char* txt)
+{
+  if (txt && txt[0] != '\0')
   {
-    CFStringRef str = CFStringCreateWithCString(NULL, currentText, kCFStringEncodingUTF8);
+    CFStringRef str = CFStringCreateWithCString(NULL, txt, kCFStringEncodingUTF8);
     if (str)
     {
       SetControlData(mParamEditView, kControlEditTextPart, kControlEditTextCFStringTag, sizeof(str), &str);
@@ -386,21 +451,17 @@ void IGraphicsCarbon::PromptUserInput(IControl* pControl, IParam* pParam)
     }
     ControlEditTextSelectionRec sel;
     sel.selStart = 0;
-    sel.selEnd = strlen(currentText);
+    sel.selEnd = strlen(txt);
     SetControlData(mParamEditView, kControlEditTextPart, kControlEditTextSelectionTag, sizeof(sel), &sel);
   }
+}
 
-  ControlFontStyleRec font = { kControlUseJustMask | kControlUseSizeMask | kControlUseFontMask, 0, 11, 0, 0, teCenter, 0, 0 };
-  font.font = ATSFontFamilyFindFromName(CFSTR("Arial"), kATSOptionFlagsDefault);
-  SetControlData(mParamEditView, kControlEditTextPart, kControlFontStyleTag, sizeof(font), &font);
-
+void IGraphicsCarbon::ShowParamEditView()
+{
   HIViewSetVisible(mParamEditView, true);
   HIViewAdvanceFocus(mParamEditView, 0);
   SetKeyboardFocus(mWindow, mParamEditView, kControlEditTextPart);
   SetUserFocusWindow(mWindow);
-
-  mEdControl = pControl;
-  mEdParam = pParam;
 }
 
 void IGraphicsCarbon::EndUserInput(bool commit)
@@ -413,22 +474,10 @@ void IGraphicsCarbon::EndUserInput(bool commit)
     CFStringRef str;
     if (GetControlData(mParamEditView, kControlEditTextPart, kControlEditTextCFStringTag, sizeof(str), &str, NULL) == noErr)
     {
-      char txt[MAX_PARAM_LEN];
-      double v;
-      CFStringGetCString(str, txt, MAX_PARAM_LEN, kCFStringEncodingUTF8);
+      char txt[MAX_EDIT_LEN];
+      CFStringGetCString(str, txt, MAX_EDIT_LEN, kCFStringEncodingUTF8);
+      mGraphicsMac->SetFromStringAfterPrompt(mEdControl, mEdParam, txt);
       CFRelease(str);
-      if (mEdParam->GetNDisplayTexts())
-      {
-        int vi = 0;
-        mEdParam->MapDisplayText(txt, &vi);
-        v = (double)vi;
-      }
-      else
-      {
-        v = atof(txt);
-        if (mEdParam->DisplayIsNegated()) v = -v;
-      }
-      mEdControl->SetValueFromUserInput(mEdParam->GetNormalized(v));
     }
   }
 

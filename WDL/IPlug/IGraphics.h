@@ -4,9 +4,11 @@
 #include "IPlugStructs.h"
 
 #define MAX_PARAM_LEN 32
+#define MAX_EDIT_LEN  1000
 
 class IPlugBase;
 class IControl;
+class IEditableTextControl;
 class IParam;
 
 class IGraphics
@@ -44,6 +46,8 @@ public:
   virtual void Resize(int w, int h);
 	virtual bool WindowIsOpen() { return (GetWindow()); }
 	virtual void PromptUserInput(IControl* pControl, IParam* pParam) = 0;
+	virtual void PromptUserInput(IEditableTextControl* pControl) = 0;
+	void SetFromStringAfterPrompt(IControl* pControl, IParam* pParam, char *txt);
 	virtual void HostPath(WDL_String* pPath) = 0;   // Full path to host executable.
   virtual void PluginPath(WDL_String* pPath) = 0; // Full path to plugin dll.
 	// Run the "open file" or "save file" dialog.  Default to host executable path.

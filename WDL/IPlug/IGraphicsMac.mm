@@ -239,6 +239,14 @@ void IGraphicsMac::PromptUserInput(IControl* pControl, IParam* pParam)
     mGraphicsCarbon->PromptUserInput(pControl, pParam);
 }
 
+void IGraphicsMac::PromptUserInput(IEditableTextControl* pControl)
+{
+  if (mGraphicsCocoa)
+    [mGraphicsCocoa promptUserInput: pControl];
+  else if (mGraphicsCarbon)
+    mGraphicsCarbon->PromptUserInput(pControl);
+}
+
 bool IGraphicsMac::OpenURL(const char* url,
   const char* msgWindowTitle, const char* confirmMsg, const char* errMsgOnFailure)
 {
@@ -279,7 +287,7 @@ bool IGraphicsMac::DrawIText(IText* pTxt, char* cStr, IRECT* pR)
     mTxtAttrs = [[NSMutableDictionary alloc] init];
   }
   
-  int fontSize = int(0.75 * (double) pTxt->mSize);
+  int fontSize = AdjustFontSize(pTxt->mSize);
   int yAdj = fontSize / 4;
   bool antialias = (fontSize >= 12);
   

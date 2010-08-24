@@ -31,6 +31,7 @@ public:
 
   bool PromptForColor(IColor* pColor, char* prompt = "");
 	void PromptUserInput(IControl* pControl, IParam* pParam);
+	void PromptUserInput(IEditableTextControl* pControl);
 
   bool OpenURL(const char* url, 
     const char* msgWindowTitle = 0, const char* confirmMsg = 0, const char* errMsgOnFailure = 0);

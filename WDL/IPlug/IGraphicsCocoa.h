@@ -46,4 +46,5 @@ inline CGRect ToCGRect(int h, IRECT* pR)
 - (void) killTimer;
 - (void) controlTextDidChange: (NSNotification *) aNotification;
 - (void) promptUserInput: (IControl*) pControl param: (IParam*) pParam;
+- (void) promptUserInput: (IEditableTextControl*) pControl;
 @end

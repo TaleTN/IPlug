@@ -29,6 +29,30 @@ void IGraphics::Resize(int w, int h)
   mPlug->ResizeGraphics(w, h);
 }
 
+void IGraphics::SetFromStringAfterPrompt(IControl* pControl, IParam* pParam, char *txt)
+{
+	if (pParam)
+	{
+		double v;
+		if (pParam->GetNDisplayTexts())
+		{
+			int vi = 0;
+			pParam->MapDisplayText(txt, &vi);
+			v = (double)vi;
+		}
+		else
+		{
+			v = atof(txt);
+			if (pParam->DisplayIsNegated()) v = -v;
+		}
+    	pControl->SetValueFromUserInput(pParam->GetNormalized(v));
+	}
+	else // if (pControl)
+	{
+		if (((IEditableTextControl*)pControl)->IsEditable()) ((ITextControl*)pControl)->SetTextFromPlug(txt);
+	}
+}
+
 void IGraphics::AttachBackground(int ID, const char* name)
 {
   IBitmap bg = LoadIBitmap(ID, name);

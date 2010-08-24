@@ -16,9 +16,13 @@ public:
   void OffsetContentRect(CGRect* pR);
   bool Resize(int w, int h);
   void PromptUserInput(IControl* pControl, IParam* pParam);
+  void PromptUserInput(IEditableTextControl* pControl);
 
 protected:
 
+  void InstallParamEditHandler(ControlRef control);
+  void SetParamEditText(const char* txt);
+  void ShowParamEditView();
   void EndUserInput(bool commit);
   
 private:
