@@ -385,7 +385,7 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
         bool savedOK = true;
         if (isBank) {
           _this->ModifyCurrentPreset();
-          savedOK = _this->SerializePresetsState(pChunk);
+          savedOK = _this->SerializePresets(pChunk);
           //savedOK = _this->SerializeState(pChunk);
         }
         else {
@@ -408,7 +408,7 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
         int iplugVer = GetIPlugVerFromChunk(pChunk, &pos);
         isBank &= (iplugVer >= 0x010000);
         if (isBank) {
-          pos = _this->UnserializePresetsState(pChunk, pos);
+          pos = _this->UnserializePresets(pChunk, pos);
           //pos = _this->UnserializeState(pChunk, pos);
         }
         else {
