@@ -482,6 +482,17 @@ void IPlugBase::MakePresetFromNamedParams(char* name, int nParamsNamed, ...)
   }
 }
 
+void IPlugBase::MakePresetFromChunk(char* name, ByteChunk* pChunk)
+{
+  IPreset* pPreset = GetNextUninitializedPreset(&mPresets);
+  if (pPreset) {
+    pPreset->mInitialized = true;
+    strcpy(pPreset->mName, name);
+
+    pPreset->mChunk.PutChunk(pChunk);
+  }
+}
+
 #define DEFAULT_USER_PRESET_NAME "user preset"
 
 void MakeDefaultUserPresetName(WDL_PtrList<IPreset>* pPresets, char* str)
