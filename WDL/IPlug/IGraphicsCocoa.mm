@@ -278,7 +278,7 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
   IRECT* pR = pControl->GetRECT();
 
-  NSRect r = { pR->L, mGraphics->Height() - pR->B, pR->W(), pR->H() };
+  NSRect r = { pR->L, mGraphics->Height() - (pR->B + 3), pR->W(), pR->H() + 6 };
   if (pControl->IsSecure())
     mParamEditView = [[NSSecureTextField alloc] initWithFrame: r];
   else
