@@ -30,8 +30,10 @@ starts and ends at C. Only despressed keys are drawn by this control, so the
 entire keyboard (with all its keys released) should already be visible (e.g.
 because it's in the background).
 
-pRegularKeys should contain 6 bitmaps (C/F, D, E/B, G, A), while pSharpKey
-should only contain 1 bitmap (for all flat/sharp keys).
+By default pRegularKeys should contain 6 bitmaps (C/F, D, E/B, G, A, high
+C), while pSharpKey should only contain 1 bitmap (for all flat/sharp keys).
+If you want to use more bitmaps, e.g. if the 1st octave is alternatively
+coloured, then you should override the DrawKey() method.
 
 pKeyCoords should contain the x-coordinates of each key relative to the
 start of the octave. (Note that only the coordinates for the flat/sharp keys
@@ -80,11 +82,15 @@ class IKeyboardControl: public IControl
 {
 public:
 	IKeyboardControl(IPlugBase* pPlug, int x, int y, int minNote, int nOctaves, IBitmap* pRegularKeys, IBitmap* pSharpKey, const int pKeyCoords[12]):
-	IControl(pPlug, &IRECT(x, y, x + (nOctaves * 7 + 1) * pRegularKeys->W, y + pRegularKeys->H / pRegularKeys->N), -1),
-	mRegularKeys(*pRegularKeys), mSharpKey(*pSharpKey),
-	mRegularKeyH(mRegularKeys.H / mRegularKeys.N), mKeyCoords(pKeyCoords), mOctaveWidth(mRegularKeys.W * 7),
-	mNumOctaves(nOctaves), mMaxKey(nOctaves * 12), mKey(-1), mMinNote(minNote),
-	mNoteOn(IMidiMsg::kNoteOn << 4), mNoteOff(IMidiMsg::kNoteOff << 4) { mDblAsSingleClick = true; }
+	IControl(pPlug, &IRECT(x, y, pRegularKeys), -1),
+	mMinNote(minNote), mNumOctaves(nOctaves), mRegularKeys(*pRegularKeys), mSharpKey(*pSharpKey), mKeyCoords(pKeyCoords),
+	mOctaveWidth(pRegularKeys->W * 7), mMaxKey(nOctaves * 12), mKey(-1), mNoteOn(IMidiMsg::kNoteOn << 4), mNoteOff(IMidiMsg::kNoteOff << 4)
+	{
+		mRECT.R += nOctaves * mOctaveWidth;
+		mTargetRECT.R = mRECT.R;
+
+		mDblAsSingleClick = true;
+	}
 
 	~IKeyboardControl() {}
 
@@ -138,76 +144,81 @@ public:
 		if (((PLUG_CLASS_NAME*)mPlug)->GetNumKeys() == 0) return true;
 
 		// "Regular" keys
-		IRECT r(mRECT.L, mRECT.T, mRECT.L + mRegularKeys.W, mRECT.T + mRegularKeyH);
+		IRECT r(mRECT.L, mRECT.T, mRECT.L + mRegularKeys.W, mRECT.B);
 		int key = 0;
 		while (key < mMaxKey)
 		{
 			// Draw the key.
 			int note = key % 12;
-			if (((PLUG_CLASS_NAME*)mPlug)->GetKeyStatus(key))
-			{
-				if (note == 0 || note == 5) // C or F
-					pGraphics->DrawBitmap(&mRegularKeys, &r, 1, &mBlend);
-				else if (note == 2) // D
-					pGraphics->DrawBitmap(&mRegularKeys, &r, 2, &mBlend);
-				else if (note == 4 || note == 11) // E or B
-					pGraphics->DrawBitmap(&mRegularKeys, &r, 3, &mBlend);
-				else if (note == 7) // G
-					pGraphics->DrawBitmap(&mRegularKeys, &r, 4, &mBlend);
-				else // if (note == 8) // A
-					pGraphics->DrawBitmap(&mRegularKeys, &r, 5, &mBlend);
-			}
+			if (((PLUG_CLASS_NAME*)mPlug)->GetKeyStatus(key)) DrawKey(pGraphics, &r, key, note, false);
 
 			// Next, please!
-			if (note == 4 || note == 11) // E or B
-				key++;
-			else
-				key += 2;
+			key += mNextKey[note];
 			r.L += mRegularKeys.W;
 			r.R += mRegularKeys.W;
 		}
 		// Draw the high C.
-		if (((PLUG_CLASS_NAME*)mPlug)->GetKeyStatus(key))
-			pGraphics->DrawBitmap(&mRegularKeys, &r, 6, &mBlend);
+		if (((PLUG_CLASS_NAME*)mPlug)->GetKeyStatus(key)) DrawKey(pGraphics, &r, key, 0, false);
 
 		// Flat/sharp keys
-		r.L = mRECT.L + mKeyCoords[1] + 1;
-		r.R = r.L + mSharpKey.W;
-		r.B = mRECT.T + mSharpKey.H;
+		int l = mRECT.L;
+		r.B = mRECT.T + mSharpKey.H / mSharpKey.N;
 		key = 1;
-		while (key <= mMaxKey)
+		while (true)
 		{
 			// Draw the key.
 			int note = key % 12;
-			if (((PLUG_CLASS_NAME*)mPlug)->GetKeyStatus(key))
-				pGraphics->DrawBitmap(&mSharpKey, &r, 0, &mBlend);
+			r.L = l + mKeyCoords[note];
+			r.R = r.L + mSharpKey.W;
+			if (((PLUG_CLASS_NAME*)mPlug)->GetKeyStatus(key)) DrawKey(pGraphics, &r, key, note, true);
 
 			// Next, please!
-			int dX;
-			if (note == 3) // D#
-			{
-				key += 3;
-				dX = mKeyCoords[6]; // F#
-			}
-			else if (note == 10) // A#
-			{
-				key += 3;
-				dX = mOctaveWidth + mKeyCoords[1]; // C#
-			}
-			else
-			{
-				key += 2;
-				dX = mKeyCoords[note + 2];
-			}
-			dX -= mKeyCoords[note];
-			r.L += dX;
-			r.R += dX;
+			key += mNextKey[note];
+			if (key > mMaxKey) break;
+			if (note == 10) l += mOctaveWidth;
 		}
 
 		return true;
 	}
 
 protected:
+	virtual void DrawKey(IGraphics* pGraphics, IRECT* pR, int key, int note, bool sharp)
+	{
+		if (sharp)
+		{
+			pGraphics->DrawBitmap(&mSharpKey, pR, 0, &mBlend);
+		}
+		else
+			pGraphics->DrawBitmap(&mRegularKeys, pR, key < mMaxKey ? mBitmapN[note] : 6, &mBlend);
+	}
+
+	/* Override the above method if e.g. you want to draw the 1st octave
+	// using different bitmaps:
+
+	virtual void DrawKey(IGraphics* pGraphics, IRECT* pR, int key, int note, bool sharp)
+	{
+		if (sharp)
+		{
+			pGraphics->DrawBitmap(&mSharpKey, pR, key < 12 ? 1 : 2, &mBlend);
+		}
+		else
+		{
+			int n;
+			if (key < mMaxKey)
+			{
+				n = mBitmapN[note];
+				if (key >= 12) n += 5;
+			}
+			else
+			{
+				n = 11;
+			}
+			pGraphics->DrawBitmap(&mRegularKeys, pR, n, &mBlend);
+		}
+	}
+
+	*/
+
 	// Returns the key number at the (x, y) coordinates.
 	int GetMouseKey(int x, int y)
 	{
@@ -222,8 +233,8 @@ protected:
 
 		// Flat/sharp key
 		int note;
-		double h = mSharpKey.H;
-		if (y < mSharpKey.H && octave < mNumOctaves)
+		int h = mSharpKey.H / mSharpKey.N;
+		if (y < h && octave < mNumOctaves)
 		{
 			// C#
 			if (x < mKeyCoords[1]) goto RegularKey;
@@ -263,17 +274,15 @@ protected:
 		}
 
 	RegularKey:
-		h = mRegularKeyH;
+		h = mRECT.H();
 		int n = x / mRegularKeys.W;
-		if (n < 3) // C..E
-			note = n * 2;
-		else // F..B
-			note = n * 2 - 1;
+		note = n * 2;
+		if (n >= 3) note--;
 
 	CalcVelocity:
 		// Calculate the velocity depeding on the vertical coordinate
 		// relative to the key height.
-		mVelocity = 1 + int((double)y / h * 126. + 0.5);
+		mVelocity = 1 + int((double)y / (double)h * 126. + 0.5);
 
 		return note + octave * 12;
 	}
@@ -282,14 +291,23 @@ protected:
 	void SendNoteOn()  { mPlug->ProcessMidiMsg(&IMidiMsg(0, mNoteOn,  mMinNote + mKey, mVelocity)); }
 	void SendNoteOff() { mPlug->ProcessMidiMsg(&IMidiMsg(0, mNoteOff, mMinNote + mKey, 64       )); }
 
+	static const int mNextKey[12];
+	static const int mBitmapN[12];
+
 	IBitmap mRegularKeys, mSharpKey;
-	int mRegularKeyH;
 	const int* mKeyCoords;
 	int mOctaveWidth, mNumOctaves;
 	int mMaxKey, mKey;
 	int mMinNote, mVelocity;
 	BYTE mNoteOn, mNoteOff;
 };
+
+
+// Next "regular" or sharp/flat note relative to the current note.
+const int IKeyboardControl::mNextKey[12] = { 2, 2, 2, 3, 1, 2, 2, 2, 2, 2, 3, 1 };
+
+// The bitmap index number for each note.
+const int IKeyboardControl::mBitmapN[12] = { 1, 0, 2, 0, 3, 1, 0, 4, 0, 5, 0, 3 };
 
 
 #endif // _IKEYBOARDCONTROL_
