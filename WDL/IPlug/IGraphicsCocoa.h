@@ -7,7 +7,17 @@
 // Cocoa objects can be supplied by any existing component, 
 // so we need to make sure the C++ static lib code gets the 
 // IGraphicsCocoa that it expects.
-#define IGRAPHICS_COCOA IGraphicsCocoa_v1002_c4c3b5d
+#define IGRAPHICS_COCOA IGraphicsCocoa_v1002_baaf6dc
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
+  #if __LP64__ || NS_BUILD_32_LIKE_64
+    typedef long NSInteger;
+    typedef unsigned long NSUInteger;
+  #else
+    typedef int NSInteger;
+    typedef unsigned int NSUInteger;
+  #endif
+#endif
 
 NSString* ToNSString(const char* cStr);
 

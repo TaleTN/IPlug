@@ -200,9 +200,9 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 {
   char* txt = (char*)[[mParamEditView stringValue] UTF8String];
 
-  int vi = -1;
+  NSInteger vi = -1;
   if (mEdParam && mEdParam->GetNDisplayTexts())
-    vi = (int)[mParamEditView indexOfSelectedItem];
+    vi = (NSInteger)[mParamEditView indexOfSelectedItem];
   if (vi != -1)
     mEdControl->SetValueFromUserInput(mEdParam->GetNormalized((double)vi));
   else

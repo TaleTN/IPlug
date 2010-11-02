@@ -1336,7 +1336,7 @@ IPlugAU::BusChannels* IPlugAU::GetBus(AudioUnitScope scope, AudioUnitElement bus
 void IPlugAU::ClearConnections()
 {
   int nInBuses = mInBuses.GetSize();
-  for (int i = 0,; i < nInBuses; ++i) {
+  for (int i = 0; i < nInBuses; ++i) {
     BusChannels* pInBus = mInBuses.Get(i);
     pInBus->mConnected = false;
     pInBus->mNHostChannels = -1;
@@ -1344,7 +1344,7 @@ void IPlugAU::ClearConnections()
     memset(pInBusConn, 0, sizeof(InputBusConnection));
   }
   int nOutBuses = mOutBuses.GetSize();
-  for (int i = 0,; i < nOutBuses; ++i) {
+  for (int i = 0; i < nOutBuses; ++i) {
     BusChannels* pOutBus = mOutBuses.Get(i);
     pOutBus->mConnected = false;
     pOutBus->mNHostChannels = -1;
