@@ -48,7 +48,12 @@ int PtrListInitialize(WDL_PtrList<C>* pList, int size)
   return size;
 }
 
-#define GET_COMP_PARAM(TYPE, IDX) *((TYPE*)&(params->params[IDX]))
+#if defined(__APPLE__) && defined(__LP64__)
+	#define GET_COMP_PARAM(TYPE, IDX, NUM) *((TYPE*)&(params->params[NUM - IDX]))
+#else
+	#define GET_COMP_PARAM(TYPE, IDX, NUM) *((TYPE*)&(params->params[IDX]))
+#endif
+
 #define NO_OP(select) case select: return badComponentSelector;
 
 // static
@@ -62,7 +67,7 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
     IPlugAU* _this = MakePlug();
     _this->HostSpecificInit();
     _this->PruneUninitializedPresets();
-    _this->mCI = GET_COMP_PARAM(ComponentInstance, 0);
+    _this->mCI = GET_COMP_PARAM(ComponentInstance, 0, 1);
     SetComponentInstanceStorage(_this->mCI, (Handle) _this);
     return noErr;
   }
@@ -96,11 +101,11 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       return noErr;
     }
     case kAudioUnitGetPropertyInfoSelect: {
-      AudioUnitPropertyID propID = GET_COMP_PARAM(AudioUnitPropertyID, 4);
-      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3);
-      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2);
-      UInt32* pDataSize = GET_COMP_PARAM(UInt32*, 1);
-      Boolean* pWriteable = GET_COMP_PARAM(Boolean*, 0);
+      AudioUnitPropertyID propID = GET_COMP_PARAM(AudioUnitPropertyID, 4, 5);
+      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3, 5);
+      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2, 5);
+      UInt32* pDataSize = GET_COMP_PARAM(UInt32*, 1, 5);
+      Boolean* pWriteable = GET_COMP_PARAM(Boolean*, 0, 5);
 
       UInt32 dataSize = 0;
       if (!pDataSize) {
@@ -114,11 +119,11 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       return _this->GetProperty(propID, scope, element, pDataSize, pWriteable, 0);
     }
     case kAudioUnitGetPropertySelect: {
-      AudioUnitPropertyID propID = GET_COMP_PARAM(AudioUnitPropertyID, 4);
-      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3);
-      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2);
-      void* pData = GET_COMP_PARAM(void*, 1);
-      UInt32* pDataSize = GET_COMP_PARAM(UInt32*, 0);
+      AudioUnitPropertyID propID = GET_COMP_PARAM(AudioUnitPropertyID, 4, 5);
+      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3, 5);
+      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2, 5);
+      void* pData = GET_COMP_PARAM(void*, 1, 5);
+      UInt32* pDataSize = GET_COMP_PARAM(UInt32*, 0, 5);
 
       UInt32 dataSize = 0;
       if (!pDataSize) {
@@ -128,18 +133,18 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       return _this->GetProperty(propID, scope, element, pDataSize, &writeable, pData);
     }
     case kAudioUnitSetPropertySelect: {
-      AudioUnitPropertyID propID = GET_COMP_PARAM(AudioUnitPropertyID, 4);
-      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3);
-      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2);
-      const void* pData = GET_COMP_PARAM(const void*, 1);
-      UInt32* pDataSize = GET_COMP_PARAM(UInt32*, 0);
+      AudioUnitPropertyID propID = GET_COMP_PARAM(AudioUnitPropertyID, 4, 5);
+      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3, 5);
+      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2, 5);
+      const void* pData = GET_COMP_PARAM(const void*, 1, 5);
+      UInt32* pDataSize = GET_COMP_PARAM(UInt32*, 0, 5);
       return _this->SetProperty(propID, scope, element, pDataSize, pData);
     }
     case kAudioUnitAddPropertyListenerSelect: {
       PropertyListener listener;
-      listener.mPropID = GET_COMP_PARAM(AudioUnitPropertyID, 2);
-      listener.mListenerProc = GET_COMP_PARAM(AudioUnitPropertyListenerProc, 1);
-      listener.mProcArgs = GET_COMP_PARAM(void*, 0);
+      listener.mPropID = GET_COMP_PARAM(AudioUnitPropertyID, 2, 3);
+      listener.mListenerProc = GET_COMP_PARAM(AudioUnitPropertyListenerProc, 1, 3);
+      listener.mProcArgs = GET_COMP_PARAM(void*, 0, 3);
       int i, n = _this->mPropertyListeners.GetSize();
       for (i = 0; i < n; ++i) {
         PropertyListener* pListener = _this->mPropertyListeners.Get(i);
@@ -152,8 +157,8 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
     }
     case kAudioUnitRemovePropertyListenerSelect: {
       PropertyListener listener;
-      listener.mPropID = GET_COMP_PARAM(AudioUnitPropertyID, 1);
-      listener.mListenerProc = GET_COMP_PARAM(AudioUnitPropertyListenerProc, 0);
+      listener.mPropID = GET_COMP_PARAM(AudioUnitPropertyID, 1, 2);
+      listener.mListenerProc = GET_COMP_PARAM(AudioUnitPropertyListenerProc, 0, 2);
       int i, n = _this->mPropertyListeners.GetSize();
       for (i = 0; i < n; ++i) {
         PropertyListener* pListener = _this->mPropertyListeners.Get(i);
@@ -166,9 +171,9 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
     }
   	case kAudioUnitRemovePropertyListenerWithUserDataSelect: {
       PropertyListener listener;
-      listener.mPropID = GET_COMP_PARAM(AudioUnitPropertyID, 2);
-      listener.mListenerProc = GET_COMP_PARAM(AudioUnitPropertyListenerProc, 1);
-      listener.mProcArgs = GET_COMP_PARAM(void*, 0);
+      listener.mPropID = GET_COMP_PARAM(AudioUnitPropertyID, 2, 3);
+      listener.mListenerProc = GET_COMP_PARAM(AudioUnitPropertyListenerProc, 1, 3);
+      listener.mProcArgs = GET_COMP_PARAM(void*, 0, 3);
       int i, n = _this->mPropertyListeners.GetSize();
       for (i = 0; i < n; ++i) {
         PropertyListener* pListener = _this->mPropertyListeners.Get(i);
@@ -182,15 +187,15 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
     }
     case kAudioUnitAddRenderNotifySelect: {
       AURenderCallbackStruct acs;
-      acs.inputProc = GET_COMP_PARAM(AURenderCallback, 1);
-      acs.inputProcRefCon = GET_COMP_PARAM(void*, 0);
+      acs.inputProc = GET_COMP_PARAM(AURenderCallback, 1, 2);
+      acs.inputProcRefCon = GET_COMP_PARAM(void*, 0, 2);
       PtrListAddFromStack(&(_this->mRenderNotify), &acs);
       return noErr;
     }
     case kAudioUnitRemoveRenderNotifySelect: {
       AURenderCallbackStruct acs;
-      acs.inputProc = GET_COMP_PARAM(AURenderCallback, 1);
-      acs.inputProcRefCon = GET_COMP_PARAM(void*, 0);
+      acs.inputProc = GET_COMP_PARAM(AURenderCallback, 1, 2);
+      acs.inputProcRefCon = GET_COMP_PARAM(void*, 0, 2);
       int i, n = _this->mRenderNotify.GetSize();
       for (i = 0; i < n; ++i) {
         AURenderCallbackStruct* pACS = _this->mRenderNotify.Get(i);
@@ -202,23 +207,23 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       return noErr;
     }
     case kAudioUnitGetParameterSelect: {
-      AudioUnitParameterID paramID = GET_COMP_PARAM(AudioUnitParameterID, 3);
-      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 2);
-      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 1);
-      AudioUnitParameterValue* pValue = GET_COMP_PARAM(AudioUnitParameterValue*, 0);
+      AudioUnitParameterID paramID = GET_COMP_PARAM(AudioUnitParameterID, 3, 4);
+      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 2, 4);
+      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 1, 4);
+      AudioUnitParameterValue* pValue = GET_COMP_PARAM(AudioUnitParameterValue*, 0, 4);
       return GetParamProc(pPlug, paramID, scope, element, pValue);
     }
     case kAudioUnitSetParameterSelect: {
-      AudioUnitParameterID paramID = GET_COMP_PARAM(AudioUnitParameterID, 4);
-      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3);
-      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2);
-      AudioUnitParameterValue value = GET_COMP_PARAM(AudioUnitParameterValue, 1);
-      UInt32 offset = GET_COMP_PARAM(UInt32, 0);
+      AudioUnitParameterID paramID = GET_COMP_PARAM(AudioUnitParameterID, 4, 5);
+      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3, 5);
+      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2, 5);
+      AudioUnitParameterValue value = GET_COMP_PARAM(AudioUnitParameterValue, 1, 5);
+      UInt32 offset = GET_COMP_PARAM(UInt32, 0, 5);
       return SetParamProc(pPlug, paramID, scope, element, value, offset);
     }
     case kAudioUnitScheduleParametersSelect: {
-      AudioUnitParameterEvent* pEvent = GET_COMP_PARAM(AudioUnitParameterEvent*, 1);
-      UInt32 nEvents = GET_COMP_PARAM(UInt32, 0);
+      AudioUnitParameterEvent* pEvent = GET_COMP_PARAM(AudioUnitParameterEvent*, 1, 2);
+      UInt32 nEvents = GET_COMP_PARAM(UInt32, 0, 2);
       for (int i = 0; i < nEvents; ++i, ++pEvent) {
         if (pEvent->eventType == kParameterEvent_Immediate) {
           ComponentResult r = SetParamProc(pPlug, pEvent->parameter, pEvent->scope, pEvent->element,
@@ -231,11 +236,11 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       return noErr;
     }
     case kAudioUnitRenderSelect: {
-      AudioUnitRenderActionFlags* pFlags = GET_COMP_PARAM(AudioUnitRenderActionFlags*, 4);
-      const AudioTimeStamp* pTimestamp = GET_COMP_PARAM(AudioTimeStamp*, 3);
-      UInt32 outputBusIdx = GET_COMP_PARAM(UInt32, 2);
-      UInt32 nFrames = GET_COMP_PARAM(UInt32, 1);
-      AudioBufferList* pBufferList = GET_COMP_PARAM(AudioBufferList*, 0);
+      AudioUnitRenderActionFlags* pFlags = GET_COMP_PARAM(AudioUnitRenderActionFlags*, 4, 5);
+      const AudioTimeStamp* pTimestamp = GET_COMP_PARAM(AudioTimeStamp*, 3, 5);
+      UInt32 outputBusIdx = GET_COMP_PARAM(UInt32, 2, 5);
+      UInt32 nFrames = GET_COMP_PARAM(UInt32, 1, 5);
+      AudioBufferList* pBufferList = GET_COMP_PARAM(AudioBufferList*, 0, 5);
       return RenderProc(_this, pFlags, pTimestamp, outputBusIdx, nFrames, pBufferList);
     }
     case kAudioUnitResetSelect: {
@@ -244,10 +249,10 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
     }
     case kMusicDeviceMIDIEventSelect: {   // Ignore kMusicDeviceSysExSelect for now.
       IMidiMsg msg;
-      msg.mStatus = GET_COMP_PARAM(UInt32, 3);
-      msg.mData1 = GET_COMP_PARAM(UInt32, 2);
-      msg.mData2 = GET_COMP_PARAM(UInt32, 1);
-      msg.mOffset = GET_COMP_PARAM(UInt32, 0);
+      msg.mStatus = GET_COMP_PARAM(UInt32, 3, 4);
+      msg.mData1 = GET_COMP_PARAM(UInt32, 2, 4);
+      msg.mData2 = GET_COMP_PARAM(UInt32, 1, 4);
+      msg.mOffset = GET_COMP_PARAM(UInt32, 0, 4);
       _this->ProcessMidiMsg(&msg);
       return noErr;
     }
@@ -259,11 +264,11 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       return noErr;
     }
     case kMusicDeviceStartNoteSelect: {
-      MusicDeviceInstrumentID deviceID = GET_COMP_PARAM(MusicDeviceInstrumentID, 4);
-      MusicDeviceGroupID groupID = GET_COMP_PARAM(MusicDeviceGroupID, 3);
-      NoteInstanceID* pNoteID = GET_COMP_PARAM(NoteInstanceID*, 2);
-      UInt32 offset = GET_COMP_PARAM(UInt32, 1);
-      MusicDeviceNoteParams* pNoteParams = GET_COMP_PARAM(MusicDeviceNoteParams*, 0);
+      MusicDeviceInstrumentID deviceID = GET_COMP_PARAM(MusicDeviceInstrumentID, 4, 5);
+      MusicDeviceGroupID groupID = GET_COMP_PARAM(MusicDeviceGroupID, 3, 5);
+      NoteInstanceID* pNoteID = GET_COMP_PARAM(NoteInstanceID*, 2, 5);
+      UInt32 offset = GET_COMP_PARAM(UInt32, 1, 5);
+      MusicDeviceNoteParams* pNoteParams = GET_COMP_PARAM(MusicDeviceNoteParams*, 0, 5);
       int note = (int) pNoteParams->mPitch;
       *pNoteID = note;
       IMidiMsg msg;
@@ -271,9 +276,9 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       return noErr;
     }
     case kMusicDeviceStopNoteSelect: {
-      MusicDeviceGroupID groupID = GET_COMP_PARAM(MusicDeviceGroupID, 2);
-      NoteInstanceID noteID = GET_COMP_PARAM(NoteInstanceID, 1);
-      UInt32 offset = GET_COMP_PARAM(UInt32, 0);
+      MusicDeviceGroupID groupID = GET_COMP_PARAM(MusicDeviceGroupID, 2, 3);
+      NoteInstanceID noteID = GET_COMP_PARAM(NoteInstanceID, 1, 3);
+      UInt32 offset = GET_COMP_PARAM(UInt32, 0, 3);
       // noteID is supposed to be some incremented unique ID, but we're just storing note number in it.
       IMidiMsg msg;
       msg.MakeNoteOffMsg(noteID, offset);
@@ -331,7 +336,7 @@ ComponentResult IPlugAU::IPlugAUCarbonViewEntry(ComponentParameters *params, voi
 
   if (select == kComponentOpenSelect) {
       CarbonViewInstance* pCVI = new CarbonViewInstance;
-      pCVI->mCI = GET_COMP_PARAM(ComponentInstance, 0);
+      pCVI->mCI = GET_COMP_PARAM(ComponentInstance, 0, 1);
       pCVI->mPlug = 0;
       SetComponentInstanceStorage(pCVI->mCI, (Handle) pCVI);
       return noErr;
