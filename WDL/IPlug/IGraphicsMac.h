@@ -1,11 +1,18 @@
 #ifndef _IGRAPHICSMAC_
 #define _IGRAPHICSMAC_
 
+#if defined(__APPLE__) && defined(__LP64__) && !defined(IPLUG_NO_CARBON_SUPPORT)
+	#define IPLUG_NO_CARBON_SUPPORT
+#endif
+
 #include "IGraphicsLice.h"
 #include "../swell/swell.h"
 #include <Carbon/Carbon.h>
 
-class IGraphicsCarbon;
+#ifndef IPLUG_NO_CARBON_SUPPORT
+	class IGraphicsCarbon;
+#endif
+
 class NSMutableDictionary;
 
 class IGraphicsMac : public IGraphicsLice
@@ -20,10 +27,14 @@ public:
   bool DrawScreen(IRECT* pR);
 
   void* OpenWindow(void* pWindow);
+#ifndef IPLUG_NO_CARBON_SUPPORT
   void* OpenWindow(void* pWindow, void* pControl);
+#endif
   
 	void* OpenCocoaWindow(void* pParentView);  
+#ifndef IPLUG_NO_CARBON_SUPPORT
   void* OpenCarbonWindow(void* pParentWnd, void* pParentControl);
+#endif
   
 	void CloseWindow();
 	bool WindowIsOpen();
@@ -53,7 +64,9 @@ protected:
   
 private:
   
+#ifndef IPLUG_NO_CARBON_SUPPORT
   IGraphicsCarbon* mGraphicsCarbon; 
+#endif
   void* mGraphicsCocoa;   // Can't forward-declare IGraphicsCocoa because it's an obj-C object.
   
   WDL_String mBundleID;

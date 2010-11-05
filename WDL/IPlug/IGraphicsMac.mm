@@ -3,7 +3,9 @@
 #include "IControl.h"
 #include "Log.h"
 #import "IGraphicsCocoa.h"
-#include "IGraphicsCarbon.h"
+#ifndef IPLUG_NO_CARBON_SUPPORT
+	#include "IGraphicsCarbon.h"
+#endif
 #include "../swell/swell-internal.h"
 
 struct CocoaAutoReleasePool
@@ -31,7 +33,11 @@ inline NSColor* ToNSColor(IColor* pColor)
 }
 
 IGraphicsMac::IGraphicsMac(IPlugBase* pPlug, int w, int h, int refreshFPS)
-:	IGraphicsLice(pPlug, w, h, refreshFPS), mGraphicsCarbon(0), mGraphicsCocoa(0), mTxtAttrs(0)
+:	IGraphicsLice(pPlug, w, h, refreshFPS),
+#ifndef IPLUG_NO_CARBON_SUPPORT
+	mGraphicsCarbon(0),
+#endif
+	mGraphicsCocoa(0), mTxtAttrs(0)
 {
   NSApplicationLoad();
   
@@ -102,12 +108,14 @@ bool IGraphicsMac::DrawScreen(IRECT* pR)
     NSGraphicsContext* gc = [NSGraphicsContext graphicsContextWithGraphicsPort: pCGC flipped: YES];
     pCGC = (CGContextRef) [gc graphicsPort];    
   }
+#ifndef IPLUG_NO_CARBON_SUPPORT
   else
   if (mGraphicsCarbon) {
     pCGC = mGraphicsCarbon->GetCGContext();
     mGraphicsCarbon->OffsetContentRect(&r);
     // Flipping is handled in IGraphicsCarbon.
   }
+#endif
   if (!pCGC) {
     return false;
   }
@@ -124,10 +132,12 @@ void* IGraphicsMac::OpenWindow(void* pParent)
   return OpenCocoaWindow(pParent);
 }
 
+#ifndef IPLUG_NO_CARBON_SUPPORT
 void* IGraphicsMac::OpenWindow(void* pWindow, void* pControl)
 {
   return OpenCarbonWindow(pWindow, pControl);
 }
+#endif
 
 void* IGraphicsMac::OpenCocoaWindow(void* pParentView)
 {
@@ -142,6 +152,7 @@ void* IGraphicsMac::OpenCocoaWindow(void* pParentView)
   return mGraphicsCocoa;
 }
 
+#ifndef IPLUG_NO_CARBON_SUPPORT
 void* IGraphicsMac::OpenCarbonWindow(void* pParentWnd, void* pParentControl)
 {
   TRACE;
@@ -152,14 +163,17 @@ void* IGraphicsMac::OpenCarbonWindow(void* pParentWnd, void* pParentControl)
   mGraphicsCarbon = new IGraphicsCarbon(this, pWnd, pControl);
   return mGraphicsCarbon->GetView();
 }
+#endif
 
 void IGraphicsMac::CloseWindow()
 {
+#ifndef IPLUG_NO_CARBON_SUPPORT
   if (mGraphicsCarbon) 
   {
     DELETE_NULL(mGraphicsCarbon);
   }
   else  
+#endif
 	if (mGraphicsCocoa) 
   {
     IGRAPHICS_COCOA* graphicscocoa = (IGRAPHICS_COCOA*)mGraphicsCocoa;
@@ -176,7 +190,11 @@ void IGraphicsMac::CloseWindow()
 
 bool IGraphicsMac::WindowIsOpen()
 {
+#ifndef IPLUG_NO_CARBON_SUPPORT
 	return (mGraphicsCarbon || mGraphicsCocoa);
+#else
+	return mGraphicsCocoa;
+#endif
 }
 
 void IGraphicsMac::Resize(int w, int h)
@@ -186,10 +204,12 @@ void IGraphicsMac::Resize(int w, int h)
     mDrawBitmap->resize(w, h);
   } 
   
+#ifndef IPLUG_NO_CARBON_SUPPORT
   if (mGraphicsCarbon) {
     mGraphicsCarbon->Resize(w, h);
   }
   else
+#endif
   if (mGraphicsCocoa) {
     NSSize size = { w, h };
     [(IGRAPHICS_COCOA*) mGraphicsCocoa setFrameSize: size ];
@@ -235,16 +255,20 @@ void IGraphicsMac::PromptUserInput(IControl* pControl, IParam* pParam)
 {
   if (mGraphicsCocoa)
     [mGraphicsCocoa promptUserInput: pControl param: pParam];
+#ifndef IPLUG_NO_CARBON_SUPPORT
   else if (mGraphicsCarbon)
     mGraphicsCarbon->PromptUserInput(pControl, pParam);
+#endif
 }
 
 void IGraphicsMac::PromptUserInput(IEditableTextControl* pControl)
 {
   if (mGraphicsCocoa)
     [mGraphicsCocoa promptUserInput: pControl];
+#ifndef IPLUG_NO_CARBON_SUPPORT
   else if (mGraphicsCarbon)
     mGraphicsCarbon->PromptUserInput(pControl);
+#endif
 }
 
 bool IGraphicsMac::OpenURL(const char* url,

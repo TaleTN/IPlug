@@ -4,6 +4,8 @@
 #include <Carbon/Carbon.h>
 #include "IGraphicsMac.h"
 
+#ifndef IPLUG_NO_CARBON_SUPPORT
+
 class IGraphicsCarbon
 {
 public:
@@ -50,4 +52,5 @@ public:
   static pascal OSStatus CarbonParamEditHandler(EventHandlerCallRef pHandlerCall, EventRef pEvent, void* pGraphicsCarbon);
 };
 
-#endif
+#endif // IPLUG_NO_CARBON_SUPPORT
+#endif // _IGRAPHICSCARBON_

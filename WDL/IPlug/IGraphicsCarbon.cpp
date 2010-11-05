@@ -1,4 +1,5 @@
 #include "IGraphicsCarbon.h"
+#ifndef IPLUG_NO_CARBON_SUPPORT
 
 IRECT GetRegionRect(EventRef pEvent, int gfxW, int gfxH)
 {
@@ -501,3 +502,5 @@ void IGraphicsCarbon::EndUserInput(bool commit)
   mEdControl = 0;
   mEdParam = 0;
 }
+
+#endif // IPLUG_NO_CARBON_SUPPORT
