@@ -274,10 +274,12 @@ protected:
 		}
 
 	RegularKey:
-		h = mRECT.H();
-		int n = x / mRegularKeys.W;
-		note = n * 2;
-		if (n >= 3) note--;
+		{
+			h = mRECT.H();
+			int n = x / mRegularKeys.W;
+			note = n * 2;
+			if (n >= 3) note--;
+		}
 
 	CalcVelocity:
 		// Calculate the velocity depeding on the vertical coordinate
