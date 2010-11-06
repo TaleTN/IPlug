@@ -6,6 +6,20 @@
 	objectVersion = 44;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		3DE787121285A4B900AD8D4F /* IGraphicsCocoa.h */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 3DE787181285A4D700AD8D4F /* Build configuration list for PBXAggregateTarget "IGraphicsCocoa.h" */;
+			buildPhases = (
+				3DE787111285A4B900AD8D4F /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = IGraphicsCocoa.h;
+			productName = Untitled;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		3DC38C621284C89200CC2144 /* Containers.h in Headers */ = {isa = PBXBuildFile; fileRef = 52FBBE870D0CF0D3001C8B8A /* Containers.h */; };
 		3DC38C631284C89200CC2144 /* IControl.h in Headers */ = {isa = PBXBuildFile; fileRef = 52FBBE890D0CF0D3001C8B8A /* IControl.h */; };
@@ -308,6 +322,23 @@
 		52FBBEBE0D0CF0D3001C8B8A /* Log.h in Headers */ = {isa = PBXBuildFile; fileRef = 52FBBEA20D0CF0D3001C8B8A /* Log.h */; };
 		D2AAC088055469A000DB518D /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3DE787191285A4D900AD8D4F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DE787121285A4B900AD8D4F /* Untitled */;
+			remoteInfo = Untitled;
+		};
+		3DE787371285A79E00AD8D4F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DE787121285A4B900AD8D4F /* IGraphicsCocoa.h */;
+			remoteInfo = IGraphicsCocoa.h;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		0867D69BFE84028FC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -887,6 +918,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				3DE787381285A79E00AD8D4F /* PBXTargetDependency */,
 			);
 			name = IPlug_x64;
 			productName = IPlug;
@@ -904,6 +936,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				3DE7871A1285A4D900AD8D4F /* PBXTargetDependency */,
 			);
 			name = IPlug;
 			productName = IPlug;
@@ -925,9 +958,26 @@
 			targets = (
 				D2AAC07D0554694100DB518D /* IPlug */,
 				3DC38C601284C89200CC2144 /* IPlug_x64 */,
+				3DE787121285A4B900AD8D4F /* IGraphicsCocoa.h */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3DE787111285A4B900AD8D4F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Generates an unique suffix for the IGRAPHICS_COCOA #define in\n# IGraphicsCocoa.h.\n\nsha1=$(openssl rand 140593 | openssl dgst -sha1)\nsed -i .bak 's/^\\([ \t]*#define[ \t]\\{1,\\}IGRAPHICS_COCOA[ \t]\\{1,\\}IGraphicsCocoa_v[^ \t]\\{1,\\}\\)_[^ \t]\\{1,\\}\\([ \t]*\\)$/\\1_'${sha1:0:7}'\\2/' IGraphicsCocoa.h\nrm -f IGraphicsCocoa.h.bak\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3DC38C931284C89200CC2144 /* Sources */ = {
@@ -1143,6 +1193,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3DE7871A1285A4D900AD8D4F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3DE787121285A4B900AD8D4F /* IGraphicsCocoa.h */;
+			targetProxy = 3DE787191285A4D900AD8D4F /* PBXContainerItemProxy */;
+		};
+		3DE787381285A79E00AD8D4F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3DE787121285A4B900AD8D4F /* IGraphicsCocoa.h */;
+			targetProxy = 3DE787371285A79E00AD8D4F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1DEB921F08733DC00010E9CD /* Debug */ = {
@@ -1395,6 +1458,48 @@
 			};
 			name = "Reaper Special ppc";
 		};
+		3DE787131285A4B900AD8D4F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = Untitled;
+			};
+			name = Debug;
+		};
+		3DE787141285A4B900AD8D4F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = Untitled;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		3DE787151285A4B900AD8D4F /* Tracer */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = Untitled;
+			};
+			name = Tracer;
+		};
+		3DE787161285A4B900AD8D4F /* Reaper Special x86 */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = Untitled;
+			};
+			name = "Reaper Special x86";
+		};
+		3DE787171285A4B900AD8D4F /* Reaper Special ppc */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = Untitled;
+			};
+			name = "Reaper Special ppc";
+		};
 		528359A40D7F0BF500577159 /* Tracer */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1556,6 +1661,18 @@
 				3DC38CFD1284C89200CC2144 /* Tracer */,
 				3DC38CFE1284C89200CC2144 /* Reaper Special x86 */,
 				3DC38CFF1284C89200CC2144 /* Reaper Special ppc */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3DE787181285A4D700AD8D4F /* Build configuration list for PBXAggregateTarget "IGraphicsCocoa.h" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3DE787131285A4B900AD8D4F /* Debug */,
+				3DE787141285A4B900AD8D4F /* Release */,
+				3DE787151285A4B900AD8D4F /* Tracer */,
+				3DE787161285A4B900AD8D4F /* Reaper Special x86 */,
+				3DE787171285A4B900AD8D4F /* Reaper Special ppc */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
