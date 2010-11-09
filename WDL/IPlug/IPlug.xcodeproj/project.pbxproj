@@ -975,7 +975,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Generates an unique suffix for the IGRAPHICS_COCOA #define in\n# IGraphicsCocoa.h.\n\nsha1=$(openssl rand 140593 | openssl dgst -sha1)\nsed -i .bak 's/^\\([ \t]*#define[ \t]\\{1,\\}IGRAPHICS_COCOA[ \t]\\{1,\\}IGraphicsCocoa_v[^ \t]\\{1,\\}\\)_[^ \t]\\{1,\\}\\([ \t]*\\)$/\\1_'${sha1:0:7}'\\2/' IGraphicsCocoa.h\nrm -f IGraphicsCocoa.h.bak\n";
+			shellScript = "# Generates an unique suffix for the IGRAPHICS_COCOA #define in\n# IGraphicsCocoa.h.\n\nsha1=$({ id -nu; echo $HOSTNAME; date; } | openssl dgst -sha1)\nsed -i .bak 's/^\\([ \t]*#define[ \t]\\{1,\\}IGRAPHICS_COCOA[ \t]\\{1,\\}IGraphicsCocoa_v[^ \t]\\{1,\\}\\)_[^ \t]\\{1,\\}\\([ \t]*\\)$/\\1_'${sha1:0:7}'\\2/' IGraphicsCocoa.h\nrm -f IGraphicsCocoa.h.bak\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
