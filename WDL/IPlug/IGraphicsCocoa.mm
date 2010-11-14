@@ -69,7 +69,7 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
 - (BOOL) isOpaque
 {
-  return YES;
+  return mGraphics ? YES : NO;
 }
 
 - (BOOL) acceptsFirstResponder
@@ -113,70 +113,94 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
 - (void) mouseDown: (NSEvent*) pEvent
 {
-  if (mParamEditView) EndUserInput(self);
-  int x, y;
-  [self getMouseXY:pEvent x:&x y:&y];
-  if ([pEvent clickCount] > 1) {
-    mGraphics->OnMouseDblClick(x, y, &GetMouseMod(pEvent));
-  }
-  else {
-    mGraphics->OnMouseDown(x, y, &GetMouseMod(pEvent));
+  if (mGraphics)
+  {
+    if (mParamEditView) EndUserInput(self);
+    int x, y;
+    [self getMouseXY:pEvent x:&x y:&y];
+    if ([pEvent clickCount] > 1) {
+      mGraphics->OnMouseDblClick(x, y, &GetMouseMod(pEvent));
+    }
+    else {
+      mGraphics->OnMouseDown(x, y, &GetMouseMod(pEvent));
+    }
   }
 }
 
 - (void) mouseUp: (NSEvent*) pEvent
 {
-  int x, y;
-  [self getMouseXY:pEvent x:&x y:&y];
-  mGraphics->OnMouseUp(x, y, &GetMouseMod(pEvent));
+  if (mGraphics)
+  {
+    int x, y;
+    [self getMouseXY:pEvent x:&x y:&y];
+    mGraphics->OnMouseUp(x, y, &GetMouseMod(pEvent));
+  }
 }
 
 - (void) mouseDragged: (NSEvent*) pEvent
 {
-  int x, y;
-  [self getMouseXY:pEvent x:&x y:&y];
-  mGraphics->OnMouseDrag(x, y, &GetMouseMod(pEvent));
+  if (mGraphics)
+  {
+    int x, y;
+    [self getMouseXY:pEvent x:&x y:&y];
+    mGraphics->OnMouseDrag(x, y, &GetMouseMod(pEvent));
+  }
 }
 
 - (void) rightMouseDown: (NSEvent*) pEvent
 {
-  if (mParamEditView)
+  if (mGraphics)
   {
-    EndUserInput(self);
-    return;
+    if (mParamEditView)
+    {
+      EndUserInput(self);
+      return;
+    }
+    int x, y;
+    [self getMouseXY:pEvent x:&x y:&y];
+    mGraphics->OnMouseDown(x, y, &GetRightMouseMod(pEvent));
   }
-  int x, y;
-  [self getMouseXY:pEvent x:&x y:&y];
-  mGraphics->OnMouseDown(x, y, &GetRightMouseMod(pEvent));
 }
 
 - (void) rightMouseUp: (NSEvent*) pEvent
 {
-  int x, y;
-  [self getMouseXY:pEvent x:&x y:&y];
-  mGraphics->OnMouseUp(x, y, &GetRightMouseMod(pEvent));
+  if (mGraphics)
+  {
+    int x, y;
+    [self getMouseXY:pEvent x:&x y:&y];
+    mGraphics->OnMouseUp(x, y, &GetRightMouseMod(pEvent));
+  }
 }
 
 - (void) rightMouseDragged: (NSEvent*) pEvent
 {
-  int x, y;
-  [self getMouseXY:pEvent x:&x y:&y];
-  mGraphics->OnMouseDrag(x, y, &GetRightMouseMod(pEvent));
+  if (mGraphics)
+  {
+    int x, y;
+    [self getMouseXY:pEvent x:&x y:&y];
+    mGraphics->OnMouseDrag(x, y, &GetRightMouseMod(pEvent));
+  }
 }
 
 - (void) mouseMoved: (NSEvent*) pEvent
 {
-  int x, y;
-  [self getMouseXY:pEvent x:&x y:&y];
-  mGraphics->OnMouseOver(x, y, &GetMouseMod(pEvent));
+  if (mGraphics)
+  {
+    int x, y;
+    [self getMouseXY:pEvent x:&x y:&y];
+    mGraphics->OnMouseOver(x, y, &GetMouseMod(pEvent));
+  }
 }
 
 - (void) scrollWheel: (NSEvent*) pEvent
 {
-  int x, y;
-  [self getMouseXY:pEvent x:&x y:&y];
-  int d = [pEvent deltaY];
-  mGraphics->OnMouseWheel(x, y, &GetMouseMod(pEvent), d);
+  if (mGraphics)
+  {
+    int x, y;
+    [self getMouseXY:pEvent x:&x y:&y];
+    int d = [pEvent deltaY];
+    mGraphics->OnMouseWheel(x, y, &GetMouseMod(pEvent), d);
+  }
 }
 
 - (void) killTimer
