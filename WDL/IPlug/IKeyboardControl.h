@@ -54,16 +54,34 @@ Here is code snippet defining a 4-octave keyboard starting at MIDI note 48
 	pGraphics->AttachControl(mKeyboard);
 
 The plug-in should provide the following methods, so the keyboard control
-can pull status information from the plug-in:
+can pull status information from the plug-in, and send MIDI Note On/Off
+message to the plug-in:
 
-	// Should return true if one or more keys are playing
-	int GetNumKeys();
+	// Should return non-zero if one or more keys are playing.
+	int MyPlug::GetNumKeys()
+	{
+		IMutexLock lock(this);
+		return mNumKeys;
+	}
 
-	// Should return true if the key is playing
-	bool GetKeyStatus(int key);
+	// Should return true if the specified key is playing.
+	bool MyPlug::GetKeyStatus(int key)
+	{
+		IMutexLock lock(this);
+		return mKeyStatus[key];
+	}
 
-(Instead of int you can also use any other integer type for these methods,
-e.g. "char GetNumKeys()" or "bool GetKeyStatus(char note)" will also work.)
+	// Called to send Note On and Note Off MIDI messages to the plug-in when
+	// clicking on the keyboard using the mouse.
+	void MyPlug::ProcessMidiMsgFromGui(IMidiMsg* pMsg)
+	{
+		IMutexLock lock(this);
+		ProcessMidiMsg(pMsg);
+	}
+
+(Instead of int you can also use any other integer types for the
+GetNumKeys() and GetKeyStatus() methods, i.e. "char GetNumKeys()" or
+"bool GetKeyStatus(char note)" will also work.)
 
 When the keyboard should be redrawn, e.g. when the plug-in has received a
 MIDI Note On/Off message, the plug-in should call mKeyboard->SetDirty().
@@ -141,7 +159,7 @@ public:
 	virtual bool Draw(IGraphics* pGraphics)
 	{
 		// Skip if no keys are playing.
-		if (((PLUG_CLASS_NAME*)mPlug)->GetNumKeys() == 0) return true;
+		if (((PLUG_CLASS_NAME*)mPlug)->GetNumKeys() == 0 && mKey == -1) return true;
 
 		// "Regular" keys
 		IRECT r(mRECT.L, mRECT.T, mRECT.L + mRegularKeys.W, mRECT.B);
@@ -150,7 +168,7 @@ public:
 		{
 			// Draw the key.
 			int note = key % 12;
-			if (((PLUG_CLASS_NAME*)mPlug)->GetKeyStatus(key)) DrawKey(pGraphics, &r, key, note, false);
+			if (((PLUG_CLASS_NAME*)mPlug)->GetKeyStatus(key) || key == mKey) DrawKey(pGraphics, &r, key, note, false);
 
 			// Next, please!
 			key += mNextKey[note];
@@ -158,7 +176,7 @@ public:
 			r.R += mRegularKeys.W;
 		}
 		// Draw the high C.
-		if (((PLUG_CLASS_NAME*)mPlug)->GetKeyStatus(key)) DrawKey(pGraphics, &r, key, 0, false);
+		if (((PLUG_CLASS_NAME*)mPlug)->GetKeyStatus(key) || key == mKey) DrawKey(pGraphics, &r, key, 0, false);
 
 		// Flat/sharp keys
 		int l = mRECT.L;
@@ -170,7 +188,7 @@ public:
 			int note = key % 12;
 			r.L = l + mKeyCoords[note];
 			r.R = r.L + mSharpKey.W;
-			if (((PLUG_CLASS_NAME*)mPlug)->GetKeyStatus(key)) DrawKey(pGraphics, &r, key, note, true);
+			if (((PLUG_CLASS_NAME*)mPlug)->GetKeyStatus(key) || key == mKey) DrawKey(pGraphics, &r, key, note, true);
 
 			// Next, please!
 			key += mNextKey[note];
@@ -290,8 +308,8 @@ protected:
 	}
 
 	// Sends a Note On/Off MIDI message to the plug-in.
-	void SendNoteOn()  { mPlug->ProcessMidiMsg(&IMidiMsg(0, mNoteOn,  mMinNote + mKey, mVelocity)); }
-	void SendNoteOff() { mPlug->ProcessMidiMsg(&IMidiMsg(0, mNoteOff, mMinNote + mKey, 64       )); }
+	inline void SendNoteOn()  { ((PLUG_CLASS_NAME*)mPlug)->ProcessMidiMsgFromGui(&IMidiMsg(0, mNoteOn,  mMinNote + mKey, mVelocity)); }
+	inline void SendNoteOff() { ((PLUG_CLASS_NAME*)mPlug)->ProcessMidiMsgFromGui(&IMidiMsg(0, mNoteOff, mMinNote + mKey, 64       )); }
 
 	static const int mNextKey[12];
 	static const int mBitmapN[12];
