@@ -683,8 +683,16 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
         if (scope == kAudioUnitScope_Global) {
           CStrLocal cStr(pVFS->inString);
           IParam* pParam = GetParam(pVFS->inParamID);
-          int v;
-          if (pParam->MapDisplayText(cStr.mCStr, &v)) {
+          if (pParam->GetNDisplayTexts())
+          {
+            int v;
+            if (pParam->MapDisplayText(cStr.mCStr, &v))
+              pVFS->outValue = (AudioUnitParameterValue) v;
+          }
+          else
+          {
+            double v = atof(cStr.mCStr);
+            if (pParam->DisplayIsNegated()) v = -v;
             pVFS->outValue = (AudioUnitParameterValue) v;
           }
         }
