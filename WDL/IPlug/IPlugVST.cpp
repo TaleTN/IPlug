@@ -317,6 +317,33 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
       }
 	    return 0;
     }
+    case effString2Parameter:
+    {
+      if (idx >= 0 && idx < _this->NParams())
+      {
+        if (ptr)
+        {
+          double v;
+          IParam* pParam = _this->GetParam(idx);
+          if (pParam->GetNDisplayTexts())
+          {
+            int vi;
+            if (!pParam->MapDisplayText((char*)ptr, &vi)) return 0;
+            v = (double)vi;
+          }
+          else
+          {
+            v = atof((char*)ptr);
+            if (pParam->DisplayIsNegated()) v = -v;
+          }
+          if (_this->GetGUI()) _this->GetGUI()->SetParameterFromPlug(idx, v, false);
+          pParam->Set(v);
+          _this->OnParamChange(idx);
+        }
+        return 1;
+      }
+      return 0;
+    }
     case effSetSampleRate: {
 	    _this->SetSampleRate(opt);
 	    _this->Reset();
