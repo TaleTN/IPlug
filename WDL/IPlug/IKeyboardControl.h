@@ -26,7 +26,7 @@ freely, subject to the following restrictions:
 
 
 IKeyboardControl is a (musical) keyboard for IPlug instruments. The keyboard
-starts and ends at C. Only despressed keys are drawn by this control, so the
+starts and ends at C. Only depressed keys are drawn by this control, so the
 entire keyboard (with all its keys released) should already be visible (e.g.
 because it's in the background).
 
@@ -71,14 +71,6 @@ message to the plug-in:
 		return mKeyStatus[key];
 	}
 
-	// Called to send Note On and Note Off MIDI messages to the plug-in when
-	// clicking on the keyboard using the mouse.
-	void MyPlug::ProcessMidiMsgFromGui(IMidiMsg* pMsg)
-	{
-		IMutexLock lock(this);
-		ProcessMidiMsg(pMsg);
-	}
-
 (Instead of int you can also use any other integer types for the
 GetNumKeys() and GetKeyStatus() methods, i.e. "char GetNumKeys()" or
 "bool GetKeyStatus(char note)" will also work.)
@@ -102,7 +94,7 @@ public:
 	IKeyboardControl(IPlugBase* pPlug, int x, int y, int minNote, int nOctaves, IBitmap* pRegularKeys, IBitmap* pSharpKey, const int pKeyCoords[12]):
 	IControl(pPlug, &IRECT(x, y, pRegularKeys), -1),
 	mMinNote(minNote), mNumOctaves(nOctaves), mRegularKeys(*pRegularKeys), mSharpKey(*pSharpKey), mKeyCoords(pKeyCoords),
-	mOctaveWidth(pRegularKeys->W * 7), mMaxKey(nOctaves * 12), mKey(-1), mNoteOn(IMidiMsg::kNoteOn << 4), mNoteOff(IMidiMsg::kNoteOff << 4)
+	mOctaveWidth(pRegularKeys->W * 7), mMaxKey(nOctaves * 12), mKey(-1)
 	{
 		mRECT.R += nOctaves * mOctaveWidth;
 		mTargetRECT.R = mRECT.R;
@@ -111,14 +103,13 @@ public:
 	}
 
 	~IKeyboardControl() {}
-
-	inline void SetMidiCh(BYTE ch)
-	{
-		mNoteOn  = IMidiMsg::kNoteOn  << 4 | ch;
-		mNoteOff = IMidiMsg::kNoteOff << 4 | ch;
-	}
-
-	inline BYTE GetMidiCh() const { return mNoteOn & 0x0F; }
+	
+	// Returns the key currently playing, or -1 if no key is playing.
+	inline int GetKey() const { return mKey; }
+	// Returns the Note On velocity of the key currently playing.
+	inline int GetVelocity() const { return 1 + int(mVelocity * 126. + 0.5); }
+	// Returns the velocity as a floating point value.
+	inline double GetReal() const { return mVelocity; }
 
 	virtual void OnMouseDown(int x, int y, IMouseMod* pMod)
 	{
@@ -127,12 +118,7 @@ public:
 		// Skip if this key is already being played using the mouse.
 		int key = GetMouseKey(x, y);
 		if (key == mKey) return;
-
-		// Send a Note Off for the previous key (if any).
-		if (mKey != -1) SendNoteOff();
-		// Send a Note On for the new key.
 		mKey = key;
-		if (mKey != -1) SendNoteOn();
 
 		// Update the keyboard in the GUI.
 		SetDirty();
@@ -141,10 +127,7 @@ public:
 	virtual void OnMouseUp(int x, int y, IMouseMod* pMod)
 	{
 		// Skip if no key is playing.
-		if (mKey == -1) return;
-
-		// Send a Note Off.
-		SendNoteOff();
+		if (mKey < 0) return;
 		mKey = -1;
 
 		// Update the keyboard in the GUI.
@@ -302,14 +285,10 @@ protected:
 	CalcVelocity:
 		// Calculate the velocity depeding on the vertical coordinate
 		// relative to the key height.
-		mVelocity = 1 + int((double)y / (double)h * 126. + 0.5);
+		mVelocity = (double)y / (double)h;
 
 		return note + octave * 12;
 	}
-
-	// Sends a Note On/Off MIDI message to the plug-in.
-	inline void SendNoteOn()  { ((PLUG_CLASS_NAME*)mPlug)->ProcessMidiMsgFromGui(&IMidiMsg(0, mNoteOn,  mMinNote + mKey, mVelocity)); }
-	inline void SendNoteOff() { ((PLUG_CLASS_NAME*)mPlug)->ProcessMidiMsgFromGui(&IMidiMsg(0, mNoteOff, mMinNote + mKey, 64       )); }
 
 	static const int mNextKey[12];
 	static const int mBitmapN[12];
@@ -317,9 +296,8 @@ protected:
 	IBitmap mRegularKeys, mSharpKey;
 	const int* mKeyCoords;
 	int mOctaveWidth, mNumOctaves;
-	int mMaxKey, mKey;
-	int mMinNote, mVelocity;
-	BYTE mNoteOn, mNoteOff;
+	int mKey, mMinNote, mMaxKey;
+	double mVelocity;
 };
 
 
