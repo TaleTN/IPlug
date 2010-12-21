@@ -112,9 +112,11 @@ resource 'dlle' (RES_ID) {
 
 resource 'thng' (RES_ID, RES_NAME) {
 #if PLUG_IS_INST
-  kAudioUnitType_MusicDevice,
+kAudioUnitType_MusicDevice,
+#elif	PLUG_DOES_MIDI
+kAudioUnitType_MusicEffect,
 #else
-  kAudioUnitType_Effect,
+kAudioUnitType_Effect,
 #endif
 	PLUG_UNIQUE_ID,
 	PLUG_MFR_ID,
