@@ -199,7 +199,12 @@ protected:
   void ProcessBuffers(double sampleType, int nFrames);
   void ProcessBuffersAccumulating(float sampleType, int nFrames); 
 
-  struct IMutexLock {
+public:
+  
+  WDL_Mutex mMutex;
+
+  struct IMutexLock 
+  {
     WDL_Mutex* mpMutex;
     IMutexLock(IPlugBase* pPlug) : mpMutex(&(pPlug->mMutex)) { mpMutex->Enter(); }
     ~IMutexLock() { if (mpMutex) { mpMutex->Leave(); } }
@@ -238,8 +243,6 @@ private:
   };
   WDL_PtrList<InChannel> mInChannels;
   WDL_PtrList<OutChannel> mOutChannels;
-  
-  WDL_Mutex mMutex;
 };
 
 #endif
