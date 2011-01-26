@@ -148,10 +148,9 @@ public:
 	{
 		if (mFront > 0) Compact();
 		mGrow = size = Granulize(size);
-		if (size == mSize) return mSize;
-
 		// Don't shrink below the number of currently queued MIDI messages.
 		if (size < mBack) size = Granulize(mBack);
+		if (size == mSize) return mSize;
 
 		void* buf = realloc(mBuf, size * sizeof(IMidiMsg));
 		if (!buf) return mSize;
