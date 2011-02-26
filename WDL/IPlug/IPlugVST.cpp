@@ -88,6 +88,11 @@ void IPlugVST::EndInformHostOfParamChange(int idx)
   mHostCallback(&mAEffect, audioMasterEndEdit, idx, 0, 0, 0.0f);
 }
 
+void IPlugVST::InformHostOfProgramChange()
+{
+	mHostCallback(&mAEffect, audioMasterUpdateDisplay, 0, 0, 0, 0.0f);
+}
+
 inline VstTimeInfo* GetTimeInfo(audioMasterCallback hostCallback, AEffect* pAEffect, int filter = 0)
 { 
 #pragma warning(disable:4312)	// Pointer size cast mismatch.

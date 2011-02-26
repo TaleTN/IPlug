@@ -28,6 +28,8 @@ public:
 	void InformHostOfParamChange(int idx, double normalizedValue);
   void EndInformHostOfParamChange(int idx);
 
+	void InformHostOfProgramChange();
+	
 	int GetSamplePos();   // Samples since start of project.
 	double GetTempo();
 	void GetTimeSig(int* pNum, int* pDenom);

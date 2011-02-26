@@ -89,6 +89,7 @@ public:
   virtual void InformHostOfParamChange(int idx, double normalizedValue) = 0;
   virtual void EndInformHostOfParamChange(int idx) = 0;
 
+	virtual void InformHostOfProgramChange() = 0;
   // ----------------------------------------
   // Useful stuff for your plugin class or an outsider to call, 
   // most of which is implemented by the API class.
