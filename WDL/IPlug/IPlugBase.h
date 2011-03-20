@@ -199,6 +199,11 @@ protected:
   void ProcessBuffers(double sampleType, int nFrames);
   void ProcessBuffersAccumulating(float sampleType, int nFrames); 
 
+ 	WDL_PtrList<IParam> mParams;
+
+  WDL_PtrList<IPreset> mPresets;
+  int mCurrentPresetIdx;
+
 public:
   
   WDL_Mutex mMutex;
@@ -223,11 +228,7 @@ private:
   double mSampleRate;
   int mBlockSize, mLatency;
 
- 	WDL_PtrList<IParam> mParams;
 	IGraphics* mGraphics;
-
-  WDL_PtrList<IPreset> mPresets;
-  int mCurrentPresetIdx;
 
   WDL_TypedBuf<double*> mInData, mOutData;
   struct InChannel {
