@@ -18,10 +18,7 @@
 #include "../mutex.h"
 #include "../wdlstring.h"
 #include "../ptrlist.h"
-
-#if defined __APPLE__ && defined __BIG_ENDIAN__ 
-#include <CoreServices/CoreServices.h>  // for endian conversion functions
-#endif
+#include "../wdlendian.h"
 
 #define FREE_NULL(p) {free(p);p=0;}
 #define DELETE_NULL(p) {delete(p); p=0;}
@@ -69,29 +66,146 @@ public:
 	ByteChunk() {}
 	~ByteChunk() {}
 
-	template <class T> inline int Put(const T* pVal) 
-  {
+	inline int PutBytes(const void* pBuf, int size)
+	{
 		int n = mBytes.GetSize();
-		mBytes.Resize(n + sizeof(T));
-		memcpy(mBytes.Get() + n, (BYTE*) pVal, sizeof(T));
+		mBytes.Resize(n + size);
+		memcpy(mBytes.Get() + n, pBuf, size);
 		return mBytes.GetSize();
 	}
 
-	template <class T> inline int Get(T* pVal, int startPos) 
-  {
-    int endPos = startPos + sizeof(T);
+	inline int GetBytes(void* pBuf, int size, int startPos)
+	{
+		int endPos = startPos + size;
     if (startPos >= 0 && endPos <= mBytes.GetSize()) {
-      memcpy((BYTE*) pVal, mBytes.Get() + startPos, sizeof(T));
+		memcpy(pBuf, mBytes.Get() + startPos, size);
       return endPos;
     }
     return -1;
 	}
 
-	// can not be defined here as on apple bigendian they use
-	//  specialisations of the Get and Put functions which are
-	//  defined below
-	inline int PutStr(const char* str);
-	inline int GetStr(WDL_String* pStr, int startPos);
+	template <class T> inline int Put(const T* pVal) 
+  {
+		return PutBytes(pVal, sizeof(T));
+	}
+
+	template <class T> inline int Get(T* pVal, int startPos) 
+  {
+		return GetBytes(pVal, sizeof(T), startPos);
+	}
+
+// Handle endian conversion for integer and floating point data types.
+// Data is always stored in the chunk in little endian format, so nothing needs
+//  changing on Intel x86 platforms.
+
+#ifdef WDL_BIG_ENDIAN
+
+	inline int Put(const unsigned short* pVal)
+	{
+		unsigned short i = WDL_htole16(*pVal);
+		return PutBytes(&i, 2);
+	}
+
+	inline int Get(unsigned short* pVal, int startPos)
+	{
+		startPos = GetBytes(pVal, 2, startPos);
+		*pVal = WDL_le16toh(*pVal);
+		return startPos;
+	}
+
+	inline int Put(const unsigned int* pVal)
+	{
+		unsigned int i = WDL_htole32(*pVal);
+		return PutBytes(&i, 4);
+	}
+
+	inline int Get(unsigned int* pVal, int startPos)
+	{
+		startPos = GetBytes(pVal, 4, startPos);
+		*pVal = WDL_le32toh(*pVal);
+		return startPos;
+	}
+
+	inline int Put(const WDL_UINT64* pVal)
+	{
+		WDL_UINT64 i = WDL_htole64(*pVal);
+		return PutBytes(&i, 8);
+	}
+
+	inline int Get(WDL_UINT64* pVal, int startPos)
+	{
+		startPos = GetBytes(pVal, 8, startPos);
+		*pVal = WDL_le64toh(*pVal);
+		return startPos;
+	}
+
+	// Signed
+
+	inline int Put(const short*     pVal) { return Put((const unsigned short*) pVal); }
+	inline int Put(const int*       pVal) { return Put((const unsigned int*)   pVal); }
+	inline int Put(const WDL_INT64* pVal) { return Put((const WDL_UINT64*)     pVal); }
+
+	inline int Get(short*     pVal, int startPos) { return Get((unsigned short*) pVal, startPos); }
+	inline int Get(int*       pVal, int startPos) { return Get((unsigned int*)   pVal, startPos); }
+	inline int Get(WDL_INT64* pVal, int startPos) { return Get((WDL_UINT64*)     pVal, startPos); }
+
+	// Floats
+
+	inline int Put(const float* pVal)
+	{
+		unsigned int i = WDL_ftole32(*pVal);
+		return PutBytes(&i, 4);
+	}
+
+	inline int Get(float* pVal, int startPos)
+	{
+		startPos = GetBytes(pVal, 4, startPos);
+		*pVal = WDL_le32tof(*pVal);
+		return startPos;
+	}
+
+	inline int Put(const double* pVal)
+	{
+		WDL_UINT64 i = WDL_ftole64(*pVal);
+		return PutBytes(&i, 8);
+	}
+
+	inline int Get(double* pVal, int startPos)
+	{
+		startPos = GetBytes(pVal, 8, startPos);
+		*pVal = WDL_le64tof(*pVal);
+		return startPos;
+	}
+
+#endif // WDL_BIG_ENDIAN
+
+	inline int PutStr(const char* str) 
+  {
+    int slen = strlen(str);
+        #ifdef WDL_BIG_ENDIAN
+        { const unsigned int i = WDL_htole32(slen); Put(&i); }
+        #else
+		Put(&slen);
+		#endif
+		return PutBytes(str, slen);
+	}
+
+	inline int GetStr(WDL_String* pStr, int startPos)
+  {
+		int len;
+    int strStartPos = Get(&len, startPos);
+    if (strStartPos >= 0) {
+      #ifdef WDL_BIG_ENDIAN
+      len = WDL_le32toh(len);
+      #endif
+      int strEndPos = strStartPos + len;
+      if (strEndPos <= mBytes.GetSize() && len > 0) {
+        pStr->Set((char*) (mBytes.Get() + strStartPos), len);
+      }
+      return strEndPos;
+    }
+    return -1;
+	}
 
   inline int PutBool(bool b)
   {
@@ -114,11 +228,7 @@ public:
 
   inline int PutChunk(ByteChunk* pRHS)
   {
-    int n = mBytes.GetSize();
-    int nRHS = pRHS->Size();
-    mBytes.Resize(n + nRHS);
-    memcpy(mBytes.Get() + n, pRHS->GetBytes(), nRHS);
-    return mBytes.GetSize();
+    return PutBytes(pRHS->GetBytes(), pRHS->Size());
   }
 
   inline void Clear() 
@@ -155,60 +265,5 @@ private:
 
   WDL_TypedBuf<unsigned char> mBytes;
 };
-
-
-#if defined __APPLE__ && defined __BIG_ENDIAN__ 
-// Handle endian conversion for int and double (the two types IPlug uses internally)
-// Data is always stored in the chunk in little endian format, so nothing needs
-//  changing on Intel x86 platforms.
-// (specializations must be defined outside the class according to gcc and the standard)
-template <> inline int ByteChunk::Get<int>(int* pVal, int startPos) {
-		int32_t t;
-		int endPos = Get((uint *)&t,startPos); // cast to uint* so it calls the normal Get
-		*pVal =  EndianS32_LtoB( t );
-		return endPos;
-}
-template <> inline int ByteChunk::Put<int>(const int* pVal) {
-	int32_t t = EndianS32_BtoL( *pVal );
-	return Put((uint *)&t); // cast to uint* so it calls the normal Put
-}
-template <> inline int ByteChunk::Get<double>(double* pVal, int startPos) {
-		uint64_t t;
-		int endPos = Get(&t,startPos);
-		uint64_t *pVuint64 = (uint64_t *)pVal;
-		*pVuint64 =  EndianU64_LtoB( t );
-		return endPos;
-}
-template <> inline int ByteChunk::Put<double>(const double* pVal) {
-	uint64_t *pVuint64 = (uint64_t *)pVal;
-	uint64_t t = EndianU64_BtoL( *pVuint64 );
-	return Put(&t);
-}
-#endif
-
-
-inline int ByteChunk::PutStr(const char* str) 
-  {
-    int slen = strlen(str);
-		Put(&slen);
-		int n = mBytes.GetSize();
-		mBytes.Resize(n + slen);
-		memcpy(mBytes.Get() + n, (BYTE*) str, slen);
-		return mBytes.GetSize();
-	}
-
-inline int ByteChunk::GetStr(WDL_String* pStr, int startPos)
-  {
-		int len;
-    int strStartPos = Get(&len, startPos);
-    if (strStartPos >= 0) {
-      int strEndPos = strStartPos + len;
-      if (strEndPos <= mBytes.GetSize() && len > 0) {
-        pStr->Set((char*) (mBytes.Get() + strStartPos), len);
-      }
-      return strEndPos;
-    }
-    return -1;
-	}
 
 #endif
