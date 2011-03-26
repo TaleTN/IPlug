@@ -69,7 +69,8 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 							SendMessage(pGraphics->mParamEditWnd, WM_GETTEXT, MAX_PARAM_LEN, (LPARAM) currentText);
 							if (strcmp(txt, currentText))
 							{
-								if (pGraphics->mEdParam->GetNDisplayTexts())
+								IParam* pParam = pGraphics->mEdParam;
+								if (pParam->GetNDisplayTexts() && (pParam->Type() == IParam::kTypeEnum || pParam->Type() == IParam::kTypeBool))
 									SendMessage(pGraphics->mParamEditWnd, CB_SELECTSTRING, -1, (LPARAM) txt);
 								else
 									SendMessage(pGraphics->mParamEditWnd, WM_SETTEXT, 0, (LPARAM) txt);
@@ -499,7 +500,7 @@ void IGraphicsWin::PromptUserInput(IControl* pControl, IParam* pParam)
   pParam->GetDisplayForHost(currentText);
 
   int n = pParam->GetNDisplayTexts();
-  if (n) {
+  if (n && (pParam->Type() == IParam::kTypeEnum || pParam->Type() == IParam::kTypeBool)) {
     int i, currentIdx = -1;
 		int w = PARAM_LIST_MIN_W, h = PARAM_EDIT_H_PER_ENUM * (n + 1);
 		for (i = 0; i < n; ++i) {

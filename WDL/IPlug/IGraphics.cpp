@@ -34,13 +34,14 @@ void IGraphics::SetFromStringAfterPrompt(IControl* pControl, IParam* pParam, cha
 	if (pParam)
 	{
 		double v;
-		if (pParam->GetNDisplayTexts())
+		bool mapped = pParam->GetNDisplayTexts();
+		if (mapped)
 		{
-			int vi = 0;
-			pParam->MapDisplayText(txt, &vi);
-			v = (double)vi;
+			int vi;
+			mapped = pParam->MapDisplayText(txt, &vi);
+			if (mapped) v = (double)vi;
 		}
-		else
+		if (!mapped)
 		{
 			v = atof(txt);
 			if (pParam->DisplayIsNegated()) v = -v;

@@ -325,13 +325,14 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
         {
           double v;
           IParam* pParam = _this->GetParam(idx);
-          if (pParam->GetNDisplayTexts())
+          bool mapped = pParam->GetNDisplayTexts();
+          if (mapped)
           {
             int vi;
-            if (!pParam->MapDisplayText((char*)ptr, &vi)) return 0;
-            v = (double)vi;
+            mapped = pParam->MapDisplayText((char*)ptr, &vi);
+            if (mapped) v = (double)vi;
           }
-          else
+          if (!mapped)
           {
             v = atof((char*)ptr);
             if (pParam->DisplayIsNegated()) v = -v;

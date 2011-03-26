@@ -338,7 +338,7 @@ void IGraphicsCarbon::PromptUserInput(IControl* pControl, IParam* pParam)
 
   ControlRef control = 0;
   int n = pParam->GetNDisplayTexts();
-  if (n)
+  if (n && (pParam->Type() == IParam::kTypeEnum || pParam->Type() == IParam::kTypeBool))
   {
     int i, currentIdx = -1;
     int w = PARAM_LIST_MIN_W, h = PARAM_LIST_H;

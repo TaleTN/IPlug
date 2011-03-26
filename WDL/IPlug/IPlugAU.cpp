@@ -535,7 +535,7 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
       ASSERT_SCOPE(kAudioUnitScope_Global);
       IParam* pParam = GetParam(element);
       int n = pParam->GetNDisplayTexts();
-      if (!n) {
+      if (!(n && (pParam->Type() == IParam::kTypeEnum || pParam->Type() == IParam::kTypeBool))) {
         *pDataSize = 0;
         return kAudioUnitErr_InvalidProperty;
       }
@@ -683,13 +683,15 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
         if (scope == kAudioUnitScope_Global) {
           CStrLocal cStr(pVFS->inString);
           IParam* pParam = GetParam(pVFS->inParamID);
-          if (pParam->GetNDisplayTexts())
+          bool mapped = pParam->GetNDisplayTexts();
+          if (mapped)
           {
             int v;
-            if (pParam->MapDisplayText(cStr.mCStr, &v))
+            mapped = pParam->MapDisplayText(cStr.mCStr, &v);
+            if (mapped)
               pVFS->outValue = (AudioUnitParameterValue) v;
           }
-          else
+          if (!mapped)
           {
             double v = atof(cStr.mCStr);
             if (pParam->DisplayIsNegated()) v = -v;

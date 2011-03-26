@@ -225,7 +225,7 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
   char* txt = (char*)[[mParamEditView stringValue] UTF8String];
 
   NSInteger vi = -1;
-  if (mEdParam && mEdParam->GetNDisplayTexts())
+  if ([mParamEditView respondsToSelector: @selector(indexOfSelectedItem)] == YES)
     vi = (NSInteger)[mParamEditView indexOfSelectedItem];
   if (vi != -1)
     mEdControl->SetValueFromUserInput(mEdParam->GetNormalized((double)vi));
@@ -252,7 +252,7 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
   pParam->GetDisplayForHost(currentText);
 
   int n = pParam->GetNDisplayTexts();
-  if (n)
+  if (n && (pParam->Type() == IParam::kTypeEnum || pParam->Type() == IParam::kTypeBool))
   {
     int i, currentIdx = -1;
     int w = PARAM_LIST_MIN_W, h = PARAM_LIST_H;
