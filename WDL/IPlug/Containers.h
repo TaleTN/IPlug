@@ -109,7 +109,7 @@ public:
 	inline int Get(unsigned short* pVal, int startPos)
 	{
 		startPos = GetBytes(pVal, 2, startPos);
-		*pVal = WDL_le16toh(*pVal);
+		WDL_LE16TOH(*pVal);
 		return startPos;
 	}
 
@@ -122,7 +122,7 @@ public:
 	inline int Get(unsigned int* pVal, int startPos)
 	{
 		startPos = GetBytes(pVal, 4, startPos);
-		*pVal = WDL_le32toh(*pVal);
+		WDL_LE32TOH(*pVal);
 		return startPos;
 	}
 
@@ -135,7 +135,7 @@ public:
 	inline int Get(WDL_UINT64* pVal, int startPos)
 	{
 		startPos = GetBytes(pVal, 8, startPos);
-		*pVal = WDL_le64toh(*pVal);
+		WDL_LE64TOH(*pVal);
 		return startPos;
 	}
 
@@ -159,8 +159,9 @@ public:
 
 	inline int Get(float* pVal, int startPos)
 	{
-		startPos = GetBytes(pVal, 4, startPos);
-		*pVal = WDL_le32tof(*pVal);
+		unsigned int i;
+		startPos = GetBytes(&i, 4, startPos);
+		*pVal = WDL_le32tof(i);
 		return startPos;
 	}
 
@@ -172,8 +173,9 @@ public:
 
 	inline int Get(double* pVal, int startPos)
 	{
-		startPos = GetBytes(pVal, 8, startPos);
-		*pVal = WDL_le64tof(*pVal);
+		WDL_UINT64 i;
+		startPos = GetBytes(&i, 8, startPos);
+		*pVal = WDL_le64tof(i);
 		return startPos;
 	}
 
@@ -195,9 +197,7 @@ public:
 		int len;
     int strStartPos = Get(&len, startPos);
     if (strStartPos >= 0) {
-      #ifdef WDL_BIG_ENDIAN
-      len = WDL_le32toh(len);
-      #endif
+      WDL_LE32TOH(len);
       int strEndPos = strStartPos + len;
       if (strEndPos <= mBytes.GetSize() && len > 0) {
         pStr->Set((char*) (mBytes.Get() + strStartPos), len);
