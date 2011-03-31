@@ -102,40 +102,40 @@ public:
 
 	inline int Put(const unsigned short* pVal)
 	{
-		unsigned short i = WDL_htole16(*pVal);
+		unsigned short i = WDL_bswap16_if_be(*pVal);
 		return PutBytes(&i, 2);
 	}
 
 	inline int Get(unsigned short* pVal, int startPos)
 	{
 		startPos = GetBytes(pVal, 2, startPos);
-		WDL_LE16TOH(*pVal);
+		WDL_BSWAP16_IF_BE(*pVal);
 		return startPos;
 	}
 
 	inline int Put(const unsigned int* pVal)
 	{
-		unsigned int i = WDL_htole32(*pVal);
+		unsigned int i = WDL_bswap32_if_be(*pVal);
 		return PutBytes(&i, 4);
 	}
 
 	inline int Get(unsigned int* pVal, int startPos)
 	{
 		startPos = GetBytes(pVal, 4, startPos);
-		WDL_LE32TOH(*pVal);
+		WDL_BSWAP32_IF_BE(*pVal);
 		return startPos;
 	}
 
 	inline int Put(const WDL_UINT64* pVal)
 	{
-		WDL_UINT64 i = WDL_htole64(*pVal);
+		WDL_UINT64 i = WDL_bswap64_if_be(*pVal);
 		return PutBytes(&i, 8);
 	}
 
 	inline int Get(WDL_UINT64* pVal, int startPos)
 	{
 		startPos = GetBytes(pVal, 8, startPos);
-		WDL_LE64TOH(*pVal);
+		WDL_BSWAP64_IF_BE(*pVal);
 		return startPos;
 	}
 
@@ -153,7 +153,7 @@ public:
 
 	inline int Put(const float* pVal)
 	{
-		unsigned int i = WDL_ftole32(*pVal);
+		unsigned int i = WDL_bswapf_if_be(*pVal);
 		return PutBytes(&i, 4);
 	}
 
@@ -161,13 +161,13 @@ public:
 	{
 		unsigned int i;
 		startPos = GetBytes(&i, 4, startPos);
-		*pVal = WDL_le32tof(i);
+		*pVal = WDL_bswapf_if_be(i);
 		return startPos;
 	}
 
 	inline int Put(const double* pVal)
 	{
-		WDL_UINT64 i = WDL_ftole64(*pVal);
+		WDL_UINT64 i = WDL_bswapf_if_be(*pVal);
 		return PutBytes(&i, 8);
 	}
 
@@ -175,7 +175,7 @@ public:
 	{
 		WDL_UINT64 i;
 		startPos = GetBytes(&i, 8, startPos);
-		*pVal = WDL_le64tof(i);
+		*pVal = WDL_bswapf_if_be(i);
 		return startPos;
 	}
 
@@ -185,7 +185,7 @@ public:
   {
     int slen = strlen(str);
         #ifdef WDL_BIG_ENDIAN
-        { const unsigned int i = WDL_htole32(slen); Put(&i); }
+        { const unsigned int i = WDL_bswap32_if_be(slen); Put(&i); }
         #else
 		Put(&slen);
 		#endif
@@ -197,7 +197,7 @@ public:
 		int len;
     int strStartPos = Get(&len, startPos);
     if (strStartPos >= 0) {
-      WDL_LE32TOH(len);
+      WDL_BSWAP32_IF_BE(len);
       int strEndPos = strStartPos + len;
       if (strEndPos <= mBytes.GetSize() && len > 0) {
         pStr->Set((char*) (mBytes.Get() + strStartPos), len);
