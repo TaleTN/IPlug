@@ -52,7 +52,10 @@ public:
   // Tell the host that the graphics resized.
   // Should be called only by the graphics object when it resizes itself.
   void ResizeGraphics(int w, int h) {}
-  
+
+  // Whether the plugin is being used for offline rendering
+  bool IsRenderingOffline();
+
   enum EAUInputType {
     eNotConnected = 0,
     eDirectFastProc,
@@ -72,7 +75,7 @@ private:
 
   WDL_String mOSXBundleID, mCocoaViewFactoryClassName;
   ComponentInstance mCI;
-  bool mActive, mBypassed;
+  bool mActive, mBypassed, mIsOffline;
   double mRenderTimestamp, mTempo;
   HostCallbackInfo mHostCallbacks;
 
