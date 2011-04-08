@@ -305,7 +305,7 @@ bool IGraphics::Draw(IRECT* pR)
           mDrawRECT = *(pControl->GetRECT()); 
           for (j = 0; j < n; ++j) {
             IControl* pControl2 = mControls.Get(j);
-            if ((i == j) || (!(pControl2->IsHidden()) && pControl2->GetRECT()->Intersects(&mDrawRECT))) {
+            if (!pControl2->IsHidden() && (i == j || pControl2->GetRECT()->Intersects(&mDrawRECT))) {
               pControl2->Draw(this);
             }
           }
