@@ -103,7 +103,7 @@ int IPlugVST::GetSamplePos()
 { 
 	VstTimeInfo* pTI = GetTimeInfo(mHostCallback, &mAEffect);
 	if (pTI && pTI->samplePos >= 0.0) {
-		return int(pTI->samplePos);
+		return int(pTI->samplePos + 0.5);
 	}
 	return 0;
 }

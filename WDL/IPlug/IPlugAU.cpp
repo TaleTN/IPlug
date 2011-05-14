@@ -1466,7 +1466,7 @@ int IPlugAU::GetSamplePos()
     Boolean playing, changed, looping;
     mHostCallbacks.transportStateProc(mHostCallbacks.hostUserData, &playing, &changed, &samplePos,
       &looping, &loopStartBeat, &loopEndBeat);
-    return (int) samplePos;
+    return (int) (samplePos + 0.5);
   }
   return 0;
 }
