@@ -6,6 +6,9 @@
 
 #if defined _WIN32
   HINSTANCE gHInstance = 0;
+	#ifdef __MINGW32__
+	extern "C"
+	#endif
 	BOOL WINAPI DllMain(HINSTANCE hDllInst, DWORD fdwReason, LPVOID res)
 	{
     gHInstance = hDllInst;
