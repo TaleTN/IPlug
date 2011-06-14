@@ -16,7 +16,7 @@
 			dependencies = (
 			);
 			name = IGraphicsCocoa.h;
-			productName = Untitled;
+			productName = IGraphicsCocoa;
 		};
 /* End PBXAggregateTarget section */
 
@@ -328,8 +328,8 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 3DE787121285A4B900AD8D4F /* Untitled */;
-			remoteInfo = Untitled;
+			remoteGlobalIDString = 3DE787121285A4B900AD8D4F /* IGraphicsCocoa.h */;
+			remoteInfo = IGraphicsCocoa.h;
 		};
 		3DE787371285A79E00AD8D4F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -975,7 +975,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Generates an unique suffix for the IGRAPHICS_COCOA #define in\n# IGraphicsCocoa.h.\n\nsha1=$({ id -nu; echo $HOSTNAME; date; } | openssl dgst -sha1)\nsed -i .bak 's/^\\([ \t]*#define[ \t]\\{1,\\}IGRAPHICS_COCOA[ \t]\\{1,\\}IGraphicsCocoa_v[^ \t]\\{1,\\}\\)_[^ \t]\\{1,\\}\\([ \t]*\\)$/\\1_'${sha1:0:7}'\\2/' IGraphicsCocoa.h\nrm -f IGraphicsCocoa.h.bak\n";
+			shellScript = "# Generates a unique suffix for the IGRAPHICS_COCOA macro in\n# IGraphicsCocoa.h.\n\nversion=$(git log -n 1 --pretty=format:%h HEAD)\nif [ -z $version ]; then\n\tversion=$({ id -nu; echo $HOSTNAME; date; } | openssl dgst -sha1)\n\tversion=${version:0:7}\nfi\n\nmatch='^\\([[:space:]]*#define[[:space:]]\\{1,\\}IGRAPHICS_COCOA[[:space:]]\\{1,\\}IGraphicsCocoa_\\)\\([^[:space:]]\\{1,\\}\\)\\([[:space:]]*\\)$'\ncurrent=$(sed -n 's/'$match'/\\2/p' IGraphicsCocoa.h)\n\nif [ $version != $current ]; then\n\tsed -i .bak 's/'$match'/\\1'$version'\\3/' IGraphicsCocoa.h\n\trm -f IGraphicsCocoa.h.bak\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1464,7 +1464,7 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = Untitled;
+				PRODUCT_NAME = IGraphicsCocoa;
 			};
 			name = Debug;
 		};
@@ -1474,7 +1474,7 @@
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				PRODUCT_NAME = Untitled;
+				PRODUCT_NAME = IGraphicsCocoa;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -1482,21 +1482,21 @@
 		3DE787151285A4B900AD8D4F /* Tracer */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = Untitled;
+				PRODUCT_NAME = IGraphicsCocoa;
 			};
 			name = Tracer;
 		};
 		3DE787161285A4B900AD8D4F /* Reaper Special x86 */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = Untitled;
+				PRODUCT_NAME = IGraphicsCocoa;
 			};
 			name = "Reaper Special x86";
 		};
 		3DE787171285A4B900AD8D4F /* Reaper Special ppc */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = Untitled;
+				PRODUCT_NAME = IGraphicsCocoa;
 			};
 			name = "Reaper Special ppc";
 		};

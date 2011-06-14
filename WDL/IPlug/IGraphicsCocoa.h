@@ -7,7 +7,9 @@
 // Cocoa objects can be supplied by any existing component, 
 // so we need to make sure the C++ static lib code gets the 
 // IGraphicsCocoa that it expects.
-#define IGRAPHICS_COCOA IGraphicsCocoa_v1002_xxxxxxx
+#ifndef IGRAPHICS_COCOA
+	#define IGRAPHICS_COCOA IGraphicsCocoa_xxxxxxx
+#endif
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
   #if __LP64__ || NS_BUILD_32_LIKE_64
