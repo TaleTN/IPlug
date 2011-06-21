@@ -105,7 +105,6 @@
 		3DC38CB41284C89200CC2144 /* trees.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A88FD0FCC0A2D00360071 /* trees.c */; };
 		3DC38CB51284C89200CC2144 /* uncompr.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A88FF0FCC0A2D00360071 /* uncompr.c */; };
 		3DC38CB61284C89200CC2144 /* zutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89030FCC0A2D00360071 /* zutil.c */; };
-		3DC38CB71284C89200CC2144 /* gzio.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89050FCC0A2D00360071 /* gzio.c */; };
 		3DC38CB81284C89200CC2144 /* jcapimin.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89220FCC0A4C00360071 /* jcapimin.c */; };
 		3DC38CB91284C89200CC2144 /* jcapistd.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89230FCC0A4C00360071 /* jcapistd.c */; };
 		3DC38CBA1284C89200CC2144 /* jccoefct.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89240FCC0A4C00360071 /* jccoefct.c */; };
@@ -154,7 +153,6 @@
 		3DC38CE51284C89200CC2144 /* jutils.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89590FCC0A4C00360071 /* jutils.c */; };
 		3DC38CE61284C89200CC2144 /* png.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89960FCC0A6500360071 /* png.c */; };
 		3DC38CE71284C89200CC2144 /* pngerror.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89990FCC0A6500360071 /* pngerror.c */; };
-		3DC38CE81284C89200CC2144 /* pnggccrd.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A899A0FCC0A6500360071 /* pnggccrd.c */; };
 		3DC38CE91284C89200CC2144 /* pngget.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A899B0FCC0A6500360071 /* pngget.c */; };
 		3DC38CEA1284C89200CC2144 /* pngmem.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A899C0FCC0A6500360071 /* pngmem.c */; };
 		3DC38CEB1284C89200CC2144 /* pngpread.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A899D0FCC0A6500360071 /* pngpread.c */; };
@@ -163,7 +161,6 @@
 		3DC38CEE1284C89200CC2144 /* pngrutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A00FCC0A6500360071 /* pngrutil.c */; };
 		3DC38CEF1284C89200CC2144 /* pngset.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A10FCC0A6500360071 /* pngset.c */; };
 		3DC38CF01284C89200CC2144 /* pngtrans.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A30FCC0A6500360071 /* pngtrans.c */; };
-		3DC38CF11284C89200CC2144 /* pngvcrd.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A40FCC0A6500360071 /* pngvcrd.c */; };
 		3DC38CF21284C89200CC2144 /* pngwio.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A50FCC0A6500360071 /* pngwio.c */; };
 		3DC38CF31284C89200CC2144 /* pngwtran.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A70FCC0A6500360071 /* pngwtran.c */; };
 		3DC38CF41284C89200CC2144 /* pngwutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A80FCC0A6500360071 /* pngwutil.c */; };
@@ -212,7 +209,6 @@
 		452A891B0FCC0A2D00360071 /* zlib.h in Headers */ = {isa = PBXBuildFile; fileRef = 452A89020FCC0A2D00360071 /* zlib.h */; };
 		452A891C0FCC0A2D00360071 /* zutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89030FCC0A2D00360071 /* zutil.c */; };
 		452A891D0FCC0A2D00360071 /* zutil.h in Headers */ = {isa = PBXBuildFile; fileRef = 452A89040FCC0A2D00360071 /* zutil.h */; };
-		452A891E0FCC0A2D00360071 /* gzio.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89050FCC0A2D00360071 /* gzio.c */; };
 		452A895D0FCC0A4C00360071 /* jcapimin.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89220FCC0A4C00360071 /* jcapimin.c */; };
 		452A895E0FCC0A4C00360071 /* jcapistd.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89230FCC0A4C00360071 /* jcapistd.c */; };
 		452A895F0FCC0A4C00360071 /* jccoefct.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89240FCC0A4C00360071 /* jccoefct.c */; };
@@ -274,7 +270,6 @@
 		452A89AB0FCC0A6500360071 /* png.h in Headers */ = {isa = PBXBuildFile; fileRef = 452A89970FCC0A6500360071 /* png.h */; };
 		452A89AC0FCC0A6500360071 /* pngconf.h in Headers */ = {isa = PBXBuildFile; fileRef = 452A89980FCC0A6500360071 /* pngconf.h */; };
 		452A89AD0FCC0A6500360071 /* pngerror.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89990FCC0A6500360071 /* pngerror.c */; };
-		452A89AE0FCC0A6500360071 /* pnggccrd.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A899A0FCC0A6500360071 /* pnggccrd.c */; };
 		452A89AF0FCC0A6500360071 /* pngget.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A899B0FCC0A6500360071 /* pngget.c */; };
 		452A89B00FCC0A6500360071 /* pngmem.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A899C0FCC0A6500360071 /* pngmem.c */; };
 		452A89B10FCC0A6500360071 /* pngpread.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A899D0FCC0A6500360071 /* pngpread.c */; };
@@ -283,7 +278,6 @@
 		452A89B40FCC0A6500360071 /* pngrutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A00FCC0A6500360071 /* pngrutil.c */; };
 		452A89B50FCC0A6500360071 /* pngset.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A10FCC0A6500360071 /* pngset.c */; };
 		452A89B70FCC0A6500360071 /* pngtrans.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A30FCC0A6500360071 /* pngtrans.c */; };
-		452A89B80FCC0A6500360071 /* pngvcrd.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A40FCC0A6500360071 /* pngvcrd.c */; };
 		452A89B90FCC0A6500360071 /* pngwio.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A50FCC0A6500360071 /* pngwio.c */; };
 		452A89BB0FCC0A6500360071 /* pngwtran.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A70FCC0A6500360071 /* pngwtran.c */; };
 		452A89BC0FCC0A6500360071 /* pngwutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 452A89A80FCC0A6500360071 /* pngwutil.c */; };
@@ -387,7 +381,6 @@
 		452A89020FCC0A2D00360071 /* zlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = zlib.h; path = ../zlib/zlib.h; sourceTree = SOURCE_ROOT; };
 		452A89030FCC0A2D00360071 /* zutil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = zutil.c; path = ../zlib/zutil.c; sourceTree = SOURCE_ROOT; };
 		452A89040FCC0A2D00360071 /* zutil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = zutil.h; path = ../zlib/zutil.h; sourceTree = SOURCE_ROOT; };
-		452A89050FCC0A2D00360071 /* gzio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = gzio.c; path = ../zlib/gzio.c; sourceTree = SOURCE_ROOT; };
 		452A89220FCC0A4C00360071 /* jcapimin.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = jcapimin.c; path = ../jpeglib/jcapimin.c; sourceTree = SOURCE_ROOT; };
 		452A89230FCC0A4C00360071 /* jcapistd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = jcapistd.c; path = ../jpeglib/jcapistd.c; sourceTree = SOURCE_ROOT; };
 		452A89240FCC0A4C00360071 /* jccoefct.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = jccoefct.c; path = ../jpeglib/jccoefct.c; sourceTree = SOURCE_ROOT; };
@@ -449,7 +442,6 @@
 		452A89970FCC0A6500360071 /* png.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = png.h; path = ../libpng/png.h; sourceTree = SOURCE_ROOT; };
 		452A89980FCC0A6500360071 /* pngconf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pngconf.h; path = ../libpng/pngconf.h; sourceTree = SOURCE_ROOT; };
 		452A89990FCC0A6500360071 /* pngerror.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pngerror.c; path = ../libpng/pngerror.c; sourceTree = SOURCE_ROOT; };
-		452A899A0FCC0A6500360071 /* pnggccrd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pnggccrd.c; path = ../libpng/pnggccrd.c; sourceTree = SOURCE_ROOT; };
 		452A899B0FCC0A6500360071 /* pngget.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pngget.c; path = ../libpng/pngget.c; sourceTree = SOURCE_ROOT; };
 		452A899C0FCC0A6500360071 /* pngmem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pngmem.c; path = ../libpng/pngmem.c; sourceTree = SOURCE_ROOT; };
 		452A899D0FCC0A6500360071 /* pngpread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pngpread.c; path = ../libpng/pngpread.c; sourceTree = SOURCE_ROOT; };
@@ -458,7 +450,6 @@
 		452A89A00FCC0A6500360071 /* pngrutil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pngrutil.c; path = ../libpng/pngrutil.c; sourceTree = SOURCE_ROOT; };
 		452A89A10FCC0A6500360071 /* pngset.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pngset.c; path = ../libpng/pngset.c; sourceTree = SOURCE_ROOT; };
 		452A89A30FCC0A6500360071 /* pngtrans.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pngtrans.c; path = ../libpng/pngtrans.c; sourceTree = SOURCE_ROOT; };
-		452A89A40FCC0A6500360071 /* pngvcrd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pngvcrd.c; path = ../libpng/pngvcrd.c; sourceTree = SOURCE_ROOT; };
 		452A89A50FCC0A6500360071 /* pngwio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pngwio.c; path = ../libpng/pngwio.c; sourceTree = SOURCE_ROOT; };
 		452A89A70FCC0A6500360071 /* pngwtran.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pngwtran.c; path = ../libpng/pngwtran.c; sourceTree = SOURCE_ROOT; };
 		452A89A80FCC0A6500360071 /* pngwutil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pngwutil.c; path = ../libpng/pngwutil.c; sourceTree = SOURCE_ROOT; };
@@ -640,7 +631,6 @@
 				452A89970FCC0A6500360071 /* png.h */,
 				452A89980FCC0A6500360071 /* pngconf.h */,
 				452A89990FCC0A6500360071 /* pngerror.c */,
-				452A899A0FCC0A6500360071 /* pnggccrd.c */,
 				452A899B0FCC0A6500360071 /* pngget.c */,
 				452A899C0FCC0A6500360071 /* pngmem.c */,
 				452A899D0FCC0A6500360071 /* pngpread.c */,
@@ -649,7 +639,6 @@
 				452A89A00FCC0A6500360071 /* pngrutil.c */,
 				452A89A10FCC0A6500360071 /* pngset.c */,
 				452A89A30FCC0A6500360071 /* pngtrans.c */,
-				452A89A40FCC0A6500360071 /* pngvcrd.c */,
 				452A89A50FCC0A6500360071 /* pngwio.c */,
 				452A89A70FCC0A6500360071 /* pngwtran.c */,
 				452A89A80FCC0A6500360071 /* pngwutil.c */,
@@ -748,7 +737,6 @@
 				452A89020FCC0A2D00360071 /* zlib.h */,
 				452A89030FCC0A2D00360071 /* zutil.c */,
 				452A89040FCC0A2D00360071 /* zutil.h */,
-				452A89050FCC0A2D00360071 /* gzio.c */,
 			);
 			name = zlib;
 			sourceTree = "<group>";
@@ -1019,7 +1007,6 @@
 				3DC38CB41284C89200CC2144 /* trees.c in Sources */,
 				3DC38CB51284C89200CC2144 /* uncompr.c in Sources */,
 				3DC38CB61284C89200CC2144 /* zutil.c in Sources */,
-				3DC38CB71284C89200CC2144 /* gzio.c in Sources */,
 				3DC38CB81284C89200CC2144 /* jcapimin.c in Sources */,
 				3DC38CB91284C89200CC2144 /* jcapistd.c in Sources */,
 				3DC38CBA1284C89200CC2144 /* jccoefct.c in Sources */,
@@ -1068,7 +1055,6 @@
 				3DC38CE51284C89200CC2144 /* jutils.c in Sources */,
 				3DC38CE61284C89200CC2144 /* png.c in Sources */,
 				3DC38CE71284C89200CC2144 /* pngerror.c in Sources */,
-				3DC38CE81284C89200CC2144 /* pnggccrd.c in Sources */,
 				3DC38CE91284C89200CC2144 /* pngget.c in Sources */,
 				3DC38CEA1284C89200CC2144 /* pngmem.c in Sources */,
 				3DC38CEB1284C89200CC2144 /* pngpread.c in Sources */,
@@ -1077,7 +1063,6 @@
 				3DC38CEE1284C89200CC2144 /* pngrutil.c in Sources */,
 				3DC38CEF1284C89200CC2144 /* pngset.c in Sources */,
 				3DC38CF01284C89200CC2144 /* pngtrans.c in Sources */,
-				3DC38CF11284C89200CC2144 /* pngvcrd.c in Sources */,
 				3DC38CF21284C89200CC2144 /* pngwio.c in Sources */,
 				3DC38CF31284C89200CC2144 /* pngwtran.c in Sources */,
 				3DC38CF41284C89200CC2144 /* pngwutil.c in Sources */,
@@ -1125,7 +1110,6 @@
 				452A89160FCC0A2D00360071 /* trees.c in Sources */,
 				452A89180FCC0A2D00360071 /* uncompr.c in Sources */,
 				452A891C0FCC0A2D00360071 /* zutil.c in Sources */,
-				452A891E0FCC0A2D00360071 /* gzio.c in Sources */,
 				452A895D0FCC0A4C00360071 /* jcapimin.c in Sources */,
 				452A895E0FCC0A4C00360071 /* jcapistd.c in Sources */,
 				452A895F0FCC0A4C00360071 /* jccoefct.c in Sources */,
@@ -1174,7 +1158,6 @@
 				452A89940FCC0A4C00360071 /* jutils.c in Sources */,
 				452A89AA0FCC0A6500360071 /* png.c in Sources */,
 				452A89AD0FCC0A6500360071 /* pngerror.c in Sources */,
-				452A89AE0FCC0A6500360071 /* pnggccrd.c in Sources */,
 				452A89AF0FCC0A6500360071 /* pngget.c in Sources */,
 				452A89B00FCC0A6500360071 /* pngmem.c in Sources */,
 				452A89B10FCC0A6500360071 /* pngpread.c in Sources */,
@@ -1183,7 +1166,6 @@
 				452A89B40FCC0A6500360071 /* pngrutil.c in Sources */,
 				452A89B50FCC0A6500360071 /* pngset.c in Sources */,
 				452A89B70FCC0A6500360071 /* pngtrans.c in Sources */,
-				452A89B80FCC0A6500360071 /* pngvcrd.c in Sources */,
 				452A89B90FCC0A6500360071 /* pngwio.c in Sources */,
 				452A89BB0FCC0A6500360071 /* pngwtran.c in Sources */,
 				452A89BC0FCC0A6500360071 /* pngwutil.c in Sources */,
