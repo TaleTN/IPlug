@@ -81,7 +81,6 @@
 		3D84F9EB13ACCE54000BCB8B /* pngtrans.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F31C13ACA160000BCB8B /* pngtrans.c */; };
 		3D84F9F113ACCE54000BCB8B /* swell-gdi.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33413ACA1C8000BCB8B /* swell-gdi.mm */; };
 		3D84F9F213ACCE54000BCB8B /* lice_arc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33813ACA387000BCB8B /* lice_arc.cpp */; };
-		3D84F9F313ACCE54000BCB8B /* lice_bmp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33A13ACA387000BCB8B /* lice_bmp.cpp */; };
 		3D84F9F413ACCE54000BCB8B /* lice_line.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33D13ACA387000BCB8B /* lice_line.cpp */; };
 		3D84F9F513ACCE54000BCB8B /* lice_png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33E13ACA387000BCB8B /* lice_png.cpp */; };
 		3D84F9F613ACCE54000BCB8B /* lice_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33F13ACA387000BCB8B /* lice_text.cpp */; };
@@ -134,7 +133,6 @@
 		3D91A45913AD069D00659595 /* pngtrans.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F31C13ACA160000BCB8B /* pngtrans.c */; };
 		3D91A45F13AD069D00659595 /* swell-gdi.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33413ACA1C8000BCB8B /* swell-gdi.mm */; };
 		3D91A46013AD069D00659595 /* lice_arc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33813ACA387000BCB8B /* lice_arc.cpp */; };
-		3D91A46113AD069D00659595 /* lice_bmp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33A13ACA387000BCB8B /* lice_bmp.cpp */; };
 		3D91A46213AD069D00659595 /* lice_line.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33D13ACA387000BCB8B /* lice_line.cpp */; };
 		3D91A46313AD069D00659595 /* lice_png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33E13ACA387000BCB8B /* lice_png.cpp */; };
 		3D91A46413AD069D00659595 /* lice_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33F13ACA387000BCB8B /* lice_text.cpp */; };
@@ -229,7 +227,6 @@
 		3D84F33613ACA1C8000BCB8B /* swell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = swell.h; path = ../../swell/swell.h; sourceTree = "<group>"; };
 		3D84F33813ACA387000BCB8B /* lice_arc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lice_arc.cpp; path = ../../lice/lice_arc.cpp; sourceTree = "<group>"; };
 		3D84F33913ACA387000BCB8B /* lice_bezier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lice_bezier.h; path = ../../lice/lice_bezier.h; sourceTree = "<group>"; };
-		3D84F33A13ACA387000BCB8B /* lice_bmp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lice_bmp.cpp; path = ../../lice/lice_bmp.cpp; sourceTree = "<group>"; };
 		3D84F33B13ACA387000BCB8B /* lice_combine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lice_combine.h; path = ../../lice/lice_combine.h; sourceTree = "<group>"; };
 		3D84F33C13ACA387000BCB8B /* lice_extended.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lice_extended.h; path = ../../lice/lice_extended.h; sourceTree = "<group>"; };
 		3D84F33D13ACA387000BCB8B /* lice_line.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lice_line.cpp; path = ../../lice/lice_line.cpp; sourceTree = "<group>"; };
@@ -431,7 +428,6 @@
 			children = (
 				3D84F33813ACA387000BCB8B /* lice_arc.cpp */,
 				3D84F33913ACA387000BCB8B /* lice_bezier.h */,
-				3D84F33A13ACA387000BCB8B /* lice_bmp.cpp */,
 				3D84F33B13ACA387000BCB8B /* lice_combine.h */,
 				3D84F33C13ACA387000BCB8B /* lice_extended.h */,
 				3D84F33D13ACA387000BCB8B /* lice_line.cpp */,
@@ -706,7 +702,6 @@
 				3D84F32D13ACA160000BCB8B /* pngtrans.c in Sources */,
 				3D84F33713ACA1C8000BCB8B /* swell-gdi.mm in Sources */,
 				3D84F34213ACA387000BCB8B /* lice_arc.cpp in Sources */,
-				3D84F34313ACA387000BCB8B /* lice_bmp.cpp in Sources */,
 				3D84F34413ACA387000BCB8B /* lice_line.cpp in Sources */,
 				3D84F34513ACA387000BCB8B /* lice_png.cpp in Sources */,
 				3D84F34613ACA387000BCB8B /* lice_text.cpp in Sources */,
@@ -759,7 +754,6 @@
 				3D84F9EB13ACCE54000BCB8B /* pngtrans.c in Sources */,
 				3D84F9F113ACCE54000BCB8B /* swell-gdi.mm in Sources */,
 				3D84F9F213ACCE54000BCB8B /* lice_arc.cpp in Sources */,
-				3D84F9F313ACCE54000BCB8B /* lice_bmp.cpp in Sources */,
 				3D84F9F413ACCE54000BCB8B /* lice_line.cpp in Sources */,
 				3D84F9F513ACCE54000BCB8B /* lice_png.cpp in Sources */,
 				3D84F9F613ACCE54000BCB8B /* lice_text.cpp in Sources */,
@@ -814,7 +808,6 @@
 				3D91A45913AD069D00659595 /* pngtrans.c in Sources */,
 				3D91A45F13AD069D00659595 /* swell-gdi.mm in Sources */,
 				3D91A46013AD069D00659595 /* lice_arc.cpp in Sources */,
-				3D91A46113AD069D00659595 /* lice_bmp.cpp in Sources */,
 				3D91A46213AD069D00659595 /* lice_line.cpp in Sources */,
 				3D91A46313AD069D00659595 /* lice_png.cpp in Sources */,
 				3D91A46413AD069D00659595 /* lice_text.cpp in Sources */,
@@ -900,6 +893,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DSTROOT = "$(HOME)";
 				GCC_ENABLE_OBJC_GC = supported;
+				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = s;
@@ -1047,6 +1041,7 @@
 				COPY_PHASE_STRIP = NO;
 				DSTROOT = "$(HOME)";
 				GCC_ENABLE_OBJC_GC = supported;
+				GCC_FAST_MATH = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1076,6 +1071,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DSTROOT = "$(HOME)";
 				GCC_ENABLE_OBJC_GC = supported;
+				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = s;
