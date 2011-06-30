@@ -9,13 +9,6 @@
 /* Begin PBXBuildFile section */
 		3D84F26913AC9D8B000BCB8B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D84F26813AC9D8B000BCB8B /* Carbon.framework */; };
 		3D84F26B13AC9D92000BCB8B /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D84F26A13AC9D92000BCB8B /* Cocoa.framework */; };
-		3D84F2C213AC9EB0000BCB8B /* swell-dlg.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C113AC9EB0000BCB8B /* swell-dlg.mm */; };
-		3D84F2C913AC9EE8000BCB8B /* swell-kb.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C313AC9EE8000BCB8B /* swell-kb.mm */; };
-		3D84F2CA13AC9EE8000BCB8B /* swell-menu.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C413AC9EE8000BCB8B /* swell-menu.mm */; };
-		3D84F2CB13AC9EE8000BCB8B /* swell-misc.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C513AC9EE8000BCB8B /* swell-misc.mm */; };
-		3D84F2CC13AC9EE8000BCB8B /* swell-miscdlg.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C613AC9EE8000BCB8B /* swell-miscdlg.mm */; };
-		3D84F2CD13AC9EE8000BCB8B /* swell-wnd.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C713AC9EE8000BCB8B /* swell-wnd.mm */; };
-		3D84F2CE13AC9EE8000BCB8B /* swell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C813AC9EE8000BCB8B /* swell.cpp */; };
 		3D84F30213ACA080000BCB8B /* adler32.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2EB13ACA080000BCB8B /* adler32.c */; };
 		3D84F30413ACA080000BCB8B /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2ED13ACA080000BCB8B /* crc32.c */; };
 		3D84F30713ACA080000BCB8B /* infback.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2F213ACA080000BCB8B /* infback.c */; };
@@ -53,13 +46,6 @@
 		3D84F37613ACA4A1000BCB8B /* IPlugStructs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F36513ACA4A1000BCB8B /* IPlugStructs.cpp */; };
 		3D84F37713ACA4A1000BCB8B /* IPlugVST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F36713ACA4A1000BCB8B /* IPlugVST.cpp */; };
 		3D84F37813ACA4A1000BCB8B /* Log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F36913ACA4A1000BCB8B /* Log.cpp */; };
-		3D84F9CD13ACCE54000BCB8B /* swell-dlg.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C113AC9EB0000BCB8B /* swell-dlg.mm */; };
-		3D84F9CE13ACCE54000BCB8B /* swell-kb.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C313AC9EE8000BCB8B /* swell-kb.mm */; };
-		3D84F9CF13ACCE54000BCB8B /* swell-menu.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C413AC9EE8000BCB8B /* swell-menu.mm */; };
-		3D84F9D013ACCE54000BCB8B /* swell-misc.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C513AC9EE8000BCB8B /* swell-misc.mm */; };
-		3D84F9D113ACCE54000BCB8B /* swell-miscdlg.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C613AC9EE8000BCB8B /* swell-miscdlg.mm */; };
-		3D84F9D213ACCE54000BCB8B /* swell-wnd.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C713AC9EE8000BCB8B /* swell-wnd.mm */; };
-		3D84F9D313ACCE54000BCB8B /* swell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C813AC9EE8000BCB8B /* swell.cpp */; };
 		3D84F9D413ACCE54000BCB8B /* adler32.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2EB13ACA080000BCB8B /* adler32.c */; };
 		3D84F9D613ACCE54000BCB8B /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2ED13ACA080000BCB8B /* crc32.c */; };
 		3D84F9D913ACCE54000BCB8B /* infback.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2F213ACA080000BCB8B /* infback.c */; };
@@ -105,13 +91,6 @@
 		3D84FA5E13ACD19C000BCB8B /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D84FA5D13ACD19C000BCB8B /* CoreServices.framework */; };
 		3D84FA8313ACD2E9000BCB8B /* IPlugAU_ViewFactory.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35F13ACA4A1000BCB8B /* IPlugAU_ViewFactory.mm */; };
 		3D84FA8A13ACD407000BCB8B /* IPlugAU.r in Rez */ = {isa = PBXBuildFile; fileRef = 3D84F36213ACA4A1000BCB8B /* IPlugAU.r */; };
-		3D91A43B13AD069D00659595 /* swell-dlg.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C113AC9EB0000BCB8B /* swell-dlg.mm */; };
-		3D91A43C13AD069D00659595 /* swell-kb.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C313AC9EE8000BCB8B /* swell-kb.mm */; };
-		3D91A43D13AD069D00659595 /* swell-menu.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C413AC9EE8000BCB8B /* swell-menu.mm */; };
-		3D91A43E13AD069D00659595 /* swell-misc.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C513AC9EE8000BCB8B /* swell-misc.mm */; };
-		3D91A43F13AD069D00659595 /* swell-miscdlg.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C613AC9EE8000BCB8B /* swell-miscdlg.mm */; };
-		3D91A44013AD069D00659595 /* swell-wnd.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C713AC9EE8000BCB8B /* swell-wnd.mm */; };
-		3D91A44113AD069D00659595 /* swell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2C813AC9EE8000BCB8B /* swell.cpp */; };
 		3D91A44213AD069D00659595 /* adler32.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2EB13ACA080000BCB8B /* adler32.c */; };
 		3D91A44413AD069D00659595 /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2ED13ACA080000BCB8B /* crc32.c */; };
 		3D91A44713AD069D00659595 /* infback.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2F213ACA080000BCB8B /* infback.c */; };
@@ -182,13 +161,6 @@
 		3D84F0EE13AC9289000BCB8B /* IPlugExample.vst */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IPlugExample.vst; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D84F26813AC9D8B000BCB8B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		3D84F26A13AC9D92000BCB8B /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
-		3D84F2C113AC9EB0000BCB8B /* swell-dlg.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "swell-dlg.mm"; path = "../../swell/swell-dlg.mm"; sourceTree = "<group>"; };
-		3D84F2C313AC9EE8000BCB8B /* swell-kb.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "swell-kb.mm"; path = "../../swell/swell-kb.mm"; sourceTree = "<group>"; };
-		3D84F2C413AC9EE8000BCB8B /* swell-menu.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "swell-menu.mm"; path = "../../swell/swell-menu.mm"; sourceTree = "<group>"; };
-		3D84F2C513AC9EE8000BCB8B /* swell-misc.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "swell-misc.mm"; path = "../../swell/swell-misc.mm"; sourceTree = "<group>"; };
-		3D84F2C613AC9EE8000BCB8B /* swell-miscdlg.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "swell-miscdlg.mm"; path = "../../swell/swell-miscdlg.mm"; sourceTree = "<group>"; };
-		3D84F2C713AC9EE8000BCB8B /* swell-wnd.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "swell-wnd.mm"; path = "../../swell/swell-wnd.mm"; sourceTree = "<group>"; };
-		3D84F2C813AC9EE8000BCB8B /* swell.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = swell.cpp; path = ../../swell/swell.cpp; sourceTree = "<group>"; };
 		3D84F2E613AC9F99000BCB8B /* aeffect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aeffect.h; path = ../../../VST_SDK/aeffect.h; sourceTree = "<group>"; };
 		3D84F2E713AC9F99000BCB8B /* aeffectx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aeffectx.h; path = ../../../VST_SDK/aeffectx.h; sourceTree = "<group>"; };
 		3D84F2EB13ACA080000BCB8B /* adler32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = adler32.c; path = ../../zlib/adler32.c; sourceTree = "<group>"; };
@@ -357,20 +329,6 @@
 			name = img;
 			sourceTree = "<group>";
 		};
-		3D84F26C13AC9DD0000BCB8B /* SWELL */ = {
-			isa = PBXGroup;
-			children = (
-				3D84F2C813AC9EE8000BCB8B /* swell.cpp */,
-				3D84F2C113AC9EB0000BCB8B /* swell-dlg.mm */,
-				3D84F2C313AC9EE8000BCB8B /* swell-kb.mm */,
-				3D84F2C413AC9EE8000BCB8B /* swell-menu.mm */,
-				3D84F2C513AC9EE8000BCB8B /* swell-misc.mm */,
-				3D84F2C613AC9EE8000BCB8B /* swell-miscdlg.mm */,
-				3D84F2C713AC9EE8000BCB8B /* swell-wnd.mm */,
-			);
-			name = SWELL;
-			sourceTree = "<group>";
-		};
 		3D84F2CF13AC9F28000BCB8B /* IPlug */ = {
 			isa = PBXGroup;
 			children = (
@@ -508,7 +466,6 @@
 				3D91A6A713AE16A700659595 /* IPlugExampleAU-Info.plist */,
 				3D84F0F513AC938E000BCB8B /* Resources */,
 				3D84F2CF13AC9F28000BCB8B /* IPlug */,
-				3D84F26C13AC9DD0000BCB8B /* SWELL */,
 				3D84F2E513AC9F75000BCB8B /* VST_SDK */,
 				3D8C809E13AC7C1000E81445 /* Frameworks */,
 				3D84F0EF13AC9289000BCB8B /* Products */,
