@@ -7,9 +7,10 @@
 
 // OSX crap.
 // - Manually edit the info.plist file to set the CFBundleIdentifier to the either the string 
-// "com.BUNDLE_MFR.audiounit.BUNDLE_NAME" or "com.BUNDLE_MFR.vst.BUNDLE_NAME".
-// Double quotes, no spaces.
-#define BUNDLE_MFR "Schwa"
+// "BUNDLE_DOMAIN.audiounit.BUNDLE_NAME" or "BUNDLE_DOMAIN.vst.BUNDLE_NAME".
+// Double quotes, no spaces. BUNDLE_DOMAIN must contain only alphanumeric
+// (A-Z,a-z,0-9), hyphen (-), and period (.) characters.
+#define BUNDLE_DOMAIN "com.Schwa"
 #define BUNDLE_NAME "IPlugExample"
 // - Manually create a PLUG_CLASS_NAME.exp file with two entries: _PLUG_ENTRY and _PLUG_VIEW_ENTRY
 // (these two defines, each with a leading underscore).

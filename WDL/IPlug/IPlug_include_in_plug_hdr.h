@@ -24,7 +24,10 @@
 #elif defined __APPLE__
   #include "IGraphicsMac.h"
   #define EXPORT __attribute__((visibility("default")))
-  #define BUNDLE_ID "com." BUNDLE_MFR "." API_EXT "." BUNDLE_NAME
+  #ifndef BUNDLE_DOMAIN
+    #define BUNDLE_DOMAIN "com." BUNDLE_MFR
+  #endif
+  #define BUNDLE_ID BUNDLE_DOMAIN "." API_EXT "." BUNDLE_NAME
 #else
   #error "No OS defined!"
 #endif
