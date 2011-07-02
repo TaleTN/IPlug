@@ -39,7 +39,6 @@
 		3D84F36D13ACA4A1000BCB8B /* IGraphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F34E13ACA4A1000BCB8B /* IGraphics.cpp */; };
 		3D84F36E13ACA4A1000BCB8B /* IGraphicsCarbon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35013ACA4A1000BCB8B /* IGraphicsCarbon.cpp */; };
 		3D84F36F13ACA4A1000BCB8B /* IGraphicsCocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35313ACA4A1000BCB8B /* IGraphicsCocoa.mm */; };
-		3D84F37013ACA4A1000BCB8B /* IGraphicsLice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35413ACA4A1000BCB8B /* IGraphicsLice.cpp */; };
 		3D84F37113ACA4A1000BCB8B /* IGraphicsMac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35713ACA4A1000BCB8B /* IGraphicsMac.mm */; };
 		3D84F37213ACA4A1000BCB8B /* IParam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35A13ACA4A1000BCB8B /* IParam.cpp */; };
 		3D84F37513ACA4A1000BCB8B /* IPlugBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F36313ACA4A1000BCB8B /* IPlugBase.cpp */; };
@@ -76,7 +75,6 @@
 		3D84F9FA13ACCE54000BCB8B /* IGraphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F34E13ACA4A1000BCB8B /* IGraphics.cpp */; };
 		3D84F9FB13ACCE54000BCB8B /* IGraphicsCarbon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35013ACA4A1000BCB8B /* IGraphicsCarbon.cpp */; };
 		3D84F9FC13ACCE54000BCB8B /* IGraphicsCocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35313ACA4A1000BCB8B /* IGraphicsCocoa.mm */; };
-		3D84F9FD13ACCE54000BCB8B /* IGraphicsLice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35413ACA4A1000BCB8B /* IGraphicsLice.cpp */; };
 		3D84F9FE13ACCE54000BCB8B /* IGraphicsMac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35713ACA4A1000BCB8B /* IGraphicsMac.mm */; };
 		3D84F9FF13ACCE54000BCB8B /* IParam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35A13ACA4A1000BCB8B /* IParam.cpp */; };
 		3D84FA0013ACCE54000BCB8B /* IPlugBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F36313ACA4A1000BCB8B /* IPlugBase.cpp */; };
@@ -120,7 +118,6 @@
 		3D91A46713AD069D00659595 /* IControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F34B13ACA4A1000BCB8B /* IControl.cpp */; };
 		3D91A46813AD069D00659595 /* IGraphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F34E13ACA4A1000BCB8B /* IGraphics.cpp */; };
 		3D91A46A13AD069D00659595 /* IGraphicsCocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35313ACA4A1000BCB8B /* IGraphicsCocoa.mm */; };
-		3D91A46B13AD069D00659595 /* IGraphicsLice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35413ACA4A1000BCB8B /* IGraphicsLice.cpp */; };
 		3D91A46C13AD069D00659595 /* IGraphicsMac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35713ACA4A1000BCB8B /* IGraphicsMac.mm */; };
 		3D91A46D13AD069D00659595 /* IParam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35A13ACA4A1000BCB8B /* IParam.cpp */; };
 		3D91A46E13AD069D00659595 /* IPlugBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F36313ACA4A1000BCB8B /* IPlugBase.cpp */; };
@@ -218,8 +215,6 @@
 		3D84F35113ACA4A1000BCB8B /* IGraphicsCarbon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IGraphicsCarbon.h; path = ../../IPlug/IGraphicsCarbon.h; sourceTree = "<group>"; };
 		3D84F35213ACA4A1000BCB8B /* IGraphicsCocoa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IGraphicsCocoa.h; path = ../../IPlug/IGraphicsCocoa.h; sourceTree = "<group>"; };
 		3D84F35313ACA4A1000BCB8B /* IGraphicsCocoa.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = IGraphicsCocoa.mm; path = ../../IPlug/IGraphicsCocoa.mm; sourceTree = "<group>"; };
-		3D84F35413ACA4A1000BCB8B /* IGraphicsLice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IGraphicsLice.cpp; path = ../../IPlug/IGraphicsLice.cpp; sourceTree = "<group>"; };
-		3D84F35513ACA4A1000BCB8B /* IGraphicsLice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IGraphicsLice.h; path = ../../IPlug/IGraphicsLice.h; sourceTree = "<group>"; };
 		3D84F35613ACA4A1000BCB8B /* IGraphicsMac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IGraphicsMac.h; path = ../../IPlug/IGraphicsMac.h; sourceTree = "<group>"; };
 		3D84F35713ACA4A1000BCB8B /* IGraphicsMac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = IGraphicsMac.mm; path = ../../IPlug/IGraphicsMac.mm; sourceTree = "<group>"; };
 		3D84F35813ACA4A1000BCB8B /* IKeyboardControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IKeyboardControl.h; path = ../../IPlug/IKeyboardControl.h; sourceTree = "<group>"; };
@@ -344,8 +339,6 @@
 				3D84F35113ACA4A1000BCB8B /* IGraphicsCarbon.h */,
 				3D84F35213ACA4A1000BCB8B /* IGraphicsCocoa.h */,
 				3D84F35313ACA4A1000BCB8B /* IGraphicsCocoa.mm */,
-				3D84F35413ACA4A1000BCB8B /* IGraphicsLice.cpp */,
-				3D84F35513ACA4A1000BCB8B /* IGraphicsLice.h */,
 				3D84F35613ACA4A1000BCB8B /* IGraphicsMac.h */,
 				3D84F35713ACA4A1000BCB8B /* IGraphicsMac.mm */,
 				3D84F35813ACA4A1000BCB8B /* IKeyboardControl.h */,
@@ -668,7 +661,6 @@
 				3D84F36D13ACA4A1000BCB8B /* IGraphics.cpp in Sources */,
 				3D84F36E13ACA4A1000BCB8B /* IGraphicsCarbon.cpp in Sources */,
 				3D84F36F13ACA4A1000BCB8B /* IGraphicsCocoa.mm in Sources */,
-				3D84F37013ACA4A1000BCB8B /* IGraphicsLice.cpp in Sources */,
 				3D84F37113ACA4A1000BCB8B /* IGraphicsMac.mm in Sources */,
 				3D84F37213ACA4A1000BCB8B /* IParam.cpp in Sources */,
 				3D84F37513ACA4A1000BCB8B /* IPlugBase.cpp in Sources */,
@@ -720,7 +712,6 @@
 				3D84F9FA13ACCE54000BCB8B /* IGraphics.cpp in Sources */,
 				3D84F9FB13ACCE54000BCB8B /* IGraphicsCarbon.cpp in Sources */,
 				3D84F9FC13ACCE54000BCB8B /* IGraphicsCocoa.mm in Sources */,
-				3D84F9FD13ACCE54000BCB8B /* IGraphicsLice.cpp in Sources */,
 				3D84F9FE13ACCE54000BCB8B /* IGraphicsMac.mm in Sources */,
 				3D84F9FF13ACCE54000BCB8B /* IParam.cpp in Sources */,
 				3D84FA0013ACCE54000BCB8B /* IPlugBase.cpp in Sources */,
@@ -773,7 +764,6 @@
 				3D91A46713AD069D00659595 /* IControl.cpp in Sources */,
 				3D91A46813AD069D00659595 /* IGraphics.cpp in Sources */,
 				3D91A46A13AD069D00659595 /* IGraphicsCocoa.mm in Sources */,
-				3D91A46B13AD069D00659595 /* IGraphicsLice.cpp in Sources */,
 				3D91A46C13AD069D00659595 /* IGraphicsMac.mm in Sources */,
 				3D91A46D13AD069D00659595 /* IParam.cpp in Sources */,
 				3D91A46E13AD069D00659595 /* IPlugBase.cpp in Sources */,
