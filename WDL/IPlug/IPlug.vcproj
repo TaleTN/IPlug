@@ -288,14 +288,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\IGraphicsLice.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IGraphicsLice.h"
-				>
-			</File>
-			<File
 				RelativePath=".\IGraphicsWin.cpp"
 				>
 			</File>

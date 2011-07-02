@@ -1,5 +1,5 @@
 # IPlug makefile for Microsoft Windows SDK v7.0/v7.1
-# (c) Theo Niessink 2009, 2010
+# (c) Theo Niessink 2009-2011
 # <http://www.taletn.com/>
 #
 # This file is provided 'as-is', without any express or implied warranty. In
@@ -121,7 +121,6 @@ IPLUG = \
 "$(INTDIR)/IPlugStructs.obj" \
 "$(INTDIR)/Log.obj" \
 "$(INTDIR)/IGraphics.obj" \
-"$(INTDIR)/IGraphicsLice.obj" \
 "$(INTDIR)/IGraphicsWin.obj" \
 "$(INTDIR)/IControl.obj" \
 "$(INTDIR)/IPlugBase.obj" \

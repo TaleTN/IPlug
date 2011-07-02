@@ -185,7 +185,6 @@
     <ClInclude Include="Hosts.h" />
     <ClInclude Include="IControl.h" />
     <ClInclude Include="IGraphics.h" />
-    <ClInclude Include="IGraphicsLice.h" />
     <ClInclude Include="IGraphicsWin.h" />
     <ClInclude Include="IParam.h" />
     <ClInclude Include="IPlugBase.h" />
@@ -199,7 +198,6 @@
     <ClCompile Include="Hosts.cpp" />
     <ClCompile Include="IControl.cpp" />
     <ClCompile Include="IGraphics.cpp" />
-    <ClCompile Include="IGraphicsLice.cpp" />
     <ClCompile Include="IGraphicsWin.cpp" />
     <ClCompile Include="IParam.cpp" />
     <ClCompile Include="IPlugBase.cpp" />
