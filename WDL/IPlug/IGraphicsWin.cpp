@@ -268,7 +268,7 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND hWnd, UINT msg, WPARAM wParam,
 }
 
 IGraphicsWin::IGraphicsWin(IPlugBase* pPlug, int w, int h, int refreshFPS)
-:	IGraphicsLice(pPlug, w, h, refreshFPS), mPlugWnd(0), mParamEditWnd(0), 
+:	IGraphics(pPlug, w, h, refreshFPS), mPlugWnd(0), mParamEditWnd(0), 
   mPID(0), mParentWnd(0), mMainWnd(0), mCustomColorStorage(0),
 	mEdControl(0), mEdParam(0), mDefEditProc(0), mParamEditMsg(kNone), mIdleTicks(0),
   mFontActive(false), mHInstance(0)
@@ -606,7 +606,7 @@ void IGraphicsWin::PluginPath(WDL_String* pPath)
   GetModulePath(mHInstance, pPath);
 }
 
-void IGraphicsWin::PromptForFile(WDL_String* pFilename, EFileAction action, char* dir, char* extensions)
+void IGraphicsWin::PromptForFile(WDL_String* pFilename, int action, char* dir, char* extensions)
 {
   pFilename->Set("");
 	if (!WindowIsOpen()) { 

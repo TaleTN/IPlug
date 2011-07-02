@@ -5,7 +5,7 @@
 	#define IPLUG_NO_CARBON_SUPPORT
 #endif
 
-#include "IGraphicsLice.h"
+#include "IGraphics.h"
 #include "../swell/swell.h"
 #include <Carbon/Carbon.h>
 
@@ -15,7 +15,7 @@
 
 class NSMutableDictionary;
 
-class IGraphicsMac : public IGraphicsLice
+class IGraphicsMac : public IGraphics
 {
 public:
 
@@ -43,7 +43,7 @@ public:
 	void HostPath(WDL_String* pPath); 
   void PluginPath(WDL_String* pPath);
 
-	void PromptForFile(WDL_String* pFilename, EFileAction action = kFileOpen, char* dir = "",
+	void PromptForFile(WDL_String* pFilename, int action = kFileOpen, char* dir = "",
     char* extensions = "");   // extensions = "txt wav" for example.
   bool PromptForColor(IColor* pColor, char* prompt = "");
 	void PromptUserInput(IControl* pControl, IParam* pParam);

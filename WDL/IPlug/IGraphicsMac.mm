@@ -33,7 +33,7 @@ inline NSColor* ToNSColor(IColor* pColor)
 }
 
 IGraphicsMac::IGraphicsMac(IPlugBase* pPlug, int w, int h, int refreshFPS)
-:	IGraphicsLice(pPlug, w, h, refreshFPS),
+:	IGraphics(pPlug, w, h, refreshFPS),
 #ifndef IPLUG_NO_CARBON_SUPPORT
 	mGraphicsCarbon(0),
 #endif
@@ -242,7 +242,7 @@ void IGraphicsMac::PluginPath(WDL_String* pPath)
 }
 
 // extensions = "txt wav" for example
-void IGraphicsMac::PromptForFile(WDL_String* pFilename, EFileAction action, char* dir, char* extensions)
+void IGraphicsMac::PromptForFile(WDL_String* pFilename, int action, char* dir, char* extensions)
 {
 }
 

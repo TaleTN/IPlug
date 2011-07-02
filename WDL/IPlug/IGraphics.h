@@ -2,6 +2,16 @@
 #define _IGRAPHICS_
 
 #include "IPlugStructs.h"
+#include "IControl.h"
+#include "../lice/lice.h"
+
+// Specialty stuff for calling in to Reaper for Lice functionality.
+#ifdef REAPER_SPECIAL
+  #include "../IPlugExt/ReaperExt.h"
+  #define _LICE ReaperExt
+#else
+  #define _LICE
+#endif
 
 #define MAX_PARAM_LEN 32
 #define MAX_EDIT_LEN  1000
@@ -15,32 +25,32 @@ class IGraphics
 {
 public:
   
-  virtual void PrepDraw() = 0;    // Called once, when the IGraphics class is attached to the IPlug class.
+  void PrepDraw();    // Called once, when the IGraphics class is attached to the IPlug class.
 	bool IsDirty(IRECT* pR);        // Ask the plugin what needs to be redrawn.
   bool Draw(IRECT* pR);           // The system announces what needs to be redrawn.  Ordering and drawing logic.
   virtual bool DrawScreen(IRECT* pR) = 0;  // Tells the OS class to put the final bitmap on the screen.
 
   // Methods for the drawing implementation class.
-	virtual bool DrawBitmap(IBitmap* pBitmap, IRECT* pDest, int srcX, int srcY,
-		const IChannelBlend* pBlend = 0) = 0; 
-	virtual bool DrawRotatedBitmap(IBitmap* pBitmap, int destCtrX, int destCtrY, double angle, int yOffsetZeroDeg = 0,
-		const IChannelBlend* pBlend = 0) = 0; 
-	virtual bool DrawRotatedMask(IBitmap* pBase, IBitmap* pMask, IBitmap* pTop, int x, int y, double angle,
-    const IChannelBlend* pBlend = 0) = 0; 
-	virtual bool DrawPoint(const IColor* pColor, float x, float y, 
-		const IChannelBlend* pBlend = 0, bool antiAlias = false) = 0;
+	bool DrawBitmap(IBitmap* pBitmap, IRECT* pDest, int srcX, int srcY,
+		const IChannelBlend* pBlend = 0); 
+	bool DrawRotatedBitmap(IBitmap* pBitmap, int destCtrX, int destCtrY, double angle, int yOffsetZeroDeg = 0,
+		const IChannelBlend* pBlend = 0); 
+	bool DrawRotatedMask(IBitmap* pBase, IBitmap* pMask, IBitmap* pTop, int x, int y, double angle,
+    const IChannelBlend* pBlend = 0); 
+	bool DrawPoint(const IColor* pColor, float x, float y, 
+		const IChannelBlend* pBlend = 0, bool antiAlias = false);
   // Live ammo!  Will crash if out of bounds!  etc.
-  virtual bool ForcePixel(const IColor* pColor, int x, int y) = 0;
-	virtual bool DrawLine(const IColor* pColor, float x1, float y1, float x2, float y2,
-		const IChannelBlend* pBlend = 0, bool antiAlias = false) = 0;
-	virtual bool DrawArc(const IColor* pColor, float cx, float cy, float r, float minAngle, float maxAngle, 
-		const IChannelBlend* pBlend = 0, bool antiAlias = false) = 0;
-	virtual bool DrawCircle(const IColor* pColor, float cx, float cy, float r,
-		const IChannelBlend* pBlend = 0, bool antiAlias = false) = 0;
-  virtual bool FillIRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend = 0) = 0;
+  bool ForcePixel(const IColor* pColor, int x, int y);
+	bool DrawLine(const IColor* pColor, float x1, float y1, float x2, float y2,
+		const IChannelBlend* pBlend = 0, bool antiAlias = false);
+	bool DrawArc(const IColor* pColor, float cx, float cy, float r, float minAngle, float maxAngle, 
+		const IChannelBlend* pBlend = 0, bool antiAlias = false);
+	bool DrawCircle(const IColor* pColor, float cx, float cy, float r,
+		const IChannelBlend* pBlend = 0, bool antiAlias = false);
+  bool FillIRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend = 0);
 	virtual bool DrawIText(IText* pTxt, char* str, IRECT* pR) = 0;
-  virtual IColor GetPoint(int x, int y) = 0;
-  virtual void* GetData() = 0;
+  IColor GetPoint(int x, int y);
+  void* GetData() { return GetBits(); }
 
 	// Methods for the OS implementation class.  
   virtual void Resize(int w, int h);
@@ -51,8 +61,8 @@ public:
 	virtual void HostPath(WDL_String* pPath) = 0;   // Full path to host executable.
   virtual void PluginPath(WDL_String* pPath) = 0; // Full path to plugin dll.
 	// Run the "open file" or "save file" dialog.  Default to host executable path.
-  enum EFileAction { kFileOpen, kFileSave };
-	virtual void PromptForFile(WDL_String* pFilename, EFileAction action = kFileOpen, char* dir = 0,
+  enum EFileAction { kFileOpen, kFileSave }; // See IFileSelectorControl::EFileAction.
+	virtual void PromptForFile(WDL_String* pFilename, int action = kFileOpen, char* dir = 0,
         char* extensions = 0) = 0;  // extensions = "txt wav" for example.
   virtual bool PromptForColor(IColor* pColor, char* prompt = 0) = 0;
 
@@ -82,10 +92,10 @@ public:
   
   IPlugBase* GetPlug() { return mPlug; }
   
-	virtual IBitmap LoadIBitmap(int ID, const char* name, int nStates = 1) = 0;
-  virtual IBitmap ScaleBitmap(IBitmap* pSrcBitmap, int destW, int destH) = 0;
-  virtual IBitmap CropBitmap(IBitmap* pSrcBitmap, IRECT* pR) = 0;
-  virtual void AttachBackground(int ID, const char* name);
+	IBitmap LoadIBitmap(int ID, const char* name, int nStates = 1);
+  IBitmap ScaleBitmap(IBitmap* pSrcBitmap, int destW, int destH);
+  IBitmap CropBitmap(IBitmap* pSrcBitmap, IRECT* pR);
+  void AttachBackground(int ID, const char* name);
   // Returns the control index of this control (not the number of controls).
 	int AttachControl(IControl* pControl);
 
@@ -110,8 +120,8 @@ public:
   bool DrawRect(const IColor* pColor, IRECT* pR);
   bool DrawVerticalLine(const IColor* pColor, IRECT* pR, float x);
   bool DrawHorizontalLine(const IColor* pColor, IRECT* pR, float y);
-  virtual bool DrawVerticalLine(const IColor* pColor, int xi, int yLo, int yHi);
-  virtual bool DrawHorizontalLine(const IColor* pColor, int yi, int xLo, int xHi);
+  bool DrawVerticalLine(const IColor* pColor, int xi, int yLo, int yHi);
+  bool DrawHorizontalLine(const IColor* pColor, int yi, int xLo, int xHi);
   bool DrawRadialLine(const IColor* pColor, float cx, float cy, float angle, float rMin, float rMax, 
     const IChannelBlend* pBlend = 0, bool antiAlias = false);
 
@@ -137,8 +147,12 @@ public:
 	// IPlug::OnIdle which is called from the audio processing thread.
 	void OnGUIIdle();
 
-  virtual void RetainBitmap(IBitmap* pBitmap) = 0;
-  virtual void ReleaseBitmap(IBitmap* pBitmap) = 0;
+  void RetainBitmap(IBitmap* pBitmap);
+  void ReleaseBitmap(IBitmap* pBitmap);
+      LICE_pixel* GetBits();
+
+  // For controls that need to interface directly with LICE.
+  inline LICE_SysBitmap* GetDrawBitmap() const { return mDrawBitmap; }
   
   WDL_Mutex mMutex;
   
@@ -157,7 +171,12 @@ protected:
 
   bool CanHandleMouseOver() { return mHandleMouseOver; }
 
+  virtual LICE_IBitmap* OSLoadBitmap(int ID, const char* name) = 0;
+	LICE_SysBitmap* mDrawBitmap;
+
 private:
+
+	LICE_MemBitmap* mTmpBitmap;
 
 	int mWidth, mHeight, mFPS, mIdleTicks;
 	int GetMouseControlIdx(int x, int y);

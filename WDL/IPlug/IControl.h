@@ -412,9 +412,10 @@ class IFileSelectorControl : public IControl
 public:
 
   enum EFileSelectorState { kFSNone, kFSSelecting, kFSDone };
+  enum EFileAction { kFileOpen, kFileSave }; // See IGraphics::EFileAction.
 
   IFileSelectorControl(IPlugBase* pPlug, IRECT* pR, int paramIdx, IBitmap* pBitmap, 
-    IGraphics::EFileAction action, char* dir = "", char* extensions = "")     // extensions = "txt wav" for example.
+    EFileAction action, char* dir = "", char* extensions = "")     // extensions = "txt wav" for example.
 	:	IControl(pPlug, pR, paramIdx), mBitmap(*pBitmap), 
     mFileAction(action), mDir(dir), mExtensions(extensions), mState(kFSNone) {}
 	~IFileSelectorControl() {}
@@ -430,7 +431,7 @@ public:
 private:
   IBitmap mBitmap;
 	WDL_String mDir, mFile, mExtensions;
-  IGraphics::EFileAction mFileAction;
+  EFileAction mFileAction;
 	EFileSelectorState mState;
 };
 
