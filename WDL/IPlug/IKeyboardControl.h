@@ -4,7 +4,7 @@
 /*
 
 IKeyboardControl
-(c) Theo Niessink 2009, 2010
+(c) Theo Niessink 2009-2011
 <http://www.taletn.com/>
 
 
@@ -39,8 +39,7 @@ pKeyCoords should contain the x-coordinates of each key relative to the
 start of the octave. (Note that only the coordinates for the flat/sharp keys
 are actually used, the coordinates for the "regular" keys are ignored.)
 
-Here is code snippet defining a 4-octave keyboard starting at MIDI note 48
-(C3):
+Here is code snippet defining a 4-octave keyboard:
 
 	IBitmap regular = pGraphics->LoadIBitmap(REGULAR_KEYS_ID, REGULAR_KEYS_PNG, 6);
 	IBitmap sharp   = pGraphics->LoadIBitmap(SHARP_KEY_ID,    SHARP_KEY_PNG);
@@ -49,7 +48,7 @@ Here is code snippet defining a 4-octave keyboard starting at MIDI note 48
 	int coords[12] = { 0, 13, 23, 39, 46, 69, 82, 92, 107, 115, 131, 138 };
 
 	// Store a pointer to the keyboard in member variable IControl* mKeyboard
-	mKeyboard = new IKeyboardControl(this, x, y, 48, 4, &regular, &sharp, coords);
+	mKeyboard = new IKeyboardControl(this, x, y, 4, &regular, &sharp, coords);
 
 	pGraphics->AttachControl(mKeyboard);
 
@@ -91,9 +90,9 @@ been declared, so it is propbably best to include it in your plug-in's main
 class IKeyboardControl: public IControl
 {
 public:
-	IKeyboardControl(IPlugBase* pPlug, int x, int y, int minNote, int nOctaves, IBitmap* pRegularKeys, IBitmap* pSharpKey, const int pKeyCoords[12]):
+	IKeyboardControl(IPlugBase* pPlug, int x, int y, int nOctaves, IBitmap* pRegularKeys, IBitmap* pSharpKey, const int pKeyCoords[12]):
 	IControl(pPlug, &IRECT(x, y, pRegularKeys), -1),
-	mMinNote(minNote), mNumOctaves(nOctaves), mRegularKeys(*pRegularKeys), mSharpKey(*pSharpKey), mKeyCoords(pKeyCoords),
+	mNumOctaves(nOctaves), mRegularKeys(*pRegularKeys), mSharpKey(*pSharpKey), mKeyCoords(pKeyCoords),
 	mOctaveWidth(pRegularKeys->W * 7), mMaxKey(nOctaves * 12), mKey(-1)
 	{
 		mRECT.R += nOctaves * mOctaveWidth;
@@ -296,7 +295,7 @@ protected:
 	IBitmap mRegularKeys, mSharpKey;
 	const int* mKeyCoords;
 	int mOctaveWidth, mNumOctaves;
-	int mKey, mMinNote, mMaxKey;
+	int mKey, mMaxKey;
 	double mVelocity;
 };
 
