@@ -1,5 +1,5 @@
 # IPlug makefile for Microsoft Windows SDK v7.0/v7.1
-# (c) Theo Niessink 2009, 2010
+# (c) Theo Niessink 2009-2011
 # <http://www.taletn.com/>
 #
 # This file is provided 'as-is', without any express or implied warranty. In
@@ -95,7 +95,7 @@ CPPFLAGS = $(CPPFLAGS) /D "TRACER_BUILD"
 LINKFLAGS = $(LINKFLAGS) /opt:icf /opt:ref /incremental:no /defaultlib:libcmt
 !ENDIF
 
-LINKFLAGS = $(LINKFLAGS) lice.lib IPlug.lib shell32.lib user32.lib gdi32.lib comdlg32.lib
+LINKFLAGS = $(LINKFLAGS) lice.lib IPlug.lib shell32.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib
 
 
 all : dll
