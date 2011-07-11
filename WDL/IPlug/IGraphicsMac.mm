@@ -37,7 +37,7 @@ IGraphicsMac::IGraphicsMac(IPlugBase* pPlug, int w, int h, int refreshFPS)
 #ifndef IPLUG_NO_CARBON_SUPPORT
 	mGraphicsCarbon(0),
 #endif
-	mGraphicsCocoa(0), mTxtAttrs(0)
+	mGraphicsCocoa(0)
 {
   NSApplicationLoad();
   
@@ -46,10 +46,6 @@ IGraphicsMac::IGraphicsMac(IPlugBase* pPlug, int w, int h, int refreshFPS)
 IGraphicsMac::~IGraphicsMac()
 {
 	CloseWindow();
-  if (mTxtAttrs) {
-    [mTxtAttrs release];
-    mTxtAttrs = 0;
-  }
 }
 
 LICE_IBitmap* LoadImgFromResourceOSX(const char* bundleID, const char* filename)
@@ -303,55 +299,3 @@ int IGraphicsMac::GetUserOSVersion()   // Returns a number like 0x1050 (10.5).
   Trace(TRACELOC, "%x", ver);
   return ver;
 }
-
-bool IGraphicsMac::DrawIText(IText* pTxt, char* cStr, IRECT* pR)
-{
-  bool init = (mTxtAttrs);
-  if (!init) {
-    mTxtAttrs = [[NSMutableDictionary alloc] init];
-  }
-  
-  int fontSize = AdjustFontSize(pTxt->mSize);
-  int yAdj = fontSize / 4;
-  bool antialias = (fontSize >= 12);
-  
-  if (!init) { // || strcmp(pTxt->mFont, mTxt.mFont)) {
-    NSFont* font = [NSFont fontWithName: ToNSString(pTxt->mFont) size: fontSize]; 
-    [mTxtAttrs setValue: font forKey: NSFontAttributeName];
-    strcpy(mTxt.mFont, pTxt->mFont);
-  }
-  
-  if (!init || pTxt->mColor != mTxt.mColor) {
-    [mTxtAttrs setValue: ToNSColor(&(pTxt->mColor)) forKey: NSForegroundColorAttributeName];
-    mTxt.mColor = pTxt->mColor;
-  }
-  
-  if (!init || pTxt->mAlign != mTxt.mAlign) {
-    NSTextAlignment align;
-    switch (pTxt->mAlign) {
-      case IText::kAlignNear:   align = NSLeftTextAlignment;    break;
-      case IText::kAlignFar:    align = NSRightTextAlignment;   break;
-      case IText::kAlignCenter:
-      default:                  align = NSCenterTextAlignment;  break;
-    }
-    NSMutableParagraphStyle* paraStyle = [[NSMutableParagraphStyle alloc] init];
-    [paraStyle setAlignment: align];
-    [mTxtAttrs setValue: paraStyle forKey: NSParagraphStyleAttributeName];   
-    [paraStyle release];
-    mTxt.mAlign = pTxt->mAlign;
-  }
-  
-  [NSGraphicsContext saveGraphicsState];
-  HDC__* destCtx = (HDC__*) mDrawBitmap->getDC();
-  NSGraphicsContext* destGC = [NSGraphicsContext graphicsContextWithGraphicsPort:destCtx->ctx flipped:YES];
-  [destGC setShouldAntialias: antialias];
-  [NSGraphicsContext setCurrentContext:destGC];
-  NSRect r = { pR->L, pR->T+yAdj+6, pR->W(), pR->H() };
-  NSString* str = ToNSString(cStr);
-  [str drawWithRect:r options: NSStringDrawingUsesDeviceMetrics attributes: mTxtAttrs]; 
-  [NSGraphicsContext restoreGraphicsState];
-  
-  return true;  
-}
-
-                                

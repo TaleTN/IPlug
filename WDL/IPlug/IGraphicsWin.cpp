@@ -271,7 +271,7 @@ IGraphicsWin::IGraphicsWin(IPlugBase* pPlug, int w, int h, int refreshFPS)
 :	IGraphics(pPlug, w, h, refreshFPS), mPlugWnd(0), mParamEditWnd(0), 
   mPID(0), mParentWnd(0), mMainWnd(0), mCustomColorStorage(0),
 	mEdControl(0), mEdParam(0), mDefEditProc(0), mParamEditMsg(kNone), mIdleTicks(0),
-  mFontActive(false), mHInstance(0)
+  mHInstance(0)
 {
 }
 
@@ -740,43 +740,5 @@ bool IGraphicsWin::OpenURL(const char* url,
     MessageBox(mPlugWnd, errMsgOnFailure, msgWindowTitle, MB_OK);
   }
   return false;
-}
-
-bool IGraphicsWin::DrawIText(IText* pText, char* str, IRECT* pR)
-{
-  if (!str || str[0] == '\0') {
-      return true;
-  }
-
-	HDC pDC = mDrawBitmap->getDC();
-	
-  bool setColor = (pText->mColor != mActiveFontColor);
-	if (!mFontActive) {
-		int h = pText->mSize;
-		int esc = 10 * pText->mOrientation;
-		int wt = (pText->mStyle == IText::kStyleBold ? FW_BOLD : 0);
-		int it = (pText->mStyle == IText::kStyleItalic ? 1 : 0);
-		HFONT font = CreateFont(h, 0, esc, esc, wt, it, 0, 0, 0, 0, 0, 0, 0, pText->mFont);
-		SelectObject(pDC, font);  // leak?
-		SetBkMode(pDC, TRANSPARENT);
-		mFontActive = true;
-    setColor = true;
-	}
-	
-	if (setColor) {
-		SetTextColor(pDC, RGB(pText->mColor.R, pText->mColor.G, pText->mColor.B));
-		mActiveFontColor = pText->mColor;
-	}
-    
-	UINT fmt = DT_NOCLIP;
-	switch(pText->mAlign) {
-		case IText::kAlignCenter:	fmt |= DT_CENTER; break;
-		case IText::kAlignFar:		fmt |= DT_RIGHT; break;
-		case IText::kAlignNear:
-		default:					        fmt |= DT_LEFT; break;
-	}
-
-	RECT R = { pR->L, pR->T, pR->R, pR->B };
-	return !!DrawText(pDC, str, strlen(str), &R, fmt);
 }
 

@@ -3,6 +3,10 @@
 
 #include "Containers.h"
 
+// The order is important here, so 1st include swell.h, then lice_text.h.
+#include "../swell/swell.h"
+#include "../lice/lice_text.h"
+
 // Abstracting the graphics made it easy to go ahead and abstract the OS ... 
 // the cost is this crap redefining some basic stuff.
 
@@ -61,18 +65,19 @@ struct IText
 	enum EStyle { kStyleNormal, kStyleBold, kStyleItalic } mStyle;
 	enum EAlign { kAlignNear, kAlignCenter, kAlignFar } mAlign;
 	int mOrientation;   // Degrees ccwise from normal.
+	LICE_IFont* mCached;
 
 	IText(int size = DEFAULT_TEXT_SIZE, const IColor* pColor = 0, char* font = 0,
 		EStyle style = kStyleNormal, EAlign align = kAlignCenter, int orientation = 0)
     :	mSize(size), mColor(pColor ? *pColor : DEFAULT_TEXT_COLOR), //mFont(font ? font : DEFAULT_FONT),
-        mStyle(style), mAlign(align), mOrientation(orientation) 
+        mStyle(style), mAlign(align), mOrientation(orientation), mCached(0)
     {
         strcpy(mFont, (font ? font : DEFAULT_FONT));     
     }
 
     IText(const IColor* pColor) 
 	:	mSize(DEFAULT_TEXT_SIZE), mColor(*pColor), //mFont(DEFAULT_FONT), 
-        mStyle(kStyleNormal), mAlign(kAlignCenter), mOrientation(0)
+        mStyle(kStyleNormal), mAlign(kAlignCenter), mOrientation(0), mCached(0)
     {
         strcpy(mFont, DEFAULT_FONT);     
     }

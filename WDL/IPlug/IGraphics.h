@@ -16,6 +16,12 @@
 #define MAX_PARAM_LEN 32
 #define MAX_EDIT_LEN  1000
 
+#ifdef __APPLE__
+  #define AdjustFontSize(size) (size * 89 / 100)
+#else
+  #define AdjustFontSize(size) (size)
+#endif
+
 class IPlugBase;
 class IControl;
 class IEditableTextControl;
@@ -48,7 +54,8 @@ public:
 	bool DrawCircle(const IColor* pColor, float cx, float cy, float r,
 		const IChannelBlend* pBlend = 0, bool antiAlias = false);
   bool FillIRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend = 0);
-	virtual bool DrawIText(IText* pTxt, char* str, IRECT* pR) = 0;
+	inline void PrepDrawIText(IText* pTxt) { if (!pTxt->mCached) CacheFont(pTxt); }
+	bool DrawIText(IText* pTxt, char* str, IRECT* pR);
   IColor GetPoint(int x, int y);
   void* GetData() { return GetBits(); }
 
@@ -173,6 +180,8 @@ protected:
 
   virtual LICE_IBitmap* OSLoadBitmap(int ID, const char* name) = 0;
 	LICE_SysBitmap* mDrawBitmap;
+
+  LICE_IFont* CacheFont(IText* pTxt);
 
 private:
 

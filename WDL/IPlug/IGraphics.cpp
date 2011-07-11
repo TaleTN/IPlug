@@ -68,6 +68,57 @@ public:
 
 static BitmapStorage s_bitmapCache;
 
+class FontStorage
+{
+public:
+
+  struct FontKey
+  {
+    int size, orientation;
+    IText::EStyle style;
+    char face[FONT_LEN];
+    LICE_IFont* font;
+  };
+
+  WDL_PtrList<FontKey> m_fonts;
+  WDL_Mutex m_mutex;
+
+  LICE_IFont* Find(IText* pTxt)
+  {
+    WDL_MutexLock lock(&m_mutex);
+    int i = 0, n = m_fonts.GetSize();
+    for (i = 0; i < n; ++i)
+    {
+      FontKey* key = m_fonts.Get(i);
+      if (key->size == pTxt->mSize && key->orientation == pTxt->mOrientation && key->style == pTxt->mStyle && !strcmp(key->face, pTxt->mFont)) return key->font;
+    }
+    return 0;
+  }
+
+  void Add(LICE_IFont* font, IText* pTxt)
+  {
+    WDL_MutexLock lock(&m_mutex);
+    FontKey* key = m_fonts.Add(new FontKey);
+    key->size = pTxt->mSize;
+    key->orientation = pTxt->mOrientation;
+    key->style = pTxt->mStyle;
+    strcpy(key->face, pTxt->mFont);
+    key->font = font;
+  }
+
+  ~FontStorage()
+  {
+    int i, n = m_fonts.GetSize();
+    for (i = 0; i < n; ++i)
+    {
+      delete(m_fonts.Get(i)->font);
+    }
+    m_fonts.Empty(true);
+  }
+};
+
+static FontStorage s_fontCache;
+
 inline LICE_pixel LiceColor(const IColor* pColor) 
 {
 	return LICE_RGBA(pColor->R, pColor->G, pColor->B, pColor->A);
@@ -392,6 +443,53 @@ bool IGraphics::FillIRect(const IColor* pColor, IRECT* pR, const IChannelBlend* 
 {
   _LICE::LICE_FillRect(mDrawBitmap, pR->L, pR->T, pR->W(), pR->H(), LiceColor(pColor), LiceWeight(pBlend), LiceBlendMode(pBlend));
     return true;
+}
+
+bool IGraphics::DrawIText(IText* pTxt, char* str, IRECT* pR)
+{
+  if (!str || str[0] == '\0') {
+    return true;
+  }
+
+  LICE_IFont* font = pTxt->mCached;
+  if (!font)
+  {
+    font = CacheFont(pTxt);
+    if (!font) return false;
+  }
+
+  font->SetTextColor(LiceColor(&pTxt->mColor));
+
+  UINT fmt = DT_NOCLIP | LICE_DT_USEFGALPHA;
+  if (pTxt->mAlign == IText::kAlignNear)
+    fmt |= DT_LEFT;
+  else if (pTxt->mAlign == IText::kAlignCenter)
+    fmt |= DT_CENTER;
+  else // if (pTxt->mAlign == IText::kAlignFar)
+    fmt |= DT_RIGHT;
+
+  RECT R = { pR->L, pR->T, pR->R, pR->B };
+  font->DrawText(mDrawBitmap, str, -1, &R, fmt);
+  return true;
+}
+
+LICE_IFont* IGraphics::CacheFont(IText* pTxt)
+{
+  LICE_IFont* font = s_fontCache.Find(pTxt);
+  if (!font)
+  {
+    int h = AdjustFontSize(pTxt->mSize);
+    int esc = 10 * pTxt->mOrientation;
+    int wt = (pTxt->mStyle == IText::kStyleBold ? FW_BOLD : FW_NORMAL);
+    int it = (pTxt->mStyle == IText::kStyleItalic ? TRUE : FALSE);
+    HFONT hFont = CreateFont(h, 0, esc, esc, wt, it, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, pTxt->mFont);
+    if (!hFont) return 0;
+    font = new LICE_CachedFont;
+    font->SetFromHFont(hFont, LICE_FONT_FLAG_OWNS_HFONT);
+    s_fontCache.Add(font, pTxt);
+  }
+  pTxt->mCached = font;
+  return font;
 }
 
 IColor IGraphics::GetPoint(int x, int y)

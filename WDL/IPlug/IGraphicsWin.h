@@ -45,15 +45,10 @@ public:
   IRECT GetWindowRECT();
   void SetWindowTitle(char* str);
 
-  bool DrawIText(IText* pText, char* str, IRECT* pR);
-
 protected:
   LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
 
 private:
-  bool mFontActive;
-  IColor mActiveFontColor;
-
   HINSTANCE mHInstance;
   HWND mPlugWnd, mParamEditWnd;
 	// Ed = being edited manually.

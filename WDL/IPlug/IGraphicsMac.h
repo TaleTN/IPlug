@@ -13,8 +13,6 @@
 	class IGraphicsCarbon;
 #endif
 
-class NSMutableDictionary;
-
 class IGraphicsMac : public IGraphics
 {
 public:
@@ -56,7 +54,6 @@ public:
 
   const char* GetBundleID()  { return mBundleID.Get(); }
   static int GetUserOSVersion();   // Returns a number like 0x1050 (10.5).
-  bool DrawIText(IText* pTxt, char* str, IRECT* pR);
   
 protected:
   
@@ -70,8 +67,6 @@ private:
   void* mGraphicsCocoa;   // Can't forward-declare IGraphicsCocoa because it's an obj-C object.
   
   WDL_String mBundleID;
-  NSMutableDictionary* mTxtAttrs;
-  IText mTxt;
 };
 
 inline CFStringRef MakeCFString(const char* cStr)
@@ -106,10 +101,5 @@ struct CStrLocal
     FREE_NULL(mCStr); 
   }
 };
-
-inline int AdjustFontSize(int size)
-{
-	return int(0.75 * (double)size);
-}
 
 #endif
