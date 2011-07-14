@@ -16,12 +16,6 @@
 #define MAX_PARAM_LEN 32
 #define MAX_EDIT_LEN  1000
 
-#ifdef __APPLE__
-  #define AdjustFontSize(size) (size * 89 / 100)
-#else
-  #define AdjustFontSize(size) (size)
-#endif
-
 class IPlugBase;
 class IControl;
 class IEditableTextControl;

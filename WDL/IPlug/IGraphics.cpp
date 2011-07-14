@@ -477,17 +477,34 @@ bool IGraphics::DrawIText(IText* pTxt, char* str, IRECT* pR)
 
 LICE_IFont* IGraphics::CacheFont(IText* pTxt)
 {
-  LICE_IFont* font = s_fontCache.Find(pTxt);
+  LICE_CachedFont* font = (LICE_CachedFont*)s_fontCache.Find(pTxt);
   if (!font)
   {
-    int h = AdjustFontSize(pTxt->mSize);
+    font = new LICE_CachedFont;
+    int h = pTxt->mSize;
     int esc = 10 * pTxt->mOrientation;
     int wt = (pTxt->mStyle == IText::kStyleBold ? FW_BOLD : FW_NORMAL);
     int it = (pTxt->mStyle == IText::kStyleItalic ? TRUE : FALSE);
+  #ifdef __APPLE__
+    bool resized = false;
+Resize:
+    if (h < 2) h = 2;
+  #endif
     HFONT hFont = CreateFont(h, 0, esc, esc, wt, it, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, pTxt->mFont);
-    if (!hFont) return 0;
-    font = new LICE_CachedFont;
+    if (!hFont)
+    {
+      delete(font);
+      return 0;
+    }
     font->SetFromHFont(hFont, LICE_FONT_FLAG_OWNS_HFONT | LICE_FONT_FLAG_FORCE_NATIVE);
+  #ifdef __APPLE__
+    if (!resized && font->GetLineHeight() != h)
+    {
+      h = int((double)(h * h) / (double)font->GetLineHeight() + 0.5);
+      resized = true;
+      goto Resize;
+    }
+  #endif
     s_fontCache.Add(font, pTxt);
   }
   pTxt->mCached = font;

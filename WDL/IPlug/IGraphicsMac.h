@@ -102,4 +102,9 @@ struct CStrLocal
   }
 };
 
+inline int AdjustFontSize(int size)
+{
+	return int(0.75 * (double)size);
+}
+
 #endif
