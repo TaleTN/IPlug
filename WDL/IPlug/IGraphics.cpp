@@ -458,9 +458,11 @@ bool IGraphics::DrawIText(IText* pTxt, char* str, IRECT* pR)
     if (!font) return false;
   }
 
-  font->SetTextColor(LiceColor(&pTxt->mColor));
+  LICE_pixel color = LiceColor(&pTxt->mColor);
+  font->SetTextColor(color);
 
-  UINT fmt = DT_NOCLIP | LICE_DT_USEFGALPHA;
+  UINT fmt = DT_NOCLIP;
+  if (LICE_GETA(color) < 255) fmt |= LICE_DT_USEFGALPHA;
   if (pTxt->mAlign == IText::kAlignNear)
     fmt |= DT_LEFT;
   else if (pTxt->mAlign == IText::kAlignCenter)
@@ -485,7 +487,7 @@ LICE_IFont* IGraphics::CacheFont(IText* pTxt)
     HFONT hFont = CreateFont(h, 0, esc, esc, wt, it, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, pTxt->mFont);
     if (!hFont) return 0;
     font = new LICE_CachedFont;
-    font->SetFromHFont(hFont, LICE_FONT_FLAG_OWNS_HFONT);
+    font->SetFromHFont(hFont, LICE_FONT_FLAG_OWNS_HFONT | LICE_FONT_FLAG_FORCE_NATIVE);
     s_fontCache.Add(font, pTxt);
   }
   pTxt->mCached = font;
