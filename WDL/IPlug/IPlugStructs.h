@@ -65,19 +65,20 @@ struct IText
 	enum EStyle { kStyleNormal, kStyleBold, kStyleItalic } mStyle;
 	enum EAlign { kAlignNear, kAlignCenter, kAlignFar } mAlign;
 	int mOrientation;   // Degrees ccwise from normal.
+	enum EQuality { kQualityDefault, kQualityNonAntiAliased, kQualityAntiAliased, kQualityClearType } mQuality;
 	LICE_IFont* mCached;
 
 	IText(int size = DEFAULT_TEXT_SIZE, const IColor* pColor = 0, char* font = 0,
-		EStyle style = kStyleNormal, EAlign align = kAlignCenter, int orientation = 0)
+		EStyle style = kStyleNormal, EAlign align = kAlignCenter, int orientation = 0, EQuality quality = kQualityDefault)
     :	mSize(size), mColor(pColor ? *pColor : DEFAULT_TEXT_COLOR), //mFont(font ? font : DEFAULT_FONT),
-        mStyle(style), mAlign(align), mOrientation(orientation), mCached(0)
+        mStyle(style), mAlign(align), mOrientation(orientation), mQuality(quality), mCached(0)
     {
         strcpy(mFont, (font ? font : DEFAULT_FONT));     
     }
 
     IText(const IColor* pColor) 
 	:	mSize(DEFAULT_TEXT_SIZE), mColor(*pColor), //mFont(DEFAULT_FONT), 
-        mStyle(kStyleNormal), mAlign(kAlignCenter), mOrientation(0), mCached(0)
+        mStyle(kStyleNormal), mAlign(kAlignCenter), mOrientation(0), mQuality(kQualityDefault), mCached(0)
     {
         strcpy(mFont, DEFAULT_FONT);     
     }

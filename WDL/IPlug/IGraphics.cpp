@@ -485,12 +485,27 @@ LICE_IFont* IGraphics::CacheFont(IText* pTxt)
     int esc = 10 * pTxt->mOrientation;
     int wt = (pTxt->mStyle == IText::kStyleBold ? FW_BOLD : FW_NORMAL);
     int it = (pTxt->mStyle == IText::kStyleItalic ? TRUE : FALSE);
+
+    int q;
+    if (pTxt->mQuality == IText::kQualityDefault)
+      q = DEFAULT_QUALITY;
+  #ifdef CLEARTYPE_QUALITY
+    else if (pTxt->mQuality == IText::kQualityClearType)
+      q = CLEARTYPE_QUALITY;
+    else if (pTxt->mQuality == IText::kQualityAntiAliased)
+  #else
+    else if (pTxt->mQuality != IText::kQualityNonAntiAliased)
+  #endif
+      q = ANTIALIASED_QUALITY;
+    else // if (pTxt->mQuality == IText::kQualityNonAntiAliased)
+      q = NONANTIALIASED_QUALITY;
+
   #ifdef __APPLE__
     bool resized = false;
 Resize:
     if (h < 2) h = 2;
   #endif
-    HFONT hFont = CreateFont(h, 0, esc, esc, wt, it, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, pTxt->mFont);
+    HFONT hFont = CreateFont(h, 0, esc, esc, wt, it, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, q, DEFAULT_PITCH, pTxt->mFont);
     if (!hFont)
     {
       delete(font);
