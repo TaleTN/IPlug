@@ -75,6 +75,7 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
   IPlugAU* _this = (IPlugAU*) pPlug;
 
   if (select == kComponentCloseSelect) {
+    _this->ClearConnections();
     DELETE_NULL(_this);
     return noErr;
   }
@@ -96,7 +97,6 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
     }
     case kAudioUnitUninitializeSelect: {
       _this->mActive = false;
-      _this->ClearConnections();
       _this->OnActivate(false);
       return noErr;
     }
