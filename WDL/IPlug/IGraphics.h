@@ -48,7 +48,7 @@ public:
 	bool DrawCircle(const IColor* pColor, float cx, float cy, float r,
 		const IChannelBlend* pBlend = 0, bool antiAlias = false);
   bool FillIRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend = 0);
-	inline void PrepDrawIText(IText* pTxt) { if (!pTxt->mCached) CacheFont(pTxt); }
+	static inline void PrepDrawIText(IText* pTxt) { if (!pTxt->mCached) CacheFont(pTxt); }
 	bool DrawIText(IText* pTxt, char* str, IRECT* pR);
   IColor GetPoint(int x, int y);
   void* GetData() { return GetBits(); }
@@ -175,7 +175,7 @@ protected:
   virtual LICE_IBitmap* OSLoadBitmap(int ID, const char* name) = 0;
 	LICE_SysBitmap* mDrawBitmap;
 
-  LICE_IFont* CacheFont(IText* pTxt);
+  static LICE_IFont* CacheFont(IText* pTxt);
 
 private:
 
