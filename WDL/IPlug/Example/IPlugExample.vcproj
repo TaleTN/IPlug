@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="shell32.lib lice.lib IPlug.lib user32.lib gdi32.lib comdlg32.lib"
+				AdditionalDependencies="shell32.lib lice.lib IPlug.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib"
 				OutputFile="$(OutDir)/$(ProjectName)_DEBUG.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\..\IPlug\$(ConfigurationName)&quot;;&quot;..\..\lice\$(ConfigurationName)&quot;"
@@ -148,7 +148,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="shell32.lib lice.lib IPlug.lib user32.lib gdi32.lib comdlg32.lib"
+				AdditionalDependencies="shell32.lib lice.lib IPlug.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib"
 				OutputFile="$(OutDir)/$(ProjectName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\..\IPlug\$(ConfigurationName)&quot;;&quot;..\..\lice\$(ConfigurationName)&quot;"
@@ -230,7 +230,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="shell32.lib lice.lib IPlug.lib user32.lib gdi32.lib comdlg32.lib"
+				AdditionalDependencies="shell32.lib lice.lib IPlug.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib"
 				OutputFile="$(OutDir)/$(ProjectName)_TRACER.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\..\IPlug\$(ConfigurationName)&quot;;..\..\lice\Release"
