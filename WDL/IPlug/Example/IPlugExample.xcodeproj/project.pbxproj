@@ -242,7 +242,7 @@
 		3D84FA5B13ACD187000BCB8B /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		3D84FA5D13ACD19C000BCB8B /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		3D8C7FDB13AC7B1900E81445 /* resource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = resource.h; sourceTree = "<group>"; };
-		3D91A48113AD069D00659595 /* IPlugExample.x64.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IPlugExample.x64.component; sourceTree = BUILT_PRODUCTS_DIR; };
+		3D91A48113AD069D00659595 /* IPlugExample.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IPlugExample.component; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D91A65013AE155B00659595 /* IPlugExample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IPlugExample.cpp; sourceTree = "<group>"; };
 		3D91A65413AE156D00659595 /* IPlugExample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPlugExample.h; sourceTree = "<group>"; };
 		3D91A65513AE158500659595 /* IPlugExample.exp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.exports; path = IPlugExample.exp; sourceTree = "<group>"; };
@@ -299,7 +299,7 @@
 			children = (
 				3D84F0EE13AC9289000BCB8B /* IPlugExample.vst */,
 				3D84FA0C13ACCE54000BCB8B /* IPlugExample.component */,
-				3D91A48113AD069D00659595 /* IPlugExample.x64.component */,
+				3D91A48113AD069D00659595 /* IPlugExample.component */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -531,7 +531,7 @@
 			);
 			name = AU_x64;
 			productName = VST;
-			productReference = 3D91A48113AD069D00659595 /* IPlugExample.x64.component */;
+			productReference = 3D91A48113AD069D00659595 /* IPlugExample.component */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -1065,7 +1065,7 @@
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/Components";
 				REZ_PREPROCESSOR_DEFINITIONS = "i386_$i386 x86_64_$x86_64";
 				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
-				WRAPPER_EXTENSION = x64.component;
+				WRAPPER_EXTENSION = component;
 			};
 			name = Debug;
 		};
@@ -1096,7 +1096,7 @@
 				REZ_PREPROCESSOR_DEFINITIONS = "i386_$i386 x86_64_$x86_64";
 				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
-				WRAPPER_EXTENSION = x64.component;
+				WRAPPER_EXTENSION = component;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -1128,7 +1128,7 @@
 				REZ_PREPROCESSOR_DEFINITIONS = "i386_$i386 x86_64_$x86_64";
 				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
-				WRAPPER_EXTENSION = x64.component;
+				WRAPPER_EXTENSION = component;
 				ZERO_LINK = NO;
 			};
 			name = Tracer;
