@@ -1456,7 +1456,7 @@ void IPlugAU::EndInformHostOfParamChange(int idx)
 void IPlugAU::InformHostOfProgramChange()
 {
 	//InformListeners(kAudioUnitProperty_CurrentPreset, kAudioUnitScope_Global);
-	InformListeners(kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global);
+	//InformListeners(kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global);
 }
 
 bool IPlugAU::IsRenderingOffline()
