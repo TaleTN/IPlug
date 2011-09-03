@@ -4,7 +4,7 @@
 /*
 
 IDrawbarControl
-(c) Theo Niessink 2009, 2010
+(c) Theo Niessink 2009-2011
 <http://www.taletn.com/>
 
 
@@ -51,7 +51,7 @@ public:
 		}
 
 		y -= mRECT.T;
-		if (y < int(mValue * mLen))
+		if (y < mHandleY)
 		{
 			mValue = mValue - floor((double)y / mLen * mMax) / mMax;
 			SetDirty();
@@ -71,16 +71,16 @@ public:
 		SetDirty();
 	}
 
-	inline int GetHandleOffs(double value = -1.) const { return int((1. - floor(mValue * mMax + 0.5) / mMax) * mLen); }
+	inline double GetSteppedValue() const { return floor(mValue * mMax + 0.5) / mMax; }
+	inline int GetHandleOffs() const { return int((1. - GetSteppedValue()) * mLen); }
 
 	void PromptUserInput()
 	{
 		if (mParamIdx >= 0 && !mDisablePrompt)
 		{
 			IRECT tmp = mRECT;
-			int len = int(mLen);
-			int h = mRECT.H() - len;
-			mRECT.T += len - GetHandleOffs();
+			int h = mRECT.H() - int(mLen);
+			mRECT.T += mHandleY;
 			mRECT.B = mRECT.T + h;
 			mPlug->GetGUI()->PromptUserInput(this, mPlug->GetParam(mParamIdx));
 			mRECT = tmp;
@@ -88,11 +88,22 @@ public:
 		}
 	}
 
-	virtual bool Draw(IGraphics* pGraphics) { return pGraphics->DrawBitmap(&mBitmap, &mRECT, 0, GetHandleOffs(), &mBlend); }
+	virtual void SetDirty(bool pushParamToPlug = true)
+	{
+		IControl::SetDirty(pushParamToPlug);
+
+		// mHandleOffs = GetHandleOffs();
+		double value = GetSteppedValue();
+		mHandleOffs = int((1. - value) * mLen);
+		mHandleY    = int(      value  * mLen);
+	}
+
+	virtual bool Draw(IGraphics* pGraphics) { return pGraphics->DrawBitmap(&mBitmap, &mRECT, 0, mHandleOffs, &mBlend); }
 
 protected:
 	double mLen, mMax;
 	IBitmap mBitmap;
+	int mHandleOffs, mHandleY;
 };
 
 
