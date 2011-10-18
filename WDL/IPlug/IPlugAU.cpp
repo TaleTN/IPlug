@@ -3,6 +3,8 @@
 #include "Log.h"
 #include "Hosts.h"
 
+#include "../dfx-library/dfx-au-utilities.h"
+
 //#include "/Developer/Examples/CoreAudio/PublicUtility/CAStreamBasicDescription.h"
 
 #define kAudioUnitRemovePropertyListenerWithUserDataSelect 0x0012
@@ -163,7 +165,7 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       for (i = 0; i < n; ++i) {
         PropertyListener* pListener = _this->mPropertyListeners.Get(i);
         if (listener.mPropID == pListener->mPropID && listener.mListenerProc == pListener->mListenerProc) {
-          _this->mPropertyListeners.Delete(i);
+          _this->mPropertyListeners.Delete(i, true);
           break;
         }
       }
@@ -179,7 +181,7 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
         PropertyListener* pListener = _this->mPropertyListeners.Get(i);
         if (listener.mPropID == pListener->mPropID &&
           listener.mListenerProc == pListener->mListenerProc && listener.mProcArgs == pListener->mProcArgs) {
-          _this->mPropertyListeners.Delete(i);
+          _this->mPropertyListeners.Delete(i, true);
           break;
         }
       }
@@ -200,7 +202,7 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       for (i = 0; i < n; ++i) {
         AURenderCallbackStruct* pACS = _this->mRenderNotify.Get(i);
         if (acs.inputProc == pACS->inputProc) {
-          _this->mRenderNotify.Delete(i);
+          _this->mRenderNotify.Delete(i, true);
           break;
         }
       }
@@ -541,10 +543,10 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
       }
       *pDataSize = sizeof(CFArrayRef);
       if (pData) {
-        CFMutableArrayRef nameArray = CFArrayCreateMutable(0, n, 0);
+        CFMutableArrayRef nameArray = CFArrayCreateMutable(kCFAllocatorDefault, n, &kCFTypeArrayCallBacks);
         for (int i = 0; i < n; ++i) {
-          const char* str = pParam->GetDisplayText(i);
-          CFArrayAppendValue(nameArray, MakeCFString(str)); // Release here?
+          CFStrLocal cfStr = CFStrLocal(pParam->GetDisplayText(i));
+          CFArrayAppendValue(nameArray, cfStr.mCFStr);
         }
         *((CFArrayRef*) pData) = nameArray;
       }
@@ -599,12 +601,12 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
       *pDataSize = sizeof(CFArrayRef);
       if (pData) {
         int i, n = NPresets();
-        CFMutableArrayRef presetArray = CFArrayCreateMutable(0, n, 0);
+        CFMutableArrayRef presetArray = CFArrayCreateMutable(kCFAllocatorDefault, n, &kCFAUPresetArrayCallBacks);
         for (i = 0; i < n; ++i) {
-          AUPreset* pAUPreset = new AUPreset;
-          pAUPreset->presetNumber = i;
-          pAUPreset->presetName = MakeCFString(GetPresetName(i));
-          CFArrayAppendValue(presetArray, pAUPreset);
+          CFStrLocal presetName = CFStrLocal(GetPresetName(i));
+          CFAUPresetRef newPreset = CFAUPresetCreate(kCFAllocatorDefault, i, presetName.mCFStr);
+          CFArrayAppendValue(presetArray, newPreset);
+          CFAUPresetRelease(newPreset);
         }
         *((CFMutableArrayRef*) pData) = presetArray;
       }
