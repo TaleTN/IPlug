@@ -166,6 +166,10 @@
 		3DC38CF61284C89200CC2144 /* swell-gdi.mm in Sources */ = {isa = PBXBuildFile; fileRef = 45B61BC510B15E25009E1E8C /* swell-gdi.mm */; };
 		3DC38CF81284C89200CC2144 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
 		3DC38CF91284C89200CC2144 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C4DA4E0D0E50F90007A920 /* Carbon.framework */; };
+		3DF8EF1F144D9E4A00DF1854 /* dfx-au-utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DF8EF1D144D9E4A00DF1854 /* dfx-au-utilities.c */; };
+		3DF8EF20144D9E4A00DF1854 /* dfx-au-utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DF8EF1E144D9E4A00DF1854 /* dfx-au-utilities.h */; };
+		3DF8EF21144D9E4A00DF1854 /* dfx-au-utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DF8EF1D144D9E4A00DF1854 /* dfx-au-utilities.c */; };
+		3DF8EF22144D9E4A00DF1854 /* dfx-au-utilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 3DF8EF1E144D9E4A00DF1854 /* dfx-au-utilities.h */; };
 		452A87500FCBFE1900360071 /* aeffect.h in Headers */ = {isa = PBXBuildFile; fileRef = 452A874E0FCBFE1900360071 /* aeffect.h */; };
 		452A87510FCBFE1900360071 /* aeffectx.h in Headers */ = {isa = PBXBuildFile; fileRef = 452A874F0FCBFE1900360071 /* aeffectx.h */; };
 		452A87830FCBFFDD00360071 /* lice_arc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 452A87670FCBFFDD00360071 /* lice_arc.cpp */; };
@@ -336,6 +340,8 @@
 		1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		32DBCF5E0370ADEE00C91783 /* IPlug_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPlug_Prefix.pch; sourceTree = "<group>"; };
 		3DC38D001284C89200CC2144 /* libIPlug_x64.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libIPlug_x64.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DF8EF1D144D9E4A00DF1854 /* dfx-au-utilities.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "dfx-au-utilities.c"; path = "../dfx-library/dfx-au-utilities.c"; sourceTree = SOURCE_ROOT; };
+		3DF8EF1E144D9E4A00DF1854 /* dfx-au-utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "dfx-au-utilities.h"; path = "../dfx-library/dfx-au-utilities.h"; sourceTree = SOURCE_ROOT; };
 		452A874E0FCBFE1900360071 /* aeffect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aeffect.h; sourceTree = "<group>"; };
 		452A874F0FCBFE1900360071 /* aeffectx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aeffectx.h; sourceTree = "<group>"; };
 		452A87670FCBFFDD00360071 /* lice_arc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lice_arc.cpp; path = ../lice/lice_arc.cpp; sourceTree = SOURCE_ROOT; };
@@ -522,6 +528,7 @@
 				452A874D0FCBFE1900360071 /* VST_SDK */,
 				52FBBE770D0CF0D3001C8B8A /* IPlug */,
 				08FB77AEFE84172EC02AAC07 /* Classes */,
+				3DF8EF1C144D9E0800DF1854 /* dfx-library */,
 				32C88DFF0371C24200C91783 /* Other Sources */,
 				0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */,
 				034768DFFF38A50411DB9C8B /* Products */,
@@ -570,6 +577,15 @@
 				32DBCF5E0370ADEE00C91783 /* IPlug_Prefix.pch */,
 			);
 			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		3DF8EF1C144D9E0800DF1854 /* dfx-library */ = {
+			isa = PBXGroup;
+			children = (
+				3DF8EF1D144D9E4A00DF1854 /* dfx-au-utilities.c */,
+				3DF8EF1E144D9E4A00DF1854 /* dfx-au-utilities.h */,
+			);
+			name = "dfx-library";
 			sourceTree = "<group>";
 		};
 		452A874D0FCBFE1900360071 /* VST_SDK */ = {
@@ -824,6 +840,7 @@
 				3DC38C901284C89200CC2144 /* png.h in Headers */,
 				3DC38C911284C89200CC2144 /* pngconf.h in Headers */,
 				3DC38C921284C89200CC2144 /* swell-internal.h in Headers */,
+				3DF8EF22144D9E4A00DF1854 /* dfx-au-utilities.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -879,6 +896,7 @@
 				452A89AB0FCC0A6500360071 /* png.h in Headers */,
 				452A89AC0FCC0A6500360071 /* pngconf.h in Headers */,
 				452A8A030FCC0F4E00360071 /* swell-internal.h in Headers */,
+				3DF8EF20144D9E4A00DF1854 /* dfx-au-utilities.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1057,6 +1075,7 @@
 				3DC38CF41284C89200CC2144 /* pngwutil.c in Sources */,
 				3DC38CF51284C89200CC2144 /* pngrio.c in Sources */,
 				3DC38CF61284C89200CC2144 /* swell-gdi.mm in Sources */,
+				3DF8EF21144D9E4A00DF1854 /* dfx-au-utilities.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1159,6 +1178,7 @@
 				452A89BC0FCC0A6500360071 /* pngwutil.c in Sources */,
 				452A89BD0FCC0A6500360071 /* pngrio.c in Sources */,
 				45B61BC610B15E25009E1E8C /* swell-gdi.mm in Sources */,
+				3DF8EF1F144D9E4A00DF1854 /* dfx-au-utilities.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

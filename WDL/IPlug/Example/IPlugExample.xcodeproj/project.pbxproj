@@ -152,6 +152,8 @@
 		3D91A6CD13AE172400659595 /* knob_sm.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6BE13AE172400659595 /* knob_sm.png */; };
 		3D91A6CE13AE172400659595 /* toggle-switch.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6BF13AE172400659595 /* toggle-switch.png */; };
 		3D91A6CF13AE172400659595 /* VU-meter_sm.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6C013AE172400659595 /* VU-meter_sm.png */; };
+		3DF8EED7144D967400DF1854 /* dfx-au-utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DF8EED5144D967400DF1854 /* dfx-au-utilities.c */; };
+		3DF8EED8144D967400DF1854 /* dfx-au-utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DF8EED5144D967400DF1854 /* dfx-au-utilities.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -253,6 +255,8 @@
 		3D91A6BE13AE172400659595 /* knob_sm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = knob_sm.png; path = img/knob_sm.png; sourceTree = "<group>"; };
 		3D91A6BF13AE172400659595 /* toggle-switch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "toggle-switch.png"; path = "img/toggle-switch.png"; sourceTree = "<group>"; };
 		3D91A6C013AE172400659595 /* VU-meter_sm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "VU-meter_sm.png"; path = "img/VU-meter_sm.png"; sourceTree = "<group>"; };
+		3DF8EED5144D967400DF1854 /* dfx-au-utilities.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "dfx-au-utilities.c"; path = "../../dfx-library/dfx-au-utilities.c"; sourceTree = "<group>"; };
+		3DF8EED6144D967400DF1854 /* dfx-au-utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "dfx-au-utilities.h"; path = "../../dfx-library/dfx-au-utilities.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -361,6 +365,7 @@
 				3D84F36913ACA4A1000BCB8B /* Log.cpp */,
 				3D84F36A13ACA4A1000BCB8B /* Log.h */,
 				3D84F2E913AC9FA6000BCB8B /* LICE */,
+				3DF8EED2144D95A000DF1854 /* dfx-library */,
 			);
 			name = IPlug;
 			sourceTree = "<group>";
@@ -476,6 +481,15 @@
 				3D84FA5D13ACD19C000BCB8B /* CoreServices.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3DF8EED2144D95A000DF1854 /* dfx-library */ = {
+			isa = PBXGroup;
+			children = (
+				3DF8EED5144D967400DF1854 /* dfx-au-utilities.c */,
+				3DF8EED6144D967400DF1854 /* dfx-au-utilities.h */,
+			);
+			name = "dfx-library";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -721,6 +735,7 @@
 				3D84FA8313ACD2E9000BCB8B /* IPlugAU_ViewFactory.mm in Sources */,
 				3D91A65213AE155B00659595 /* IPlugExample.cpp in Sources */,
 				3D91A65713AE158500659595 /* IPlugExample.exp in Sources */,
+				3DF8EED7144D967400DF1854 /* dfx-au-utilities.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -773,6 +788,7 @@
 				3D91A47313AD069D00659595 /* IPlugAU_ViewFactory.mm in Sources */,
 				3D91A65313AE155B00659595 /* IPlugExample.cpp in Sources */,
 				3D91A65813AE158500659595 /* IPlugExample.exp in Sources */,
+				3DF8EED8144D967400DF1854 /* dfx-au-utilities.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
