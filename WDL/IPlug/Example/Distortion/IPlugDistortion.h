@@ -50,20 +50,18 @@ public:
 	~IPlugDistortion() {}
 
 	void OnParamChange(int paramIdx);
-	void Reset();
 	void ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames);
 
 private:
 	const int mOversampling;
-	const double mDC;
 
-	double mDrive, mGain, mSilence;
+	const double mDC;
+	double mDistortedDC;
+
+	double mDrive, mGain;
 
 	WDL_BesselFilterCoeffs mAntiAlias;
 	WDL_BesselFilterStage mUpsample, mDownsample;
-
-	const double mHighPassFreq;
-	double mHighPassA, mHighPassOutput;
 };
 
 

@@ -43,13 +43,15 @@ inline double fast_tanh(double x)
 
 IPlugDistortion::IPlugDistortion(IPlugInstanceInfo instanceInfo):
 IPLUG_CTOR(kNumParams, 0, instanceInfo),
-mOversampling(8), mDC(0.2), mHighPassFreq(20.), mHighPassOutput(0.)
+mOversampling(8), mDC(0.2)
 {
 	TRACE;
 
 	mAntiAlias.Calc(0.5 / (double)mOversampling);
 	mUpsample.Reset();
 	mDownsample.Reset();
+
+	mDistortedDC = fast_tanh(mDC);
 
 	GetParam(kDrive)->InitDouble("Drive", 0.5, 0., 1., 0.001);
 }
@@ -66,20 +68,9 @@ void IPlugDistortion::OnParamChange(int paramIdx)
 			double value = GetParam(kDrive)->Value();
 			mDrive = 1. + 15. * value;
 			mGain = pow(2., value) / mDrive;
-			mSilence = mGain * fast_tanh(mDC);
 			break;
 		}
 	}
-}
-
-
-void IPlugDistortion::Reset()
-{
-	TRACE; IMutexLock lock(this);
-
-	double dt = 1./GetSampleRate();
-	double RC = 1./(mHighPassFreq * 2.*PI);
-	mHighPassA = dt / (RC + dt);
 }
 
 
@@ -101,18 +92,14 @@ void IPlugDistortion::ProcessDoubleReplacing(double** inputs, double** outputs, 
 
 			// Distortion
 			if (WDL_DENORMAL_OR_ZERO_DOUBLE_AGGRESSIVE(&sample))
-				sample = mSilence;
+				sample = 0.;
 			else
-				sample = mGain * fast_tanh(mDC + mDrive * sample);
+				sample = mGain * (fast_tanh(mDC + mDrive * sample) - mDistortedDC);
 
 			// Downsample
 			mDownsample.Process(sample, mAntiAlias.Coeffs());
 			if (j == 0) output = mDownsample.Output();
 		}
-
-		// Remove DC
-		mHighPassOutput += mHighPassA * (output - mHighPassOutput);
-		output -= mHighPassOutput;
 
 		outputs[0][i] = outputs[1][i] = output;
 	}
