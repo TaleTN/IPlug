@@ -635,35 +635,40 @@ void IGraphicsWin::PromptForFile(WDL_String* pFilename, int action, char* dir, c
 	ofn.lpstrInitialDir = dirCStr;
 	ofn.Flags = OFN_PATHMUSTEXIST;
 
-    //if (!extensions.empty()) {
-        //static char extStr[256];
-        //static char defExtStr[16];
-        //int i, j, p;
+	if (CSTR_NOT_EMPTY(extensions)) {
+		char extStr[256];
+		char defExtStr[16];
+		int i, p, n = strlen(extensions);
 
-        //for (j = 0, p = 0; j < extensions.size(); ++j) {
-        //    extStr[p++] = extensions[j++];
-        //}
-        //extStr[p++] = '\0';
+		bool seperator = true;
+		for (i = 0, p = 0; i < n; ++i) {
+			if (seperator) {
+				if (p) {
+					extStr[p++] = ';';
+				}
+				seperator = false;
+				extStr[p++] = '*';
+				extStr[p++] = '.';
+			}
+			if (extensions[i] == ' ') {
+				seperator = true;
+			}
+			else {
+				extStr[p++] = extensions[i];
+			}
+		}
+		extStr[p++] = '\0';
 
-        //StrVector exts = SplitStr(extensions);
-        //for (i = 0, p = 0; i < exts.size(); ++i) {
-        //    const std::string& ext = exts[i];
-        //    if (i) {
-        //        extStr[p++] = ';';
-        //    }
-        //    extStr[p++] = '*';
-        //    extStr[p++] = '.';
-        //    for (j = 0; j < ext.size(); ++j) {
-        //        extStr[p++] = ext[j];
-        //    }
-        //}
-        //extStr[p++] = '\0';
-        //extStr[p++] = '\0';
-        //ofn.lpstrFilter = extStr;
-        //
-        //strcpy(defExtStr, exts.front().c_str());
-        //ofn.lpstrDefExt = defExtStr;
-    //}
+		strcpy(&extStr[p], extStr);
+		extStr[p + p] = '\0';
+		ofn.lpstrFilter = extStr;
+
+		for (i = 0, p = 0; i < n && extensions[i] != ' '; ++i) {
+			defExtStr[p++] = extensions[i];
+		}
+		defExtStr[p++] = '\0';
+		ofn.lpstrDefExt = defExtStr;
+	}
 
     bool rc = false;
     switch (action) {
