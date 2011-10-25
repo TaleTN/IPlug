@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="IPlugExample" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin\Debug\IPlugExample" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Debug\" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-D_DEBUG" />
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin\Release\IPlugExample" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj\Release\" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-DNDEBUG" />
+					<Add option="-O2" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-DDLL_BUILD" />
+			<Add option="-DVST_API" />
+			<Add option="-DIPLUG_NO_JPEG_SUPPORT" />
+			<Add option="-msse2" />
+			<Add option="-ffast-math" />
+			<Add directory="." />
+			<Add directory="..\..\zlib" />
+		</Compiler>
+		<Linker>
+			<Add option="-s" />
+			<Add library="shell32" />
+			<Add library="user32" />
+			<Add library="gdi32" />
+			<Add library="comdlg32" />
+			<Add library="advapi32" />
+			<Add library="wininet" />
+		</Linker>
+		<Unit filename="IPlugExample.cpp" />
+		<Unit filename="IPlugExample.h" />
+		<Unit filename="IPlugExample.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
+		<Unit filename="resource.h" />
+		<Unit filename="..\Containers.h" />
+		<Unit filename="..\Hosts.cpp" />
+		<Unit filename="..\Hosts.h" />
+		<Unit filename="..\IParam.cpp" />
+		<Unit filename="..\IParam.h" />
+		<Unit filename="..\IPlugStructs.cpp" />
+		<Unit filename="..\IPlugStructs.h" />
+		<Unit filename="..\Log.cpp" />
+		<Unit filename="..\Log.h" />
+		<Unit filename="..\IGraphics.cpp" />
+		<Unit filename="..\IGraphics.h" />
+		<Unit filename="..\IGraphicsWin.cpp" />
+		<Unit filename="..\IGraphicsWin.h" />
+		<Unit filename="..\IControl.cpp" />
+		<Unit filename="..\IControl.h" />
+		<Unit filename="..\IPlugBase.cpp" />
+		<Unit filename="..\IPlugBase.h" />
+		<Unit filename="..\IPlugVST.cpp" />
+		<Unit filename="..\IPlugVST.h" />
+		<Unit filename="..\IPlug_include_in_plug_hdr.h" />
+		<Unit filename="..\IPlug_include_in_plug_src.h" />
+		<Unit filename="..\..\zlib\zlib.h" />
+		<Unit filename="..\..\zlib\zconf.h" />
+		<Unit filename="..\..\zlib\zconf.in.h" />
+		<Unit filename="..\..\zlib\adler32.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\zlib\crc32.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\zlib\crc32.h" />
+		<Unit filename="..\..\zlib\infback.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\zlib\inffast.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\zlib\inffast.h" />
+		<Unit filename="..\..\zlib\inffixed.h" />
+		<Unit filename="..\..\zlib\inflate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\zlib\inflate.h" />
+		<Unit filename="..\..\zlib\inftrees.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\zlib\inftrees.h" />
+		<Unit filename="..\..\zlib\trees.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\zlib\trees.h" />
+		<Unit filename="..\..\zlib\uncompr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\zlib\zutil.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\zlib\zutil.h" />
+		<Unit filename="..\..\libpng\png.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\libpng\png.h" />
+		<Unit filename="..\..\libpng\pngconf.h" />
+		<Unit filename="..\..\libpng\pngerror.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\libpng\pngget.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\libpng\pngmem.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\libpng\pngread.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\libpng\pngrio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\libpng\pngrtran.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\libpng\pngrutil.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\libpng\pngset.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\libpng\pngtrans.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\lice\lice.cpp" />
+		<Unit filename="..\..\lice\lice.h" />
+		<Unit filename="..\..\lice\lice_arc.cpp" />
+		<Unit filename="..\..\lice\lice_bezier.h" />
+		<Unit filename="..\..\lice\lice_line.cpp" />
+		<Unit filename="..\..\lice\lice_png.cpp" />
+		<Unit filename="..\..\lice\lice_textnew.cpp" />
+		<Unit filename="..\..\lice\lice_text.h" />
+		<Unit filename="..\..\lice\lice_combine.h" />
+		<Unit filename="..\..\lice\lice_extended.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
