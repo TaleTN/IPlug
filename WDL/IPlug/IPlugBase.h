@@ -199,6 +199,8 @@ protected:
   void ProcessBuffers(float sampleType, int nFrames);
   void ProcessBuffers(double sampleType, int nFrames);
   void ProcessBuffersAccumulating(float sampleType, int nFrames); 
+  void PassThroughBuffers(float sampleType, int nFrames);
+  void PassThroughBuffers(double sampleType, int nFrames);
 
  	WDL_PtrList<IParam> mParams;
 

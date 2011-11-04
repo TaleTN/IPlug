@@ -1230,9 +1230,6 @@ ComponentResult IPlugAU::RenderProc(void* pPlug, AudioUnitRenderActionFlags* pFl
   Trace(TRACELOC, "%d:%d:%d", outputBusIdx, pOutBufList->mNumberBuffers, nFrames);
 
   IPlugAU* _this = (IPlugAU*) pPlug;
-  if (_this->mBypassed) {
-    return noErr;
-  }
 
   if (!(pTimestamp->mFlags & kAudioTimeStampSampleTimeValid) ||
       outputBusIdx >= _this->mOutBuses.GetSize() ||
@@ -1322,7 +1319,12 @@ ComponentResult IPlugAU::RenderProc(void* pPlug, AudioUnitRenderActionFlags* pFl
     _this->AttachOutputBuffers(chIdx, 1, (AudioSampleType**) &(pOutBufList->mBuffers[i].mData));
   }
 
-  _this->ProcessBuffers((AudioSampleType) 0, nFrames);
+  if (_this->mBypassed) {
+    _this->PassThroughBuffers((AudioSampleType) 0, nFrames);
+  }
+  else {
+    _this->ProcessBuffers((AudioSampleType) 0, nFrames);
+  }
 
   if (nRenderNotify) {
     for (int i = 0; i < nRenderNotify; ++i) {

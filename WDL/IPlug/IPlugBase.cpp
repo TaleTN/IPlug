@@ -341,6 +341,24 @@ void IPlugBase::ProcessBuffersAccumulating(float sampleType, int nFrames)
   }
 }
 
+void IPlugBase::PassThroughBuffers(double sampleType, int nFrames) 
+{
+  IPlugBase::ProcessDoubleReplacing(mInData.Get(), mOutData.Get(), nFrames);
+}
+
+void IPlugBase::PassThroughBuffers(float sampleType, int nFrames)
+{
+  IPlugBase::ProcessDoubleReplacing(mInData.Get(), mOutData.Get(), nFrames);
+  int i, n = NOutChannels();
+  OutChannel** ppOutChannel = mOutChannels.GetList();
+  for (i = 0; i < n; ++i, ++ppOutChannel) {
+    OutChannel* pOutChannel = *ppOutChannel;
+    if (pOutChannel->mConnected) {
+      CastCopy(pOutChannel->mFDest, *(pOutChannel->mDest), nFrames);
+    }
+  }   
+}
+
 // If latency changes after initialization (often not supported by the host).
 void IPlugBase::SetLatency(int samples)
 {
