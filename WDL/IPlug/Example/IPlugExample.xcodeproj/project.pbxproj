@@ -152,6 +152,7 @@
 		3D91A6CD13AE172400659595 /* knob_sm.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6BE13AE172400659595 /* knob_sm.png */; };
 		3D91A6CE13AE172400659595 /* toggle-switch.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6BF13AE172400659595 /* toggle-switch.png */; };
 		3D91A6CF13AE172400659595 /* VU-meter_sm.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6C013AE172400659595 /* VU-meter_sm.png */; };
+		3DEED526146EF25600229183 /* IGraphicsCarbon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35013ACA4A1000BCB8B /* IGraphicsCarbon.cpp */; };
 		3DF8EED7144D967400DF1854 /* dfx-au-utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DF8EED5144D967400DF1854 /* dfx-au-utilities.c */; };
 		3DF8EED8144D967400DF1854 /* dfx-au-utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DF8EED5144D967400DF1854 /* dfx-au-utilities.c */; };
 /* End PBXBuildFile section */
@@ -638,13 +639,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D84F2C213AC9EB0000BCB8B /* swell-dlg.mm in Sources */,
-				3D84F2C913AC9EE8000BCB8B /* swell-kb.mm in Sources */,
-				3D84F2CA13AC9EE8000BCB8B /* swell-menu.mm in Sources */,
-				3D84F2CB13AC9EE8000BCB8B /* swell-misc.mm in Sources */,
-				3D84F2CC13AC9EE8000BCB8B /* swell-miscdlg.mm in Sources */,
-				3D84F2CD13AC9EE8000BCB8B /* swell-wnd.mm in Sources */,
-				3D84F2CE13AC9EE8000BCB8B /* swell.cpp in Sources */,
 				3D84F30213ACA080000BCB8B /* adler32.c in Sources */,
 				3D84F30413ACA080000BCB8B /* crc32.c in Sources */,
 				3D84F30713ACA080000BCB8B /* infback.c in Sources */,
@@ -689,13 +683,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D84F9CD13ACCE54000BCB8B /* swell-dlg.mm in Sources */,
-				3D84F9CE13ACCE54000BCB8B /* swell-kb.mm in Sources */,
-				3D84F9CF13ACCE54000BCB8B /* swell-menu.mm in Sources */,
-				3D84F9D013ACCE54000BCB8B /* swell-misc.mm in Sources */,
-				3D84F9D113ACCE54000BCB8B /* swell-miscdlg.mm in Sources */,
-				3D84F9D213ACCE54000BCB8B /* swell-wnd.mm in Sources */,
-				3D84F9D313ACCE54000BCB8B /* swell.cpp in Sources */,
 				3D84F9D413ACCE54000BCB8B /* adler32.c in Sources */,
 				3D84F9D613ACCE54000BCB8B /* crc32.c in Sources */,
 				3D84F9D913ACCE54000BCB8B /* infback.c in Sources */,
@@ -743,13 +730,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D91A43B13AD069D00659595 /* swell-dlg.mm in Sources */,
-				3D91A43C13AD069D00659595 /* swell-kb.mm in Sources */,
-				3D91A43D13AD069D00659595 /* swell-menu.mm in Sources */,
-				3D91A43E13AD069D00659595 /* swell-misc.mm in Sources */,
-				3D91A43F13AD069D00659595 /* swell-miscdlg.mm in Sources */,
-				3D91A44013AD069D00659595 /* swell-wnd.mm in Sources */,
-				3D91A44113AD069D00659595 /* swell.cpp in Sources */,
 				3D91A44213AD069D00659595 /* adler32.c in Sources */,
 				3D91A44413AD069D00659595 /* crc32.c in Sources */,
 				3D91A44713AD069D00659595 /* infback.c in Sources */,
@@ -789,6 +769,7 @@
 				3D91A65313AE155B00659595 /* IPlugExample.cpp in Sources */,
 				3D91A65813AE158500659595 /* IPlugExample.exp in Sources */,
 				3DF8EED8144D967400DF1854 /* dfx-au-utilities.c in Sources */,
+				3DEED526146EF25600229183 /* IGraphicsCarbon.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1072,7 +1053,6 @@
 					IPLUG_NO_JPEG_SUPPORT,
 					_DEBUG,
 					AU_API,
-					IPLUG_NO_CARBON_SUPPORT,
 					"IGRAPHICS_COCOA=IPlugExampleAU",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
@@ -1102,7 +1082,6 @@
 					IPLUG_NO_JPEG_SUPPORT,
 					NDEBUG,
 					AU_API,
-					IPLUG_NO_CARBON_SUPPORT,
 					"IGRAPHICS_COCOA=IPlugExampleAU",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
@@ -1134,7 +1113,6 @@
 					IPLUG_NO_JPEG_SUPPORT,
 					NDEBUG,
 					AU_API,
-					IPLUG_NO_CARBON_SUPPORT,
 					"IGRAPHICS_COCOA=IPlugExampleAU",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
