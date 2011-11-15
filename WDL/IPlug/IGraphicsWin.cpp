@@ -16,7 +16,6 @@ static double sFPS = 0.0;
 enum EParamEditMsg {
 	kNone,
 	kEditing,
-	kUpdate,
 	kCancel,
 	kCommit
 };
@@ -62,21 +61,6 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 
 				if (pGraphics->mParamEditWnd && pGraphics->mParamEditMsg != kNone) {
 					switch (pGraphics->mParamEditMsg) {
-            case kUpdate: {
-            				if (!pGraphics->mEdParam) break;
-							pGraphics->mEdParam->GetDisplayForHost(txt);
-							char currentText[MAX_PARAM_LEN];
-							SendMessage(pGraphics->mParamEditWnd, WM_GETTEXT, MAX_PARAM_LEN, (LPARAM) currentText);
-							if (strcmp(txt, currentText))
-							{
-								IParam* pParam = pGraphics->mEdParam;
-								if (pParam->GetNDisplayTexts() && (pParam->Type() == IParam::kTypeEnum || pParam->Type() == IParam::kTypeBool))
-									SendMessage(pGraphics->mParamEditWnd, CB_SELECTSTRING, -1, (LPARAM) txt);
-								else
-									SendMessage(pGraphics->mParamEditWnd, WM_SETTEXT, 0, (LPARAM) txt);
-							}
-							break;
-            }
             case kCommit: {
 							SendMessage(pGraphics->mParamEditWnd, WM_GETTEXT, MAX_EDIT_LEN, (LPARAM) txt);
 							pGraphics->SetFromStringAfterPrompt(pGraphics->mEdControl, pGraphics->mEdParam, txt);
@@ -101,10 +85,12 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
         if (pGraphics->IsDirty(&dirtyR)) {
           RECT r = { dirtyR.L, dirtyR.T, dirtyR.R, dirtyR.B };
           InvalidateRect(hWnd, &r, FALSE);
-          UpdateWindow(hWnd);
           if (pGraphics->mParamEditWnd) {
-            pGraphics->mParamEditMsg = kUpdate;
+            IRECT* notDirtyR = pGraphics->mEdControl->GetRECT();
+            SetRect(&r, notDirtyR->L, notDirtyR->T, notDirtyR->R, notDirtyR->B);
+            ValidateRect(hWnd, &r);
           }
+          UpdateWindow(hWnd);
         }
       }
       return 0;
@@ -226,7 +212,7 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND hWnd, UINT msg, WPARAM wParam,
 					pGraphics->mParamEditMsg = kCommit;
 					return 0;
 				}
-				break;
+				// Fall through.
 			}
 			case WM_SETFOCUS: {
 				pGraphics->mParamEditMsg = kEditing;
