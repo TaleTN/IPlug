@@ -51,7 +51,6 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 			pGraphics->mParamEditMsg = kCancel;
 			return 0;
 		}
-		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 
 	switch (msg) {
@@ -86,8 +85,8 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
           RECT r = { dirtyR.L, dirtyR.T, dirtyR.R, dirtyR.B };
           InvalidateRect(hWnd, &r, FALSE);
           if (pGraphics->mParamEditWnd) {
-            IRECT* notDirtyR = pGraphics->mEdControl->GetRECT();
-            SetRect(&r, notDirtyR->L, notDirtyR->T, notDirtyR->R, notDirtyR->B);
+            GetClientRect(pGraphics->mParamEditWnd, &r);
+            MapWindowPoints(pGraphics->mParamEditWnd, hWnd, (LPPOINT)&r, 2);
             ValidateRect(hWnd, &r);
           }
           UpdateWindow(hWnd);
