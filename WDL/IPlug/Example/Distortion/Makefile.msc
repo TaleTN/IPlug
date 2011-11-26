@@ -115,8 +115,11 @@ all : dll
 "$(INTDIR)/IPlugDistortion.obj" : IPlugDistortion.cpp IPlugDistortion.h resource.h
 	$(CPP) $(CPPFLAGS) IPlugDistortion.cpp
 
-"$(OUTDIR)/$(OUTFILE)" : "$(OUTDIR)" "$(INTDIR)" "$(INTDIR)/IPlugDistortion.obj"
-	link $(LINKFLAGS) /out:"$(OUTDIR)/$(OUTFILE)" /implib:"$(INTDIR)/IPlugDistortion.lib" "$(INTDIR)/IPlugDistortion.obj"
+"$(INTDIR)/besselfilter.obj" : ../../../besselfilter.cpp
+	$(CPP) $(CPPFLAGS) ../../../besselfilter.cpp
+
+"$(OUTDIR)/$(OUTFILE)" : "$(OUTDIR)" "$(INTDIR)" "$(INTDIR)/IPlugDistortion.obj" "$(INTDIR)/besselfilter.obj"
+	link $(LINKFLAGS) /out:"$(OUTDIR)/$(OUTFILE)" /implib:"$(INTDIR)/IPlugDistortion.lib" "$(INTDIR)/IPlugDistortion.obj" "$(INTDIR)/besselfilter.obj"
 
 dll : "$(OUTDIR)/$(OUTFILE)"
 #	@if not "$(PLATFORM)"=="X64" if exist "C:\Program Files\REAPER\VstPlugins" copy "$(OUTDIR:/=\)\$(OUTFILE:/=\)" "C:\Program Files\REAPER\VstPlugins"
