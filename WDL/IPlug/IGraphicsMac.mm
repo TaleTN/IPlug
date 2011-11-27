@@ -240,6 +240,60 @@ void IGraphicsMac::PluginPath(WDL_String* pPath)
 // extensions = "txt wav" for example
 void IGraphicsMac::PromptForFile(WDL_String* pFilename, int action, char* dir, char* extensions)
 {
+  pFilename->Set("");
+  if (!WindowIsOpen()) {
+    return;
+  }
+  CocoaAutoReleasePool pool;
+
+  NSSavePanel* panel = nil;
+  switch (action) {
+    case kFileSave: {
+      panel = [NSSavePanel savePanel];
+      break;
+    }
+    case kFileOpen: {
+      panel = [NSOpenPanel openPanel];
+      [panel setCanChooseFiles: YES];
+      [panel setCanChooseDirectories: NO];
+      [panel setResolvesAliases: YES];
+      break;
+    }
+    default:
+      return;
+  }
+
+  if (CSTR_NOT_EMPTY(extensions)) {
+    NSArray* fileTypes = [[NSString stringWithUTF8String:extensions] componentsSeparatedByString: @" "];
+    [panel setAllowedFileTypes: fileTypes];
+    [panel setAllowsOtherFileTypes: NO];
+  }
+
+  // Apple's documentation states that setDirectory is deprecated in Mac OS
+  // X v10.6, use setDirectoryURL instead, which is available in v10.6 and
+  // later.
+  // http://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/nssavepanel_Class/
+
+  if (CSTR_NOT_EMPTY(dir)) {
+    #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
+      [panel setDirectoryURL: [NSString stringWithUTF8String: dir]];
+    #elif MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_6
+      [panel setDirectory: [NSString stringWithUTF8String: dir]];
+    #else
+      if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_6) {
+        [panel setDirectoryURL: [NSString stringWithUTF8String: dir]];
+      }
+      else {
+        [panel setDirectory: [NSString stringWithUTF8String: dir]];
+      }
+    #endif
+  }
+
+  int result = [panel runModal];
+
+  if (result == NSOKButton) {
+    pFilename->Set([[[panel URL] path] UTF8String]);
+  }
 }
 
 bool IGraphicsMac::PromptForColor(IColor* pColor, char* prompt)
