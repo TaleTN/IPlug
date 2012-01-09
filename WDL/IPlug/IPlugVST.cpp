@@ -17,13 +17,16 @@ int VSTSpkrArrType(int nchan)
 IPlugVST::IPlugVST(IPlugInstanceInfo instanceInfo, int nParams, const char* channelIOStr, int nPresets,
 	const char* effectName, const char* productName, const char* mfrName,
 	int vendorVersion, int uniqueID, int mfrID, int latency, 
-  bool plugDoesMidi, bool plugDoesChunks, bool plugIsInst)
+  int plugDoesMidi, bool plugDoesChunks, bool plugIsInst)
 : IPlugBase(nParams, channelIOStr, nPresets, effectName, productName, mfrName,
     vendorVersion, uniqueID, mfrID, latency,
     plugDoesMidi, plugDoesChunks, plugIsInst),
     mDoesMidi(plugDoesMidi), mHostCallback(instanceInfo.mVSTHostCallback), mHostSpecificInitDone(false)
 {
   Trace(TRACELOC, "%s", effectName);
+
+  // 0 = no MIDI, 1 = MIDI in & out, 2 = MIDI in only, 3 = MIDI out only
+  assert(plugDoesMidi >= 0 && plugDoesMidi <= 3);
 
   mHasVSTExtensions = VSTEXT_NONE;
 
@@ -574,13 +577,21 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
           return 1;
         }
         if (_this->mDoesMidi) {
-          if (!strcmp((char*) ptr, "sendVstEvents") ||
-            !strcmp((char*) ptr, "sendVstMidiEvent") ||
-            !strcmp((char*) ptr, "receiveVstEvents") ||
-            !strcmp((char*) ptr, "receiveVstMidiEvent")) { // ||
-            //!strcmp((char*) ptr, "midiProgramNames")) {
+          if (_this->mDoesMidi & 1) {
+            if (!strcmp((char*) ptr, "sendVstEvents") ||
+                !strcmp((char*) ptr, "sendVstMidiEvent")) {
               return 1;
+            }
           }
+          if (_this->mDoesMidi <= 2) {
+            if (!strcmp((char*) ptr, "receiveVstEvents") ||
+                !strcmp((char*) ptr, "receiveVstMidiEvent")) {
+              return 1;
+            }
+          }
+          //if (!strcmp((char*) ptr, "midiProgramNames")) {
+          //  return 1;
+          //}
         }
         // Support Reaper VST extensions: http://www.reaper.fm/sdk/vst/
         if (!strcmp((char*) ptr, "hasCockosExtensions"))

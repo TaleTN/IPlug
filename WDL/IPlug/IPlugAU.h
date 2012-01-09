@@ -33,7 +33,7 @@ public:
 	IPlugAU(IPlugInstanceInfo instanceInfo, int nParams, const char* channelIOStr, int nPresets, 
 		const char* effectName, const char* productName, const char* mfrName,
 		int vendorVersion, int uniqueID, int mfrID, int latency, 
-    bool plugDoesMidi, bool plugDoesChunks,  bool plugIsInst);
+    int plugDoesMidi, bool plugDoesChunks,  bool plugIsInst);
 
   virtual ~IPlugAU();
   

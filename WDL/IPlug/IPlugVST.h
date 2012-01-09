@@ -18,7 +18,7 @@ public:
 	IPlugVST(IPlugInstanceInfo instanceInfo, int nParams, const char* channelIOStr, int nPresets,
 		const char* effectName, const char* productName, const char* mfrName,
 		int vendorVersion, int uniqueID, int mfrID, int latency = 0, 
-    bool plugDoesMidi = false, bool plugDoesChunks = false, 
+    int plugDoesMidi = 0, bool plugDoesChunks = false, 
     bool plugIsInst = false);
 
   // ----------------------------------------
@@ -65,7 +65,7 @@ private:
   VstSpeakerArrangement mInputSpkrArr, mOutputSpkrArr;
 
   bool mHostSpecificInitDone;
-  bool mDoesMidi;
+  int mDoesMidi;
   
   enum { VSTEXT_NONE=0, VSTEXT_COCKOS, VSTEXT_COCOA }; // list of VST extensions supported by host
   int mHasVSTExtensions;

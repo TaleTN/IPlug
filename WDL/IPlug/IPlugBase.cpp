@@ -48,7 +48,7 @@ void GetVersionStr(int version, char* str)
 IPlugBase::IPlugBase(int nParams, const char* channelIOStr, int nPresets,
 	const char* effectName, const char* productName, const char* mfrName,
 	int vendorVersion, int uniqueID, int mfrID, int latency, 
-  bool plugDoesMidi, bool plugDoesChunks, bool plugIsInst)
+  int plugDoesMidi, bool plugDoesChunks, bool plugIsInst)
 : mUniqueID(uniqueID), mMfrID(mfrID), mVersion(vendorVersion),
   mSampleRate(DEFAULT_SAMPLE_RATE), mBlockSize(0), mLatency(latency), mHost(kHostUninit), mHostVersion(0),
   mStateChunks(plugDoesChunks), mGraphics(0), mCurrentPresetIdx(0), mIsInst(plugIsInst)
