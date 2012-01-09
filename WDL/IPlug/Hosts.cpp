@@ -65,5 +65,8 @@ EHost LookUpHost(const char* inHost)
   if (strstr(host, "presonus vst2 host")) {
 		return kHostStudioOne;
 	}
+  if (strstr(host, "acoustica")) {
+    return kHostMixcraft;
+  }
 	return kHostUnknown;
 }
