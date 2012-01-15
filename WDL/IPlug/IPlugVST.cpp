@@ -477,7 +477,7 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
               //  msg.LogMsg();
               //#endif
 				    }
-				    else {
+				    else if (_this->mDoesMidi & 1) {
 					    _this->SendVSTEvent(pEvent);	// Pass sysex messages through.
 				    }
 			    }
