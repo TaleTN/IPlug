@@ -50,7 +50,7 @@
     }
     EXPORT int main(audioMasterCallback hostCallback)
     {
-      return (int) VSTPluginMain(hostCallback);
+      return (VstIntPtr) VSTPluginMain(hostCallback);
     }
   };
 #elif defined AU_API
