@@ -152,6 +152,50 @@
 		3D91A6CD13AE172400659595 /* knob_sm.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6BE13AE172400659595 /* knob_sm.png */; };
 		3D91A6CE13AE172400659595 /* toggle-switch.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6BF13AE172400659595 /* toggle-switch.png */; };
 		3D91A6CF13AE172400659595 /* VU-meter_sm.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6C013AE172400659595 /* VU-meter_sm.png */; };
+		3DA8719514D9B94E00F78D9A /* BG_400x200.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6BC13AE172400659595 /* BG_400x200.png */; };
+		3DA8719614D9B94E00F78D9A /* fader-cap_sm.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6BD13AE172400659595 /* fader-cap_sm.png */; };
+		3DA8719714D9B94E00F78D9A /* knob_sm.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6BE13AE172400659595 /* knob_sm.png */; };
+		3DA8719814D9B94E00F78D9A /* toggle-switch.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6BF13AE172400659595 /* toggle-switch.png */; };
+		3DA8719914D9B94E00F78D9A /* VU-meter_sm.png in Resources */ = {isa = PBXBuildFile; fileRef = 3D91A6C013AE172400659595 /* VU-meter_sm.png */; };
+		3DA8719B14D9B94E00F78D9A /* adler32.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2EB13ACA080000BCB8B /* adler32.c */; };
+		3DA8719C14D9B94E00F78D9A /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2ED13ACA080000BCB8B /* crc32.c */; };
+		3DA8719D14D9B94E00F78D9A /* infback.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2F213ACA080000BCB8B /* infback.c */; };
+		3DA8719E14D9B94E00F78D9A /* inffast.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2F313ACA080000BCB8B /* inffast.c */; };
+		3DA8719F14D9B94E00F78D9A /* inflate.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2F613ACA080000BCB8B /* inflate.c */; };
+		3DA871A014D9B94E00F78D9A /* inftrees.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2F813ACA080000BCB8B /* inftrees.c */; };
+		3DA871A114D9B94E00F78D9A /* trees.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2FA13ACA080000BCB8B /* trees.c */; };
+		3DA871A214D9B94E00F78D9A /* uncompr.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F2FC13ACA080000BCB8B /* uncompr.c */; };
+		3DA871A314D9B94E00F78D9A /* zutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F30013ACA080000BCB8B /* zutil.c */; };
+		3DA871A414D9B94E00F78D9A /* png.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F30F13ACA160000BCB8B /* png.c */; };
+		3DA871A514D9B94E00F78D9A /* pngerror.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F31213ACA160000BCB8B /* pngerror.c */; };
+		3DA871A614D9B94E00F78D9A /* pngget.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F31413ACA160000BCB8B /* pngget.c */; };
+		3DA871A714D9B94E00F78D9A /* pngmem.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F31513ACA160000BCB8B /* pngmem.c */; };
+		3DA871A814D9B94E00F78D9A /* pngread.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F31713ACA160000BCB8B /* pngread.c */; };
+		3DA871A914D9B94E00F78D9A /* pngrio.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F31813ACA160000BCB8B /* pngrio.c */; };
+		3DA871AA14D9B94E00F78D9A /* pngrtran.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F31913ACA160000BCB8B /* pngrtran.c */; };
+		3DA871AB14D9B94E00F78D9A /* pngrutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F31A13ACA160000BCB8B /* pngrutil.c */; };
+		3DA871AC14D9B94E00F78D9A /* pngset.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F31B13ACA160000BCB8B /* pngset.c */; };
+		3DA871AD14D9B94E00F78D9A /* pngtrans.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F31C13ACA160000BCB8B /* pngtrans.c */; };
+		3DA871AE14D9B94E00F78D9A /* swell-gdi.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33413ACA1C8000BCB8B /* swell-gdi.mm */; };
+		3DA871AF14D9B94E00F78D9A /* lice_arc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33813ACA387000BCB8B /* lice_arc.cpp */; };
+		3DA871B014D9B94E00F78D9A /* lice_line.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33D13ACA387000BCB8B /* lice_line.cpp */; };
+		3DA871B114D9B94E00F78D9A /* lice_png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33E13ACA387000BCB8B /* lice_png.cpp */; };
+		3DA871B214D9B94E00F78D9A /* lice_textnew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F33F13ACA387000BCB8B /* lice_textnew.cpp */; };
+		3DA871B314D9B94E00F78D9A /* lice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F34013ACA387000BCB8B /* lice.cpp */; };
+		3DA871B414D9B94E00F78D9A /* Hosts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F34913ACA4A1000BCB8B /* Hosts.cpp */; };
+		3DA871B514D9B94E00F78D9A /* IControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F34B13ACA4A1000BCB8B /* IControl.cpp */; };
+		3DA871B614D9B94E00F78D9A /* IGraphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F34E13ACA4A1000BCB8B /* IGraphics.cpp */; };
+		3DA871B714D9B94E00F78D9A /* IGraphicsCocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35313ACA4A1000BCB8B /* IGraphicsCocoa.mm */; };
+		3DA871B814D9B94E00F78D9A /* IGraphicsMac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35713ACA4A1000BCB8B /* IGraphicsMac.mm */; };
+		3DA871B914D9B94E00F78D9A /* IParam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35A13ACA4A1000BCB8B /* IParam.cpp */; };
+		3DA871BA14D9B94E00F78D9A /* IPlugBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F36313ACA4A1000BCB8B /* IPlugBase.cpp */; };
+		3DA871BB14D9B94E00F78D9A /* IPlugStructs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F36513ACA4A1000BCB8B /* IPlugStructs.cpp */; };
+		3DA871BC14D9B94E00F78D9A /* Log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F36913ACA4A1000BCB8B /* Log.cpp */; };
+		3DA871BF14D9B94E00F78D9A /* IPlugExample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D91A65013AE155B00659595 /* IPlugExample.cpp */; };
+		3DA871C214D9B94E00F78D9A /* IGraphicsCarbon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35013ACA4A1000BCB8B /* IGraphicsCarbon.cpp */; };
+		3DA871C414D9B94E00F78D9A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D84F26A13AC9D92000BCB8B /* Cocoa.framework */; };
+		3DA871C914D9B94E00F78D9A /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D84F26813AC9D8B000BCB8B /* Carbon.framework */; };
+		3DA871DE14D9C07200F78D9A /* IPlugVST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F36713ACA4A1000BCB8B /* IPlugVST.cpp */; };
 		3DEED526146EF25600229183 /* IGraphicsCarbon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D84F35013ACA4A1000BCB8B /* IGraphicsCarbon.cpp */; };
 		3DF8EED7144D967400DF1854 /* dfx-au-utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DF8EED5144D967400DF1854 /* dfx-au-utilities.c */; };
 		3DF8EED8144D967400DF1854 /* dfx-au-utilities.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DF8EED5144D967400DF1854 /* dfx-au-utilities.c */; };
@@ -256,6 +300,7 @@
 		3D91A6BE13AE172400659595 /* knob_sm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = knob_sm.png; path = img/knob_sm.png; sourceTree = "<group>"; };
 		3D91A6BF13AE172400659595 /* toggle-switch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "toggle-switch.png"; path = "img/toggle-switch.png"; sourceTree = "<group>"; };
 		3D91A6C013AE172400659595 /* VU-meter_sm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "VU-meter_sm.png"; path = "img/VU-meter_sm.png"; sourceTree = "<group>"; };
+		3DA871D014D9B94E00F78D9A /* IPlugExample.vst */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IPlugExample.vst; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DF8EED5144D967400DF1854 /* dfx-au-utilities.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "dfx-au-utilities.c"; path = "../../dfx-library/dfx-au-utilities.c"; sourceTree = "<group>"; };
 		3DF8EED6144D967400DF1854 /* dfx-au-utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "dfx-au-utilities.h"; path = "../../dfx-library/dfx-au-utilities.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -296,6 +341,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3DA871C314D9B94E00F78D9A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DA871C414D9B94E00F78D9A /* Cocoa.framework in Frameworks */,
+				3DA871C914D9B94E00F78D9A /* Carbon.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -305,6 +359,7 @@
 				3D84F0EE13AC9289000BCB8B /* IPlugExample.vst */,
 				3D84FA0C13ACCE54000BCB8B /* IPlugExample.component */,
 				3D91A48113AD069D00659595 /* IPlugExample.component */,
+				3DA871D014D9B94E00F78D9A /* IPlugExample.vst */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -549,6 +604,23 @@
 			productReference = 3D91A48113AD069D00659595 /* IPlugExample.component */;
 			productType = "com.apple.product-type.bundle";
 		};
+		3DA8719314D9B94E00F78D9A /* VST_x64 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3DA871CC14D9B94E00F78D9A /* Build configuration list for PBXNativeTarget "VST_x64" */;
+			buildPhases = (
+				3DA8719414D9B94E00F78D9A /* Resources */,
+				3DA8719A14D9B94E00F78D9A /* Sources */,
+				3DA871C314D9B94E00F78D9A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VST_x64;
+			productName = VST;
+			productReference = 3DA871D014D9B94E00F78D9A /* IPlugExample.vst */;
+			productType = "com.apple.product-type.bundle";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -570,6 +642,7 @@
 			projectRoot = "";
 			targets = (
 				3D84F0ED13AC9289000BCB8B /* VST */,
+				3DA8719314D9B94E00F78D9A /* VST_x64 */,
 				3D84F9AB13ACCE54000BCB8B /* AU */,
 				3D91A41913AD069D00659595 /* AU_x64 */,
 			);
@@ -610,6 +683,18 @@
 				3D91A6CD13AE172400659595 /* knob_sm.png in Resources */,
 				3D91A6CE13AE172400659595 /* toggle-switch.png in Resources */,
 				3D91A6CF13AE172400659595 /* VU-meter_sm.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DA8719414D9B94E00F78D9A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DA8719514D9B94E00F78D9A /* BG_400x200.png in Resources */,
+				3DA8719614D9B94E00F78D9A /* fader-cap_sm.png in Resources */,
+				3DA8719714D9B94E00F78D9A /* knob_sm.png in Resources */,
+				3DA8719814D9B94E00F78D9A /* toggle-switch.png in Resources */,
+				3DA8719914D9B94E00F78D9A /* VU-meter_sm.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -770,6 +855,50 @@
 				3D91A65813AE158500659595 /* IPlugExample.exp in Sources */,
 				3DF8EED8144D967400DF1854 /* dfx-au-utilities.c in Sources */,
 				3DEED526146EF25600229183 /* IGraphicsCarbon.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DA8719A14D9B94E00F78D9A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DA8719B14D9B94E00F78D9A /* adler32.c in Sources */,
+				3DA8719C14D9B94E00F78D9A /* crc32.c in Sources */,
+				3DA8719D14D9B94E00F78D9A /* infback.c in Sources */,
+				3DA8719E14D9B94E00F78D9A /* inffast.c in Sources */,
+				3DA8719F14D9B94E00F78D9A /* inflate.c in Sources */,
+				3DA871A014D9B94E00F78D9A /* inftrees.c in Sources */,
+				3DA871A114D9B94E00F78D9A /* trees.c in Sources */,
+				3DA871A214D9B94E00F78D9A /* uncompr.c in Sources */,
+				3DA871A314D9B94E00F78D9A /* zutil.c in Sources */,
+				3DA871A414D9B94E00F78D9A /* png.c in Sources */,
+				3DA871A514D9B94E00F78D9A /* pngerror.c in Sources */,
+				3DA871A614D9B94E00F78D9A /* pngget.c in Sources */,
+				3DA871A714D9B94E00F78D9A /* pngmem.c in Sources */,
+				3DA871A814D9B94E00F78D9A /* pngread.c in Sources */,
+				3DA871A914D9B94E00F78D9A /* pngrio.c in Sources */,
+				3DA871AA14D9B94E00F78D9A /* pngrtran.c in Sources */,
+				3DA871AB14D9B94E00F78D9A /* pngrutil.c in Sources */,
+				3DA871AC14D9B94E00F78D9A /* pngset.c in Sources */,
+				3DA871AD14D9B94E00F78D9A /* pngtrans.c in Sources */,
+				3DA871AE14D9B94E00F78D9A /* swell-gdi.mm in Sources */,
+				3DA871AF14D9B94E00F78D9A /* lice_arc.cpp in Sources */,
+				3DA871B014D9B94E00F78D9A /* lice_line.cpp in Sources */,
+				3DA871B114D9B94E00F78D9A /* lice_png.cpp in Sources */,
+				3DA871B214D9B94E00F78D9A /* lice_textnew.cpp in Sources */,
+				3DA871B314D9B94E00F78D9A /* lice.cpp in Sources */,
+				3DA871B414D9B94E00F78D9A /* Hosts.cpp in Sources */,
+				3DA871B514D9B94E00F78D9A /* IControl.cpp in Sources */,
+				3DA871B614D9B94E00F78D9A /* IGraphics.cpp in Sources */,
+				3DA871B714D9B94E00F78D9A /* IGraphicsCocoa.mm in Sources */,
+				3DA871B814D9B94E00F78D9A /* IGraphicsMac.mm in Sources */,
+				3DA871B914D9B94E00F78D9A /* IParam.cpp in Sources */,
+				3DA871BA14D9B94E00F78D9A /* IPlugBase.cpp in Sources */,
+				3DA871BB14D9B94E00F78D9A /* IPlugStructs.cpp in Sources */,
+				3DA871BC14D9B94E00F78D9A /* Log.cpp in Sources */,
+				3DA871BF14D9B94E00F78D9A /* IPlugExample.cpp in Sources */,
+				3DA871C214D9B94E00F78D9A /* IGraphicsCarbon.cpp in Sources */,
+				3DA871DE14D9C07200F78D9A /* IPlugVST.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1127,6 +1256,88 @@
 			};
 			name = Tracer;
 		};
+		3DA871CD14D9B94E00F78D9A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEPLOYMENT_LOCATION = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					NO_GZCOMPRESS,
+					IPLUG_NO_JPEG_SUPPORT,
+					_DEBUG,
+					VST_API,
+					VST_FORCE_DEPRECATED,
+					"IGRAPHICS_COCOA=IPlugExample",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = 4.2;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				WRAPPER_EXTENSION = vst;
+			};
+			name = Debug;
+		};
+		3DA871CE14D9B94E00F78D9A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					x86_64,
+					i386,
+				);
+				COPY_PHASE_STRIP = YES;
+				DEPLOYMENT_LOCATION = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					NO_GZCOMPRESS,
+					IPLUG_NO_JPEG_SUPPORT,
+					NDEBUG,
+					VST_API,
+					VST_FORCE_DEPRECATED,
+					"IGRAPHICS_COCOA=IPlugExample",
+				);
+				GCC_VERSION = 4.2;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				STRIP_INSTALLED_PRODUCT = YES;
+				WRAPPER_EXTENSION = vst;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		3DA871CF14D9B94E00F78D9A /* Tracer */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					x86_64,
+					i386,
+				);
+				COPY_PHASE_STRIP = YES;
+				DEPLOYMENT_LOCATION = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					NO_GZCOMPRESS,
+					IPLUG_NO_JPEG_SUPPORT,
+					NDEBUG,
+					VST_API,
+					VST_FORCE_DEPRECATED,
+					"IGRAPHICS_COCOA=IPlugExample",
+				);
+				GCC_VERSION = 4.2;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				STRIP_INSTALLED_PRODUCT = YES;
+				WRAPPER_EXTENSION = vst;
+				ZERO_LINK = NO;
+			};
+			name = Tracer;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1166,6 +1377,16 @@
 				3D91A47E13AD069D00659595 /* Debug */,
 				3D91A47F13AD069D00659595 /* Release */,
 				3D91A48013AD069D00659595 /* Tracer */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3DA871CC14D9B94E00F78D9A /* Build configuration list for PBXNativeTarget "VST_x64" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3DA871CD14D9B94E00F78D9A /* Debug */,
+				3DA871CE14D9B94E00F78D9A /* Release */,
+				3DA871CF14D9B94E00F78D9A /* Tracer */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
