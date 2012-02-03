@@ -386,8 +386,8 @@ void IPlugBase::OnParamReset()
 void IPlugBase::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames)
 {
   // Mutex is already locked.
-  int i, nIn = mInChannels.GetSize(), nOut = mOutChannels.GetSize();
-  for (i = 0; i < nIn; ++i) {
+  int i = 0, nOut = mOutChannels.GetSize();
+  for (int n = MIN(mInChannels.GetSize(), nOut); i < n; ++i) {
     memcpy(outputs[i], inputs[i], nFrames * sizeof(double));
   }
   for (/* same i */; i < nOut; ++i) {
