@@ -222,7 +222,6 @@
 		3D84F2FB13ACA080000BCB8B /* trees.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trees.h; path = ../../zlib/trees.h; sourceTree = "<group>"; };
 		3D84F2FC13ACA080000BCB8B /* uncompr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uncompr.c; path = ../../zlib/uncompr.c; sourceTree = "<group>"; };
 		3D84F2FD13ACA080000BCB8B /* zconf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = zconf.h; path = ../../zlib/zconf.h; sourceTree = "<group>"; };
-		3D84F2FE13ACA080000BCB8B /* zconf.in.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = zconf.in.h; path = ../../zlib/zconf.in.h; sourceTree = "<group>"; };
 		3D84F2FF13ACA080000BCB8B /* zlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = zlib.h; path = ../../zlib/zlib.h; sourceTree = "<group>"; };
 		3D84F30013ACA080000BCB8B /* zutil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = zutil.c; path = ../../zlib/zutil.c; sourceTree = "<group>"; };
 		3D84F30113ACA080000BCB8B /* zutil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = zutil.h; path = ../../zlib/zutil.h; sourceTree = "<group>"; };
@@ -472,7 +471,6 @@
 				3D84F2FB13ACA080000BCB8B /* trees.h */,
 				3D84F2FC13ACA080000BCB8B /* uncompr.c */,
 				3D84F2FD13ACA080000BCB8B /* zconf.h */,
-				3D84F2FE13ACA080000BCB8B /* zconf.in.h */,
 				3D84F2FF13ACA080000BCB8B /* zlib.h */,
 				3D84F30013ACA080000BCB8B /* zutil.c */,
 				3D84F30113ACA080000BCB8B /* zutil.h */,
