@@ -426,11 +426,14 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
       if (pData) {
         AudioUnitParameterInfo* pInfo = (AudioUnitParameterInfo*) pData;
         memset(pInfo, 0, sizeof(AudioUnitParameterInfo));
+        IParam* pParam = GetParam(element);
+        if (!pParam) {
+          return noErr;
+        }
         pInfo->flags = kAudioUnitParameterFlag_CFNameRelease |
           kAudioUnitParameterFlag_HasCFNameString |
           kAudioUnitParameterFlag_IsReadable |
         kAudioUnitParameterFlag_IsWritable;
-        IParam* pParam = GetParam(element);
         const char* paramName = pParam->GetNameForHost();
         pInfo->cfNameString = MakeCFString(pParam->GetNameForHost());
         strcpy(pInfo->name, paramName);   // Max 52.
