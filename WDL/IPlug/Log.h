@@ -7,7 +7,7 @@
 #if defined _WIN32
   #define SYS_THREAD_ID (int) GetCurrentThreadId()
 #elif defined __APPLE__
-  #define SYS_THREAD_ID (int) pthread_self()
+  #define SYS_THREAD_ID (long) pthread_self()
 #else 
   #error "No OS defined!"
 #endif

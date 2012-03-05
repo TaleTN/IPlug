@@ -27,7 +27,6 @@ const int TXTLEN = 1024;
 	catch(...) {  \
 		strcpy(str, "parse error"); \
 	} \
-  strcat(str, "\r\n"); \
 }
 
 struct LogFile
@@ -205,7 +204,14 @@ const char* AppendTimestamp(const char* Mmm_dd_yyyy, const char* hh_mm_ss, const
       static WDL_Mutex sLogMutex;      
       char str[TXTLEN];
       VARARGS_TO_STR(str);
-      printf("[%d:%s:%d]%s", GetOrdinalThreadID(SYS_THREAD_ID), funcName, line, str);
+    #ifdef _WIN32
+      char tmp[2048];
+      sprintf(tmp, "[%d:%s:%d]%s", GetOrdinalThreadID(SYS_THREAD_ID), funcName, line, str);
+      OutputDebugString(tmp);
+    #else
+      printf("[%d:%s:%d]%s\n", GetOrdinalThreadID(SYS_THREAD_ID), funcName, line, str);
+      fflush(stdout);
+    #endif
      
       //WDL_MutexLock lock(&sLogMutex);
       //fprintf(sLogFile.mFP, "[%d:%s:%d]%s", GetOrdinalThreadID(SYS_THREAD_ID), funcName, line, str);
@@ -213,6 +219,8 @@ const char* AppendTimestamp(const char* Mmm_dd_yyyy, const char* hh_mm_ss, const
     }
   }
 
+  #undef VST_FORCE_DEPRECATED
+  #define VST_FORCE_DEPRECATED 1
   #include "../../VST_SDK/aeffectx.h"
   const char* VSTOpcodeStr(int opCode)
   {
