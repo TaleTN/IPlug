@@ -977,6 +977,7 @@
 					Z_SOLO,
 					IPLUG_NO_JPEG_SUPPORT,
 					NDEBUG,
+					TRACER_BUILD,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GENERATE_PKGINFO_FILE = YES;
@@ -1008,6 +1009,7 @@
 					Z_SOLO,
 					IPLUG_NO_JPEG_SUPPORT,
 					NDEBUG,
+					TRACER_BUILD,
 					VST_API,
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
@@ -1098,6 +1100,7 @@
 					Z_SOLO,
 					IPLUG_NO_JPEG_SUPPORT,
 					NDEBUG,
+					TRACER_BUILD,
 					AU_API,
 					"IGRAPHICS_COCOA=IPlugExampleAU",
 				);
@@ -1251,6 +1254,7 @@
 					Z_SOLO,
 					IPLUG_NO_JPEG_SUPPORT,
 					NDEBUG,
+					TRACER_BUILD,
 					AU_API,
 					"IGRAPHICS_COCOA=IPlugExampleAU",
 				);
@@ -1337,6 +1341,7 @@
 					Z_SOLO,
 					IPLUG_NO_JPEG_SUPPORT,
 					NDEBUG,
+					TRACER_BUILD,
 					VST_API,
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
