@@ -1,5 +1,5 @@
 # IPlug distortion example
-# (c) Theo Niessink 2011
+# (c) Theo Niessink 2011, 2012
 # <http://www.taletn.com/>
 #
 # This software is provided 'as-is', without any express or implied
@@ -64,7 +64,7 @@ LINKFLAGS = $(LINKFLAGS) /machine:x86
 !	ENDIF
 PLATFORM = X64
 OUTFILE = IPlugDistortion.dll
-CPPFLAGS = $(CPPFLAGS) /favor:INTEL64 /wd4267 /wd4800 /wd4244
+CPPFLAGS = $(CPPFLAGS) /favor:blend /wd4267 /wd4800 /wd4244
 LINKFLAGS = $(LINKFLAGS) /machine:x64
 
 !ELSE

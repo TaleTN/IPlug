@@ -1,5 +1,5 @@
 # IPlug instrument example
-# (c) Theo Niessink 2009, 2010
+# (c) Theo Niessink 2009-2012
 # <http://www.taletn.com/>
 #
 #
@@ -65,7 +65,7 @@ LINKFLAGS = $(LINKFLAGS) /machine:x86
 !	ENDIF
 PLATFORM = X64
 OUTFILE = IPlugInstrument.dll
-CPPFLAGS = $(CPPFLAGS) /favor:INTEL64 /wd4267 /wd4800
+CPPFLAGS = $(CPPFLAGS) /favor:blend /wd4267 /wd4800
 LINKFLAGS = $(LINKFLAGS) /machine:x64
 
 !ELSE
