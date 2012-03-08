@@ -32,6 +32,7 @@ enum EHost {
   kHostAudioMulch,
   kHostStudioOne,
 	kHostMixcraft,
+  kHostGarageBand,
 
 	// These hosts don't report the host name:
   // EnergyXT2

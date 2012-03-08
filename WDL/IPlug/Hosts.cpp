@@ -68,5 +68,8 @@ EHost LookUpHost(const char* inHost)
   if (strstr(host, "acoustica")) {
     return kHostMixcraft;
   }
+  if (strstr(host, "garageband")) {
+    return kHostGarageBand;
+  }
 	return kHostUnknown;
 }
