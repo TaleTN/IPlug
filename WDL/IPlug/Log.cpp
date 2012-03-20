@@ -206,10 +206,18 @@ const char* AppendTimestamp(const char* Mmm_dd_yyyy, const char* hh_mm_ss, const
       VARARGS_TO_STR(str);
     #ifdef _WIN32
       char tmp[2048];
-      sprintf(tmp, "[%d:%s:%d]%s", GetOrdinalThreadID(SYS_THREAD_ID), funcName, line, str);
+      sprintf(tmp,
+    #else
+      printf(
+    #endif
+      "[%d:%s:%d]%s"
+    #ifndef _WIN32
+      "\n"
+    #endif
+      , GetOrdinalThreadID(SYS_THREAD_ID), funcName, line, str);
+    #ifdef _WIN32
       OutputDebugString(tmp);
     #else
-      printf("[%d:%s:%d]%s\n", GetOrdinalThreadID(SYS_THREAD_ID), funcName, line, str);
       fflush(stdout);
     #endif
      
