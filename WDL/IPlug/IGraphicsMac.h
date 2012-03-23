@@ -1,10 +1,6 @@
 #ifndef _IGRAPHICSMAC_
 #define _IGRAPHICSMAC_
 
-#if defined(__APPLE__) && defined(__LP64__) && !defined(IPLUG_NO_CARBON_SUPPORT)
-	#define IPLUG_NO_CARBON_SUPPORT
-#endif
-
 #include "IGraphics.h"
 #include "../swell/swell.h"
 #include <Carbon/Carbon.h>

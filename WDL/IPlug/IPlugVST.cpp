@@ -391,7 +391,7 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
       IGraphics* pGraphics = _this->GetGUI();
 	    if (pGraphics)
       {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(IPLUG_NO_CARBON_SUPPORT)
         if (!pGraphics->OpenWindow(ptr)) pGraphics=0;
 #else   // OSX, check if we are in a Cocoa VST host
         bool iscocoa = (_this->mHasVSTExtensions&VSTEXT_COCOA);

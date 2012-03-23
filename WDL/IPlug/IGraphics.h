@@ -5,6 +5,10 @@
 #include "IControl.h"
 #include "../lice/lice.h"
 
+#if defined(__APPLE__) && defined(__LP64__) && !defined(IPLUG_NO_CARBON_SUPPORT)
+	#define IPLUG_NO_CARBON_SUPPORT
+#endif
+
 // Specialty stuff for calling in to Reaper for Lice functionality.
 #ifdef REAPER_SPECIAL
   #include "../IPlugExt/ReaperExt.h"
