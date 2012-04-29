@@ -71,5 +71,8 @@ EHost LookUpHost(const char* inHost)
   if (strstr(host, "garageband")) {
     return kHostGarageBand;
   }
+  if (strstr(host, "ardour")) {
+		return kHostArdour;
+	}
 	return kHostUnknown;
 }
