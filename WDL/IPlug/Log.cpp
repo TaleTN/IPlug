@@ -180,11 +180,11 @@ const char* AppendTimestamp(const char* Mmm_dd_yyyy, const char* hh_mm_ss, const
 
 #if defined TRACER_BUILD
 
-  int GetOrdinalThreadID(int sysThreadID)
+  int GetOrdinalThreadID(SYS_THREAD_ID_TYPE sysThreadID)
   {
-    static WDL_TypedBuf<int> sThreadIDs;
+    static WDL_TypedBuf<SYS_THREAD_ID_TYPE> sThreadIDs;
     int i, n = sThreadIDs.GetSize();
-    int* pThreadID = sThreadIDs.Get();
+    SYS_THREAD_ID_TYPE* pThreadID = sThreadIDs.Get();
     for (i = 0; i < n; ++i, ++pThreadID) {
       if (sysThreadID == *pThreadID) {
         return i;

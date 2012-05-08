@@ -5,9 +5,11 @@
 #include "Containers.h"
 
 #if defined _WIN32
-  #define SYS_THREAD_ID (int) GetCurrentThreadId()
+  #define SYS_THREAD_ID GetCurrentThreadId()
+  typedef DWORD SYS_THREAD_ID_TYPE;
 #elif defined __APPLE__
-  #define SYS_THREAD_ID (long) pthread_self()
+  #define SYS_THREAD_ID pthread_self()
+  typedef pthread_t SYS_THREAD_ID_TYPE;
 #else 
   #error "No OS defined!"
 #endif
