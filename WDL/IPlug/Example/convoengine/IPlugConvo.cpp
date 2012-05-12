@@ -1,7 +1,7 @@
 /*
 
 IPlug convoengine example
-(c) Theo Niessink 2010
+(c) Theo Niessink 2010-2012
 <http://www.taletn.com/>
 
 
@@ -31,6 +31,8 @@ engine.
 #include "IPlugConvo.h"
 #include "../../IPlug_include_in_plug_src.h"
 
+#include "../../../pcmfmtcvt.h"
+
 
 enum EParams
 {
@@ -42,12 +44,12 @@ enum EParams
 
 IPlugConvo::IPlugConvo(IPlugInstanceInfo instanceInfo):
 	IPLUG_CTOR(kNumParams, 0, instanceInfo),
-	mSampleRate(0.)
+	mSampleRate(0)
 {
 	TRACE;
 
-	GetParam(kDry)->InitDouble("Dry", 1.,  0., 1., 0.001);
-	GetParam(kWet)->InitDouble("Wet", 0.5, 0., 1., 0.001);
+	GetParam(kDry)->InitDouble("Dry", 0., 0., 1., 0.001);
+	GetParam(kWet)->InitDouble("Wet", 1., 0., 1., 0.001);
 }
 
 
@@ -73,29 +75,55 @@ void IPlugConvo::Reset()
 	TRACE; IMutexLock lock(this);
 
 	// Detect a change in sample rate.
-	if (GetSampleRate() != mSampleRate)
+	int sr = int(GetSampleRate());
+	if (sr != mSampleRate)
 	{
-		mSampleRate = GetSampleRate();
+		mSampleRate = sr;
 
-		// Create a mono impulse response of 250 ms.
-		mImpulse.SetNumChannels(1);
-		int nSamples = mImpulse.SetLength(int(0.250 * mSampleRate + 0.5));
-		if (nSamples > 0)
+		float* irSrc = (float*)mIR;
+		const int irRate = 44100;
+		const int mono = 1;
+
+		mImpulse.SetNumChannels(mono);
+
+		int len = sizeof(mIR) / sizeof(float);
+		if (mSampleRate != irRate)
 		{
-			WDL_FFT_REAL* buf = mImpulse.impulses[0].Get();
-			memset(buf, 0, nSamples * sizeof(WDL_FFT_REAL));
-
-			// Set echo taps every ~25 ms.
-			buf[0] = 0.5;
-			buf[int(0.1 * (double)nSamples)] = 0.5;
-			buf[int(0.2 * (double)nSamples)] = 0.46875;
-			buf[int(0.3 * (double)nSamples)] = 0.4375;
-			buf[int(0.4 * (double)nSamples)] = 0.40625;
-			buf[int(0.5 * (double)nSamples)] = 0.375;
-			buf[int(0.6 * (double)nSamples)] = 0.34375;
-			buf[int(0.7 * (double)nSamples)] = 0.3125;
-			buf[int(0.8 * (double)nSamples)] = 0.28125;
-			buf[int(0.9 * (double)nSamples)] = 0.25;
+			// Resample the impulse response.
+			len = int((double)mSampleRate / (double)irRate * (double)len + 0.5);
+			len = mImpulse.SetLength(len);
+			if (len > 0)
+			{
+				double state = 0.;
+				WDL_FFT_REAL* p = mImpulse.impulses[0].Get();
+				#if WDL_FFT_REALSIZE == 8
+					float* tmp = (float*)malloc(len * sizeof(float));
+					if (tmp)
+					{
+						memset(tmp, 0, len * sizeof(float));
+						mixFloats(irSrc, irRate, mono, tmp, mSampleRate, mono, len, 1.f, 0.f, &state);
+						// Convert to impulse response to double precision.
+						for (int i = 0; i < len; ++i) *p++ = tmp[i];
+						free(tmp);
+					}
+					else
+					{
+						memset(p, 0, len * sizeof(WDL_FFT_REAL));
+					}
+				#else
+					memset(p, 0, len * sizeof(WDL_FFT_REAL));
+					mixFloats(irSrc, irRate, mono, p, mSampleRate, mono, len, 1.f, 0.f, &state);
+				#endif
+			}
+		}
+		else
+		{
+			len = mImpulse.SetLength(len);
+			if (len > 0)
+			{
+				WDL_FFT_REAL* p = mImpulse.impulses[0].Get();
+				for (int i = 0; i < len; ++i) *p++ = *irSrc++;
+			}
 		}
 
 		// Tie the impulse response to the convolution engine.
@@ -115,7 +143,7 @@ void IPlugConvo::ProcessDoubleReplacing(double** inputs, double** outputs, int n
 		double* in = inputs[0];
 		// Use outputs[0] as a temporary buffer.
 		WDL_FFT_REAL* tmp = (WDL_FFT_REAL*)outputs[0];
-		for (int i = 0; i < nFrames; ++i) *tmp++ = *in++;
+		for (int i = 0; i < nFrames; ++i) *tmp++ = (WDL_FFT_REAL)*in++;
 		mEngine.Add((WDL_FFT_REAL**)outputs, nFrames, 1);
 	}
 	#endif
@@ -142,3 +170,43 @@ void IPlugConvo::ProcessDoubleReplacing(double** inputs, double** outputs, int n
 		mEngine.Advance(nAvail);
 	}
 }
+
+
+// Impulse response (extracted from ir.wav using the convertor code below)
+
+const float IPlugConvo::mIR[] =
+{
+	#include "ir.h"
+};
+
+/*
+
+#include <stdio.h>
+#include "../../../wdlendian.h"
+
+int main(int argc, char* argv[])
+{
+	FILE* f = fopen(argv[1], "rb");
+	fseek(f, 12, SEEK_SET);
+
+	unsigned int i, n;
+	for (;;)
+	{
+		fread(&i, 1, 4, f);
+		fread(&n, 1, 4, f);
+		n = WDL_bswap32_if_be(n);
+		if (i == WDL_bswap32_if_le('data')) break;
+		fseek(f, n, SEEK_CUR);
+	}
+
+	while (n > 0)
+	{
+		n -= fread(&i, 1, 4, f);
+		printf("%.8ef,\n", (float)WDL_bswapf_if_be(i));
+	}
+
+	fclose(f);
+	return 0;
+}
+
+*/

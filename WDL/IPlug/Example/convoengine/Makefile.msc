@@ -82,6 +82,9 @@ INTDIR = $(OUTDIR)
 CPPFLAGS = $(CPPFLAGS) /EHsc /fp:fast /D "VST_API" /D "WINVER=0x0501" /D "_WINDLL" /D "_MBCS" /MT /c /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /W3 /D "_CRT_SECURE_NO_WARNINGS" /nologo
 LINKFLAGS = $(LINKFLAGS) /dll /subsystem:windows /libpath:"../../../lice/$(OUTDIR:Tracer=Release)" /libpath:"../../$(OUTDIR)" /dynamicbase:no /manifest:no /nologo
 
+# Double precision processing
+CPPFLAGS = $(CPPFLAGS) /D "WDL_FFT_REALSIZE=8" /D "WDL_CONVO_WANT_FULLPRECISION_IMPULSE_STORAGE"
+
 !IF "$(CONFIGURATION)" == "Debug"
 CPPFLAGS = $(CPPFLAGS) /D "_DEBUG" /RTCsu
 !	IF "$(PLATFORM)" == "X64"
@@ -99,7 +102,7 @@ CPPFLAGS = $(CPPFLAGS) /D "TRACER_BUILD"
 LINKFLAGS = $(LINKFLAGS) /opt:icf /opt:ref /incremental:no /defaultlib:libcmt
 !ENDIF
 
-LINKFLAGS = $(LINKFLAGS) lice.lib IPlug.lib shell32.lib user32.lib gdi32.lib comdlg32.lib
+LINKFLAGS = $(LINKFLAGS) lice.lib IPlug.lib shell32.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib
 
 
 all : dll
@@ -126,7 +129,8 @@ all : dll
 	link $(LINKFLAGS) /out:"$(OUTDIR)/$(OUTFILE)" /implib:"$(INTDIR)/IPlugConvo.lib" "$(INTDIR)/IPlugConvo.obj" "$(INTDIR)/convoengine.obj" "$(INTDIR)/fft.obj"
 
 dll : "$(OUTDIR)/$(OUTFILE)"
+#	@if not "$(PLATFORM)"=="X64" if exist "C:\Program Files\REAPER\VstPlugins" copy "$(OUTDIR:/=\)\$(OUTFILE:/=\)" "C:\Program Files\REAPER\VstPlugins"
+#	@if "$(PLATFORM)"=="X64" if exist "C:\Program Files\REAPER (x64)\VstPlugins" copy "$(OUTDIR:/=\)\$(OUTFILE:/=\)" "C:\Program Files\REAPER (x64)\VstPlugins"
 
 clean :
-	@if exist "$(OUTDIR)/*.*" erase /Q "$(OUTDIR:/=\)\*.*"
-	@if exist "$(OUTDIR)" rd "$(OUTDIR:/=\)"
+	@if exist "$(OUTDIR)" rd /s /q "$(OUTDIR)"

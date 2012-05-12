@@ -4,7 +4,7 @@
 /*
 
 IPlug convoengine example
-(c) Theo Niessink 2010
+(c) Theo Niessink 2010-2012
 <http://www.taletn.com/>
 
 
@@ -46,12 +46,14 @@ public:
 	void ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames);
 
 private:
+	static const float mIR[512];
+
 	WDL_ImpulseBuffer mImpulse;
 	WDL_ConvolutionEngine_Div mEngine;
 
 	double mDry, mWet;
 
-	double mSampleRate;
+	int mSampleRate;
 };
 
 
