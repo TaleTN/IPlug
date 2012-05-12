@@ -591,7 +591,7 @@ void IGraphicsWin::PluginPath(WDL_String* pPath)
   GetModulePath(mHInstance, pPath);
 }
 
-void IGraphicsWin::PromptForFile(WDL_String* pFilename, int action, char* dir, char* extensions)
+void IGraphicsWin::PromptForFile(WDL_String* pFilename, EFileAction action, char* dir, char* extensions)
 {
   pFilename->Set("");
 	if (!WindowIsOpen()) { 

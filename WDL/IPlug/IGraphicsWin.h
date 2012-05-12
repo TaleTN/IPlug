@@ -1,6 +1,7 @@
 #ifndef _IGRAPHICSWIN_
 #define _IGRAPHICSWIN_
 
+#include "IControl.h"
 #include "IGraphics.h"
 
 #include <windows.h>
@@ -26,7 +27,7 @@ public:
 	void HostPath(WDL_String* pPath); 
   void PluginPath(WDL_String* pPath);
 
-	void PromptForFile(WDL_String* pFilename, int action = kFileOpen, char* dir = "",
+	void PromptForFile(WDL_String* pFilename, EFileAction action = kFileOpen, char* dir = "",
     char* extensions = "");   // extensions = "txt wav" for example.
 
   bool PromptForColor(IColor* pColor, char* prompt = "");

@@ -238,7 +238,7 @@ void IGraphicsMac::PluginPath(WDL_String* pPath)
 }
 
 // extensions = "txt wav" for example
-void IGraphicsMac::PromptForFile(WDL_String* pFilename, int action, char* dir, char* extensions)
+void IGraphicsMac::PromptForFile(WDL_String* pFilename, EFileAction action, char* dir, char* extensions)
 {
   pFilename->Set("");
   if (!WindowIsOpen()) {

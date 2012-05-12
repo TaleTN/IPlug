@@ -2,7 +2,6 @@
 #define _IGRAPHICS_
 
 #include "IPlugStructs.h"
-#include "IControl.h"
 #include "../lice/lice.h"
 
 #if defined(__APPLE__) && defined(__LP64__) && !defined(IPLUG_NO_CARBON_SUPPORT)
@@ -66,8 +65,8 @@ public:
 	virtual void HostPath(WDL_String* pPath) = 0;   // Full path to host executable.
   virtual void PluginPath(WDL_String* pPath) = 0; // Full path to plugin dll.
 	// Run the "open file" or "save file" dialog.  Default to host executable path.
-  enum EFileAction { kFileOpen, kFileSave }; // See IFileSelectorControl::EFileAction.
-	virtual void PromptForFile(WDL_String* pFilename, int action = kFileOpen, char* dir = 0,
+  enum EFileAction { kFileOpen, kFileSave };
+	virtual void PromptForFile(WDL_String* pFilename, EFileAction action = kFileOpen, char* dir = 0,
         char* extensions = 0) = 0;  // extensions = "txt wav" for example.
   virtual bool PromptForColor(IColor* pColor, char* prompt = 0) = 0;
 
