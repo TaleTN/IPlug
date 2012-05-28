@@ -31,8 +31,6 @@ engine.
 #include "IPlugConvo.h"
 #include "../../IPlug_include_in_plug_src.h"
 
-#include "../../../pcmfmtcvt.h"
-
 
 enum EParams
 {
@@ -70,61 +68,57 @@ void IPlugConvo::OnParamChange(int paramIdx)
 }
 
 
+template <class I, class O>
+void IPlugConvo::Resample(const I* src, int src_len, double src_srate, O* dest, int dest_len, double dest_srate)
+{
+	if (dest_srate == src_srate)
+	{
+		// Copy
+		int i, n = dest_len;
+		if (n > src_len) n = src_len;
+		for (i = 0; i < n; ++i) *dest++ = (O)*src++;
+		for (; i < dest_len; ++i) *dest++ = 0;
+		return;
+	}
+
+	// Resample using linear interpolation.
+	double pos = 0.;
+	double delta = src_srate / dest_srate;
+	for (int i = 0; i < dest_len; ++i)
+	{
+		int idx = int(pos);
+		if (idx < src_len)
+		{
+			double frac = pos - floor(pos);
+			double interp = (1. - frac) * src[idx];
+			if (++idx < src_len) interp += frac * src[idx];
+			pos += delta;
+			*dest++ = (O)(delta * interp);
+		}
+		else
+		{
+			*dest++ = 0;
+		}
+	}
+}
+
+
 void IPlugConvo::Reset()
 {
 	TRACE; IMutexLock lock(this);
 
 	// Detect a change in sample rate.
-	int sr = int(GetSampleRate());
-	if (sr != mSampleRate)
+	if (GetSampleRate() != mSampleRate)
 	{
-		mSampleRate = sr;
+		mSampleRate = GetSampleRate();
 
-		float* irSrc = (float*)mIR;
-		const int irRate = 44100;
-		const int mono = 1;
+		const int irLength = sizeof(mIR) / sizeof(mIR[0]);
+		const double irSampleRate = 44100.;
+		mImpulse.SetNumChannels(1);
 
-		mImpulse.SetNumChannels(mono);
-
-		int len = sizeof(mIR) / sizeof(float);
-		if (mSampleRate != irRate)
-		{
-			// Resample the impulse response.
-			len = int((double)mSampleRate / (double)irRate * (double)len + 0.5);
-			len = mImpulse.SetLength(len);
-			if (len > 0)
-			{
-				double state = 0.;
-				WDL_FFT_REAL* p = mImpulse.impulses[0].Get();
-				#if WDL_FFT_REALSIZE == 8
-					float* tmp = (float*)malloc(len * sizeof(float));
-					if (tmp)
-					{
-						memset(tmp, 0, len * sizeof(float));
-						mixFloats(irSrc, irRate, mono, tmp, mSampleRate, mono, len, 1.f, 0.f, &state);
-						// Convert to impulse response to double precision.
-						for (int i = 0; i < len; ++i) *p++ = tmp[i];
-						free(tmp);
-					}
-					else
-					{
-						memset(p, 0, len * sizeof(WDL_FFT_REAL));
-					}
-				#else
-					memset(p, 0, len * sizeof(WDL_FFT_REAL));
-					mixFloats(irSrc, irRate, mono, p, mSampleRate, mono, len, 1.f, 0.f, &state);
-				#endif
-			}
-		}
-		else
-		{
-			len = mImpulse.SetLength(len);
-			if (len > 0)
-			{
-				WDL_FFT_REAL* p = mImpulse.impulses[0].Get();
-				for (int i = 0; i < len; ++i) *p++ = *irSrc++;
-			}
-		}
+		// Resample the impulse response.
+		int len = mImpulse.SetLength(ResampleLength(irLength, irSampleRate, mSampleRate));
+		if (len) Resample(mIR, irLength, irSampleRate, mImpulse.impulses[0].Get(), len, mSampleRate);
 
 		// Tie the impulse response to the convolution engine.
 		mEngine.SetImpulse(&mImpulse, 0);

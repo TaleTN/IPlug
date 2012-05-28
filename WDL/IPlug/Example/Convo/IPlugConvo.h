@@ -45,6 +45,15 @@ public:
 	void Reset();
 	void ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames);
 
+	// Returns destination length
+	inline int ResampleLength(int src_len, double src_srate, double dest_srate)
+	{
+		if (dest_srate == src_srate) return src_len;
+		return int(ceil(dest_srate / src_srate * (double)src_len));
+	}
+
+	template <class I, class O> void Resample(const I* src, int src_len, double src_srate, O* dest, int dest_len, double dest_srate);
+
 private:
 	static const float mIR[512];
 
@@ -53,7 +62,7 @@ private:
 
 	double mDry, mWet;
 
-	int mSampleRate;
+	double mSampleRate;
 };
 
 
