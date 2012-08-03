@@ -1,5 +1,5 @@
 # IPlug makefile for Microsoft Windows SDK v7.0/v7.1
-# (c) Theo Niessink 2009-2011
+# (c) Theo Niessink 2009-2012
 # <http://www.taletn.com/>
 #
 # This file is provided 'as-is', without any express or implied warranty. In
@@ -18,47 +18,38 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-
 # Usage:
 #   Setenv [/Debug | /Release] [/x86 | /x64] [/xp | /vista | /2003 | /2008 | /win7]
-#   NMAKE /f IPlug_winsdk7.mak [CONFIGURATION=Tracer] [NOSSE2=1] [all | lib | iplug]
-#
-# /Debug                Debug build
-# /Release              Release build
-# /x86                  32-bit x86 code
-# /x64                  64-bit x64 code
-# /xp                   Windows XP SP2 (recommended)
-# /vista                Windows Vista
-# /2003                 Windows Server 2003
-# /2008                 Windows Server 2008, Windows Vista SP1
-# /win7                 Windows 7
-#
-# CONFIGURATION=Tracer  Tracer build
-# NOSSE2=1              disables the use of SSE2 instructions
-# all                   builds the .lib file, keeping all intermediate files
-# lib                   builds the .lib file, and then deletes all
-#                       intermediate files
-# iplug                 only compiles IPlug
+#   nmake /f Makefile.msc [CONFIGURATION=Tracer] [NOSSE2=1] [all | lib | iplug]
 
+PROJECT = IPlug
+OUTFILE = $(PROJECT).lib
 
-!IFNDEF CONFIGURATION
-!	IFDEF NODEBUG
+CPPFLAGS = $(CPPFLAGS) /EHsc /GS- /GR- /D "_LIB" /D "_MBCS" /D "IPLUG_NO_JPEG_SUPPORT" /Oi /Ot /fp:fast /MT /c /Fo"$(OUTDIR)/" /Fd"$(OUTDIR)/" /W3 /WX /wd4996 /wd4244 /nologo
+
+!IF !DEFINED(CONFIGURATION) && DEFINED(NODEBUG)
 CONFIGURATION = Release
-!	ELSE
+!ELSE IF !DEFINED(CONFIGURATION)
 CONFIGURATION = Debug
-!	ENDIF
 !ENDIF
 
-!IFNDEF TARGET_CPU
-!	IF "$(CPU)" == "i386"
-TARGET_CPU = x86
-!	ELSE IF "$(CPU)" == "AMD64"
-TARGET_CPU = x64
+!IF "$(CONFIGURATION)" == "Release" || "$(CONFIGURATION)" == "Tracer"
+
+CPPFLAGS = $(CPPFLAGS) /D "NDEBUG" /O2 /Ob2
+
+!ELSE IF "$(CONFIGURATION)" == "Debug"
+
+CPPFLAGS = $(CPPFLAGS) /D "_DEBUG" /RTCsu
+!	IF "$(PLATFORM)" == "X64"
+CPPFLAGS = $(CPPFLAGS) /Zi
+!	ELSE
+CPPFLAGS = $(CPPFLAGS) /ZI
 !	ENDIF
+
 !ENDIF
 
+!IF "$(TARGET_CPU)" == "x86" || "$(CPU)" == "i386"
 
-!IF "$(TARGET_CPU)" == "x86"
 !	IFNDEF NOSSE2
 PLATFORM = Win32
 CPPFLAGS = $(CPPFLAGS) /arch:SSE2
@@ -66,84 +57,52 @@ CPPFLAGS = $(CPPFLAGS) /arch:SSE2
 PLATFORM = Win32_noSSE2
 !	ENDIF
 CPPFLAGS = $(CPPFLAGS) /D "WIN32" /D "_CRT_SECURE_NO_WARNINGS"
-!ELSE IF "$(TARGET_CPU)" == "x64"
+
+!ELSE IF "$(TARGET_CPU)" == "x64" || "$(CPU)" == "AMD64"
+
 PLATFORM = X64
-!	IFDEF NOSSE2
-!		MESSAGE Warning: NOSSE2 has no effect on x64 code
-!		MESSAGE
-!	ENDIF
 CPPFLAGS = $(CPPFLAGS) /favor:blend /wd4267 /wd4800
-!ELSE
-!	ERROR Unsupported target CPU "$(TARGET_CPU)"
+
 !ENDIF
 
 OUTDIR = $(PLATFORM)/$(CONFIGURATION)
-INTDIR = $(OUTDIR)
 
-!MESSAGE IPlug - $(CONFIGURATION)|$(PLATFORM)
+!MESSAGE $(PROJECT) - $(CONFIGURATION)|$(PLATFORM)
 !MESSAGE
 
-
-CPPFLAGS = $(CPPFLAGS) /EHsc /GS- /GR- /D "_LIB" /D "_MBCS" /D "IPLUG_NO_JPEG_SUPPORT" /Oi /Ot /fp:fast /MT /c /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /W3 /WX /wd4996 /wd4244 /nologo
-
-!IF "$(CONFIGURATION)" == "Debug"
-CPPFLAGS = $(CPPFLAGS) /D "_DEBUG" /RTCsu
-!	IF "$(PLATFORM)" == "X64"
-CPPFLAGS = $(CPPFLAGS) /Zi
-!	ELSE
-CPPFLAGS = $(CPPFLAGS) /ZI
-!	ENDIF
-!ELSE
-CPPFLAGS = $(CPPFLAGS) /D "NDEBUG" /O2 /Ob2
-!	IF "$(CONFIGURATION)" == "Tracer"
-CPPFLAGS = $(CPPFLAGS) /D "TRACER_BUILD"
-!	ENDIF
-!ENDIF
-
-!MESSAGE $(CPP) $(CPPFLAGS)
-!MESSAGE
-
-
-all : "$(OUTDIR)/IPlug.lib"
+all : "$(OUTDIR)/$(OUTFILE)"
 
 "$(OUTDIR)" :
-	@if not exist "$(OUTDIR)/" mkdir "$(OUTDIR)"
-
-!IF "$(INTDIR)" != "$(OUTDIR)"
-"$(INTDIR)" :
-	@if not exist "$(INTDIR)/" mkdir "$(INTDIR)"
+!IF !EXIST("$(OUTDIR)/")
+	mkdir $@
 !ENDIF
 
-
 IPLUG = \
-"$(INTDIR)/Hosts.obj" \
-"$(INTDIR)/IParam.obj" \
-"$(INTDIR)/IPlugStructs.obj" \
-"$(INTDIR)/Log.obj" \
-"$(INTDIR)/IGraphics.obj" \
-"$(INTDIR)/IGraphicsWin.obj" \
-"$(INTDIR)/IControl.obj" \
-"$(INTDIR)/IPlugBase.obj" \
-"$(INTDIR)/IPlugVST.obj"
+"$(OUTDIR)/Hosts.obj" \
+"$(OUTDIR)/IParam.obj" \
+"$(OUTDIR)/IPlugStructs.obj" \
+"$(OUTDIR)/Log.obj" \
+"$(OUTDIR)/IGraphics.obj" \
+"$(OUTDIR)/IGraphicsWin.obj" \
+"$(OUTDIR)/IControl.obj" \
+"$(OUTDIR)/IPlugBase.obj" \
+"$(OUTDIR)/IPlugVST.obj"
 
-iplug : $(IPLUG)
+iplug : "$(OUTDIR)" $(IPLUG)
 
-.cpp{$(INTDIR)}.obj :
-	@$(CPP) $(CPPFLAGS) "$<"
+.cpp{$(OUTDIR)}.obj :
+	$(CPP) $(CPPFLAGS) $<
 
+"$(OUTDIR)/$(OUTFILE)" : "$(OUTDIR)" $(IPLUG)
+	lib /out:"$(OUTDIR)/$(OUTFILE)" /nologo wininet.lib $(IPLUG)
 
-LIB_FLAGS = /out:"$(OUTDIR)/IPlug.lib" /nologo wininet.lib
+lib : "$(OUTDIR)/$(OUTFILE)"
+	del "$(OUTDIR:/=\)\*.obj"
+!IF "$(CONFIGURATION)" == "Debug"
+	del "$(OUTDIR:/=\)\vc*.*"
+!ENDIF
 
-"$(OUTDIR)/IPlug.lib" : "$(OUTDIR)" "$(INTDIR)" $(IPLUG)
-	@echo.
-	@echo lib $(LIB_FLAGS)
-	@lib $(LIB_FLAGS) $(IPLUG)
-
-lib : "$(OUTDIR)/IPlug.lib" clear
-
-clear :
-	@if exist "$(INTDIR)/*.obj" erase "$(INTDIR:/=\)\*.obj"
-	@if exist "$(INTDIR)/vc*.*" erase "$(INTDIR:/=\)\vc*.*"
-
-clean : clear
-	@if exist "$(OUTDIR)/IPlug.lib" erase "$(OUTDIR:/=\)\IPlug.lib"
+clean :
+!IF EXIST("$(OUTDIR)/")
+	rmdir /s /q "$(OUTDIR:/=\)"
+!ENDIF

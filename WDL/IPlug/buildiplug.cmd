@@ -2,7 +2,7 @@
 setlocal
 
 rem  IPlug & LICE makefiles for Microsoft Windows SDK v7.0/v7.1
-rem  (c) Theo Niessink 2009-2011
+rem  (c) Theo Niessink 2009-2012
 rem  <http://www.taletn.com/>
 rem
 rem  This file is provided 'as-is', without any express or implied warranty.
@@ -58,7 +58,7 @@ if /i "%1"=="/Tracer" (
   shift
   goto Usage
 )
-echo Usage: "buildiplug.cmd [/x86 | /x64] [/Release | /Debug | Tracer]"
+echo Usage: buildiplug.cmd [/x86 ^| /x64] [/Release ^| /Debug ^| Tracer]
 goto :eof
 
 :SaveCurEnv
@@ -98,19 +98,19 @@ if "%config%"=="Tracer" goto LiceRelease
 if "%arch%"=="x64" goto LiceDebug64
 call Setenv /Debug /x86 /xp
 
-title "LICE - Debug|Win32"
+title LICE - Debug^|Win32
 NMAKE /f Makefile.msc clean
 NMAKE /f Makefile.msc all
 
-rem title "LICE - Debug|Win32_noSSE2"
-rem NMAKE /f Makefile.msc NOSSE2=1 clean
-rem NMAKE /f Makefile.msc NOSSE2=1 all
+rem title LICE - Debug^|Win32_noSSE2
+rem nmake /f Makefile.msc NOSSE2=1 clean
+rem nmake /f Makefile.msc NOSSE2=1 all
 
 if "%arch%"=="x86" goto LiceRelease
 :LiceDebug64
 call Setenv /Debug /x64 /xp
 
-title "LICE - Debug|X64"
+title LICE - Debug^|X64
 NMAKE /f Makefile.msc clean
 NMAKE /f Makefile.msc all
 
@@ -119,11 +119,11 @@ if "%config%"=="Debug" goto BuildIPlug
 if "%arch%"=="x64" goto LiceRelease64
 call Setenv /Release /x86 /xp
 
-title "LICE - Release|Win32"
+title LICE - Release^|Win32
 NMAKE /f Makefile.msc clean
 NMAKE /f Makefile.msc lib
 
-title "LICE - Release|Win32_noSSE2"
+title LICE - Release^|Win32_noSSE2
 NMAKE /f Makefile.msc NOSSE2=1 clean
 NMAKE /f Makefile.msc NOSSE2=1 lib
 
@@ -131,7 +131,7 @@ if "%arch%"=="x86" goto BuildIPlug
 :LiceRelease64
 call Setenv /Release /x64 /xp
 
-title "LICE - Release|X64"
+title LICE - Release^|X64
 NMAKE /f Makefile.msc clean
 NMAKE /f Makefile.msc lib
 
@@ -144,11 +144,11 @@ if "%config%"=="Tracer" goto IPlugTracer
 if "%arch%"=="x64" goto IPlugDebug64
 call Setenv /Debug /x86 /xp
 
-title "IPlug - Debug|Win32"
+title IPlug - Debug^|Win32
 NMAKE /f Makefile.msc clean
 NMAKE /f Makefile.msc all
 
-rem title "IPlug - Debug|Win32_noSSE2"
+rem title IPlug - Debug^|Win32_noSSE2
 rem NMAKE /f Makefile.msc NOSSE2=1 clean
 rem NMAKE /f Makefile.msc NOSSE2=1 all
 
@@ -156,7 +156,7 @@ if "%arch%"=="x86" goto IPlugRelease
 :IPlugDebug64
 call Setenv /Debug /x64 /xp
 
-title "IPlug - Debug|X64"
+title IPlug - Debug^|X64
 NMAKE /f Makefile.msc clean
 NMAKE /f Makefile.msc all
 
@@ -165,11 +165,11 @@ if "%config%"=="Debug" goto RestoreEnv
 if "%arch%"=="x64" goto IPlugRelease64
 call Setenv /Release /x86 /xp
 
-title "IPlug - Release|Win32"
+title IPlug - Release^|Win32
 NMAKE /f Makefile.msc clean
 NMAKE /f Makefile.msc lib
 
-title "IPlug - Release|Win32_noSSE2"
+title IPlug - Release^|Win32_noSSE2
 NMAKE /f Makefile.msc NOSSE2=1 clean
 NMAKE /f Makefile.msc NOSSE2=1 lib
 
@@ -177,7 +177,7 @@ if "%arch%"=="x86" goto RestoreEnv
 :IPlugRelease64
 call Setenv /Release /x64 /xp
 
-title "IPlug - Release|X64"
+title IPlug - Release^|X64
 NMAKE /f Makefile.msc clean
 NMAKE /f Makefile.msc lib
 
@@ -186,11 +186,11 @@ goto RestoreEnv
 if "%arch%"=="x64" goto IPlugTracer64
 call Setenv /Release /x86 /xp
 
-title "IPlug - Tracer|Win32"
+title IPlug - Tracer^|Win32
 NMAKE /f Makefile.msc CONFIGURATION=Tracer clean
 NMAKE /f Makefile.msc CONFIGURATION=Tracer lib
 
-rem title "IPlug - Tracer|Win32_noSSE2"
+rem title IPlug - Tracer^|Win32_noSSE2
 rem NMAKE /f Makefile.msc CONFIGURATION=Tracer NOSSE2=1 clean
 rem NMAKE /f Makefile.msc CONFIGURATION=Tracer NOSSE2=1 lib
 
@@ -198,7 +198,7 @@ if "%arch%"=="x86" goto RestoreEnv
 :IPlugTracer64
 call Setenv /Release /x64 /xp
 
-title "IPlug - Tracer|X64"
+title IPlug - Tracer^|X64
 NMAKE /f Makefile.msc CONFIGURATION=Tracer clean
 NMAKE /f Makefile.msc CONFIGURATION=Tracer lib
 
@@ -207,36 +207,36 @@ call %setenv%
 
 if not "%arch%"=="x64" (
   if not "%config%"=="Release" if not "%config%"=="Tracer" (
-    if not exist ..\lice\Win32\Debug\lice.lib echo Error: "LICE - Debug|Win32" failed.
-    rem if not exist ..\lice\Win32_noSSE2\Debug\lice.lib echo Error: "LICE - Debug|Win32_noSSE2" failed.
-    if not exist Win32\Debug\IPlug.lib echo Error: "IPlug - Debug|Win32" failed.
-    rem if not exist Win32_noSSE2\Debug\IPlug.lib echo Error: "IPlug - Debug|Win32_noSSE2" failed.
+    if not exist ..\lice\Win32\Debug\lice.lib echo Error: LICE - Debug^|Win32 failed.
+    rem if not exist ..\lice\Win32_noSSE2\Debug\lice.lib echo Error: LICE - Debug^|Win32_noSSE2 failed.
+    if not exist Win32\Debug\IPlug.lib echo Error: IPlug - Debug^|Win32 failed.
+    rem if not exist Win32_noSSE2\Debug\IPlug.lib echo Error: IPlug - Debug^|Win32_noSSE2 failed.
   )
   if not "%config%"=="Debug" if not "%config%"=="Tracer" (
-    if not exist ..\lice\Win32\Release\lice.lib echo Error: "LICE - Release|Win32" failed.
-    if not exist ..\lice\Win32_noSSE2\Release\lice.lib echo Error: "LICE - Release|Win32_noSSE2" failed.
-    if not exist Win32\Release\IPlug.lib echo Error: "IPlug - Release|Win32" failed.
-    if not exist Win32_noSSE2\Release\IPlug.lib echo Error: "IPlug - Release|Win32_noSSE2" failed.
+    if not exist ..\lice\Win32\Release\lice.lib echo Error: LICE - Release^|Win32 failed.
+    if not exist ..\lice\Win32_noSSE2\Release\lice.lib echo Error: LICE - Release^|Win32_noSSE2 failed.
+    if not exist Win32\Release\IPlug.lib echo Error: IPlug - Release^|Win32 failed.
+    if not exist Win32_noSSE2\Release\IPlug.lib echo Error: IPlug - Release^|Win32_noSSE2 failed.
   )
   if "%config%"=="Tracer" (
-    if not exist ..\lice\Win32\Release\lice.lib echo Error: "LICE - Release|Win32" failed.
-    rem if not exist ..\lice\Win32_noSSE2\Release\lice.lib echo Error: "LICE - Release|Win32_noSSE2" failed.
-    if not exist Win32\Tracer\IPlug.lib echo Error: "IPlug - Tracer|Win32" failed.
-    rem if not exist Win32_noSSE2\Tracer\IPlug.lib echo Error: "IPlug - Tracer|Win32_noSSE2" failed.
+    if not exist ..\lice\Win32\Release\lice.lib echo Error: LICE - Release^|Win32 failed.
+    rem if not exist ..\lice\Win32_noSSE2\Release\lice.lib echo Error: LICE - Release^|Win32_noSSE2 failed.
+    if not exist Win32\Tracer\IPlug.lib echo Error: IPlug - Tracer^|Win32 failed.
+    rem if not exist Win32_noSSE2\Tracer\IPlug.lib echo Error: IPlug - Tracer^|Win32_noSSE2 failed.
   )
 )
 
 if not "%arch%"=="x86" (
   if not "%config%"=="Release" if not "%config%"=="Tracer" (
-    if not exist ..\lice\X64\Debug\lice.lib echo Error: "LICE - Debug|X64" failed.
-    if not exist X64\Debug\IPlug.lib echo Error: "IPlug - Debug|X64" failed.
+    if not exist ..\lice\X64\Debug\lice.lib echo Error: LICE - Debug^|X64 failed.
+    if not exist X64\Debug\IPlug.lib echo Error: IPlug - Debug^|X64 failed.
   )
   if not "%config%"=="Debug" if not "%config%"=="Tracer" (
-    if not exist ..\lice\X64\Release\lice.lib echo Error: "LICE - Release|X64" failed.
-    if not exist X64\Release\IPlug.lib echo Error: "IPlug - Release|X64" failed.
+    if not exist ..\lice\X64\Release\lice.lib echo Error: LICE - Release^|X64 failed.
+    if not exist X64\Release\IPlug.lib echo Error: IPlug - Release^|X64 failed.
   )
   if "%config%"=="Tracer" (
-    if not exist ..\lice\X64\Release\lice.lib echo Error: "LICE - Release|X64" failed.
-    if not exist X64\Tracer\IPlug.lib echo Error: "IPlug - Tracer|X64" failed.
+    if not exist ..\lice\X64\Release\lice.lib echo Error: LICE - Release^|X64 failed.
+    if not exist X64\Tracer\IPlug.lib echo Error: IPlug - Tracer^|X64 failed.
   )
 )
