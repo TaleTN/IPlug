@@ -89,6 +89,16 @@
   #define PUBLIC_NAME PLUG_NAME
 #endif
 
+#ifndef PLUG_DOES_MIDI
+  #if PLUG_DOES_MIDI_IN && PLUG_DOES_MIDI_OUT
+    #define PLUG_DOES_MIDI 1
+  #elif PLUG_DOES_MIDI_IN
+    #define PLUG_DOES_MIDI 2
+  #elif PLUG_DOES_MIDI_OUT
+    #define PLUG_DOES_MIDI 3
+  #endif
+#endif
+
 #define IPLUG_CTOR(nParams, nPresets, instanceInfo) \
   IPlug(instanceInfo, nParams, PLUG_CHANNEL_IO, nPresets, \
     PUBLIC_NAME, "", PLUG_MFR, PLUG_VER, PLUG_UNIQUE_ID, PLUG_MFR_ID, \
