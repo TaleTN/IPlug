@@ -149,7 +149,7 @@ protected:
   // If latency changes after initialization (often not supported by the host).
   virtual void SetLatency(int samples);
 	virtual bool SendMidiMsg(IMidiMsg* pMsg) = 0;
-  virtual bool SendMidiMsgs(WDL_TypedBuf<IMidiMsg>* pMsgs) = 0;
+  virtual bool SendMidiMsgs(WDL_TypedBuf<IMidiMsg>* pMsgs);
   bool IsInst() { return mIsInst; }
     
   void MakeDefaultPreset(char* name = 0, int nPresets = 1);

@@ -217,18 +217,6 @@ bool IPlugVST::SendMidiMsg(IMidiMsg* pMsg)
 	return SendVSTEvent((VstEvent*) &midiEvent);
 }
 
-bool IPlugVST::SendMidiMsgs(WDL_TypedBuf<IMidiMsg>* pMsgs)
-{
-  // Todo: bundle and SendVSTEvents.
-  bool rc = true;
-  int n = pMsgs->GetSize();
-  IMidiMsg* pMsg = pMsgs->Get();
-  for (int i = 0; i < n; ++i, ++pMsg) {
-    rc &= SendMidiMsg(pMsg);
-  }
-  return rc;
-}
-
 audioMasterCallback IPlugVST::GetHostCallback()
 {
   return mHostCallback;
