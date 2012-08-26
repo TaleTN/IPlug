@@ -406,12 +406,6 @@ void IPlugBase::ProcessDoubleReplacing(double** inputs, double** outputs, int nF
   }
 }
 
-// Default passthrough.
-void IPlugBase::ProcessMidiMsg(IMidiMsg* pMsg)
-{
-	SendMidiMsg(pMsg);
-}
-
 IPreset* GetNextUninitializedPreset(WDL_PtrList<IPreset>* pPresets)
 {
   int n = pPresets->GetSize();

@@ -58,7 +58,7 @@ public:
   // Implementations should set a mutex lock like in the no-op!  
   virtual void OnActivate(bool active) { TRACE;  IMutexLock lock(this); }
     
-	virtual void ProcessMidiMsg(IMidiMsg* pMsg);
+	virtual void ProcessMidiMsg(IMidiMsg* pMsg) {}
 	virtual bool MidiNoteName(int noteNumber, char* rName) { *rName = '\0'; return false; }
 
   // Implementations should set a mutex lock.
