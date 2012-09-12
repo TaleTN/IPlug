@@ -71,7 +71,7 @@ protected:
   void SetBlockSize(int blockSize);
   void SetLatency(int samples);
 	bool SendMidiMsg(IMidiMsg* pMsg);
-  bool SendSysEx(int offset, const BYTE* pData, int size);
+  bool SendSysEx(ISysEx* pSysEx);
   
 private:
 

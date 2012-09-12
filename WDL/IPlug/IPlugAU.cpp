@@ -259,9 +259,11 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       return noErr;
     }
     case kMusicDeviceSysExSelect: {
-      UInt8* pData = GET_COMP_PARAM(UInt8*, 1, 2);
-      UInt32 dataSize = GET_COMP_PARAM(UInt32, 0, 2);
-      _this->ProcessSysEx(0, (const BYTE*)pData, dataSize);
+      ISysEx sysex;
+      sysex.mData = GET_COMP_PARAM(UInt8*, 1, 2);
+      sysex.mSize = GET_COMP_PARAM(UInt32, 0, 2);
+      sysex.mOffset = 0;
+      _this->ProcessSysEx(&sysex);
       return noErr;
     }
     case kMusicDevicePrepareInstrumentSelect: {
@@ -1588,7 +1590,7 @@ bool IPlugAU::SendMidiMsg(IMidiMsg* pMsg)
   return false;
 }
 
-bool IPlugAU::SendSysEx(int offset, const BYTE* pData, int size)
+bool IPlugAU::SendSysEx(ISysEx* pSysEx)
 {
   return false;
 }

@@ -217,16 +217,16 @@ bool IPlugVST::SendMidiMsg(IMidiMsg* pMsg)
 	return SendVSTEvent((VstEvent*) &midiEvent);
 }
 
-bool IPlugVST::SendSysEx(int offset, const BYTE* pData, int size)
+bool IPlugVST::SendSysEx(ISysEx* pSysEx)
 { 
 	VstMidiSysexEvent sysexEvent;
 	memset(&sysexEvent, 0, sizeof(VstMidiSysexEvent));
 
 	sysexEvent.type = kVstSysExType;
 	sysexEvent.byteSize = sizeof(VstMidiSysexEvent);
-	sysexEvent.deltaFrames = offset;
-	sysexEvent.dumpBytes = size;
-	sysexEvent.sysexDump = (char*)pData;
+	sysexEvent.deltaFrames = pSysEx->mOffset;
+	sysexEvent.dumpBytes = pSysEx->mSize;
+	sysexEvent.sysexDump = (char*)pSysEx->mData;
 
 	return SendVSTEvent((VstEvent*) &sysexEvent);
 }
@@ -481,7 +481,8 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
 				    }
 				    else if (pEvent->type == kVstSysExType) {
 				        VstMidiSysexEvent* pSE = (VstMidiSysexEvent*) pEvent;
-				        _this->ProcessSysEx(pSE->deltaFrames, (const BYTE*)pSE->sysexDump, pSE->dumpBytes);
+				        ISysEx sysex(pSE->deltaFrames, (const BYTE*)pSE->sysexDump, pSE->dumpBytes);
+				        _this->ProcessSysEx(&sysex);
 				    }
 			    }
 		    }

@@ -59,7 +59,7 @@ public:
   virtual void OnActivate(bool active) { TRACE;  IMutexLock lock(this); }
     
 	virtual void ProcessMidiMsg(IMidiMsg* pMsg) {}
-	virtual void ProcessSysEx(int offset, const BYTE* pData, int size) {}
+	virtual void ProcessSysEx(ISysEx* pSysEx) {}
 	virtual bool MidiNoteName(int noteNumber, char* rName) { *rName = '\0'; return false; }
 
   // Implementations should set a mutex lock.
@@ -151,7 +151,7 @@ protected:
   virtual void SetLatency(int samples);
 	virtual bool SendMidiMsg(IMidiMsg* pMsg) = 0;
   virtual bool SendMidiMsgs(WDL_TypedBuf<IMidiMsg>* pMsgs);
-  virtual bool SendSysEx(int offset, const BYTE* pData, int size) = 0;
+  virtual bool SendSysEx(ISysEx* pSysEx) = 0;
   bool IsInst() { return mIsInst; }
     
   void MakeDefaultPreset(char* name = 0, int nPresets = 1);

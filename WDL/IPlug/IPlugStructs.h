@@ -274,6 +274,17 @@ struct IMidiMsg
   void LogMsg();
 };
 
+struct ISysEx
+{
+  int mOffset, mSize;
+  const BYTE* mData;
+
+  ISysEx(int offs = 0, const BYTE* pData = NULL, int size = 0) : mOffset(offs), mData(pData), mSize(size) {}
+
+  void Clear();
+  void LogMsg();
+};
+
 const int MAX_PRESET_NAME_LEN = 256;
 #define UNUSED_PRESET_NAME "empty"
 
