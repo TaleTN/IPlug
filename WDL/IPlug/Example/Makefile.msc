@@ -18,67 +18,29 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+PROJECT = IPlugExample
+OUTFILE = $(PROJECT).dll
 
-!IFNDEF CONFIGURATION
-!	IFDEF NODEBUG
-CONFIGURATION = Release
-!	ELSE
-CONFIGURATION = Debug
-!	ENDIF
-!ENDIF
-
-!IFNDEF TARGET_CPU
-!	IF "$(CPU)" == "i386"
-TARGET_CPU = x86
-!	ELSE IF "$(CPU)" == "AMD64"
-# TARGET_CPU = x64
-!		ERROR Use Windows SDK v7.1 for x64 build
-!	ENDIF
-!ELSE
-!	IF "$(TARGET_CPU)" == "x86"
-!		ERROR Use Windows SDK v7.0 for x86 builds
-!	ENDIF
-!ENDIF
-
-
-!IF "$(TARGET_CPU)" == "x86"
-!	IFNDEF NOSSE2
-PLATFORM = Win32
-OUTFILE = IPlugExample.dll
-CPPFLAGS = $(CPPFLAGS) /arch:SSE2
-!	ELSE
-PLATFORM = Win32_noSSE2
-OUTFILE = IPlugExample.dll
-!	ENDIF
-CPPFLAGS = $(CPPFLAGS) /D "WIN32" /D "_WIN32_WINNT=0x0501"
-LINKFLAGS = $(LINKFLAGS) /machine:x86
-
-!ELSE IF "$(TARGET_CPU)" == "x64"
-!	IFDEF NOSSE2
-!		MESSAGE Warning: NOSSE2 has no effect on x64 code
-!		MESSAGE
-!	ENDIF
-PLATFORM = X64
-OUTFILE = IPlugExample.dll
-CPPFLAGS = $(CPPFLAGS) /favor:blend /wd4267 /wd4800 /wd4244
-LINKFLAGS = $(LINKFLAGS) /machine:x64
-
-!ELSE
-!	ERROR Unsupported target CPU "$(TARGET_CPU)"
-!ENDIF
-
-OUTDIR = $(PLATFORM)/$(CONFIGURATION)
-INTDIR = $(OUTDIR)
-
-!MESSAGE IPlugExample - $(CONFIGURATION)|$(PLATFORM)
-!MESSAGE
-
-
-CPPFLAGS = $(CPPFLAGS) /EHsc /fp:fast /D "VST_API" /D "WINVER=0x0501" /D "_WINDLL" /D "_MBCS" /MT /c /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /W3 /D "_CRT_SECURE_NO_WARNINGS" /nologo
+CPPFLAGS = $(CPPFLAGS) /EHsc /fp:fast /D "VST_API" /D "WIN32" /D "WINVER=0x0501" /D "_WIN32_WINNT=0x0501" /D "_WINDLL" /D "_MBCS" /MT /c /Fo"$(OUTDIR)/" /Fd"$(OUTDIR)/" /W3 /D "_CRT_SECURE_NO_WARNINGS" /nologo
+RFLAGS = $(RFLAGS) /D "VST_API" /nologo
 LINKFLAGS = $(LINKFLAGS) /dll /subsystem:windows /libpath:"../../lice/$(OUTDIR:Tracer=Release)" /libpath:"../$(OUTDIR)" /dynamicbase:no /manifest:no /nologo
-RCFLAGS = $(RCFLAGS) /nologo
 
-!IF "$(CONFIGURATION)" == "Debug"
+!IF !DEFINED(CONFIGURATION) && DEFINED(NODEBUG)
+CONFIGURATION = Release
+!ELSE IF !DEFINED(CONFIGURATION)
+CONFIGURATION = Debug
+!ENDIF
+
+!IF "$(CONFIGURATION)" == "Release" || "$(CONFIGURATION)" == "Tracer"
+
+CPPFLAGS = $(CPPFLAGS) /D "NDEBUG" /O2 /GS-
+!	IF "$(CONFIGURATION)" == "Tracer"
+CPPFLAGS = $(CPPFLAGS) /D "TRACER_BUILD"
+!	ENDIF
+LINKFLAGS = $(LINKFLAGS) /opt:icf /opt:ref /incremental:no /defaultlib:libcmt
+
+!ELSE IF "$(CONFIGURATION)" == "Debug"
+
 CPPFLAGS = $(CPPFLAGS) /D "_DEBUG" /RTCsu
 !	IF "$(PLATFORM)" == "X64"
 CPPFLAGS = $(CPPFLAGS) /Zi
@@ -87,39 +49,56 @@ CPPFLAGS = $(CPPFLAGS) /ZI
 !	ENDIF
 LINKFLAGS = $(LINKFLAGS) /debug /nodefaultlib:libcmt /defaultlib:libcmtd
 
-!ELSE
-CPPFLAGS = $(CPPFLAGS) /D "NDEBUG" /O2 /Ob2
-!	IF "$(CONFIGURATION)" == "Tracer"
-CPPFLAGS = $(CPPFLAGS) /D "TRACER_BUILD"
-!	ENDIF
-LINKFLAGS = $(LINKFLAGS) /opt:icf /opt:ref /incremental:no /defaultlib:libcmt
 !ENDIF
 
-LINKFLAGS = $(LINKFLAGS) lice.lib IPlug.lib shell32.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib
+!IF "$(TARGET_CPU)" == "x86" || "$(CPU)" == "i386"
 
+!	IFNDEF NOSSE2
+PLATFORM = Win32
+CPPFLAGS = $(CPPFLAGS) /arch:SSE2
+RFLAGS = $(RFLAGS) /d "_M_IX86_FP"
+!	ELSE
+PLATFORM = Win32_noSSE2
+!	ENDIF
+LINKFLAGS = $(LINKFLAGS) /machine:x86
+
+!ELSE IF "$(TARGET_CPU)" == "x64" || "$(CPU)" == "AMD64"
+
+PLATFORM = X64
+CPPFLAGS = $(CPPFLAGS) /favor:blend /wd4244
+RFLAGS = $(RFLAGS) /d "_M_X64"
+LINKFLAGS = $(LINKFLAGS) /machine:x64
+
+!ENDIF
+
+OUTDIR = $(PLATFORM)/$(CONFIGURATION)
+
+!MESSAGE $(PROJECT) - $(CONFIGURATION)|$(PLATFORM)
+!MESSAGE
+
+!IF "$(TARGET_CPU)" == "x86" || "$(CPU)" == "AMD64" || "$(APPVER)" != "5.01"
+!	MESSAGE Warning: Windows SDK, target CPU, and/or target OS mismatch
+!ENDIF
 
 all : dll
 
-"$(OUTDIR)" :
-	@if not exist "$(OUTDIR)/" mkdir "$(OUTDIR)"
+dll : "$(OUTDIR)" "$(OUTDIR)/$(OUTFILE)"
 
-!IF "$(INTDIR)" != "$(OUTDIR)"
-"$(INTDIR)" :
-	@if not exist "$(INTDIR)/" mkdir "$(INTDIR)"
+"$(OUTDIR)" :
+!IF !EXIST("$(OUTDIR)/")
+	mkdir $@
 !ENDIF
 
+"$(OUTDIR)/$(PROJECT).obj" : $(PROJECT).cpp $(PROJECT).h resource.h
+	$(CPP) $(CPPFLAGS) "$(PROJECT).cpp"
 
-"$(INTDIR)/IPlugExample.obj" : IPlugExample.cpp IPlugExample.h resource.h
-	$(CPP) $(CPPFLAGS) IPlugExample.cpp
+"$(OUTDIR)/$(PROJECT).res" : $(PROJECT).rc resource.h img/toggle-switch.png img/knob_sm.png img/fader-cap_sm.png img/BG_400x200.png img/VU-meter_sm.png
+	$(RC) $(RFLAGS) /fo$@ $(PROJECT).rc
 
-"$(INTDIR)/IPlugExample.res" : IPlugExample.rc resource.h img/toggle-switch.png img/knob_sm.png img/fader-cap_sm.png img/BG_400x200.png img/VU-meter_sm.png
-	$(RC) $(RCFLAGS) /fo"$(INTDIR)/IPlugExample.res" IPlugExample.rc
-
-"$(OUTDIR)/$(OUTFILE)" : "$(OUTDIR)" "$(INTDIR)" "$(INTDIR)/IPlugExample.obj" "$(INTDIR)/IPlugExample.res"
-	link $(LINKFLAGS) /out:"$(OUTDIR)/$(OUTFILE)" /implib:"$(INTDIR)/IPlugExample.lib" "$(INTDIR)/IPlugExample.obj" "$(INTDIR)/IPlugExample.res"
-
-dll : "$(OUTDIR)/$(OUTFILE)"
+"$(OUTDIR)/$(OUTFILE)" : "$(OUTDIR)/$(PROJECT).obj" "$(OUTDIR)/$(PROJECT).res"
+	link $(LINKFLAGS) /out:$@ /implib:"$(OUTDIR)/$(PROJECT).lib" $** lice.lib IPlug.lib shell32.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib
 
 clean :
-	@if exist "$(OUTDIR)/*.*" erase /Q "$(OUTDIR:/=\)\*.*"
-	@if exist "$(OUTDIR)" rd "$(OUTDIR:/=\)"
+!IF EXIST("$(OUTDIR)/")
+	rmdir /s /q "$(OUTDIR:/=\)"
+!ENDIF
