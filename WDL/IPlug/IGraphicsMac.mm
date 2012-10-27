@@ -7,6 +7,7 @@
 	#include "IGraphicsCarbon.h"
 #endif
 #include "../swell/swell-internal.h"
+#include <stdlib.h>
 
 struct CocoaAutoReleasePool
 {
@@ -66,7 +67,7 @@ LICE_IBitmap* LoadImgFromResourceOSX(const char* bundleID, const char* filename)
 #endif
   
   NSBundle* pBundle = [NSBundle bundleWithIdentifier:ToNSString(bundleID)];
-  NSString* pFile = [[[NSString stringWithCString:filename] lastPathComponent] stringByDeletingPathExtension];
+  NSString* pFile = [[ToNSString(filename) lastPathComponent] stringByDeletingPathExtension];
   if (pBundle && pFile) 
   {
     NSString* pPath = 0;
@@ -77,7 +78,7 @@ LICE_IBitmap* LoadImgFromResourceOSX(const char* bundleID, const char* filename)
 
     if (pPath) 
     {
-      const char* resourceFileName = [pPath cString];
+      const char* resourceFileName = [pPath UTF8String];
       if (CSTR_NOT_EMPTY(resourceFileName))
       {
         if (ispng) return LICE_LoadPNG(resourceFileName);
@@ -220,7 +221,7 @@ void IGraphicsMac::HostPath(WDL_String* pPath)
   if (pBundle) {
     NSString* path = [pBundle executablePath];
     if (path) {
-      pPath->Set([path cString]);
+      pPath->Set([path UTF8String]);
     }
   }
 }
@@ -232,7 +233,7 @@ void IGraphicsMac::PluginPath(WDL_String* pPath)
   if (pBundle) {
     NSString* path = [[pBundle bundlePath] stringByDeletingLastPathComponent]; 
     if (path) {
-      pPath->Set([path cString]);
+      pPath->Set([path UTF8String]);
       pPath->Append("/");
     }
   }
@@ -349,8 +350,27 @@ void* IGraphicsMac::GetWindow()
 // static
 int IGraphicsMac::GetUserOSVersion()   // Returns a number like 0x1050 (10.5).
 {
-  SInt32 ver = 0;
-  Gestalt(gestaltSystemVersion, &ver);
+  CocoaAutoReleasePool pool;
+
+  // http://cocoadev.com/wiki/DeterminingOSVersion
+  NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/CoreServices/SystemVersion.plist"];
+  if (!dict) return 0;
+  NSString* versionString = [dict objectForKey:@"ProductVersion"];
+  if (!versionString) return 0;
+  NSArray* versions = [versionString componentsSeparatedByString:@"."];
+  int i = atoi([[versions objectAtIndex:0] UTF8String]);
+  int ver = (i / 10 * 16 + i % 10) << 8;
+  if ([versions count] >= 2)
+  {
+    i = atoi([[versions objectAtIndex:1] UTF8String]);
+    ver |= i < 10 ? (i % 10) << 4 : 0x90;
+    if ([versions count] >= 3)
+    {
+      i = atoi([[versions objectAtIndex:2] UTF8String]);
+      ver |= i < 10 ? (i % 10) : 0x9;
+    }
+  }
+
   Trace(TRACELOC, "%x", ver);
   return ver;
 }

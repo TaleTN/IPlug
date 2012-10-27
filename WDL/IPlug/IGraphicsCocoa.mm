@@ -14,7 +14,7 @@ inline IRECT ToIRECT(IGraphics* pGraphics, NSRect* pR)
 
 NSString* ToNSString(const char* cStr)
 {
-  return [NSString stringWithCString:cStr];
+  return [NSString stringWithCString:cStr encoding:NSUTF8StringEncoding];
 }
 
 inline IMouseMod GetMouseMod(NSEvent* pEvent)
