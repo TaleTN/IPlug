@@ -633,7 +633,7 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
     NO_OP(kAudioUnitProperty_InPlaceProcessing);          // 29,
     NO_OP(kAudioUnitProperty_ElementName);                // 30,
     case kAudioUnitProperty_CocoaUI: {                    // 31,
-      if (GetGUI() && IGraphicsMac::GetUserOSVersion() >= 0x1050) {
+      if (GetGUI() && IGraphicsMac::GetUserFoundationVersion() >= 677.00) { // OS X v10.5
         *pDataSize = sizeof(AudioUnitCocoaViewInfo);  // Just one view.
         if (pData) {
           AudioUnitCocoaViewInfo* pViewInfo = (AudioUnitCocoaViewInfo*) pData;

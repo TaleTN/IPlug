@@ -374,3 +374,9 @@ int IGraphicsMac::GetUserOSVersion()   // Returns a number like 0x1050 (10.5).
   Trace(TRACELOC, "%x", ver);
   return ver;
 }
+
+// static
+double IGraphicsMac::GetUserFoundationVersion()   // Returns a number like 677.00 (10.5).
+{
+  return NSFoundationVersionNumber;
+}
