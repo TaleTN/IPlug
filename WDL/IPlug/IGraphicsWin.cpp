@@ -22,6 +22,15 @@ enum EParamEditMsg {
 
 #define IPLUG_TIMER_ID 2
 
+inline void SetMouseWheelFocus(HWND hWnd, IGraphicsWin* pGraphics)
+{
+	switch (pGraphics->GetPlug()->GetHost())
+	{
+		case kHostMixcraft:
+			SetFocus(hWnd);
+	}
+}
+
 inline IMouseMod GetMouseMod(WPARAM wParam)
 {
 	return IMouseMod((wParam & MK_LBUTTON), (wParam & MK_RBUTTON), 
@@ -31,16 +40,17 @@ inline IMouseMod GetMouseMod(WPARAM wParam)
 // static
 LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	IGraphicsWin* pGraphics = (IGraphicsWin*) GetWindowLongPtr(hWnd, GWLP_USERDATA);
+
   if (msg == WM_CREATE) {
     LPCREATESTRUCT lpcs = (LPCREATESTRUCT) lParam;
     SetWindowLongPtr(hWnd, GWLP_USERDATA, (LPARAM) (lpcs->lpCreateParams));
 		int mSec = int(1000.0 / sFPS);
 		SetTimer(hWnd, IPLUG_TIMER_ID, mSec, NULL);
-		SetFocus(hWnd);
+		SetMouseWheelFocus(hWnd, pGraphics);
 		return 0;
 	}
 
-	IGraphicsWin* pGraphics = (IGraphicsWin*) GetWindowLongPtr(hWnd, GWLP_USERDATA);
 	char txt[MAX_EDIT_LEN];
 
 	if (!pGraphics || hWnd != pGraphics->mPlugWnd) {
@@ -137,9 +147,9 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 			return 0;
     }
 		case WM_MOUSEACTIVATE: {
-			SetFocus(hWnd);
+			SetMouseWheelFocus(hWnd, pGraphics);
 			return MA_ACTIVATE;
-		}
+ 		}
 		case WM_MOUSEWHEEL: {
 			int d = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
 			int x = GET_X_LPARAM(lParam), y = GET_Y_LPARAM(lParam);
