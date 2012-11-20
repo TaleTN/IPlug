@@ -742,3 +742,17 @@ bool IGraphicsWin::OpenURL(const char* url,
   return false;
 }
 
+int IGraphicsWin::ProcessMouseWheel(float delta)
+{
+  POINT p;
+  GetCursorPos(&p);
+  HWND hWnd = WindowFromPoint(p);
+  if (hWnd == mPlugWnd) {
+    int d = int(delta);
+    RECT r;
+    GetWindowRect(hWnd, &r);
+    OnMouseWheel(p.x - r.left, p.y - r.top, &IMouseMod(false, false, GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_MENU) < 0), d);
+    return 1;
+  }
+  return 0;
+}

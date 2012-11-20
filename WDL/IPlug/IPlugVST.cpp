@@ -612,6 +612,14 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
 	    return 0;
     }
     case effVendorSpecific: {
+      // Mouse wheel
+      if (idx == 0x73744341 && value == 0x57686565) {
+        IGraphics* pGraphics = _this->GetGUI();
+        if (pGraphics) {
+          return pGraphics->ProcessMouseWheel(opt);
+        }
+        return 0;
+      }
       // Support Reaper VST extensions: http://www.reaper.fm/sdk/vst/
       if (idx == effGetParamDisplay && ptr) {
         if (value >= 0 && value < _this->NParams()) {

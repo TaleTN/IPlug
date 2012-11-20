@@ -37,6 +37,9 @@ public:
   bool OpenURL(const char* url, 
     const char* msgWindowTitle = 0, const char* confirmMsg = 0, const char* errMsgOnFailure = 0);
 
+  // Return 1 if mouse wheel is processed
+  int ProcessMouseWheel(float delta);
+
     // Specialty use!
 	void* GetWindow() { return mPlugWnd; }
   HWND GetParentWindow() { return mParentWnd; }
