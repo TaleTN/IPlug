@@ -96,7 +96,7 @@ dll : "$(OUTDIR)" "$(OUTDIR)/$(OUTFILE)"
 	$(RC) $(RFLAGS) /fo$@ $(PROJECT).rc
 
 "$(OUTDIR)/$(OUTFILE)" : "$(OUTDIR)/$(PROJECT).obj" "$(OUTDIR)/$(PROJECT).res"
-	link $(LINKFLAGS) /out:$@ /implib:"$(OUTDIR)/$(PROJECT).lib" $** lice.lib IPlug.lib shell32.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib
+	link $(LINKFLAGS) /out:$@ /implib:"$(OUTDIR)/$(PROJECT).lib" $** lice.lib IPlug.lib wininet.lib shell32.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib
 
 clean :
 !IF EXIST("$(OUTDIR)/")

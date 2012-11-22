@@ -99,7 +99,7 @@ CPPFLAGS = $(CPPFLAGS) /D "TRACER_BUILD"
 LINKFLAGS = $(LINKFLAGS) /opt:icf /opt:ref /incremental:no /defaultlib:libcmt
 !ENDIF
 
-LINKFLAGS = $(LINKFLAGS) lice.lib IPlug.lib shell32.lib user32.lib gdi32.lib comdlg32.lib
+LINKFLAGS = $(LINKFLAGS) lice.lib IPlug.lib wininet.lib shell32.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib
 
 
 all : dll
