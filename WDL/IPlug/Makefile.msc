@@ -96,7 +96,7 @@ iplug : "$(OUTDIR)" $(IPLUG)
 	$(CPP) $(CPPFLAGS) $<
 
 "$(OUTDIR)/$(OUTFILE)" : "$(OUTDIR)" $(IPLUG)
-	lib /out:"$(OUTDIR)/$(OUTFILE)" /nologo wininet.lib $(IPLUG)
+	lib /out:"$(OUTDIR)/$(OUTFILE)" /nologo $(IPLUG)
 
 lib : "$(OUTDIR)/$(OUTFILE)"
 	del "$(OUTDIR:/=\)\*.obj"
