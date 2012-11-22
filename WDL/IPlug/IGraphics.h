@@ -76,6 +76,9 @@ public:
   virtual bool OpenURL(const char* url, 
     const char* msgWindowTitle = 0, const char* confirmMsg = 0, const char* errMsgOnFailure = 0) = 0;
   
+  // Return 1 if mouse wheel is processed
+  virtual int ProcessMouseWheel(float delta) { return 0; }
+
   // Strict (default): draw everything within the smallest rectangle that contains everything dirty.
   // Every control is guaranteed to get no more than one Draw() call per cycle.
   // Fast: draw only controls that intersect something dirty.
