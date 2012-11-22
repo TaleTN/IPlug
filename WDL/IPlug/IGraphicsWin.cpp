@@ -40,17 +40,16 @@ inline IMouseMod GetMouseMod(WPARAM wParam)
 // static
 LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	IGraphicsWin* pGraphics = (IGraphicsWin*) GetWindowLongPtr(hWnd, GWLP_USERDATA);
-
   if (msg == WM_CREATE) {
     LPCREATESTRUCT lpcs = (LPCREATESTRUCT) lParam;
     SetWindowLongPtr(hWnd, GWLP_USERDATA, (LPARAM) (lpcs->lpCreateParams));
 		int mSec = int(1000.0 / sFPS);
 		SetTimer(hWnd, IPLUG_TIMER_ID, mSec, NULL);
-		SetMouseWheelFocus(hWnd, pGraphics);
+		SetMouseWheelFocus(hWnd, (IGraphicsWin*) (lpcs->lpCreateParams));
 		return 0;
 	}
 
+	IGraphicsWin* pGraphics = (IGraphicsWin*) GetWindowLongPtr(hWnd, GWLP_USERDATA);
 	char txt[MAX_EDIT_LEN];
 
 	if (!pGraphics || hWnd != pGraphics->mPlugWnd) {
