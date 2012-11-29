@@ -52,14 +52,20 @@ public:
 protected:
   LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
 
+  void SetTooltip(const char* tooltip);
+  void ShowTooltip();
+  void HideTooltip();
+
 private:
   HINSTANCE mHInstance;
-  HWND mPlugWnd, mParamEditWnd;
+  HWND mPlugWnd, mTooltipWnd, mParamEditWnd;
 	// Ed = being edited manually.
 	IControl* mEdControl;
 	IParam* mEdParam;
 	WNDPROC mDefEditProc;
 	int mParamEditMsg;
+	bool mShowingTooltip;
+	int mTooltipIdx;
 	int mIdleTicks;
 	COLORREF* mCustomColorStorage;
 
