@@ -20,7 +20,7 @@ public:
   IControl(IPlugBase* pPlug, IRECT* pR, int paramIdx = -1, IChannelBlend blendMethod = IChannelBlend::kBlendNone)
 	:	mPlug(pPlug), mRECT(*pR), mTargetRECT(*pR), mParamIdx(paramIdx), mValue(0.0), mDefaultValue(-1.0),
         mBlend(blendMethod), mDirty(true), mHide(false), mGrayed(false), mDisablePrompt(false), mDblAsSingleClick(false), 
-        mClampLo(0.0), mClampHi(1.0) {}
+        mClampLo(0.0), mClampHi(1.0), mTooltip(NULL) {}
 
 	virtual ~IControl() {}
 
@@ -71,6 +71,9 @@ public:
   void Clamp(double lo, double hi) { mClampLo = lo; mClampHi = hi; }
   void DisablePrompt(bool disable) { mDisablePrompt = disable; }  // Disables the right-click manual value entry.
 
+	inline void SetTooltip(const char* tooltip) { mTooltip = tooltip; }
+	inline const char* GetTooltip() const { return mTooltip; }
+
   // Sometimes a control changes its state as part of its Draw method.
   // Redraw() prevents the control from being cleaned immediately after drawing.
   void Redraw() { mRedraw = true; }
@@ -88,6 +91,7 @@ protected:
 	double mValue, mDefaultValue, mClampLo, mClampHi;
 	bool mDirty, mHide, mGrayed, mRedraw, mDisablePrompt, mClamped, mDblAsSingleClick;
   IChannelBlend mBlend;
+	const char* mTooltip;
 };
 
 enum EDirection { kVertical, kHorizontal };
