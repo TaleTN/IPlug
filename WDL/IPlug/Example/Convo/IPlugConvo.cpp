@@ -121,7 +121,7 @@ void IPlugConvo::Reset()
 		if (len) Resample(mIR, irLength, irSampleRate, mImpulse.impulses[0].Get(), len, mSampleRate);
 
 		// Tie the impulse response to the convolution engine.
-		mEngine.SetImpulse(&mImpulse, 0);
+		mEngine.SetImpulse(&mImpulse);
 	}
 }
 
@@ -150,7 +150,7 @@ void IPlugConvo::ProcessDoubleReplacing(double** inputs, double** outputs, int n
 
 	// If not enough samples are available yet, then only output the dry
 	// signal.
-	for (int i = 0; i < nFrames - nAvail; ++i) *out_l++ = mDry * *in++;
+	for (int i = 0; i < nFrames - nAvail; ++i) *out_l++ = *out_r++ = mDry * *in++;
 
 	// Output samples from the convolution engine.
 	if (nAvail > 0)
