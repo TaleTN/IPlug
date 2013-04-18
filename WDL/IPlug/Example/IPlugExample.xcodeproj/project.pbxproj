@@ -922,7 +922,8 @@
 				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = vst;
 			};
@@ -951,7 +952,8 @@
 				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
 				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = vst;
@@ -1017,7 +1019,8 @@
 				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
 				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = vst;
@@ -1045,7 +1048,8 @@
 				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/Components";
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = component;
 			};
@@ -1075,7 +1079,8 @@
 				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/Components";
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
 				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = component;
@@ -1108,7 +1113,8 @@
 				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/Components";
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk";
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
 				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = component;
