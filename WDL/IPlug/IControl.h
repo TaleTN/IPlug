@@ -230,7 +230,7 @@ public:
 
     bool Draw(IGraphics* pGraphics);
 
-private:
+protected:
     IColor mColor;
     float mMinAngle, mMaxAngle, mInnerRadius, mOuterRadius;
 };
@@ -249,7 +249,7 @@ public:
 
 	bool Draw(IGraphics* pGraphics);
 
-private:
+protected:
 	IBitmap mBitmap;
 	double mMinAngle, mMaxAngle;
 	int mYOffset;
@@ -267,7 +267,7 @@ public:
 
 	bool Draw(IGraphics* pGraphics);
 
-private:
+protected:
 	IBitmap mBitmap;
 };
 
@@ -287,7 +287,7 @@ public:
 
 	bool Draw(IGraphics* pGraphics);
 
-private:
+protected:
 	IBitmap mBase, mMask, mTop;
 	double mMinAngle, mMaxAngle;
 };
@@ -308,7 +308,7 @@ public:
 
 	bool Draw(IGraphics* pGraphics);
 
-private:
+protected:
 	IRECT mTargetArea;	// Keep this around to swap in & out.
 };
 
@@ -427,7 +427,7 @@ public:
   bool Draw(IGraphics* pGraphics);
 	bool IsDirty();
 
-private:
+protected:
   IBitmap mBitmap;
 	WDL_String mDir, mFile, mExtensions;
   IGraphics::EFileAction mFileAction;
