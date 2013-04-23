@@ -242,7 +242,6 @@ void IGraphicsMac::PluginPath(WDL_String* pPath)
 // extensions = "txt wav" for example
 void IGraphicsMac::PromptForFile(WDL_String* pFilename, EFileAction action, char* dir, char* extensions)
 {
-  pFilename->Set("");
   if (!WindowIsOpen()) {
     return;
   }
@@ -271,27 +270,36 @@ void IGraphicsMac::PromptForFile(WDL_String* pFilename, EFileAction action, char
     [panel setAllowsOtherFileTypes: NO];
   }
 
-  // Apple's documentation states that setDirectory is deprecated in Mac OS
-  // X v10.6, use setDirectoryURL instead, which is available in v10.6 and
-  // later.
+  // Apple's documentation states that runModalForDirectory is deprecated in
+  // Mac OS X v10.6, use setDirectoryURL, setNameFieldStringValue, and
+  // runModal instead, which are available in v10.6 and later.
   // http://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/nssavepanel_Class/
 
-  if (CSTR_NOT_EMPTY(dir)) {
-    #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
+  int result;
+  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6 && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+  if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_6)
+  #endif
+  #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+  {
+    if (CSTR_NOT_EMPTY(dir)) {
       [panel setDirectoryURL: [NSString stringWithUTF8String: dir]];
-    #elif MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_6
-      [panel setDirectory: [NSString stringWithUTF8String: dir]];
-    #else
-      if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_6) {
-        [panel setDirectoryURL: [NSString stringWithUTF8String: dir]];
-      }
-      else {
-        [panel setDirectory: [NSString stringWithUTF8String: dir]];
-      }
-    #endif
+    }
+    if (pFilename->GetLength()) {
+      [panel setNameFieldStringValue: [NSString stringWithUTF8String: pFilename->Get()]];
+    }
+    result = [panel runModal];
   }
-
-  int result = [panel runModal];
+  #endif
+  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6 && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+  else
+  #endif
+  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6
+  {
+    NSString* nsDir = CSTR_NOT_EMPTY(dir) ? [NSString stringWithUTF8String: dir] : nil;
+    NSString* nsFile = pFilename->GetLength() ? [NSString stringWithUTF8String: pFilename->Get()] : nil;
+    result = [panel runModalForDirectory: nsDir file: nsFile];
+  }
+  #endif
 
   if (result == NSOKButton) {
     pFilename->Set([[[panel URL] path] UTF8String]);

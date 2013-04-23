@@ -602,14 +602,14 @@ void IGraphicsWin::PluginPath(WDL_String* pPath)
 
 void IGraphicsWin::PromptForFile(WDL_String* pFilename, EFileAction action, char* dir, char* extensions)
 {
-  pFilename->Set("");
 	if (!WindowIsOpen()) { 
 		return;
 	}
 
   WDL_String pathStr;
 	char fnCStr[MAX_PATH_LEN], dirCStr[MAX_PATH_LEN];
-	fnCStr[0] = '\0';
+	strncpy(fnCStr, pFilename->Get(), MAX_PATH_LEN - 1);
+	fnCStr[MAX_PATH_LEN - 1] = '\0';
 	dirCStr[0] = '\0';
 	if (CSTR_NOT_EMPTY(dir)) {
   pathStr.Set(dir);
