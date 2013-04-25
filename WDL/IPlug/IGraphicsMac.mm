@@ -304,6 +304,9 @@ void IGraphicsMac::PromptForFile(WDL_String* pFilename, EFileAction action, char
   if (result == NSOKButton) {
     pFilename->Set([[[panel URL] path] UTF8String]);
   }
+  else {
+    pFilename->Set("");
+  }
 }
 
 bool IGraphicsMac::PromptForColor(IColor* pColor, char* prompt)
