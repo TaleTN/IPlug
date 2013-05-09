@@ -65,6 +65,8 @@ private:
   void* mGraphicsCocoa;   // Can't forward-declare IGraphicsCocoa because it's an obj-C object.
   
   WDL_String mBundleID;
+
+  friend int GetMouseOver(IGraphicsMac* pGraphics);
 };
 
 inline CFStringRef MakeCFString(const char* cStr)
