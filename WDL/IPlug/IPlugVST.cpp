@@ -278,6 +278,24 @@ int GetIPlugVerFromChunk(ByteChunk* pChunk, int* pPos)
   return ver;
 }
 
+double VSTString2Parameter(IParam* pParam, char* ptr)
+{
+  double v;
+  bool mapped = pParam->GetNDisplayTexts();
+  if (mapped)
+  {
+    int vi;
+    mapped = pParam->MapDisplayText(ptr, &vi);
+    if (mapped) v = (double)vi;
+  }
+  if (!mapped)
+  {
+    v = atof(ptr);
+    if (pParam->DisplayIsNegated()) v = -v;
+  }
+  return v;
+}
+
 VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode, VstInt32 idx, VstIntPtr value, void *ptr, float opt)
 {
 	// VSTDispatcher is an IPlugVST class member, we can access anything in IPlugVST from here.
@@ -338,20 +356,8 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
       {
         if (ptr)
         {
-          double v;
           IParam* pParam = _this->GetParam(idx);
-          bool mapped = pParam->GetNDisplayTexts();
-          if (mapped)
-          {
-            int vi;
-            mapped = pParam->MapDisplayText((char*)ptr, &vi);
-            if (mapped) v = (double)vi;
-          }
-          if (!mapped)
-          {
-            v = atof((char*)ptr);
-            if (pParam->DisplayIsNegated()) v = -v;
-          }
+          double v = VSTString2Parameter(pParam, (char*)ptr);
           if (_this->GetGUI()) _this->GetGUI()->SetParameterFromPlug(idx, v, false);
           pParam->Set(v);
           _this->OnParamChange(idx);
@@ -626,6 +632,16 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
           _this->GetParam(value)->GetDisplayForHost((double) opt, true, (char*) ptr);
         }
         return 0xbeef;
+      }
+      if (idx == effString2Parameter && ptr) {
+        if (value >= 0 && value < _this->NParams()) {
+          if (*(char*) ptr != '\0') {
+            IParam* pParam = _this->GetParam(value);
+            sprintf((char*) ptr, "%f", pParam->GetNormalized(VSTString2Parameter(pParam, (char*) ptr)));
+          }
+          return 0xbeef;
+        }
+        return 0;
       }
       if (idx == kVstParameterUsesIntStep) {
         if (value >= 0 && value < _this->NParams()) {
