@@ -618,46 +618,57 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
 	    return 0;
     }
     case effVendorSpecific: {
-      // Mouse wheel
-      if (idx == 0x73744341 && value == 0x57686565) {
-        IGraphics* pGraphics = _this->GetGUI();
-        if (pGraphics) {
-          return pGraphics->ProcessMouseWheel(opt);
-        }
-        return 0;
-      }
-      // Support Reaper VST extensions: http://www.reaper.fm/sdk/vst/
-      if (idx == effGetParamDisplay && ptr) {
-        if (value >= 0 && value < _this->NParams()) {
-          _this->GetParam(value)->GetDisplayForHost((double) opt, true, (char*) ptr);
-        }
-        return 0xbeef;
-      }
-      if (idx == effString2Parameter && ptr) {
-        if (value >= 0 && value < _this->NParams()) {
-          if (*(char*) ptr != '\0') {
-            IParam* pParam = _this->GetParam(value);
-            sprintf((char*) ptr, "%.17f", pParam->GetNormalized(VSTString2Parameter(pParam, (char*) ptr)));
-          }
-          return 0xbeef;
-        }
-        return 0;
-      }
-      if (idx == kVstParameterUsesIntStep) {
-        if (value >= 0 && value < _this->NParams()) {
-          IParam::EParamType type = _this->GetParam(value)->Type();
-          if (type == IParam::kTypeBool) {
-            return 0xbeef;
-          }
-          else if (type == IParam::kTypeInt || type == IParam::kTypeEnum) {
-            double min, max;
-            _this->GetParam(value)->GetBounds(&min, &max);
-            if (fabs(max - min) < 1.5) {
-              return 0xbeef;
+      switch (idx) {
+        // Mouse wheel
+        case 0x73744341: {
+          if (value == 0x57686565) {
+            IGraphics* pGraphics = _this->GetGUI();
+            if (pGraphics) {
+              return pGraphics->ProcessMouseWheel(opt);
             }
           }
+          break;
         }
-        // return 0;
+        // Support Reaper VST extensions: http://www.reaper.fm/sdk/vst/
+        case effGetParamDisplay: {
+          if (ptr) {
+            if (value >= 0 && value < _this->NParams()) {
+              _this->GetParam(value)->GetDisplayForHost((double) opt, true, (char*) ptr);
+            }
+            return 0xbeef;
+          }
+          break;
+        }
+        case effString2Parameter: {
+          if (ptr && value >= 0 && value < _this->NParams()) {
+            if (*(char*) ptr != '\0') {
+              IParam* pParam = _this->GetParam(value);
+              sprintf((char*) ptr, "%.17f", pParam->GetNormalized(VSTString2Parameter(pParam, (char*) ptr)));
+            }
+            return 0xbeef;
+          }
+          break;
+        }
+        case kVstParameterUsesIntStep: {
+          if (value >= 0 && value < _this->NParams()) {
+            IParam* pParam = _this->GetParam(value);
+            switch (pParam->Type()) {
+              case IParam::kTypeBool: {
+                return 0xbeef;
+              }
+              case IParam::kTypeInt:
+              case IParam::kTypeEnum: {
+                double min, max;
+                pParam->GetBounds(&min, &max);
+                if (fabs(max - min) < 1.5) {
+                  return 0xbeef;
+                }
+                break;
+              }
+            }
+          }
+          break;
+        }
       }
       return 0;
     }
