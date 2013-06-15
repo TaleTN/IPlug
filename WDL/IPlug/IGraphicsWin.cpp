@@ -183,6 +183,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
     }
     return 0;
 
+
 		case WM_PAINT: {
       RECT r;
       if (GetUpdateRect(hWnd, &r, FALSE)) {
@@ -210,7 +211,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 // static 
 LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	IGraphicsWin* pGraphics = (IGraphicsWin*) GetWindowLongPtr(hWnd, GWLP_USERDATA);
+	IGraphicsWin* pGraphics = (IGraphicsWin*) GetWindowLongPtr(GetParent(hWnd), GWLP_USERDATA);
 
 	if (pGraphics && pGraphics->mParamEditWnd && pGraphics->mParamEditWnd == hWnd) 
   {
@@ -523,7 +524,7 @@ void IGraphicsWin::PromptUserInput(IControl* pControl, IParam* pParam)
 	SetFocus(mParamEditWnd);
 
 	mDefEditProc = (WNDPROC) SetWindowLongPtr(mParamEditWnd, GWLP_WNDPROC, (LONG_PTR) ParamEditProc);
-  SetWindowLong(mParamEditWnd, GWLP_USERDATA, (LPARAM) this);
+  SetWindowLongPtr(mParamEditWnd, GWLP_USERDATA, 0xdeadf00b);
 
   IText txt;
 	HFONT font = CreateFont(txt.mSize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, txt.mFont);
@@ -560,7 +561,7 @@ void IGraphicsWin::PromptUserInput(IEditableTextControl* pControl)
 	SetFocus(mParamEditWnd);
 
 	mDefEditProc = (WNDPROC) SetWindowLongPtr(mParamEditWnd, GWLP_WNDPROC, (LONG_PTR) ParamEditProc);
-  SetWindowLong(mParamEditWnd, GWLP_USERDATA, (LPARAM) this);
+  SetWindowLongPtr(mParamEditWnd, GWLP_USERDATA, 0xdeadf00b);
 
 	HFONT font = CreateFont(txt->mSize, 0, 0, 0, txt->mStyle == IText::kStyleBold ? FW_BOLD : 0, txt->mStyle == IText::kStyleItalic ? TRUE : 0, 0, 0, 0, 0, 0, 0, 0, txt->mFont);
 	SendMessage(mParamEditWnd, WM_SETFONT, (WPARAM) font, 0);
