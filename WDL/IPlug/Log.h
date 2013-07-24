@@ -1,7 +1,7 @@
 #ifndef _LOG_
 #define _LOG_
 
-#include "stdarg.h"
+#include <stdarg.h>
 #include "Containers.h"
 
 #if defined _WIN32
