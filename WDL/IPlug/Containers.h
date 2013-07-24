@@ -20,6 +20,7 @@
 #include "../ptrlist.h"
 #include "../wdlendian.h"
 #include "../db2val.h"
+#include "../reminder.h"
 
 #define FREE_NULL(p) {free(p);p=0;}
 #define DELETE_NULL(p) {delete(p); p=0;}
@@ -27,9 +28,6 @@
 #define MAX(x,y) ((x)<(y)?(y):(x))
 #define BOUNDED(x,lo,hi) ((x) < (lo) ? (lo) : (x) > (hi) ? (hi) : (x))
 #define CSTR_NOT_EMPTY(cStr) ((cStr) && (cStr)[0] != '\0')
-
-#define MAKE_QUOTE(str) #str
-#define MAKE_STR(str) MAKE_QUOTE(str)
 
 #define PI 3.141592653589793238
 #define AMP_DB TWENTY_OVER_LN10
@@ -45,15 +43,6 @@ inline double AmpToDB(double amp)
 {
 	return AMP_DB * log(fabs(amp));
 }
-
-#ifndef REMINDER
-  #if defined WIN32
-    // This enables: #pragma REMINDER("change this line!") with click-through from VC++.
-    #define REMINDER(msg) message(__FILE__   "(" MAKE_STR(__LINE__) "): " msg)
-  #elif defined __APPLE__
-    #define REMINDER(msg) WARNING msg
-  #endif
-#endif
 
 template <class T> inline void SWAP(T& a, T& b) 
 {
