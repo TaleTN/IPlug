@@ -80,7 +80,7 @@ void IParam::SetDisplayText(int value, const char* text)
 
 double IParam::DBToAmp()
 {
-	return ::DBToAmp(mValue);
+	return DB2VAL(mValue);
 }
 
 void IParam::SetNormalized(double normalizedValue)

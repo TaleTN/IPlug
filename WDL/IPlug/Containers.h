@@ -19,6 +19,7 @@
 #include "../wdlstring.h"
 #include "../ptrlist.h"
 #include "../wdlendian.h"
+#include "../db2val.h"
 
 #define FREE_NULL(p) {free(p);p=0;}
 #define DELETE_NULL(p) {delete(p); p=0;}
@@ -31,14 +32,15 @@
 #define MAKE_STR(str) MAKE_QUOTE(str)
 
 #define PI 3.141592653589793238
-#define AMP_DB 8.685889638065036553
-#define IAMP_DB 0.11512925464970
+#define AMP_DB TWENTY_OVER_LN10
+#define IAMP_DB LN10_OVER_TWENTY
 
 inline double DBToAmp(double dB)
 {
-    return exp(IAMP_DB * dB);
+    return DB2VAL(dB);
 }
 
+// Unsafe for amp == 0.0, better use VAL2DB() or VAL2DB_EX() instead.
 inline double AmpToDB(double amp)
 {
 	return AMP_DB * log(fabs(amp));
