@@ -417,7 +417,6 @@ const char* AppendTimestamp(const char* Mmm_dd_yyyy, const char* hh_mm_ss, const
     }
   #endif // __APPLE__
 #else 
-  void Trace(const char* funcName, int line, const char* format, ...) {}
   const char* VSTOpcodeStr(int opCode) { return ""; }
   const char* AUSelectStr(int select) { return ""; }
   const char* AUPropertyStr(int propID) { return ""; }
