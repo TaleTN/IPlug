@@ -107,6 +107,7 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef pHandler
       
       switch (eventKind) {
         case kEventMouseDown: {
+          _this->HideTooltip();
           if (_this->mParamEditView)
           {
             HIViewRef view;
@@ -138,6 +139,19 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef pHandler
         }
         case kEventMouseMoved: {
           pGraphicsMac->OnMouseOver(x, y, &mmod);
+
+          if (pGraphicsMac->TooltipsEnabled()) {
+            int c = pGraphicsMac->GetMouseOver();
+            if (c != _this->mTooltipIdx) {
+              _this->mTooltipIdx = c;
+              _this->HideTooltip();
+              const char* tooltip = c >= 0 ? pGraphicsMac->GetControl(c)->GetTooltip() : NULL;
+              if (CSTR_NOT_EMPTY(tooltip)) {
+                _this->mTooltip = tooltip;
+                _this->mTooltipTimer = pGraphicsMac->FPS() * 3 / 2; // 1.5 seconds
+              }
+            }
+          }
           return noErr;
         }
         case kEventMouseDragged: {
@@ -176,6 +190,18 @@ pascal void IGraphicsCarbon::CarbonTimerHandler(EventLoopTimerRef pTimer, void* 
       UpdateControls(_this->mWindow, 0);// _this->mRgn);
     }
   } 
+
+  if (_this->mTooltipTimer) {
+    if (!--_this->mTooltipTimer) {
+      if (!_this->mShowingTooltip) {
+        _this->ShowTooltip();
+        _this->mTooltipTimer = _this->mGraphicsMac->FPS() * 10; // 10 seconds
+      }
+      else {
+        _this->HideTooltip();
+      }
+    }
+  }
 }
 
 // static
@@ -184,6 +210,8 @@ pascal OSStatus IGraphicsCarbon::CarbonParamEditHandler(EventHandlerCallRef pHan
   IGraphicsCarbon* _this = (IGraphicsCarbon*) pGraphicsCarbon;
   UInt32 eventClass = GetEventClass(pEvent);
   UInt32 eventKind = GetEventKind(pEvent);
+
+  _this->HideTooltip();
 
   switch (eventClass)
   {
@@ -221,7 +249,8 @@ void ResizeWindow(WindowRef pWindow, int w, int h)
 
 IGraphicsCarbon::IGraphicsCarbon(IGraphicsMac* pGraphicsMac, WindowRef pWindow, ControlRef pParentControl)
 : mGraphicsMac(pGraphicsMac), mWindow(pWindow), mView(0), mTimer(0), mControlHandler(0), mWindowHandler(0), mCGC(0),
-  mContentXOffset(0), mContentYOffset(0), mParamEditView(0), mParamEditHandler(0), mEdControl(0), mEdParam(0)
+  mContentXOffset(0), mContentYOffset(0), mParamEditView(0), mParamEditHandler(0), mEdControl(0), mEdParam(0),
+  mShowingTooltip(false), mTooltipIdx(-1), mTooltipTimer(0)
 { 
   TRACE;
   
@@ -299,6 +328,7 @@ IGraphicsCarbon::~IGraphicsCarbon()
     mEdControl = 0;
     mEdParam = 0;
   }
+  HideTooltip();
   RemoveEventLoopTimer(mTimer);
   RemoveEventHandler(mControlHandler);
   RemoveEventHandler(mWindowHandler);
@@ -501,6 +531,36 @@ void IGraphicsCarbon::EndUserInput(bool commit)
   mParamEditView = 0;
   mEdControl = 0;
   mEdParam = 0;
+}
+
+void IGraphicsCarbon::ShowTooltip()
+{
+  HMHelpContentRec helpTag;
+  helpTag.version = kMacHelpVersion;
+
+  helpTag.tagSide = kHMDefaultSide;
+  IRECT* pR = mGraphicsMac->GetControl(mTooltipIdx)->GetTargetRECT();
+  HIRect r = CGRectMake(pR->L, pR->T, pR->W(), pR->H());
+  HIRectConvert(&r, kHICoordSpaceView, mView, kHICoordSpaceScreenPixel, NULL);
+  helpTag.absHotRect.top = (int)r.origin.y;
+  helpTag.absHotRect.left = (int)r.origin.x;
+  helpTag.absHotRect.bottom = helpTag.absHotRect.top + (int)r.size.height;
+  helpTag.absHotRect.right = helpTag.absHotRect.left + (int)r.size.width;
+
+  helpTag.content[kHMMinimumContentIndex].contentType = kHMCFStringLocalizedContent;
+  helpTag.content[kHMMinimumContentIndex].u.tagCFString = CFStringCreateWithCString(NULL, mTooltip, kCFStringEncodingUTF8);
+  helpTag.content[kHMMaximumContentIndex].contentType = kHMNoContent;
+  HMDisplayTag(&helpTag);
+  mShowingTooltip = true;
+}
+
+void IGraphicsCarbon::HideTooltip()
+{
+  mTooltipTimer = 0;
+  if (mShowingTooltip) {
+    HMHideTag();
+    mShowingTooltip = false;
+  }
 }
 
 #endif // IPLUG_NO_CARBON_SUPPORT

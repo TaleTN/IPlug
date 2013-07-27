@@ -66,6 +66,7 @@ private:
   
   WDL_String mBundleID;
 
+  friend class IGraphicsCarbon;
   friend int GetMouseOver(IGraphicsMac* pGraphics);
 };
 

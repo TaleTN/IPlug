@@ -26,6 +26,9 @@ protected:
   void SetParamEditText(const char* txt);
   void ShowParamEditView();
   void EndUserInput(bool commit);
+
+  void ShowTooltip();
+  void HideTooltip();
   
 private:
   
@@ -45,6 +48,10 @@ private:
   IControl* mEdControl;
   IParam* mEdParam;
   
+  bool mShowingTooltip;
+  int mTooltipIdx, mTooltipTimer;
+  const char* mTooltip;
+
 public:
   
   static pascal OSStatus CarbonEventHandler(EventHandlerCallRef pHandlerCall, EventRef pEvent, void* pGraphicsCarbon);
