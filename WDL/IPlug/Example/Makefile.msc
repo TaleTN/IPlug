@@ -1,5 +1,5 @@
 # IPlug makefile for Microsoft Windows SDK v7.0/v7.1
-# (c) Theo Niessink 2009-2012
+# (c) Theo Niessink 2009-2013
 # <http://www.taletn.com/>
 #
 # This file is provided 'as-is', without any express or implied warranty. In
@@ -25,6 +25,26 @@ CPPFLAGS = $(CPPFLAGS) /EHsc /fp:fast /D "VST_API" /D "WIN32" /D "WINVER=0x0501"
 RFLAGS = $(RFLAGS) /D "VST_API" /nologo
 LINKFLAGS = $(LINKFLAGS) /dll /subsystem:windows /libpath:"../../lice/$(OUTDIR:Tracer=Release)" /libpath:"../$(OUTDIR)" /dynamicbase:no /manifest:no /nologo
 
+!IF "$(TARGET_CPU)" == "x86" || "$(CPU)" == "i386"
+
+!	IFNDEF NOSSE2
+PLATFORM = Win32
+CPPFLAGS = $(CPPFLAGS) /arch:SSE2
+RFLAGS = $(RFLAGS) /d "_M_IX86_FP"
+!	ELSE
+PLATFORM = Win32_noSSE2
+!	ENDIF
+LINKFLAGS = $(LINKFLAGS) /machine:x86
+
+!ELSE IF "$(TARGET_CPU)" == "x64" || "$(CPU)" == "AMD64"
+
+PLATFORM = X64
+CPPFLAGS = $(CPPFLAGS) /favor:blend /wd4244
+RFLAGS = $(RFLAGS) /d "_M_X64"
+LINKFLAGS = $(LINKFLAGS) /machine:x64
+
+!ENDIF
+
 !IF !DEFINED(CONFIGURATION) && DEFINED(NODEBUG)
 CONFIGURATION = Release
 !ELSE IF !DEFINED(CONFIGURATION)
@@ -48,26 +68,6 @@ CPPFLAGS = $(CPPFLAGS) /Zi
 CPPFLAGS = $(CPPFLAGS) /ZI
 !	ENDIF
 LINKFLAGS = $(LINKFLAGS) /debug /nodefaultlib:libcmt /defaultlib:libcmtd
-
-!ENDIF
-
-!IF "$(TARGET_CPU)" == "x86" || "$(CPU)" == "i386"
-
-!	IFNDEF NOSSE2
-PLATFORM = Win32
-CPPFLAGS = $(CPPFLAGS) /arch:SSE2
-RFLAGS = $(RFLAGS) /d "_M_IX86_FP"
-!	ELSE
-PLATFORM = Win32_noSSE2
-!	ENDIF
-LINKFLAGS = $(LINKFLAGS) /machine:x86
-
-!ELSE IF "$(TARGET_CPU)" == "x64" || "$(CPU)" == "AMD64"
-
-PLATFORM = X64
-CPPFLAGS = $(CPPFLAGS) /favor:blend /wd4244
-RFLAGS = $(RFLAGS) /d "_M_X64"
-LINKFLAGS = $(LINKFLAGS) /machine:x64
 
 !ENDIF
 
