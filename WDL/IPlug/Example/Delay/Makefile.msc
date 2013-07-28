@@ -1,5 +1,5 @@
 # IPlug delay example
-# (c) Theo Niessink 2012
+# (c) Theo Niessink 2012, 2013
 # <http://www.taletn.com/>
 #
 # This software is provided 'as-is', without any express or implied
@@ -97,7 +97,7 @@ CPPFLAGS = $(CPPFLAGS) /D "TRACER_BUILD"
 LINKFLAGS = $(LINKFLAGS) /opt:icf /opt:ref /incremental:no /defaultlib:libcmt
 !ENDIF
 
-LINKFLAGS = $(LINKFLAGS) lice.lib IPlug.lib wininet.lib shell32.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib
+LINKFLAGS = $(LINKFLAGS) lice.lib IPlug.lib wininet.lib shell32.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib comctl32.lib
 
 
 all : dll
