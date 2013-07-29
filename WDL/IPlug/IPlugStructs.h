@@ -126,7 +126,7 @@ struct IRECT
 		return IRECT();
 	}
 	inline bool Intersects(IRECT* pRHS) {
-		return (!Empty() && !pRHS->Empty() && R >= pRHS->L && L < pRHS->R && B >= pRHS->T && T < pRHS->B);
+		return (!Empty() && !pRHS->Empty() && R > pRHS->L && L < pRHS->R && B > pRHS->T && T < pRHS->B);
 	}
 	inline bool Contains(IRECT* pRHS) {
 		return (!Empty() && !pRHS->Empty() && pRHS->L >= L && pRHS->R <= R && pRHS->T >= T && pRHS->B <= B);
