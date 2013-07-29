@@ -129,10 +129,10 @@ struct IRECT
 		return (!Empty() && !pRHS->Empty() && R > pRHS->L && L < pRHS->R && B > pRHS->T && T < pRHS->B);
 	}
 	inline bool Contains(IRECT* pRHS) {
-		return (!Empty() && !pRHS->Empty() && pRHS->L >= L && pRHS->R <= R && pRHS->T >= T && pRHS->B <= B);
+		return (!Empty() && pRHS->L >= L && pRHS->R <= R && pRHS->T >= T && pRHS->B <= B);
 	}
 	inline bool Contains(int x, int y) {
-		return (!Empty() && x >= L && x < R && y >= T && y < B);
+		return (x >= L && x < R && y >= T && y < B);
 	}
 
   void Clank(IRECT* pRHS) {
