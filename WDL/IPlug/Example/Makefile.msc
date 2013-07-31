@@ -1,4 +1,4 @@
-# IPlug makefile for Microsoft Windows SDK v7.0/v7.1
+# IPlugExample Microsoft C/C++ makefile
 # (c) Theo Niessink 2009-2013
 # <http://www.taletn.com/>
 #
@@ -18,6 +18,22 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
+# Usage (from the Windows SDK v7.0/v7.1 or Visual Studio 2012 Command Prompt):
+#
+#    nmake /f Makefile.msc [configuration=Release|Debug|Tracer] [nosse2=1]
+#
+# Note: You will first need to build the LICE and IPlug libraries, so to
+# build this example from scratch you should do:
+#
+#    cd WDL\lice
+#    nmake /f Makefile.msc
+#
+#    cd WDL\IPlug
+#    nmake /f Makefile.msc
+#
+#    cd WDL\IPlug\Example
+#    nmake /f Makefile.msc
+
 PROJECT = IPlugExample
 OUTFILE = $(PROJECT).dll
 
@@ -25,7 +41,14 @@ CPPFLAGS = $(CPPFLAGS) /EHsc /fp:fast /D "VST_API" /D "WIN32" /D "WINVER=0x0501"
 RFLAGS = $(RFLAGS) /D "VST_API" /nologo
 LINKFLAGS = $(LINKFLAGS) /dll /subsystem:windows /libpath:"../../lice/$(OUTDIR:Tracer=Release)" /libpath:"../$(OUTDIR)" /dynamicbase:no /manifest:no /nologo
 
-!IF "$(TARGET_CPU)" == "x86" || "$(CPU)" == "i386"
+!IF "$(TARGET_CPU)" == "x64" || "$(CPU)" == "AMD64" || "$(PLATFORM)" == "x64"
+
+PLATFORM = X64
+CPPFLAGS = $(CPPFLAGS) /favor:blend /wd4244
+RFLAGS = $(RFLAGS) /d "_M_X64"
+LINKFLAGS = $(LINKFLAGS) /machine:x64
+
+!ELSE
 
 !	IFNDEF NOSSE2
 PLATFORM = Win32
@@ -36,19 +59,12 @@ PLATFORM = Win32_noSSE2
 !	ENDIF
 LINKFLAGS = $(LINKFLAGS) /machine:x86
 
-!ELSE IF "$(TARGET_CPU)" == "x64" || "$(CPU)" == "AMD64"
-
-PLATFORM = X64
-CPPFLAGS = $(CPPFLAGS) /favor:blend /wd4244
-RFLAGS = $(RFLAGS) /d "_M_X64"
-LINKFLAGS = $(LINKFLAGS) /machine:x64
-
 !ENDIF
 
-!IF !DEFINED(CONFIGURATION) && DEFINED(NODEBUG)
-CONFIGURATION = Release
-!ELSE IF !DEFINED(CONFIGURATION)
+!IF !DEFINED(CONFIGURATION) && DEFINED(CPU) && DEFINED(APPVER) && !DEFINED(NODEBUG)
 CONFIGURATION = Debug
+!ELSE IF !DEFINED(CONFIGURATION)
+CONFIGURATION = Release
 !ENDIF
 
 !IF "$(CONFIGURATION)" == "Release" || "$(CONFIGURATION)" == "Tracer"
@@ -75,10 +91,6 @@ OUTDIR = $(PLATFORM)/$(CONFIGURATION)
 
 !MESSAGE $(PROJECT) - $(CONFIGURATION)|$(PLATFORM)
 !MESSAGE
-
-!IF "$(TARGET_CPU)" == "x86" || "$(CPU)" == "AMD64" || "$(APPVER)" != "5.01"
-!	MESSAGE Warning: Windows SDK, target CPU, and/or target OS mismatch
-!ENDIF
 
 all : dll
 
