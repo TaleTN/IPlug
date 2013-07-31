@@ -1,5 +1,5 @@
-# IPlug makefile for Microsoft Windows SDK v7.0/v7.1
-# (c) Theo Niessink 2009-2012
+# IPlug Microsoft C/C++ makefile
+# (c) Theo Niessink 2009-2013
 # <http://www.taletn.com/>
 #
 # This file is provided 'as-is', without any express or implied warranty. In
@@ -18,16 +18,21 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-# Usage:
-#   Setenv [/Debug | /Release] [/x86 | /x64] [/xp | /vista | /2003 | /2008 | /win7]
-#   nmake /f Makefile.msc [CONFIGURATION=Tracer] [NOSSE2=1] [all | lib | iplug]
+# Usage (from the Windows SDK v7.0/v7.1 or Visual Studio 2012 Command Prompt):
+#
+#    nmake /f Makefile.msc [configuration=Release|Debug|Tracer] [nosse2=1] [all | lib | iplug]
 
 PROJECT = IPlug
 OUTFILE = $(PROJECT).lib
 
 CPPFLAGS = $(CPPFLAGS) /EHsc /GR- /D "WIN32" /D "_LIB" /D "_MBCS" /D "IPLUG_NO_JPEG_SUPPORT" /fp:fast /MT /c /Fo"$(OUTDIR)/" /Fd"$(OUTDIR)/" /W3 /WX /D "_CRT_SECURE_NO_WARNINGS" /wd4996 /wd4244 /nologo
 
-!IF "$(TARGET_CPU)" == "x86" || "$(CPU)" == "i386"
+!IF "$(TARGET_CPU)" == "x64" || "$(CPU)" == "AMD64" || "$(PLATFORM)" == "x64"
+
+PLATFORM = X64
+CPPFLAGS = $(CPPFLAGS) /favor:blend
+
+!ELSE
 
 !	IFNDEF NOSSE2
 PLATFORM = Win32
@@ -36,17 +41,12 @@ CPPFLAGS = $(CPPFLAGS) /arch:SSE2
 PLATFORM = Win32_noSSE2
 !	ENDIF
 
-!ELSE IF "$(TARGET_CPU)" == "x64" || "$(CPU)" == "AMD64"
-
-PLATFORM = X64
-CPPFLAGS = $(CPPFLAGS) /favor:blend
-
 !ENDIF
 
-!IF !DEFINED(CONFIGURATION) && DEFINED(NODEBUG)
-CONFIGURATION = Release
-!ELSE IF !DEFINED(CONFIGURATION)
+!IF !DEFINED(CONFIGURATION) && DEFINED(CPU) && DEFINED(APPVER) && !DEFINED(NODEBUG)
 CONFIGURATION = Debug
+!ELSE IF !DEFINED(CONFIGURATION)
+CONFIGURATION = Release
 !ENDIF
 
 !IF "$(CONFIGURATION)" == "Release" || "$(CONFIGURATION)" == "Tracer"
