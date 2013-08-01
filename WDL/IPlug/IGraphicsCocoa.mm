@@ -238,6 +238,7 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
     mGraphics->SetFromStringAfterPrompt(mEdControl, mEdParam, txt);
 
   EndUserInput(self);
+  [self viewDidMoveToWindow];
   [self setNeedsDisplay: YES];
 }
 
