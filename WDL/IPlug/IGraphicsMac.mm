@@ -54,14 +54,12 @@ LICE_IBitmap* LoadImgFromResourceOSX(const char* bundleID, const char* filename)
   if (!filename) return 0;
   CocoaAutoReleasePool pool;
   
+#ifndef IPLUG_NO_JPEG_SUPPORT
   const char* ext = filename+strlen(filename)-1;
   while (ext >= filename && *ext != '.') --ext;
   ++ext;
   
   bool ispng = !stricmp(ext, "png");
-#ifdef IPLUG_NO_JPEG_SUPPORT
-  if (!ispng) return 0;
-#else
   bool isjpg = !stricmp(ext, "jpg");
   if (!isjpg && !ispng) return 0;
 #endif
@@ -71,7 +69,10 @@ LICE_IBitmap* LoadImgFromResourceOSX(const char* bundleID, const char* filename)
   if (pBundle && pFile) 
   {
     NSString* pPath = 0;
-    if (ispng) pPath = [pBundle pathForResource:pFile ofType:@"png"];  
+#ifndef IPLUG_NO_JPEG_SUPPORT
+    if (ispng)
+#endif
+    pPath = [pBundle pathForResource:pFile ofType:@"png"];  
 #ifndef IPLUG_NO_JPEG_SUPPORT
     if (isjpg) pPath = [pBundle pathForResource:pFile ofType:@"jpg"];  
 #endif
@@ -81,7 +82,10 @@ LICE_IBitmap* LoadImgFromResourceOSX(const char* bundleID, const char* filename)
       const char* resourceFileName = [pPath UTF8String];
       if (CSTR_NOT_EMPTY(resourceFileName))
       {
-        if (ispng) return LICE_LoadPNG(resourceFileName);
+#ifndef IPLUG_NO_JPEG_SUPPORT
+        if (ispng)
+#endif
+        return LICE_LoadPNG(resourceFileName);
 #ifndef IPLUG_NO_JPEG_SUPPORT
         if (isjpg) return LICE_LoadJPG(resourceFileName);
 #endif

@@ -295,15 +295,18 @@ IGraphicsWin::~IGraphicsWin()
 
 LICE_IBitmap* IGraphicsWin::OSLoadBitmap(int ID, const char* name)
 {
+#ifndef IPLUG_NO_JPEG_SUPPORT
   const char* ext = name+strlen(name)-1;
   while (ext > name && *ext != '.') --ext;
   ++ext;
 
-  if (!stricmp(ext, "png")) return _LICE::LICE_LoadPNGFromResource(mHInstance, ID, 0);
+  if (!stricmp(ext, "png"))
+#endif
+  return _LICE::LICE_LoadPNGFromResource(mHInstance, ID, 0);
 #ifndef IPLUG_NO_JPEG_SUPPORT
   if (!stricmp(ext, "jpg") || !stricmp(ext, "jpeg")) return _LICE::LICE_LoadJPGFromResource(mHInstance, ID, 0);
-#endif
   return 0;
+#endif
 }
 
 void GetWindowSize(HWND pWnd, int* pW, int* pH)
