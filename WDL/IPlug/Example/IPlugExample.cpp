@@ -77,7 +77,7 @@ PlugExample::PlugExample(IPlugInstanceInfo instanceInfo)
 	// Instantiate a graphics engine.
 
 	IGraphics* pGraphics = MakeGraphics(this, kW, kH); // MakeGraphics(this, kW, kH);
-	pGraphics->AttachBackground(BG_ID, BG_FN);
+	pGraphics->AttachBackground(IPLUG_PNG_RESOURCE(BG_ID, BG_FN));
 
   // Attach controls to the graphics engine.  Controls are automatically associated
 	// with a parameter if you construct the control with a parameter index.
@@ -85,24 +85,24 @@ PlugExample::PlugExample(IPlugInstanceInfo instanceInfo)
 	// Attach a couple of meters, not associated with any parameter,
 	// which we keep indexes for, so we can push updates from the plugin class.
 
-	IBitmap bitmap = pGraphics->LoadIBitmap(METER_ID, METER_FN, kMeter_N);
+	IBitmap bitmap = pGraphics->LoadIBitmap(IPLUG_PNG_RESOURCE(METER_ID, METER_FN), kMeter_N);
   mMeterIdx_L = pGraphics->AttachControl(new IBitmapControl(this, kMeterL_X, kMeterL_Y, &bitmap));
 	mMeterIdx_R = pGraphics->AttachControl(new IBitmapControl(this, kMeterR_X, kMeterR_Y, &bitmap));
 
 	// Attach a couple of faders, associated with the parameters GainL and GainR.
 
-	bitmap = pGraphics->LoadIBitmap(FADER_ID, FADER_FN);
+	bitmap = pGraphics->LoadIBitmap(IPLUG_PNG_RESOURCE(FADER_ID, FADER_FN));
 	pGraphics->AttachControl(new IFaderControl(this, kGainL_X, kGainL_Y, kFader_Len, kGainL, &bitmap, kVertical));
 	pGraphics->AttachControl(new IFaderControl(this, kGainR_X, kGainR_Y, kFader_Len, kGainR, &bitmap, kVertical));
 
 	// Attach a 5-position switch associated with the ChannelSw parameter.
 
-	bitmap = pGraphics->LoadIBitmap(TOGGLE_ID, TOGGLE_FN, kSwitch_N);
+	bitmap = pGraphics->LoadIBitmap(IPLUG_PNG_RESOURCE(TOGGLE_ID, TOGGLE_FN), kSwitch_N);
 	pGraphics->AttachControl(new ISwitchControl(this, kSwitch_X, kSwitch_Y, kChannelSw, &bitmap));
 
 	// Attach a rotating knob associated with the Pan parameter.
 
-	bitmap = pGraphics->LoadIBitmap(KNOB_ID, KNOB_FN);
+	bitmap = pGraphics->LoadIBitmap(IPLUG_PNG_RESOURCE(KNOB_ID, KNOB_FN));
 	pGraphics->AttachControl(new IKnobRotaterControl(this, kPan_X, kPan_Y, kPan, &bitmap));
 
 	// See IControl.h for other control types,
