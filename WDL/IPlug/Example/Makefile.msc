@@ -37,7 +37,7 @@
 PROJECT = IPlugExample
 OUTFILE = $(PROJECT).dll
 
-CPPFLAGS = $(CPPFLAGS) /EHsc /fp:fast /D "VST_API" /D "WIN32" /D "WINVER=0x0501" /D "_WIN32_WINNT=0x0501" /D "_WINDLL" /D "_MBCS" /MT /c /Fo"$(OUTDIR)/" /Fd"$(OUTDIR)/" /W3 /D "_CRT_SECURE_NO_WARNINGS" /nologo
+CPPFLAGS = $(CPPFLAGS) /EHsc /fp:fast /D "VST_API" /D "WIN32" /D "WINVER=0x0501" /D "_WIN32_WINNT=0x0501" /D "_WINDLL" /D "_MBCS" /D "IPLUG_NO_JPEG_SUPPORT" /MT /c /Fo"$(OUTDIR)/" /Fd"$(OUTDIR)/" /W3 /D "_CRT_SECURE_NO_WARNINGS" /nologo
 RFLAGS = $(RFLAGS) /D "VST_API" /nologo
 LINKFLAGS = $(LINKFLAGS) /dll /subsystem:windows /libpath:"../../lice/$(OUTDIR:Tracer=Release)" /libpath:"../$(OUTDIR)" /dynamicbase:no /manifest:no /nologo
 
