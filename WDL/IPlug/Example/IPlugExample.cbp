@@ -35,8 +35,10 @@
 			<Add option="-DDLL_BUILD" />
 			<Add option="-DVST_API" />
 			<Add option="-DIPLUG_NO_JPEG_SUPPORT" />
+			<Add option="-D_WIN32_IE=0x0300" />
 			<Add option="-msse2" />
 			<Add option="-ffast-math" />
+			<Add option="-fpermissive" />
 			<Add directory="." />
 			<Add directory="..\..\zlib" />
 		</Compiler>
@@ -48,6 +50,7 @@
 			<Add library="comdlg32" />
 			<Add library="advapi32" />
 			<Add library="wininet" />
+			<Add library="comctl32" />
 		</Linker>
 		<Unit filename="IPlugExample.cpp" />
 		<Unit filename="IPlugExample.h" />
