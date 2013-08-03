@@ -31,6 +31,8 @@ public:
 	void CloseWindow();
 	bool WindowIsOpen() { return (mPlugWnd); }
 
+	void UpdateTooltips() {}
+
 	void HostPath(WDL_String* pPath); 
   void PluginPath(WDL_String* pPath);
 

@@ -41,6 +41,8 @@ public:
 	bool WindowIsOpen();
   void Resize(int w, int h);
   
+  void UpdateTooltips();
+
 	void HostPath(WDL_String* pPath); 
   void PluginPath(WDL_String* pPath);
 

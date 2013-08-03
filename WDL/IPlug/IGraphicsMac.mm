@@ -152,16 +152,7 @@ void* IGraphicsMac::OpenCocoaWindow(void* pParentView)
   // Else we are being called by IGraphicsCocoaFactory, which is being called by a Cocoa AU host, 
   // and the host will take care of attaching the view to the window. 
 
-  if (TooltipsEnabled()) {
-    IControl** ppControl = mControls.GetList();
-    for (int i = 0, n = mControls.GetSize(); i < n; ++i, ++ppControl) {
-      IControl* pControl = *ppControl;
-      const char* tooltip = pControl->GetTooltip();
-      if (tooltip) {
-        [(IGRAPHICS_COCOA*) mGraphicsCocoa registerToolTip: pControl->GetTargetRECT()];
-      }
-    }
-  }
+  UpdateTooltips();
 
   return mGraphicsCocoa;
 }
@@ -228,6 +219,25 @@ void IGraphicsMac::Resize(int w, int h)
     NSSize size = { w, h };
     [(IGRAPHICS_COCOA*) mGraphicsCocoa setFrameSize: size ];
   }  
+}
+
+void IGraphicsMac::UpdateTooltips()
+{
+  if (!(mGraphicsCocoa && TooltipsEnabled())) return;
+
+  [(IGRAPHICS_COCOA*) mGraphicsCocoa removeAllToolTips];
+
+  IControl** ppControl = mControls.GetList();
+  for (int i = 0, n = mControls.GetSize(); i < n; ++i, ++ppControl) {
+    IControl* pControl = *ppControl;
+    const char* tooltip = pControl->GetTooltip();
+    if (tooltip && !pControl->IsHidden()) {
+      IRECT* pR = pControl->GetTargetRECT();
+      if (!pControl->GetTargetRECT()->Empty()) {
+        [(IGRAPHICS_COCOA*) mGraphicsCocoa registerToolTip: pR];
+      }
+    }
+  }
 }
 
 void IGraphicsMac::HostPath(WDL_String* pPath)
