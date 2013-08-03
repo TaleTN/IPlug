@@ -78,7 +78,9 @@ private:
   
   WDL_String mBundleID;
 
+#ifndef IPLUG_NO_CARBON_SUPPORT
   friend class IGraphicsCarbon;
+#endif
   friend int GetMouseOver(IGraphicsMac* pGraphics);
 };
 
