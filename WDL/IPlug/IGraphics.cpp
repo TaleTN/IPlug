@@ -192,7 +192,14 @@ void IGraphics::SetFromStringAfterPrompt(IControl* pControl, IParam* pParam, cha
 			v = atof(txt);
 			if (pParam->DisplayIsNegated()) v = -v;
 		}
+		int paramIdx = pControl->ParamIdx();
+		if (paramIdx >= 0) {
+			mPlug->BeginInformHostOfParamChange(paramIdx);
+		}
     	pControl->SetValueFromUserInput(pParam->GetNormalized(v));
+		if (paramIdx >= 0) {
+			mPlug->EndInformHostOfParamChange(paramIdx);
+		}
 	}
 	else // if (pControl)
 	{
