@@ -766,11 +766,11 @@ void IGraphics::OnMouseDown(int x, int y, IMouseMod* pMod)
 		mMouseY = y;
     mDisplayControlValue = (pMod->R);
     IControl* pControl = mControls.Get(c);
-		pControl->OnMouseDown(x, y, pMod);
     int paramIdx = pControl->ParamIdx();
     if (paramIdx >= 0) {
       mPlug->BeginInformHostOfParamChange(paramIdx);
     }    
+    pControl->OnMouseDown(x, y, pMod);
   }
 }
 
