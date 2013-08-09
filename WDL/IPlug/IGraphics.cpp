@@ -838,6 +838,10 @@ bool IGraphics::OnMouseDblClick(int x, int y, IMouseMod* pMod)
 	int c = GetMouseControlIdx(x, y);
 	if (c >= 0) {
     IControl* pControl = mControls.Get(c);
+    int paramIdx = pControl->ParamIdx();
+    if (paramIdx >= 0) {
+      mPlug->BeginInformHostOfParamChange(paramIdx);
+    }
     if (pControl->MouseDblAsSingleClick()) {
       mMouseCapture = c;
       mMouseX = x;
@@ -848,6 +852,7 @@ bool IGraphics::OnMouseDblClick(int x, int y, IMouseMod* pMod)
     else {
 		  pControl->OnMouseDblClick(x, y, pMod);
     }
+    // OnMouseUp() will call EndInformHostOfParamChange().
 	}
   return newCapture;
 }
