@@ -861,7 +861,15 @@ void IGraphics::OnMouseWheel(int x, int y, IMouseMod* pMod, int d)
 {	
 	int c = GetMouseControlIdx(x, y);
 	if (c >= 0) {
-		mControls.Get(c)->OnMouseWheel(x, y, pMod, d);
+		IControl* pControl = mControls.Get(c);
+		int paramIdx = pControl->ParamIdx();
+		if (paramIdx >= 0) {
+			mPlug->BeginInformHostOfParamChange(paramIdx);
+		}
+		pControl->OnMouseWheel(x, y, pMod, d);
+		if (paramIdx >= 0) {
+			mPlug->EndInformHostOfParamChange(paramIdx);
+		}
 	}
 }
 
