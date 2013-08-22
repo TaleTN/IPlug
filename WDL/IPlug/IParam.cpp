@@ -16,7 +16,7 @@ IParam::~IParam()
 {
 }
 
-void IParam::InitBool(const char* name, bool defaultVal, const char* label)
+void IParam::InitBool(const char* name, bool defaultVal)
 {
 	if (mType == kTypeNone) {
 		mType = kTypeBool;
@@ -27,12 +27,12 @@ void IParam::InitBool(const char* name, bool defaultVal, const char* label)
   SetDisplayText(1, "on");
 }
 
-void IParam::InitEnum(const char* name, int defaultVal, int nEnums)
+void IParam::InitEnum(const char* name, int defaultVal, int nEnums, const char* label)
 {
 	if (mType == kTypeNone) {
 		mType = kTypeEnum;
 	}
-	InitInt(name, defaultVal, 0, nEnums - 1);
+	InitInt(name, defaultVal, 0, nEnums - 1, label);
 }
 
 void IParam::InitInt(const char* name, int defaultVal, int minVal, int maxVal, const char* label)

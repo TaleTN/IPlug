@@ -27,8 +27,8 @@ public:
 
   EParamType Type() { return mType; }
 	
-	void InitBool(const char* name, bool defaultVal, const char* label = "");
-	void InitEnum(const char* name, int defaultVal, int nEnums);
+	void InitBool(const char* name, bool defaultVal);
+	void InitEnum(const char* name, int defaultVal, int nEnums, const char* label = "");
 	void InitInt(const char* name, int defaultVal, int minVal, int maxVal, const char* label = "");
   void InitDouble(const char* name, double defaultVal, double minVal, double maxVal, double step, const char* label = "");
 
