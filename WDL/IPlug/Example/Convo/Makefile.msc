@@ -1,7 +1,6 @@
-# IPlug convoengine example
+# IPlug ConvoEngine example Microsoft C/C++ makefile
 # (c) Theo Niessink 2010-2013
 # <http://www.taletn.com/>
-#
 #
 # This software is provided 'as-is', without any express or implied
 # warranty. In no event will the authors be held liable for any damages
@@ -18,74 +17,55 @@
 # 2. Altered source versions must be plainly marked as such, and must not be
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
-#
-#
+
 # A simple IPlug plug-in effect that shows how to use WDL's fast convolution
 # engine.
 
+PROJECT = IPlugConvo
+OUTFILE = $(PROJECT).dll
 
-!IFNDEF CONFIGURATION
-!	IFDEF NODEBUG
-CONFIGURATION = Release
-!	ELSE
-CONFIGURATION = Debug
-!	ENDIF
-!ENDIF
-
-!IFNDEF TARGET_CPU
-!	IF "$(CPU)" == "i386"
-TARGET_CPU = x86
-!	ELSE IF "$(CPU)" == "AMD64"
-# TARGET_CPU = x64
-!		ERROR Use Windows SDK v7.1 for x64 build
-!	ENDIF
-!ELSE
-!	IF "$(TARGET_CPU)" == "x86"
-!		ERROR Use Windows SDK v7.0 for x86 builds
-!	ENDIF
-!ENDIF
-
-
-!IF "$(TARGET_CPU)" == "x86"
-!	IFNDEF NOSSE2
-PLATFORM = Win32
-OUTFILE = IPlugConvo.dll
-CPPFLAGS = $(CPPFLAGS) /arch:SSE2
-!	ELSE
-PLATFORM = Win32_noSSE2
-OUTFILE = IPlugConvo.dll
-!	ENDIF
-CPPFLAGS = $(CPPFLAGS) /D "WIN32" /D "_WIN32_WINNT=0x0501"
-LINKFLAGS = $(LINKFLAGS) /machine:x86
-
-!ELSE IF "$(TARGET_CPU)" == "x64"
-!	IFDEF NOSSE2
-!		MESSAGE Warning: NOSSE2 has no effect on x64 code
-!		MESSAGE
-!	ENDIF
-PLATFORM = X64
-OUTFILE = IPlugConvo.dll
-CPPFLAGS = $(CPPFLAGS) /favor:blend /wd4267 /wd4800
-LINKFLAGS = $(LINKFLAGS) /machine:x64
-
-!ELSE
-!	ERROR Unsupported target CPU "$(TARGET_CPU)"
-!ENDIF
-
-OUTDIR = $(PLATFORM)/$(CONFIGURATION)
-INTDIR = $(OUTDIR)
-
-!MESSAGE IPlugConvo - $(CONFIGURATION)|$(PLATFORM)
-!MESSAGE
-
-
-CPPFLAGS = $(CPPFLAGS) /EHsc /fp:fast /D "VST_API" /D "WINVER=0x0501" /D "_WINDLL" /D "_MBCS" /MT /c /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /W3 /D "_CRT_SECURE_NO_WARNINGS" /nologo
+CPPFLAGS = $(CPPFLAGS) /EHsc /fp:fast /D "VST_API" /D "WIN32" /D "WINVER=0x0501" /D "_WIN32_WINNT=0x0501" /D "_WINDLL" /D "_MBCS" /D "IPLUG_NO_JPEG_SUPPORT" /MT /c /Fo"$(OUTDIR)/" /Fd"$(OUTDIR)/" /W3 /D "_CRT_SECURE_NO_WARNINGS" /nologo
 LINKFLAGS = $(LINKFLAGS) /dll /subsystem:windows /libpath:"../../../lice/$(OUTDIR:Tracer=Release)" /libpath:"../../$(OUTDIR)" /dynamicbase:no /manifest:no /nologo
 
 # Double precision processing
 CPPFLAGS = $(CPPFLAGS) /D "WDL_FFT_REALSIZE=8" /D "WDL_CONVO_WANT_FULLPRECISION_IMPULSE_STORAGE"
 
-!IF "$(CONFIGURATION)" == "Debug"
+!IF "$(TARGET_CPU)" == "x64" || "$(CPU)" == "AMD64" || "$(PLATFORM)" == "x64"
+
+PLATFORM = X64
+CPPFLAGS = $(CPPFLAGS) /favor:blend /wd4244
+RFLAGS = $(RFLAGS) /d "_M_X64"
+LINKFLAGS = $(LINKFLAGS) /machine:x64
+
+!ELSE
+
+!	IFNDEF NOSSE2
+PLATFORM = Win32
+CPPFLAGS = $(CPPFLAGS) /arch:SSE2
+RFLAGS = $(RFLAGS) /d "_M_IX86_FP"
+!	ELSE
+PLATFORM = Win32_noSSE2
+!	ENDIF
+LINKFLAGS = $(LINKFLAGS) /machine:x86
+
+!ENDIF
+
+!IF !DEFINED(CONFIGURATION) && DEFINED(CPU) && DEFINED(APPVER) && !DEFINED(NODEBUG)
+CONFIGURATION = Debug
+!ELSE IF !DEFINED(CONFIGURATION)
+CONFIGURATION = Release
+!ENDIF
+
+!IF "$(CONFIGURATION)" == "Release" || "$(CONFIGURATION)" == "Tracer"
+
+CPPFLAGS = $(CPPFLAGS) /D "NDEBUG" /O2 /GS-
+!	IF "$(CONFIGURATION)" == "Tracer"
+CPPFLAGS = $(CPPFLAGS) /D "TRACER_BUILD"
+!	ENDIF
+LINKFLAGS = $(LINKFLAGS) /opt:icf /opt:ref /incremental:no /defaultlib:libcmt
+
+!ELSE IF "$(CONFIGURATION)" == "Debug"
+
 CPPFLAGS = $(CPPFLAGS) /D "_DEBUG" /RTCsu
 !	IF "$(PLATFORM)" == "X64"
 CPPFLAGS = $(CPPFLAGS) /Zi
@@ -94,43 +74,35 @@ CPPFLAGS = $(CPPFLAGS) /ZI
 !	ENDIF
 LINKFLAGS = $(LINKFLAGS) /debug /nodefaultlib:libcmt /defaultlib:libcmtd
 
-!ELSE
-CPPFLAGS = $(CPPFLAGS) /D "NDEBUG" /O2 /Ob2
-!	IF "$(CONFIGURATION)" == "Tracer"
-CPPFLAGS = $(CPPFLAGS) /D "TRACER_BUILD"
-!	ENDIF
-LINKFLAGS = $(LINKFLAGS) /opt:icf /opt:ref /incremental:no /defaultlib:libcmt
 !ENDIF
 
-LINKFLAGS = $(LINKFLAGS) lice.lib IPlug.lib wininet.lib shell32.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib comctl32.lib
+OUTDIR = $(PLATFORM)/$(CONFIGURATION)
 
+!MESSAGE $(PROJECT) - $(CONFIGURATION)|$(PLATFORM)
+!MESSAGE
 
 all : dll
 
-"$(OUTDIR)" :
-	@if not exist "$(OUTDIR)/" mkdir "$(OUTDIR)"
+dll : "$(OUTDIR)" "$(OUTDIR)/$(OUTFILE)"
 
-!IF "$(INTDIR)" != "$(OUTDIR)"
-"$(INTDIR)" :
-	@if not exist "$(INTDIR)/" mkdir "$(INTDIR)"
+"$(OUTDIR)" :
+!IF !EXIST("$(OUTDIR)/")
+	mkdir $@
 !ENDIF
 
+"$(OUTDIR)/$(PROJECT).obj" : $(PROJECT).cpp $(PROJECT).h resource.h
+	$(CPP) $(CPPFLAGS) $(PROJECT).cpp
 
-"$(INTDIR)/IPlugConvo.obj" : IPlugConvo.cpp IPlugConvo.h resource.h
-	$(CPP) $(CPPFLAGS) IPlugConvo.cpp
+"$(OUTDIR)/convoengine.obj" : ../../../convoengine.cpp
+	$(CPP) $(CPPFLAGS) $**
 
-"$(INTDIR)/convoengine.obj" : ../../../convoengine.cpp
-	$(CPP) $(CPPFLAGS) /wd4018 ../../../convoengine.cpp
+"$(OUTDIR)/fft.obj" : ../../../fft.c
+	$(CPP) $(CPPFLAGS) $**
 
-"$(INTDIR)/fft.obj" : ../../../fft.c
-	$(CPP) $(CPPFLAGS) ../../../fft.c
-
-"$(OUTDIR)/$(OUTFILE)" : "$(OUTDIR)" "$(INTDIR)" "$(INTDIR)/IPlugConvo.obj" "$(INTDIR)/convoengine.obj" "$(INTDIR)/fft.obj"
-	link $(LINKFLAGS) /out:"$(OUTDIR)/$(OUTFILE)" /implib:"$(INTDIR)/IPlugConvo.lib" "$(INTDIR)/IPlugConvo.obj" "$(INTDIR)/convoengine.obj" "$(INTDIR)/fft.obj"
-
-dll : "$(OUTDIR)/$(OUTFILE)"
-#	@if not "$(PLATFORM)"=="X64" if exist "C:\Program Files\REAPER\VstPlugins" copy "$(OUTDIR:/=\)\$(OUTFILE:/=\)" "C:\Program Files\REAPER\VstPlugins"
-#	@if "$(PLATFORM)"=="X64" if exist "C:\Program Files\REAPER (x64)\VstPlugins" copy "$(OUTDIR:/=\)\$(OUTFILE:/=\)" "C:\Program Files\REAPER (x64)\VstPlugins"
+"$(OUTDIR)/$(OUTFILE)" : "$(OUTDIR)/$(PROJECT).obj" "$(OUTDIR)/convoengine.obj" "$(OUTDIR)/fft.obj"
+	link $(LINKFLAGS) /out:$@ /implib:"$(OUTDIR)/$(PROJECT).lib" $** lice.lib IPlug.lib wininet.lib shell32.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib comctl32.lib
 
 clean :
-	@if exist "$(OUTDIR)" rd /s /q "$(OUTDIR)"
+!IF EXIST("$(OUTDIR)/")
+	rmdir /s /q "$(OUTDIR:/=\)"
+!ENDIF
