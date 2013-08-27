@@ -71,13 +71,10 @@ void IPlugConvo::OnParamChange(int paramIdx)
 template <class I, class O>
 void IPlugConvo::Resample(const I* src, int src_len, double src_srate, O* dest, int dest_len, double dest_srate)
 {
-	if (dest_srate == src_srate)
+	if (dest_len == src_len)
 	{
 		// Copy
-		int i, n = dest_len;
-		if (n > src_len) n = src_len;
-		for (i = 0; i < n; ++i) *dest++ = (O)*src++;
-		for (; i < dest_len; ++i) *dest++ = 0;
+		for (int i = 0; i < dest_len; ++i) *dest++ = (O)*src++;
 		return;
 	}
 
