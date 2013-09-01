@@ -224,6 +224,13 @@ void IGraphicsMac::Resize(int w, int h)
 
 void IGraphicsMac::UpdateTooltips()
 {
+#ifndef IPLUG_NO_CARBON_SUPPORT
+  if (mGraphicsCarbon) {
+    if (!TooltipsEnabled()) mGraphicsCarbon->HideTooltip();
+    return;
+  }
+#endif
+
   if (!mGraphicsCocoa) return;
   CocoaAutoReleasePool pool;
 
