@@ -77,7 +77,6 @@ private:
 #ifndef IPLUG_NO_CARBON_SUPPORT
   friend class IGraphicsCarbon;
 #endif
-  friend int GetMouseOver(IGraphicsMac* pGraphics);
 };
 
 inline CFStringRef MakeCFString(const char* cStr)
