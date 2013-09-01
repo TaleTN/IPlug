@@ -31,7 +31,7 @@ public:
 	void CloseWindow();
 	bool WindowIsOpen() { return (mPlugWnd); }
 
-	void UpdateTooltips() {}
+	inline void UpdateTooltips() { if (!TooltipsEnabled()) HideTooltip(); }
 
 	void HostPath(WDL_String* pPath); 
   void PluginPath(WDL_String* pPath);

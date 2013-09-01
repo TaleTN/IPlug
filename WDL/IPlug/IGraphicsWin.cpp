@@ -831,5 +831,6 @@ void IGraphicsWin::HideTooltip()
 	{
 		SetTooltip(NULL);
 		mShowingTooltip = false;
+		mTooltipIdx = -1;
 	}
 }
