@@ -224,10 +224,11 @@ void IGraphicsMac::Resize(int w, int h)
 
 void IGraphicsMac::UpdateTooltips()
 {
-  if (!(mGraphicsCocoa && TooltipsEnabled())) return;
+  if (!mGraphicsCocoa) return;
   CocoaAutoReleasePool pool;
 
   [(IGRAPHICS_COCOA*) mGraphicsCocoa removeAllToolTips];
+  if (!TooltipsEnabled()) return;
 
   IControl** ppControl = mControls.GetList();
   for (int i = 0, n = mControls.GetSize(); i < n; ++i, ++ppControl) {
