@@ -225,6 +225,7 @@ void IGraphicsMac::Resize(int w, int h)
 void IGraphicsMac::UpdateTooltips()
 {
   if (!(mGraphicsCocoa && TooltipsEnabled())) return;
+  CocoaAutoReleasePool pool;
 
   [(IGRAPHICS_COCOA*) mGraphicsCocoa removeAllToolTips];
 
