@@ -60,5 +60,5 @@ inline CGRect ToCGRect(int h, IRECT* pR)
 - (void) promptUserInput: (IControl*) pControl param: (IParam*) pParam;
 - (void) promptUserInput: (IEditableTextControl*) pControl;
 - (NSString*) view: (NSView*) pView stringForToolTip: (NSToolTipTag) tag point: (NSPoint) point userData: (void*) pData;
-- (void) registerToolTip: (IRECT*) pRECT;
+- (void) registerToolTip: (int) controlIdx rect: (IRECT*) pRECT;
 @end

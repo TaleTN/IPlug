@@ -38,11 +38,6 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
   pGraphicsCocoa->mEdParam = 0;
 }
 
-inline int GetMouseOver(IGraphicsMac* pGraphics)
-{
-	return pGraphics->GetMouseOver();
-}
-
 @implementation IGRAPHICS_COCOA
 
 - (id) init
@@ -345,16 +340,14 @@ inline int GetMouseOver(IGraphicsMac* pGraphics)
 
 - (NSString*) view: (NSView*) pView stringForToolTip: (NSToolTipTag) tag point: (NSPoint) point userData: (void*) pData
 {
-  int c = mGraphics ? GetMouseOver(mGraphics) : -1;
-  if (c < 0) return @"";
-
+  int c = (long) pData;
   const char* tooltip = mGraphics->GetControl(c)->GetTooltip();
   return CSTR_NOT_EMPTY(tooltip) ? ToNSString((const char*) tooltip) : @"";
 }
 
-- (void) registerToolTip: (IRECT*) pRECT
+- (void) registerToolTip: (int) controlIdx rect: (IRECT*) pRECT
 {
-  [self addToolTipRect: ToNSRect(mGraphics, pRECT) owner: self userData: nil];
+  [self addToolTipRect: ToNSRect(mGraphics, pRECT) owner: self userData: (void*)(long) controlIdx];
 }
 
 @end

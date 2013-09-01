@@ -236,7 +236,7 @@ void IGraphicsMac::UpdateTooltips()
     if (tooltip && !pControl->IsHidden()) {
       IRECT* pR = pControl->GetTargetRECT();
       if (!pControl->GetTargetRECT()->Empty()) {
-        [(IGRAPHICS_COCOA*) mGraphicsCocoa registerToolTip: pR];
+        [(IGRAPHICS_COCOA*) mGraphicsCocoa registerToolTip: i rect: pR];
       }
     }
   }
