@@ -341,8 +341,9 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 - (NSString*) view: (NSView*) pView stringForToolTip: (NSToolTipTag) tag point: (NSPoint) point userData: (void*) pData
 {
   int c = (long) pData;
-  const char* tooltip = mGraphics->GetControl(c)->GetTooltip();
-  return CSTR_NOT_EMPTY(tooltip) ? ToNSString((const char*) tooltip) : @"";
+  IControl* pControl = mGraphics->GetControl(c);
+  const char* tooltip = pControl->GetTooltip();
+  return CSTR_NOT_EMPTY(tooltip) && !pControl->IsHidden() && !pControl->IsGrayed() ? ToNSString((const char*) tooltip) : @"";
 }
 
 - (void) registerToolTip: (int) controlIdx rect: (IRECT*) pRECT
