@@ -18,8 +18,13 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-# A simple IPlug plug-in effect that shows how to use WDL's fast convolution
-# engine.
+# Usage (from the Windows SDK 7.0/7.1 or Visual Studio 2012 Command Prompt):
+#
+#    nmake /f Makefile.msc [configuration=Release|Debug|Tracer] [nosse2=1]
+#                          [wdl=1]
+#
+# Note: If you use wdl=1 to use WDL_Resampler, beware that its license is
+# LGPL, see WDL/resample.h.
 
 PROJECT = IPlugConvo
 OUTFILE = $(PROJECT).dll
@@ -29,6 +34,13 @@ LINKFLAGS = $(LINKFLAGS) /dll /subsystem:windows /libpath:"../../../lice/$(OUTDI
 
 # Double precision processing
 CPPFLAGS = $(CPPFLAGS) /D "WDL_FFT_REALSIZE=8" /D "WDL_CONVO_WANT_FULLPRECISION_IMPULSE_STORAGE"
+
+!IFDEF WDL
+
+CPPFLAGS = $(CPPFLAGS) /D "_USE_WDL_RESAMPLER"
+RESAMPLER = "$(OUTDIR)/resample.obj"
+
+!ENDIF
 
 !IF "$(TARGET_CPU)" == "x64" || "$(CPU)" == "AMD64" || "$(PLATFORM)" == "x64"
 
@@ -99,7 +111,10 @@ dll : "$(OUTDIR)" "$(OUTDIR)/$(OUTFILE)"
 "$(OUTDIR)/fft.obj" : ../../../fft.c
 	$(CPP) $(CPPFLAGS) $**
 
-"$(OUTDIR)/$(OUTFILE)" : "$(OUTDIR)/$(PROJECT).obj" "$(OUTDIR)/convoengine.obj" "$(OUTDIR)/fft.obj"
+"$(OUTDIR)/resample.obj" : ../../../resample.cpp
+	$(CPP) $(CPPFLAGS) $**
+
+"$(OUTDIR)/$(OUTFILE)" : "$(OUTDIR)/$(PROJECT).obj" "$(OUTDIR)/convoengine.obj" "$(OUTDIR)/fft.obj" $(RESAMPLER)
 	link $(LINKFLAGS) /out:$@ /implib:"$(OUTDIR)/$(PROJECT).lib" $** lice.lib IPlug.lib wininet.lib shell32.lib user32.lib gdi32.lib comdlg32.lib advapi32.lib comctl32.lib
 
 clean :

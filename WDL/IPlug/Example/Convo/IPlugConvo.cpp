@@ -1,7 +1,7 @@
 /*
 
 IPlug convoengine example
-(c) Theo Niessink 2010-2012
+(c) Theo Niessink 2010-2013
 <http://www.taletn.com/>
 
 
@@ -78,7 +78,30 @@ void IPlugConvo::Resample(const I* src, int src_len, double src_srate, O* dest, 
 		return;
 	}
 
+	// Resample using WDL's resampler.
+	#if defined(_USE_WDL_RESAMPLER)
+	mResampler.SetRates(src_srate, dest_srate);
+	double scale = src_srate / dest_srate;
+	while (dest_len > 0)
+	{
+		WDL_ResampleSample* p;
+		int n = mResampler.ResamplePrepare(mBlockLength, 1, &p), m = n;
+		if (n > src_len) n = src_len;
+		for (int i = 0; i < n; ++i) *p++ = (WDL_ResampleSample)*src++;
+		if (n < m) memset(p, 0, (m - n) * sizeof(WDL_ResampleSample));
+		src_len -= n;
+
+		WDL_ResampleSample buf[mBlockLength];
+		n = mResampler.ResampleOut(buf, m, m, 1);
+		if (n > dest_len) n = dest_len;
+		p = buf;
+		for (int i = 0; i < n; ++i) *dest++ = (O)(scale * *p++);
+		dest_len -= n;
+	}
+	mResampler.Reset();
+
 	// Resample using linear interpolation.
+	#else
 	double pos = 0.;
 	double delta = src_srate / dest_srate;
 	for (int i = 0; i < dest_len; ++i)
@@ -97,6 +120,7 @@ void IPlugConvo::Resample(const I* src, int src_len, double src_srate, O* dest, 
 			*dest++ = 0;
 		}
 	}
+	#endif
 }
 
 
@@ -112,6 +136,11 @@ void IPlugConvo::Reset()
 		const int irLength = sizeof(mIR) / sizeof(mIR[0]);
 		const double irSampleRate = 44100.;
 		mImpulse.SetNumChannels(1);
+
+		#if defined(_USE_WDL_RESAMPLER)
+			mResampler.SetMode(false, 0, true); // Sinc, default size
+			mResampler.SetFeedMode(true); // Input driven
+		#endif
 
 		// Resample the impulse response.
 		int len = mImpulse.SetLength(ResampleLength(irLength, irSampleRate, mSampleRate));

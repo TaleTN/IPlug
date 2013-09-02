@@ -4,7 +4,7 @@
 /*
 
 IPlug convoengine example
-(c) Theo Niessink 2010-2012
+(c) Theo Niessink 2010-2013
 <http://www.taletn.com/>
 
 
@@ -34,6 +34,10 @@ engine.
 #include "../../IPlug_include_in_plug_hdr.h"
 #include "../../../convoengine.h"
 
+#if defined(_USE_WDL_RESAMPLER)
+	#include "../../../resample.h"
+#endif
+
 
 class IPlugConvo: public IPlug
 {
@@ -58,6 +62,11 @@ private:
 
 	WDL_ImpulseBuffer mImpulse;
 	WDL_ConvolutionEngine_Div mEngine;
+
+	#if defined(_USE_WDL_RESAMPLER)
+	static const int mBlockLength = 64;
+	WDL_Resampler mResampler;
+	#endif
 
 	double mDry, mWet;
 
