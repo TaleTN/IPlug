@@ -816,6 +816,9 @@ void IGraphicsWin::SetTooltip(const char* tooltip)
 
 void IGraphicsWin::ShowTooltip()
 {
+	mTooltipIdx = TooltipsEnabled() ? GetMouseOver() : -1;
+	if (mTooltipIdx < 0) return;
+
 	const char* tooltip = GetControl(mTooltipIdx)->GetTooltip();
 	if (tooltip)
 	{
@@ -831,6 +834,5 @@ void IGraphicsWin::HideTooltip()
 	{
 		SetTooltip(NULL);
 		mShowingTooltip = false;
-		mTooltipIdx = -1;
 	}
 }
