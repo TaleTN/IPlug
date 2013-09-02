@@ -36,6 +36,9 @@ engine.
 
 #if defined(_USE_WDL_RESAMPLER)
 	#include "../../../resample.h"
+#elif defined(_USE_R8BRAIN)
+	#include "../../../../r8brain/CDSPResampler.h"
+	using namespace r8b;
 #endif
 
 
@@ -43,7 +46,7 @@ class IPlugConvo: public IPlug
 {
 public:
 	IPlugConvo(IPlugInstanceInfo instanceInfo);
-	~IPlugConvo() {}
+	~IPlugConvo();
 
 	void OnParamChange(int paramIdx);
 	void Reset();
@@ -63,9 +66,14 @@ private:
 	WDL_ImpulseBuffer mImpulse;
 	WDL_ConvolutionEngine_Div mEngine;
 
-	#if defined(_USE_WDL_RESAMPLER)
+	#if defined(_USE_WDL_RESAMPLER) || defined(_USE_R8BRAIN)
 	static const int mBlockLength = 64;
+	#endif
+
+	#if defined(_USE_WDL_RESAMPLER)
 	WDL_Resampler mResampler;
+	#elif defined(_USE_R8BRAIN)
+	CDSPResampler<>* mResampler;
 	#endif
 
 	double mDry, mWet;

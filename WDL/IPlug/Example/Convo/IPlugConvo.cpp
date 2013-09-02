@@ -42,12 +42,23 @@ enum EParams
 
 IPlugConvo::IPlugConvo(IPlugInstanceInfo instanceInfo):
 	IPLUG_CTOR(kNumParams, 0, instanceInfo),
+	#ifdef _USE_R8BRAIN
+	mResampler(NULL),
+	#endif
 	mSampleRate(0)
 {
 	TRACE;
 
 	GetParam(kDry)->InitDouble("Dry", 0., 0., 1., 0.001);
 	GetParam(kWet)->InitDouble("Wet", 1., 0., 1., 0.001);
+}
+
+
+IPlugConvo::~IPlugConvo()
+{
+	#ifdef _USE_R8BRAIN
+		if (mResampler) delete mResampler;
+	#endif
 }
 
 
@@ -100,6 +111,25 @@ void IPlugConvo::Resample(const I* src, int src_len, double src_srate, O* dest, 
 	}
 	mResampler.Reset();
 
+	// Resample using r8brain-free-src.
+	#elif defined(_USE_R8BRAIN)
+	double scale = src_srate / dest_srate;
+	while (dest_len > 0)
+	{
+		double buf[mBlockLength], *p = buf;
+		int n = mBlockLength;
+		if (n > src_len) n = src_len;
+		for (int i = 0; i < n; ++i) *p++ = (double)*src++;
+		if (n < mBlockLength) memset(p, 0, (mBlockLength - n) * sizeof(double));
+		src_len -= n;
+
+		n = mResampler->process(buf, mBlockLength, p);
+		if (n > dest_len) n = dest_len;
+		for (int i = 0; i < n; ++i) *dest++ = (O)(scale * *p++);
+		dest_len -= n;
+	}
+	mResampler->clear();
+
 	// Resample using linear interpolation.
 	#else
 	double pos = 0.;
@@ -140,6 +170,9 @@ void IPlugConvo::Reset()
 		#if defined(_USE_WDL_RESAMPLER)
 			mResampler.SetMode(false, 0, true); // Sinc, default size
 			mResampler.SetFeedMode(true); // Input driven
+		#elif defined(_USE_R8BRAIN)
+			if (mResampler) delete mResampler;
+			mResampler = new CDSPResampler<>(irSampleRate, mSampleRate, 3., 100., mBlockLength);
 		#endif
 
 		// Resample the impulse response.
