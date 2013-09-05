@@ -25,7 +25,7 @@
 PROJECT = IPlug
 OUTFILE = $(PROJECT).lib
 
-CPPFLAGS = $(CPPFLAGS) /EHsc /GR- /D "WIN32" /D "_LIB" /D "_MBCS" /D "IPLUG_NO_JPEG_SUPPORT" /fp:fast /MT /c /Fo"$(OUTDIR)/" /Fd"$(OUTDIR)/" /W3 /WX /D "_CRT_SECURE_NO_WARNINGS" /wd4996 /wd4244 /nologo
+CPPFLAGS = $(CPPFLAGS) /EHsc /D "WIN32" /D "_LIB" /D "_MBCS" /D "IPLUG_NO_JPEG_SUPPORT" /fp:fast /MT /c /Fo"$(OUTDIR)/" /Fd"$(OUTDIR)/" /W3 /WX /D "_CRT_SECURE_NO_WARNINGS" /wd4996 /wd4244 /nologo
 
 !IF "$(TARGET_CPU)" == "x64" || "$(CPU)" == "AMD64" || "$(PLATFORM)" == "x64"
 
@@ -51,7 +51,7 @@ CONFIGURATION = Release
 
 !IF "$(CONFIGURATION)" == "Release" || "$(CONFIGURATION)" == "Tracer"
 
-CPPFLAGS = $(CPPFLAGS) /D "NDEBUG" /O2 /GS-
+CPPFLAGS = $(CPPFLAGS) /D "NDEBUG" /O2 /GS- /GR-
 !	IF "$(CONFIGURATION)" == "Tracer"
 CPPFLAGS = $(CPPFLAGS) /D "TRACER_BUILD"
 !	ENDIF
