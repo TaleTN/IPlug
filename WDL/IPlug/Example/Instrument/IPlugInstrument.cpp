@@ -115,7 +115,9 @@ void IPlugInstrument::ProcessMidiMsg(IMidiMsg* pMsg)
 
 		// Discard all other MIDI messages.
 		default:
+			#if !defined(PLUG_DOES_MIDI_IN) || defined(PLUG_DOES_MIDI_OUT)
 			SendMidiMsg(pMsg);
+			#endif
 			return;
 	}
 

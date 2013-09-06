@@ -36,5 +36,5 @@
 
 #define PLUG_LATENCY           0
 #define PLUG_IS_INST           1
-#define PLUG_DOES_MIDI         1
+#define PLUG_DOES_MIDI_IN      1
 #define PLUG_DOES_STATE_CHUNKS 0
