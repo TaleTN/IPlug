@@ -55,7 +55,6 @@ RESAMPLER = "$(OUTDIR)/r8bbase.obj"
 
 PLATFORM = X64
 CPPFLAGS = $(CPPFLAGS) /favor:blend /wd4244
-RFLAGS = $(RFLAGS) /d "_M_X64"
 LINKFLAGS = $(LINKFLAGS) /machine:x64
 
 !ELSE
@@ -63,7 +62,6 @@ LINKFLAGS = $(LINKFLAGS) /machine:x64
 !	IFNDEF NOSSE2
 PLATFORM = Win32
 CPPFLAGS = $(CPPFLAGS) /arch:SSE2
-RFLAGS = $(RFLAGS) /d "_M_IX86_FP"
 !	ELSE
 PLATFORM = Win32_noSSE2
 !	ENDIF
@@ -79,11 +77,11 @@ CONFIGURATION = Release
 
 !IF "$(CONFIGURATION)" == "Release" || "$(CONFIGURATION)" == "Tracer"
 
-CPPFLAGS = $(CPPFLAGS) /D "NDEBUG" /O2 /GS-
+CPPFLAGS = $(CPPFLAGS) /D "NDEBUG" /O2 /GS- /GR-
 !	IF "$(CONFIGURATION)" == "Tracer"
 CPPFLAGS = $(CPPFLAGS) /D "TRACER_BUILD"
 !	ENDIF
-LINKFLAGS = $(LINKFLAGS) /opt:icf /opt:ref /incremental:no /defaultlib:libcmt
+LINKFLAGS = $(LINKFLAGS) /incremental:no /defaultlib:libcmt
 
 !ELSE IF "$(CONFIGURATION)" == "Debug"
 
