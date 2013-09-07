@@ -906,10 +906,6 @@
 		3D84F0F113AC928A000BCB8B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				DEPLOYMENT_LOCATION = YES;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NO_GZCOMPRESS,
 					Z_SOLO,
@@ -919,12 +915,9 @@
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
 				);
-				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
-				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = vst;
 			};
 			name = Debug;
@@ -936,10 +929,6 @@
 					i386,
 					ppc,
 				);
-				COPY_PHASE_STRIP = YES;
-				DEPLOYMENT_LOCATION = YES;
-				DEPLOYMENT_POSTPROCESSING = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NO_GZCOMPRESS,
 					Z_SOLO,
@@ -949,49 +938,37 @@
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
 				);
-				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
-				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = vst;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		3D84F15113AC9867000BCB8B /* Tracer */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
+				DEPLOYMENT_LOCATION = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
 				DSTROOT = "$(HOME)";
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ../../IPlug/IPlug_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					NO_GZCOMPRESS,
-					Z_SOLO,
-					IPLUG_NO_JPEG_SUPPORT,
-					NDEBUG,
-					TRACER_BUILD,
-				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_VERSION = 4.2;
 				GENERATE_PKGINFO_FILE = YES;
-				HEADER_SEARCH_PATHS = .;
 				INFOPLIST_PREPROCESS = YES;
 				MACH_O_TYPE = mh_bundle;
-				OTHER_LDFLAGS = "-bundle";
 				PRODUCT_NAME = IPlugExample;
-				REZ_PREPROCESSOR_DEFINITIONS = "i386_$i386 x86_64_$x86_64 ppc_$ppc ppc64_$ppc64";
 				REZ_SEARCH_PATHS = /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers;
-				STRIP_STYLE = "non-global";
-				VALID_ARCHS = "i386 x86_64 ppc ppc64";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				ZERO_LINK = NO;
 			};
 			name = Tracer;
 		};
@@ -1002,10 +979,6 @@
 					i386,
 					ppc,
 				);
-				COPY_PHASE_STRIP = YES;
-				DEPLOYMENT_LOCATION = YES;
-				DEPLOYMENT_POSTPROCESSING = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NO_GZCOMPRESS,
 					Z_SOLO,
@@ -1016,26 +989,18 @@
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
 				);
-				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
-				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = vst;
-				ZERO_LINK = NO;
 			};
 			name = Tracer;
 		};
 		3D84FA0913ACCE54000BCB8B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				DEPLOYMENT_LOCATION = YES;
 				EXPORTED_SYMBOLS_FILE = IPlugExample.exp;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NO_GZCOMPRESS,
 					Z_SOLO,
@@ -1045,12 +1010,9 @@
 					"IGRAPHICS_COCOA=IPlugExampleAU",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/Components";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
-				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = component;
 			};
 			name = Debug;
@@ -1062,11 +1024,7 @@
 					i386,
 					ppc,
 				);
-				COPY_PHASE_STRIP = YES;
-				DEPLOYMENT_LOCATION = YES;
-				DEPLOYMENT_POSTPROCESSING = YES;
 				EXPORTED_SYMBOLS_FILE = IPlugExample.exp;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NO_GZCOMPRESS,
 					Z_SOLO,
@@ -1076,15 +1034,11 @@
 					"IGRAPHICS_COCOA=IPlugExampleAU",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/Components";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
-				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = component;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -1095,11 +1049,7 @@
 					i386,
 					ppc,
 				);
-				COPY_PHASE_STRIP = YES;
-				DEPLOYMENT_LOCATION = YES;
-				DEPLOYMENT_POSTPROCESSING = YES;
 				EXPORTED_SYMBOLS_FILE = IPlugExample.exp;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NO_GZCOMPRESS,
 					Z_SOLO,
@@ -1110,15 +1060,11 @@
 					"IGRAPHICS_COCOA=IPlugExampleAU",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/Components";
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
-				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = component;
-				ZERO_LINK = NO;
 			};
 			name = Tracer;
 		};
@@ -1126,6 +1072,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				DEPLOYMENT_LOCATION = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
 				DSTROOT = "$(HOME)";
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_FAST_MATH = YES;
@@ -1133,66 +1081,48 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ../../IPlug/IPlug_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					NO_GZCOMPRESS,
-					Z_SOLO,
-					IPLUG_NO_JPEG_SUPPORT,
-					_DEBUG,
-				);
+				GCC_VERSION = 4.2;
 				GENERATE_PKGINFO_FILE = YES;
-				HEADER_SEARCH_PATHS = .;
 				INFOPLIST_PREPROCESS = YES;
 				MACH_O_TYPE = mh_bundle;
-				OTHER_LDFLAGS = "-bundle";
 				PRODUCT_NAME = IPlugExample;
-				REZ_PREPROCESSOR_DEFINITIONS = "i386_$i386 x86_64_$x86_64 ppc_$ppc ppc64_$ppc64";
 				REZ_SEARCH_PATHS = /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers;
-				STRIP_STYLE = "non-global";
-				VALID_ARCHS = "i386 x86_64 ppc ppc64";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Debug;
 		};
 		3D8C7F8913AC788800E81445 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
+				DEPLOYMENT_LOCATION = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
 				DSTROOT = "$(HOME)";
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ../../IPlug/IPlug_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					NO_GZCOMPRESS,
-					Z_SOLO,
-					IPLUG_NO_JPEG_SUPPORT,
-					NDEBUG,
-				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_VERSION = 4.2;
 				GENERATE_PKGINFO_FILE = YES;
-				HEADER_SEARCH_PATHS = .;
 				INFOPLIST_PREPROCESS = YES;
 				MACH_O_TYPE = mh_bundle;
-				OTHER_LDFLAGS = "-bundle";
 				PRODUCT_NAME = IPlugExample;
-				REZ_PREPROCESSOR_DEFINITIONS = "i386_$i386 x86_64_$x86_64 ppc_$ppc ppc64_$ppc64";
 				REZ_SEARCH_PATHS = /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers;
-				STRIP_STYLE = "non-global";
-				VALID_ARCHS = "i386 x86_64 ppc ppc64";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		3D91A47E13AD069D00659595 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_LOCATION = YES;
 				EXPORTED_SYMBOLS_FILE = IPlugExample.exp;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NO_GZCOMPRESS,
 					Z_SOLO,
@@ -1202,11 +1132,8 @@
 					"IGRAPHICS_COCOA=IPlugExampleAU",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = 4.2;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/Components";
-				REZ_PREPROCESSOR_DEFINITIONS = "i386_$i386 x86_64_$x86_64";
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				WRAPPER_EXTENSION = component;
 			};
 			name = Debug;
@@ -1218,11 +1145,7 @@
 					x86_64,
 					i386,
 				);
-				COPY_PHASE_STRIP = YES;
-				DEPLOYMENT_LOCATION = YES;
-				DEPLOYMENT_POSTPROCESSING = YES;
 				EXPORTED_SYMBOLS_FILE = IPlugExample.exp;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NO_GZCOMPRESS,
 					Z_SOLO,
@@ -1232,14 +1155,10 @@
 					"IGRAPHICS_COCOA=IPlugExampleAU",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = 4.2;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/Components";
-				REZ_PREPROCESSOR_DEFINITIONS = "i386_$i386 x86_64_$x86_64";
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
 				WRAPPER_EXTENSION = component;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -1250,11 +1169,7 @@
 					x86_64,
 					i386,
 				);
-				COPY_PHASE_STRIP = YES;
-				DEPLOYMENT_LOCATION = YES;
-				DEPLOYMENT_POSTPROCESSING = YES;
 				EXPORTED_SYMBOLS_FILE = IPlugExample.exp;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NO_GZCOMPRESS,
 					Z_SOLO,
@@ -1265,24 +1180,16 @@
 					"IGRAPHICS_COCOA=IPlugExampleAU",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = 4.2;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/Components";
-				REZ_PREPROCESSOR_DEFINITIONS = "i386_$i386 x86_64_$x86_64";
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
 				WRAPPER_EXTENSION = component;
-				ZERO_LINK = NO;
 			};
 			name = Tracer;
 		};
 		3DA871CD14D9B94E00F78D9A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				DEPLOYMENT_LOCATION = YES;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NO_GZCOMPRESS,
 					Z_SOLO,
@@ -1292,11 +1199,8 @@
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
 				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = 4.2;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				WRAPPER_EXTENSION = vst;
 			};
 			name = Debug;
@@ -1308,10 +1212,6 @@
 					x86_64,
 					i386,
 				);
-				COPY_PHASE_STRIP = YES;
-				DEPLOYMENT_LOCATION = YES;
-				DEPLOYMENT_POSTPROCESSING = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NO_GZCOMPRESS,
 					Z_SOLO,
@@ -1321,13 +1221,10 @@
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
 				);
-				GCC_VERSION = 4.2;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
 				WRAPPER_EXTENSION = vst;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -1338,10 +1235,6 @@
 					x86_64,
 					i386,
 				);
-				COPY_PHASE_STRIP = YES;
-				DEPLOYMENT_LOCATION = YES;
-				DEPLOYMENT_POSTPROCESSING = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NO_GZCOMPRESS,
 					Z_SOLO,
@@ -1352,13 +1245,10 @@
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
 				);
-				GCC_VERSION = 4.2;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				STRIP_INSTALLED_PRODUCT = YES;
 				WRAPPER_EXTENSION = vst;
-				ZERO_LINK = NO;
 			};
 			name = Tracer;
 		};
@@ -1368,8 +1258,8 @@
 		3D84F0F313AC928A000BCB8B /* Build configuration list for PBXNativeTarget "VST" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3D84F0F113AC928A000BCB8B /* Debug */,
 				3D84F0F213AC928A000BCB8B /* Release */,
+				3D84F0F113AC928A000BCB8B /* Debug */,
 				3D84F15213AC9867000BCB8B /* Tracer */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1378,8 +1268,8 @@
 		3D84FA0813ACCE54000BCB8B /* Build configuration list for PBXNativeTarget "AU" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3D84FA0913ACCE54000BCB8B /* Debug */,
 				3D84FA0A13ACCE54000BCB8B /* Release */,
+				3D84FA0913ACCE54000BCB8B /* Debug */,
 				3D84FA0B13ACCE54000BCB8B /* Tracer */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1388,8 +1278,8 @@
 		3D8C7F8A13AC788800E81445 /* Build configuration list for PBXProject "IPlugExample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3D8C7F8813AC788800E81445 /* Debug */,
 				3D8C7F8913AC788800E81445 /* Release */,
+				3D8C7F8813AC788800E81445 /* Debug */,
 				3D84F15113AC9867000BCB8B /* Tracer */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1398,8 +1288,8 @@
 		3D91A47D13AD069D00659595 /* Build configuration list for PBXNativeTarget "AU_x64" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3D91A47E13AD069D00659595 /* Debug */,
 				3D91A47F13AD069D00659595 /* Release */,
+				3D91A47E13AD069D00659595 /* Debug */,
 				3D91A48013AD069D00659595 /* Tracer */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1408,8 +1298,8 @@
 		3DA871CC14D9B94E00F78D9A /* Build configuration list for PBXNativeTarget "VST_x64" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3DA871CD14D9B94E00F78D9A /* Debug */,
 				3DA871CE14D9B94E00F78D9A /* Release */,
+				3DA871CD14D9B94E00F78D9A /* Debug */,
 				3DA871CF14D9B94E00F78D9A /* Tracer */,
 			);
 			defaultConfigurationIsVisible = 0;
