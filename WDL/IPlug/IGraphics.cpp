@@ -871,11 +871,11 @@ void IGraphics::OnMouseWheel(int x, int y, IMouseMod* pMod, int d)
 		IControl* pControl = mControls.Get(c);
 		int paramIdx = pControl->ParamIdx();
 		if (paramIdx >= 0) {
-			mPlug->BeginInformHostOfParamChange(paramIdx);
+			mPlug->BeginDelayedInformHostOfParamChange(paramIdx);
 		}
 		pControl->OnMouseWheel(x, y, pMod, d);
 		if (paramIdx >= 0) {
-			mPlug->EndInformHostOfParamChange(paramIdx);
+			mPlug->DelayEndInformHostOfParamChange(paramIdx);
 		}
 	}
 }

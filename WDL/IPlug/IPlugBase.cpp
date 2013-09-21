@@ -51,7 +51,7 @@ IPlugBase::IPlugBase(int nParams, const char* channelIOStr, int nPresets,
   int plugDoesMidi, bool plugDoesChunks, bool plugIsInst)
 : mUniqueID(uniqueID), mMfrID(mfrID), mVersion(vendorVersion),
   mSampleRate(DEFAULT_SAMPLE_RATE), mBlockSize(0), mLatency(latency), mHost(kHostUninit), mHostVersion(0),
-  mStateChunks(plugDoesChunks), mGraphics(0), mCurrentPresetIdx(0), mIsInst(plugIsInst)
+  mStateChunks(plugDoesChunks), mGraphics(0), mCurrentPresetIdx(0), mIsInst(plugIsInst), mParamChangeIdx(-1)
 {
   Trace(TRACELOC, "%s:%s", effectName, CurrentTime());
   
@@ -391,6 +391,37 @@ void IPlugBase::OnParamReset()
 		OnParamChange(i);
 	}
 	//Reset();
+}
+
+void IPlugBase::DelayEndInformHostOfParamChange(int idx)
+{
+  IMutexLock lock(this);
+
+  IGraphics* pGraphics = GetGUI();
+  if (pGraphics) {
+    mParamChangeIdx = idx;
+    int ticks = pGraphics->FPS() / 2; // 0.5 seconds
+    if (ticks < 1) ticks = 1;
+    pGraphics->SetParamChangeTimer(ticks);
+  }
+  else {
+    EndInformHostOfParamChange(idx);
+  }
+}
+
+void IPlugBase::EndDelayedInformHostOfParamChange()
+{
+  IMutexLock lock(this);
+
+  IGraphics* pGraphics = GetGUI();
+  if (pGraphics) {
+    pGraphics->CancelParamChangeTimer();
+  }
+
+  if (mParamChangeIdx >= 0) {
+    EndInformHostOfParamChange(mParamChangeIdx);
+    mParamChangeIdx = -1;
+  }
 }
 
 // Default passthrough.

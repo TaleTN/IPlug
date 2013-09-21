@@ -87,8 +87,11 @@ public:
   // If a parameter change comes from the GUI, midi, or external input,
   // the host needs to be informed in case the changes are being automated.
   virtual void BeginInformHostOfParamChange(int idx) = 0;
+  virtual void BeginDelayedInformHostOfParamChange(int idx) = 0;
   virtual void InformHostOfParamChange(int idx, double normalizedValue) = 0;
   virtual void EndInformHostOfParamChange(int idx) = 0;
+  void DelayEndInformHostOfParamChange(int idx);
+  void EndDelayedInformHostOfParamChange();
 
 	virtual void InformHostOfProgramChange() = 0;
   // ----------------------------------------
@@ -208,6 +211,8 @@ protected:
 
   WDL_PtrList<IPreset> mPresets;
   int mCurrentPresetIdx;
+
+  int mParamChangeIdx;
 
 public:
   
