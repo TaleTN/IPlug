@@ -49,6 +49,9 @@ public:
   // Return 1 if mouse wheel is processed
   int ProcessMouseWheel(float delta);
 
+  void SetParamChangeTimer(int ticks) { mParamChangeTimer = ticks; }
+  void CancelParamChangeTimer() { mParamChangeTimer = 0; }
+
     // Specialty use!
 	void* GetWindow() { return mPlugWnd; }
   HWND GetParentWindow() { return mParentWnd; }
@@ -75,6 +78,7 @@ private:
 	int mParamEditMsg;
 	bool mShowingTooltip;
 	int mTooltipIdx;
+	int mParamChangeTimer;
 	COLORREF* mCustomColorStorage;
 
   DWORD mPID;

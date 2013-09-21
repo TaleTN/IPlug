@@ -100,6 +100,10 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
           }
           UpdateWindow(hWnd);
         }
+
+        if (pGraphics->mParamChangeTimer && !--pGraphics->mParamChangeTimer) {
+          pGraphics->GetPlug()->EndDelayedInformHostOfParamChange();
+        }
       }
       return 0;
     }
@@ -288,7 +292,7 @@ IGraphicsWin::IGraphicsWin(IPlugBase* pPlug, int w, int h, int refreshFPS)
 :	IGraphics(pPlug, w, h, refreshFPS), mPlugWnd(0), mParamEditWnd(0), 
   mPID(0), mParentWnd(0), mMainWnd(0), mCustomColorStorage(0),
   mTooltipWnd(0), mShowingTooltip(false), mTooltipIdx(-1),
-	mEdControl(0), mEdParam(0), mDefEditProc(0), mParamEditMsg(kNone),
+	mEdControl(0), mEdParam(0), mDefEditProc(0), mParamEditMsg(kNone), mParamChangeTimer(0),
   mHInstance(0)
 {
 }
@@ -511,6 +515,10 @@ void IGraphicsWin::CloseWindow()
 			mTooltipWnd = 0;
 			mShowingTooltip = false;
 			mTooltipIdx = -1;
+		}
+
+		if (mParamChangeTimer) {
+			GetPlug()->EndDelayedInformHostOfParamChange();
 		}
 
 		DestroyWindow(mPlugWnd);
