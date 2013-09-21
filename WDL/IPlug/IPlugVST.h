@@ -25,6 +25,7 @@ public:
   // See IPlugBase for the full list of methods that your plugin class can implement.
 
   void BeginInformHostOfParamChange(int idx);
+  void BeginDelayedInformHostOfParamChange(int idx);
 	void InformHostOfParamChange(int idx, double normalizedValue);
   void EndInformHostOfParamChange(int idx);
 

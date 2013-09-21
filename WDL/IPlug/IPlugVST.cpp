@@ -78,7 +78,18 @@ IPlugVST::IPlugVST(IPlugInstanceInfo instanceInfo, int nParams, const char* chan
 
 void IPlugVST::BeginInformHostOfParamChange(int idx)
 {
+  EndDelayedInformHostOfParamChange();
   mHostCallback(&mAEffect, audioMasterBeginEdit, idx, 0, 0, 0.0f);
+}
+
+void IPlugVST::BeginDelayedInformHostOfParamChange(int idx)
+{
+  IMutexLock lock(this);
+
+  if (idx != mParamChangeIdx) {
+    EndDelayedInformHostOfParamChange();
+    mHostCallback(&mAEffect, audioMasterBeginEdit, idx, 0, 0, 0.0f);
+  }
 }
 
 void IPlugVST::InformHostOfParamChange(int idx, double normalizedValue)
