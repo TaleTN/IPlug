@@ -30,6 +30,9 @@ protected:
   void ShowTooltip();
   void HideTooltip();
   
+  void SetParamChangeTimer(int ticks) { mParamChangeTimer = ticks; }
+  void CancelParamChangeTimer() { mParamChangeTimer = 0; }
+
 private:
   
   IGraphicsMac* mGraphicsMac;
@@ -51,6 +54,8 @@ private:
   bool mShowingTooltip;
   int mTooltipIdx, mTooltipTimer;
   const char* mTooltip;
+
+  int mParamChangeTimer;
 
 public:
   

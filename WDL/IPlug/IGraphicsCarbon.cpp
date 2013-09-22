@@ -179,28 +179,31 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef pHandler
 pascal void IGraphicsCarbon::CarbonTimerHandler(EventLoopTimerRef pTimer, void* pGraphicsCarbon)
 {
   IGraphicsCarbon* _this = (IGraphicsCarbon*) pGraphicsCarbon;
+  IGraphicsMac* pGraphicsMac = _this->mGraphicsMac;
   IRECT r;
-  if (_this->mGraphicsMac->IsDirty(&r)) {
+  if (pGraphicsMac->IsDirty(&r)) {
     if (_this->mIsComposited) {
       HIViewSetNeedsDisplayInRect(_this->mView, &CGRectMake(r.L, r.T, r.W(), r.H()), true);
     }
     else {
-      int h = _this->mGraphicsMac->Height();
+      int h = pGraphicsMac->Height();
       SetRectRgn(_this->mRgn, r.L, h - r.B, r.R, h - r.T);
       UpdateControls(_this->mWindow, 0);// _this->mRgn);
     }
   } 
 
-  if (_this->mTooltipTimer) {
-    if (!--_this->mTooltipTimer) {
-      if (!_this->mShowingTooltip) {
-        _this->ShowTooltip();
-        _this->mTooltipTimer = _this->mGraphicsMac->FPS() * 10; // 10 seconds
-      }
-      else {
-        _this->HideTooltip();
-      }
+  if (_this->mTooltipTimer && !--_this->mTooltipTimer) {
+    if (!_this->mShowingTooltip) {
+      _this->ShowTooltip();
+      _this->mTooltipTimer = pGraphicsMac->FPS() * 10; // 10 seconds
     }
+    else {
+      _this->HideTooltip();
+    }
+  }
+
+  if (_this->mParamChangeTimer && !--_this->mParamChangeTimer) {
+    pGraphicsMac->GetPlug()->EndDelayedInformHostOfParamChange();
   }
 }
 
@@ -250,7 +253,7 @@ void ResizeWindow(WindowRef pWindow, int w, int h)
 IGraphicsCarbon::IGraphicsCarbon(IGraphicsMac* pGraphicsMac, WindowRef pWindow, ControlRef pParentControl)
 : mGraphicsMac(pGraphicsMac), mWindow(pWindow), mView(0), mTimer(0), mControlHandler(0), mWindowHandler(0), mCGC(0),
   mContentXOffset(0), mContentYOffset(0), mParamEditView(0), mParamEditHandler(0), mEdControl(0), mEdParam(0),
-  mShowingTooltip(false), mTooltipIdx(-1), mTooltipTimer(0)
+  mShowingTooltip(false), mTooltipIdx(-1), mTooltipTimer(0), mParamChangeTimer(0)
 { 
   TRACE;
   
@@ -329,6 +332,7 @@ IGraphicsCarbon::~IGraphicsCarbon()
     mEdParam = 0;
   }
   HideTooltip();
+  if (mParamChangeTimer) mGraphicsMac->GetPlug()->EndDelayedInformHostOfParamChange();
   RemoveEventLoopTimer(mTimer);
   RemoveEventHandler(mControlHandler);
   RemoveEventHandler(mWindowHandler);

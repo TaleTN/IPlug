@@ -37,6 +37,7 @@ inline CGRect ToCGRect(int h, IRECT* pR)
   // Ed = being edited manually.
   IControl* mEdControl;
   IParam* mEdParam;
+  int mParamChangeTimer;
 }
 - (id) init;
 - (id) initWithIGraphics: (IGraphicsMac*) pGraphics;
@@ -61,4 +62,6 @@ inline CGRect ToCGRect(int h, IRECT* pR)
 - (void) promptUserInput: (IEditableTextControl*) pControl;
 - (NSString*) view: (NSView*) pView stringForToolTip: (NSToolTipTag) tag point: (NSPoint) point userData: (void*) pData;
 - (void) registerToolTip: (int) controlIdx rect: (IRECT*) pRECT;
+- (void) setParamChangeTimer: (int) ticks;
+- (void) cancelParamChangeTimer;
 @end

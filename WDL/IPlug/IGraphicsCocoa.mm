@@ -46,6 +46,7 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
   
   mGraphics = 0;
   mTimer = 0;
+  mParamChangeTimer = 0;
   return self;
 }
 
@@ -99,8 +100,14 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 - (void) onTimer: (NSTimer*) pTimer
 {
   IRECT r;
-  if (pTimer == mTimer && mGraphics && mGraphics->IsDirty(&r)) {
-    [self setNeedsDisplayInRect:ToNSRect(mGraphics, &r)];
+  if (pTimer == mTimer && mGraphics) {
+    if (mGraphics->IsDirty(&r)) {
+      [self setNeedsDisplayInRect:ToNSRect(mGraphics, &r)];
+    }
+
+    if (mParamChangeTimer && !--mParamChangeTimer) {
+      mGraphics->GetPlug()->EndDelayedInformHostOfParamChange();
+    }
   }
 }
 
@@ -349,6 +356,16 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 - (void) registerToolTip: (int) controlIdx rect: (IRECT*) pRECT
 {
   [self addToolTipRect: ToNSRect(mGraphics, pRECT) owner: self userData: (void*)(long) controlIdx];
+}
+
+- (void) setParamChangeTimer: (int) ticks
+{
+  mParamChangeTimer = ticks;
+}
+
+- (void) cancelParamChangeTimer
+{
+  mParamChangeTimer = 0;
 }
 
 @end

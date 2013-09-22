@@ -183,6 +183,7 @@ void IGraphicsMac::CloseWindow()
   {
     IGRAPHICS_COCOA* graphicscocoa = (IGRAPHICS_COCOA*)mGraphicsCocoa;
     [graphicscocoa removeAllToolTips];
+    GetPlug()->EndDelayedInformHostOfParamChange();
     [graphicscocoa killTimer];
     mGraphicsCocoa = 0;
     if (graphicscocoa->mGraphics)
@@ -426,4 +427,24 @@ int IGraphicsMac::GetUserOSVersion()   // Returns a number like 0x1050 (10.5).
 double IGraphicsMac::GetUserFoundationVersion()   // Returns a number like 677.00 (10.5).
 {
   return NSFoundationVersionNumber;
+}
+
+void IGraphicsMac::SetParamChangeTimer(int ticks)
+{
+  if (mGraphicsCocoa)
+    [mGraphicsCocoa setParamChangeTimer: ticks];
+#ifndef IPLUG_NO_CARBON_SUPPORT
+  else if (mGraphicsCarbon)
+    mGraphicsCarbon->SetParamChangeTimer(ticks);
+#endif
+}
+
+void IGraphicsMac::CancelParamChangeTimer()
+{
+  if (mGraphicsCocoa)
+    [mGraphicsCocoa cancelParamChangeTimer];
+#ifndef IPLUG_NO_CARBON_SUPPORT
+  else if (mGraphicsCarbon)
+    mGraphicsCarbon->CancelParamChangeTimer();
+#endif
 }

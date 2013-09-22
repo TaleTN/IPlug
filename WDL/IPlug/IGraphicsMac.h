@@ -53,6 +53,9 @@ public:
 	void PromptUserInput(IEditableTextControl* pControl);
   bool OpenURL(const char* url, const char* msgWindowTitle = 0, const char* confirmMsg = 0, const char* errMsgOnFailure = 0);
 
+  void SetParamChangeTimer(int ticks);
+  void CancelParamChangeTimer();
+
 	void* GetWindow();
 
   const char* GetBundleID()  { return mBundleID.Get(); }
