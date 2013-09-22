@@ -1452,7 +1452,19 @@ void SendAUEvent(AudioUnitEventType type, ComponentInstance ci, int idx)
 void IPlugAU::BeginInformHostOfParamChange(int idx)
 {
   Trace(TRACELOC, "%d", idx);
+  EndDelayedInformHostOfParamChange();
   SendAUEvent(kAudioUnitEvent_BeginParameterChangeGesture, mCI, idx);
+}
+
+void IPlugAU::BeginDelayedInformHostOfParamChange(int idx)
+{
+  Trace(TRACELOC, "%d", idx);
+  IMutexLock lock(this);
+
+  if (idx != mParamChangeIdx) {
+    EndDelayedInformHostOfParamChange();
+    SendAUEvent(kAudioUnitEvent_BeginParameterChangeGesture, mCI, idx);
+  }
 }
 
 void IPlugAU::InformHostOfParamChange(int idx, double normalizedValue)
