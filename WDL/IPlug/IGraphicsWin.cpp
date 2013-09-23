@@ -234,6 +234,12 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND hWnd, UINT msg, WPARAM wParam,
 		switch (msg) {
 			case WM_KEYDOWN: {
 				if (wParam == VK_RETURN) {
+					// Deselect, because in some hosts (FL Studio, VSTHost)
+					// selected text gets deleted when processing VK_RETURN.
+					char className[5];
+					if (GetClassName(pGraphics->mParamEditWnd, className, sizeof(className)) == 4 && !stricmp(className, "EDIT")) {
+						SendMessage(pGraphics->mParamEditWnd, EM_SETSEL, -1, 0);
+					}
 					pGraphics->mParamEditMsg = kCommit;
 					return 0;
 				}
