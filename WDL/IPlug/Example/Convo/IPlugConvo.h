@@ -73,7 +73,7 @@ private:
 	#if defined(_USE_WDL_RESAMPLER)
 	WDL_Resampler mResampler;
 	#elif defined(_USE_R8BRAIN)
-	CDSPResampler<>* mResampler;
+	CDSPResampler16IR* mResampler;
 	#endif
 
 	double mDry, mWet;

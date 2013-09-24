@@ -172,7 +172,7 @@ void IPlugConvo::Reset()
 			mResampler.SetFeedMode(true); // Input driven
 		#elif defined(_USE_R8BRAIN)
 			if (mResampler) delete mResampler;
-			mResampler = new CDSPResampler<>(irSampleRate, mSampleRate, 3., 100., mBlockLength);
+			mResampler = new CDSPResampler16IR(irSampleRate, mSampleRate, mBlockLength);
 		#endif
 
 		// Resample the impulse response.
