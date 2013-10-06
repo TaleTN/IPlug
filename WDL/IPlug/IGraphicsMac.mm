@@ -319,7 +319,7 @@ void IGraphicsMac::PromptForFile(WDL_String* pFilename, EFileAction action, char
   #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
   {
     if (CSTR_NOT_EMPTY(dir)) {
-      [panel setDirectoryURL: [NSString stringWithUTF8String: dir]];
+      [panel setDirectoryURL: [NSURL fileURLWithPath: [NSString stringWithUTF8String: dir]]];
     }
     if (pFilename->GetLength()) {
       [panel setNameFieldStringValue: [NSString stringWithUTF8String: pFilename->Get()]];
