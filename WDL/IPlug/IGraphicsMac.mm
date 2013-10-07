@@ -280,6 +280,7 @@ void IGraphicsMac::PluginPath(WDL_String* pPath)
 void IGraphicsMac::PromptForFile(WDL_String* pFilename, EFileAction action, char* dir, char* extensions)
 {
   if (!WindowIsOpen()) {
+    pFilename->Set("");
     return;
   }
   CocoaAutoReleasePool pool;

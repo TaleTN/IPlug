@@ -665,6 +665,7 @@ void IGraphicsWin::PluginPath(WDL_String* pPath)
 void IGraphicsWin::PromptForFile(WDL_String* pFilename, EFileAction action, char* dir, char* extensions)
 {
 	if (!WindowIsOpen()) { 
+		pFilename->Set("");
 		return;
 	}
 
