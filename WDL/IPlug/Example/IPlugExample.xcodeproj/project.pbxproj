@@ -914,6 +914,7 @@
 					VST_API,
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
+					SWELL_CLEANUP_ON_UNLOAD,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
@@ -937,6 +938,7 @@
 					VST_API,
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
+					SWELL_CLEANUP_ON_UNLOAD,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
@@ -988,6 +990,7 @@
 					VST_API,
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
+					SWELL_CLEANUP_ON_UNLOAD,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
@@ -1008,6 +1011,7 @@
 					_DEBUG,
 					AU_API,
 					"IGRAPHICS_COCOA=IPlugExampleAU",
+					SWELL_CLEANUP_ON_UNLOAD,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
@@ -1032,6 +1036,7 @@
 					NDEBUG,
 					AU_API,
 					"IGRAPHICS_COCOA=IPlugExampleAU",
+					SWELL_CLEANUP_ON_UNLOAD,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
@@ -1058,6 +1063,7 @@
 					TRACER_BUILD,
 					AU_API,
 					"IGRAPHICS_COCOA=IPlugExampleAU",
+					SWELL_CLEANUP_ON_UNLOAD,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
@@ -1130,6 +1136,7 @@
 					_DEBUG,
 					AU_API,
 					"IGRAPHICS_COCOA=IPlugExampleAU",
+					SWELL_CLEANUP_ON_UNLOAD,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
@@ -1153,6 +1160,7 @@
 					NDEBUG,
 					AU_API,
 					"IGRAPHICS_COCOA=IPlugExampleAU",
+					SWELL_CLEANUP_ON_UNLOAD,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
@@ -1178,6 +1186,7 @@
 					TRACER_BUILD,
 					AU_API,
 					"IGRAPHICS_COCOA=IPlugExampleAU",
+					SWELL_CLEANUP_ON_UNLOAD,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = "IPlugExampleAU-Info.plist";
@@ -1198,6 +1207,7 @@
 					VST_API,
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
+					SWELL_CLEANUP_ON_UNLOAD,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
@@ -1220,6 +1230,7 @@
 					VST_API,
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
+					SWELL_CLEANUP_ON_UNLOAD,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
@@ -1244,6 +1255,7 @@
 					VST_API,
 					VST_FORCE_DEPRECATED,
 					"IGRAPHICS_COCOA=IPlugExample",
+					SWELL_CLEANUP_ON_UNLOAD,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "/Library/Audio/Plug-Ins/VST";
