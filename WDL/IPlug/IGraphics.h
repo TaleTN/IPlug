@@ -54,6 +54,8 @@ public:
   bool FillRoundRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend, int cornerradius, bool aa);
 
   bool FillIRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend = 0);
+  bool FillCircle(const IColor* pColor, float cx, float cy, float r, const IChannelBlend* pBlend = 0, bool antiAlias = false);
+
 	static inline void PrepDrawIText(IText* pTxt) { if (!pTxt->mCached) CacheFont(pTxt); }
 	bool DrawIText(IText* pTxt, char* str, IRECT* pR);
   IColor GetPoint(int x, int y);

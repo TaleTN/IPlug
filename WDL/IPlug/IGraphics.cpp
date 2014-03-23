@@ -482,6 +482,12 @@ bool IGraphics::FillIRect(const IColor* pColor, IRECT* pR, const IChannelBlend* 
     return true;
 }
 
+bool IGraphics::FillCircle(const IColor* pColor, float cx, float cy, float r, const IChannelBlend* pBlend, bool antiAlias)
+{
+  _LICE::LICE_FillCircle(mDrawBitmap, cx, cy, r, LiceColor(pColor), LiceWeight(pBlend), LiceBlendMode(pBlend), antiAlias);
+  return true;
+}
+
 bool IGraphics::DrawIText(IText* pTxt, char* str, IRECT* pR)
 {
   if (!str || str[0] == '\0') {
