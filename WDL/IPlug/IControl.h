@@ -83,6 +83,8 @@ public:
   // Only active if USE_IDLE_CALLS is defined.
   virtual void OnGUIIdle() {}
 
+  IPlugBase* GetPlug() { return mPlug; }
+  
 protected:
 
 	IPlugBase* mPlug;
