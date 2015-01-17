@@ -4,7 +4,7 @@
 /*
 
 IDrawbarControl
-(c) Theo Niessink 2009-2011
+(c) Theo Niessink 2009-2015
 <http://www.taletn.com/>
 
 
@@ -101,10 +101,10 @@ public:
 	virtual bool Draw(IGraphics* pGraphics) { return pGraphics->DrawBitmap(&mBitmap, &mRECT, 0, mHandleOffs, &mBlend); }
 
 protected:
-	double mLen, mMax;
+	double WDL_FIXALIGN mLen, mMax;
 	IBitmap mBitmap;
 	int mHandleOffs, mHandleY;
-};
+} WDL_FIXALIGN;
 
 
 #endif // _IDRAWBARCONTROL_
