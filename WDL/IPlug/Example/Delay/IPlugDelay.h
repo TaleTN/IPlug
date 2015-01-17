@@ -4,7 +4,7 @@
 /*
 
 IPlug delay example
-(c) Theo Niessink 2012
+(c) Theo Niessink 2012-2015
 <http://www.taletn.com/>
 
 This software is provided 'as-is', without any express or implied
@@ -50,9 +50,9 @@ public:
 private:
 	double* mBuffer;
 	int mDelaySamples;
-	double mSampleRate;
-	double mDecay;
-};
+	double WDL_FIXALIGN mSampleRate;
+	double WDL_FIXALIGN mDecay;
+} WDL_FIXALIGN;
 
 
 #endif // __IPLUGDELAY_H__
