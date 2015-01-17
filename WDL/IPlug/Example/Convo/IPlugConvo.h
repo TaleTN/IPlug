@@ -4,7 +4,7 @@
 /*
 
 IPlug convoengine example
-(c) Theo Niessink 2010-2013
+(c) Theo Niessink 2010-2015
 <http://www.taletn.com/>
 
 
@@ -76,10 +76,10 @@ private:
 	CDSPResampler16IR* mResampler;
 	#endif
 
-	double mDry, mWet;
+	double WDL_FIXALIGN mDry, mWet;
 
-	double mSampleRate;
-};
+	double WDL_FIXALIGN mSampleRate;
+} WDL_FIXALIGN;
 
 
 #endif // __IPLUGCONVO_H__
