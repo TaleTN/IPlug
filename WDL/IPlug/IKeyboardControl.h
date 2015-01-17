@@ -4,7 +4,7 @@
 /*
 
 IKeyboardControl
-(c) Theo Niessink 2009-2011
+(c) Theo Niessink 2009-2015
 <http://www.taletn.com/>
 
 
@@ -296,8 +296,8 @@ protected:
 	const int* mKeyCoords;
 	int mOctaveWidth, mNumOctaves;
 	int mKey, mMaxKey;
-	double mVelocity;
-};
+	double WDL_FIXALIGN mVelocity;
+} WDL_FIXALIGN;
 
 
 // Next "regular" or sharp/flat note relative to the current note.
