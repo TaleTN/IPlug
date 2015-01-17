@@ -79,7 +79,7 @@ private:
   WDL_String mOSXBundleID, mCocoaViewFactoryClassName;
   ComponentInstance mCI;
   bool mActive, mBypassed, mIsOffline;
-  double mRenderTimestamp, mTempo;
+  double WDL_FIXALIGN mRenderTimestamp, mTempo;
   HostCallbackInfo mHostCallbacks;
 
  // InScratchBuf is only needed if the upstream connection is a callback.
@@ -144,7 +144,7 @@ public:
     AudioUnitParameterValue value, UInt32 offsetFrames);
   static ComponentResult RenderProc(void* pPlug, AudioUnitRenderActionFlags* pFlags, const AudioTimeStamp* pTimestamp,
     UInt32 outputBusIdx, UInt32 nFrames, AudioBufferList* pBufferList);
-};
+} WDL_FIXALIGN;
 
 IPlugAU* MakePlug();
 

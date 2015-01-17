@@ -235,7 +235,7 @@ private:
   int mHostVersion;   //  Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
 
   bool mStateChunks, mIsInst;
-  double mSampleRate;
+  double WDL_FIXALIGN mSampleRate;
   int mBlockSize, mLatency;
 
 	IGraphics* mGraphics;
@@ -254,6 +254,6 @@ private:
   };
   WDL_PtrList<InChannel> mInChannels;
   WDL_PtrList<OutChannel> mOutChannels;
-};
+} WDL_FIXALIGN;
 
 #endif

@@ -67,7 +67,7 @@ private:
 	// All we store is the readable values.
 	// SetFromHost() and GetForHost() handle conversion from/to (0,1).
   EParamType mType;
-	double mValue, mMin, mMax, mStep, mShape;	
+	double WDL_FIXALIGN mValue, mMin, mMax, mStep, mShape;	
 	int mDisplayPrecision;
 	char mName[MAX_PARAM_NAME_LEN], mLabel[MAX_PARAM_NAME_LEN];
 	bool mNegateDisplay;
@@ -77,6 +77,6 @@ private:
     char mText[MAX_PARAM_NAME_LEN];
   };
   WDL_TypedBuf<DisplayText> mDisplayTexts;
-};
+} WDL_FIXALIGN;
 
 #endif

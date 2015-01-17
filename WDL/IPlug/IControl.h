@@ -88,11 +88,11 @@ protected:
 	IPlugBase* mPlug;
 	IRECT mRECT, mTargetRECT;
 	int mParamIdx;
-	double mValue, mDefaultValue, mClampLo, mClampHi;
+	double WDL_FIXALIGN mValue, mDefaultValue, mClampLo, mClampHi;
 	bool mDirty, mHide, mGrayed, mRedraw, mDisablePrompt, mClamped, mDblAsSingleClick;
   IChannelBlend mBlend;
 	const char* mTooltip;
-};
+} WDL_FIXALIGN;
 
 enum EDirection { kVertical, kHorizontal };
 
@@ -218,8 +218,8 @@ public:
 
 protected:
 	EDirection mDirection;
-	double mGearing;
-};
+	double WDL_FIXALIGN mGearing;
+} WDL_FIXALIGN;
 
 // A knob that is just a line.
 class IKnobLineControl : public IKnobControl
@@ -255,9 +255,9 @@ public:
 
 protected:
 	IBitmap mBitmap;
-	double mMinAngle, mMaxAngle;
+	double WDL_FIXALIGN mMinAngle, mMaxAngle;
 	int mYOffset;
-};
+} WDL_FIXALIGN;
 
 // A multibitmap knob.  The bitmap cycles through states as the mouse drags.
 class IKnobMultiControl : public IKnobControl
@@ -293,8 +293,8 @@ public:
 
 protected:
 	IBitmap mBase, mMask, mTop;
-	double mMinAngle, mMaxAngle;
-};
+	double WDL_FIXALIGN mMinAngle, mMaxAngle;
+} WDL_FIXALIGN;
 
 // Bitmap shows when value = 0, then toggles its target area to the whole bitmap
 // and waits for another click to hide itself.
