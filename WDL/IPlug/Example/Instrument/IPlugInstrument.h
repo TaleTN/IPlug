@@ -4,7 +4,7 @@
 /*
 
 IPlug instrument example
-(c) Theo Niessink 2009, 2010
+(c) Theo Niessink 2009-2015
 <http://www.taletn.com/>
 
 
@@ -48,18 +48,18 @@ public:
 	void ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames);
 
 private:
-	double mVolume;
+	double WDL_FIXALIGN mVolume;
 	bool mVelocity;
 
 	IMidiQueue mMidiQueue;
 
 	int mNote;
-	double mFreq;
-	double mGain;
+	double WDL_FIXALIGN mFreq;
+	double WDL_FIXALIGN mGain;
 
-	double mPhase; // Value in [0, 1].
-	double mSamplePeriod;
-};
+	double WDL_FIXALIGN mPhase; // Value in [0, 1].
+	double WDL_FIXALIGN mSamplePeriod;
+} WDL_FIXALIGN;
 
 
 #endif
