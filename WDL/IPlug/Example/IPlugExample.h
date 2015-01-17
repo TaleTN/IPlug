@@ -21,8 +21,8 @@ public:
 private:
 
 	int mMeterIdx_L, mMeterIdx_R;
-	double prevL, prevR;
-};
+	double WDL_FIXALIGN prevL, prevR;
+} WDL_FIXALIGN;
 
 ////////////////////////////////////////
 
