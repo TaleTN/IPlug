@@ -4,7 +4,7 @@
 /*
 
 IPlug distortion example
-(c) Theo Niessink 2011
+(c) Theo Niessink 2011-2015
 <http://www.taletn.com/>
 
 This software is provided 'as-is', without any express or implied
@@ -55,14 +55,14 @@ public:
 private:
 	const int mOversampling;
 
-	const double mDC;
-	double mDistortedDC;
+	const double WDL_FIXALIGN mDC;
+	double WDL_FIXALIGN mDistortedDC;
 
-	double mDrive, mGain;
+	double WDL_FIXALIGN mDrive, mGain;
 
 	WDL_BesselFilterCoeffs mAntiAlias;
 	WDL_BesselFilterStage mUpsample, mDownsample;
-};
+} WDL_FIXALIGN;
 
 
 #endif // __IPLUGDISTORTION_H__
