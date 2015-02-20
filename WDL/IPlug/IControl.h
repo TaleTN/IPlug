@@ -47,7 +47,7 @@ public:
 
 	int ParamIdx() { return mParamIdx; }
 	virtual void SetValueFromPlug(double value);
-	void SetValueFromUserInput(double value);
+	virtual void SetValueFromUserInput(double value);
 	double GetValue() { return mValue; }
 
 	IRECT* GetRECT() { return &mRECT; }				// The draw area for this control.
