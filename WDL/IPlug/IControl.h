@@ -84,7 +84,8 @@ public:
   virtual void OnGUIIdle() {}
 
   IPlugBase* GetPlug() { return mPlug; }
-  
+  IGraphics* GetGUI() { return mPlug->GetGUI(); }
+
 protected:
 
 	IPlugBase* mPlug;
