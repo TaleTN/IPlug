@@ -1,5 +1,5 @@
 # IPlug Microsoft C/C++ makefile
-# (c) Theo Niessink 2009-2013
+# (c) Theo Niessink 2009-2015
 # <http://www.taletn.com/>
 #
 # This file is provided 'as-is', without any express or implied warranty. In
@@ -107,4 +107,7 @@ lib : "$(OUTDIR)/$(OUTFILE)"
 clean :
 !IF EXIST("$(OUTDIR)/")
 	rmdir /s /q "$(OUTDIR:/=\)"
+!ENDIF
+!IF EXIST("$(PLATFORM)/")
+	-@rmdir /q "$(PLATFORM)"
 !ENDIF
