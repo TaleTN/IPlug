@@ -69,6 +69,13 @@ void IParam::SetShape(double shape)
     }
 }
 
+void IParam::SetShape(double nonNormalizedValue, double normalizedValue)
+{
+    if (nonNormalizedValue > mMin && nonNormalizedValue < mMax && normalizedValue > 0.0 && normalizedValue < 1.0) {
+        SetShape(log((nonNormalizedValue - mMin) / (mMax - mMin)) / log(normalizedValue));
+    }
+}
+
 void IParam::SetDisplayText(int value, const char* text) 
 {
   int n = mDisplayTexts.GetSize();

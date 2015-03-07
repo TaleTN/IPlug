@@ -37,6 +37,8 @@ public:
 
   // The higher the shape, the more resolution around host value zero.
   void SetShape(double shape);
+  // Adjusts the shape so nonNormalizedValue corresponds to normalizedValue.
+  void SetShape(double nonNormalizedValue, double normalizedValue);
 
 	// Call this if your param is (x, y) but you want to always display (-x, -y).
 	void NegateDisplay() { mNegateDisplay = true; }
