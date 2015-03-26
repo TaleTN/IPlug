@@ -9,11 +9,15 @@
 #if defined VST_API
   #include "IPlugVST.h"
   typedef IPlugVST IPlug;
-  #define API_EXT "vst"
+  #ifndef API_EXT
+    #define API_EXT "vst"
+  #endif
 #elif defined AU_API
   #include "IPlugAU.h"
   typedef IPlugAU IPlug;
-  #define API_EXT "audiounit"
+  #ifndef API_EXT
+    #define API_EXT "audiounit"
+  #endif
 #else
   #error "No API defined!"
 #endif
@@ -27,7 +31,9 @@
   #ifndef BUNDLE_DOMAIN
     #define BUNDLE_DOMAIN "com." BUNDLE_MFR
   #endif
-  #define BUNDLE_ID BUNDLE_DOMAIN "." API_EXT "." BUNDLE_NAME
+  #ifndef BUNDLE_ID
+    #define BUNDLE_ID BUNDLE_DOMAIN "." API_EXT "." BUNDLE_NAME
+  #endif
 #else
   #error "No OS defined!"
 #endif
