@@ -250,6 +250,9 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       return noErr;
     }
     case kMusicDeviceMIDIEventSelect: {
+      if (!_this->DoesMIDI() || _this->DoesMIDI() > 2) {
+        return badComponentSelector;
+      }
       IMidiMsg msg;
       msg.mStatus = GET_COMP_PARAM(UInt32, 3, 4);
       msg.mData1 = GET_COMP_PARAM(UInt32, 2, 4);
@@ -259,6 +262,9 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       return noErr;
     }
     case kMusicDeviceSysExSelect: {
+      if (!_this->DoesMIDI() || _this->DoesMIDI() > 2) {
+        return badComponentSelector;
+      }
       ISysEx sysex;
       sysex.mData = GET_COMP_PARAM(UInt8*, 1, 2);
       sysex.mSize = GET_COMP_PARAM(UInt32, 0, 2);
@@ -1596,7 +1602,7 @@ bool IPlugAU::SendMidiMsg(IMidiMsg* pMsg)
   // I believe AU passes midi messages through automatically.
   // For the case where we're generating midi messages, we'll use AUMIDIOutputCallback.
   // See AudioUnitProperties.h.
-  if (mMidiCallback.midiOutputCallback) {
+  if ((DoesMIDI() & 1) && mMidiCallback.midiOutputCallback) {
       // Todo.
   }
   return false;
