@@ -51,10 +51,13 @@ IPlugBase::IPlugBase(int nParams, const char* channelIOStr, int nPresets,
   int plugDoesMidi, bool plugDoesChunks, bool plugIsInst)
 : mUniqueID(uniqueID), mMfrID(mfrID), mVersion(vendorVersion),
   mSampleRate(DEFAULT_SAMPLE_RATE), mBlockSize(0), mLatency(latency), mHost(kHostUninit), mHostVersion(0),
-  mStateChunks(plugDoesChunks), mGraphics(0), mCurrentPresetIdx(0), mIsInst(plugIsInst), mParamChangeIdx(-1)
+  mStateChunks(plugDoesChunks), mGraphics(0), mCurrentPresetIdx(0), mIsInst(plugIsInst), mDoesMIDI(plugDoesMidi), mParamChangeIdx(-1)
 {
   Trace(TRACELOC, "%s:%s", effectName, CurrentTime());
   
+  // 0 = no MIDI, 1 = MIDI in & out, 2 = MIDI in only, 3 = MIDI out only
+  assert(plugDoesMidi >= 0 && plugDoesMidi <= 3);
+
   for (int i = 0; i < nParams; ++i) {
     mParams.Add(new IParam);
   }

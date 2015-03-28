@@ -156,6 +156,7 @@ protected:
   virtual bool SendMidiMsgs(WDL_TypedBuf<IMidiMsg>* pMsgs);
   virtual bool SendSysEx(ISysEx* pSysEx) = 0;
   bool IsInst() { return mIsInst; }
+  int DoesMIDI() { return mDoesMIDI; }
     
   void MakeDefaultPreset(char* name = 0, int nPresets = 1);
   // MakePreset(name, param1, param2, ..., paramN)
@@ -235,6 +236,7 @@ private:
   int mHostVersion;   //  Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
 
   bool mStateChunks, mIsInst;
+  int mDoesMIDI;
   double WDL_FIXALIGN mSampleRate;
   int mBlockSize, mLatency;
 
