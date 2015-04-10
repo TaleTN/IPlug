@@ -2,7 +2,6 @@
 #include <stdio.h>
 
 #define MAX_PARAM_DISPLAY_PRECISION 6
-#define MAX_PARAM_DISPLAY_LEN 8
 
 IParam::IParam()
 :	mType(kTypeNone), mValue(0.0), mMin(0.0), mMax(1.0), mStep(1.0), 
