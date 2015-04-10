@@ -301,6 +301,7 @@ struct IPreset
   : mInitialized(false)
   {
     sprintf(mName, "- %d -", idx+1);
+    assert(strlen(mName) < MAX_PRESET_NAME_LEN); // Too late, but meh.
   }
 };
 

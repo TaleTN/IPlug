@@ -66,6 +66,10 @@ IPlugBase::IPlugBase(int nParams, const char* channelIOStr, int nPresets,
     mPresets.Add(new IPreset(i));
   }
 
+  assert(strlen(effectName) < MAX_EFFECT_NAME_LEN);
+  assert(strlen(productName) < MAX_PRODUCT_NAME_LEN);
+  assert(strlen(mfrName) < MAX_MFR_NAME_LEN);
+
   strcpy(mEffectName, effectName);
   strcpy(mProductName, productName);
   strcpy(mMfrName, mfrName);
@@ -458,6 +462,7 @@ void IPlugBase::MakeDefaultPreset(char* name, int nPresets)
     IPreset* pPreset = GetNextUninitializedPreset(&mPresets);
     if (pPreset) {
       pPreset->mInitialized = true;
+      assert(name ? strlen(name) < MAX_PRESET_NAME_LEN : MAX_PRESET_NAME_LEN >= 8);
       strcpy(pPreset->mName, (name ? name : "Default"));
       SerializeParams(&(pPreset->mChunk)); 
     }
@@ -487,6 +492,7 @@ void IPlugBase::MakePreset(char* name, ...)
   IPreset* pPreset = GetNextUninitializedPreset(&mPresets);
   if (pPreset) {
     pPreset->mInitialized = true;
+    assert(strlen(name) < MAX_PRESET_NAME_LEN);
     strcpy(pPreset->mName, name);
     int i, n = mParams.GetSize();
       
@@ -507,6 +513,7 @@ void IPlugBase::MakePresetFromNamedParams(char* name, int nParamsNamed, ...)
   IPreset* pPreset = GetNextUninitializedPreset(&mPresets);
   if (pPreset) {
     pPreset->mInitialized = true;
+    assert(strlen(name) < MAX_PRESET_NAME_LEN);
     strcpy(pPreset->mName, name);
 
     int i = 0, n = mParams.GetSize();
@@ -544,6 +551,7 @@ void IPlugBase::MakePresetFromChunk(char* name, ByteChunk* pChunk)
   IPreset* pPreset = GetNextUninitializedPreset(&mPresets);
   if (pPreset) {
     pPreset->mInitialized = true;
+    assert(strlen(name) < MAX_PRESET_NAME_LEN);
     strcpy(pPreset->mName, name);
 
     pPreset->mChunk.PutChunk(pChunk);
@@ -563,6 +571,7 @@ void MakeDefaultUserPresetName(WDL_PtrList<IPreset>* pPresets, char* str)
     }
   }
   sprintf(str, "%s %d", DEFAULT_USER_PRESET_NAME, nDefaultNames + 1);
+  assert(strlen(str) < MAX_PRESET_NAME_LEN); // Too late, but meh.
 }
 
 void IPlugBase::EnsureDefaultPreset()
@@ -643,6 +652,7 @@ void IPlugBase::ModifyCurrentPreset(const char* name)
 
     if (CSTR_NOT_EMPTY(name)) 
     {
+      assert(strlen(name) < MAX_PRESET_NAME_LEN);
       strcpy(pPreset->mName, name);
     }
   }

@@ -448,6 +448,7 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
         IParam* pParam = GetParam(element);
         const char* paramName = pParam->GetNameForHost();
         pInfo->cfNameString = MakeCFString(pParam->GetNameForHost());
+        assert(strlen(paramName) < 52);
         strcpy(pInfo->name, paramName);   // Max 52.
         switch (pParam->Type()) {
           case IParam::kTypeBool:
