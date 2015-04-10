@@ -285,7 +285,10 @@ struct ISysEx
   void LogMsg();
 };
 
+#ifndef MAX_PRESET_NAME_LEN
 const int MAX_PRESET_NAME_LEN = 256;
+#endif
+
 #define UNUSED_PRESET_NAME "empty"
 
 struct IPreset

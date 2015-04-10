@@ -4,7 +4,9 @@
 #include "Containers.h"
 #include <math.h>
 
+#ifndef MAX_PARAM_NAME_LEN
 const int MAX_PARAM_NAME_LEN = 32;
+#endif
 
 inline double ToNormalizedParam(double nonNormalizedValue, double min, double max, double shape)
 {

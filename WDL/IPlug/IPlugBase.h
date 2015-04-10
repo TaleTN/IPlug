@@ -12,7 +12,18 @@
 // Uncomment to enable IPlug::OnIdle() and IGraphics::OnGUIIdle().
 // #define USE_IDLE_CALLS
 
+#ifndef MAX_EFFECT_NAME_LEN
 #define MAX_EFFECT_NAME_LEN 128
+#endif
+
+#ifndef MAX_PRODUCT_NAME_LEN
+#define MAX_PRODUCT_NAME_LEN 128
+#endif
+
+#ifndef MAX_MFR_NAME_LEN
+#define MAX_MFR_NAME_LEN 128
+#endif
+
 #define DEFAULT_BLOCK_SIZE 1024
 
 // All version ints are stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
@@ -229,7 +240,7 @@ public:
  
 private:
 
-  char mEffectName[MAX_EFFECT_NAME_LEN], mProductName[MAX_EFFECT_NAME_LEN], mMfrName[MAX_EFFECT_NAME_LEN];
+  char mEffectName[MAX_EFFECT_NAME_LEN], mProductName[MAX_PRODUCT_NAME_LEN], mMfrName[MAX_MFR_NAME_LEN];
   int mUniqueID, mMfrID, mVersion;   //  Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
   
   EHost mHost;
