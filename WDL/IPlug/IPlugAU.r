@@ -110,6 +110,10 @@ resource 'dlle' (RES_ID) {
 	PLUG_ENTRY_STR
 };
 
+#ifndef PLUG_DOES_MIDI
+  #define PLUG_DOES_MIDI (defined(PLUG_DOES_MIDI_IN) || defined(PLUG_DOES_MIDI_OUT))
+#endif
+
 resource 'thng' (RES_ID, RES_NAME) {
 #if PLUG_IS_INST
 kAudioUnitType_MusicDevice,
