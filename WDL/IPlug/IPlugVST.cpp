@@ -588,6 +588,9 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
 	    }
 	    return 0;
     }
+    case effGetVendorVersion: {
+      return _this->GetEffectVersion(true);
+    }
     case effCanDo: {
 	    if (ptr) {
         Trace(TRACELOC, "VSTCanDo(%s)", (char*) ptr);
