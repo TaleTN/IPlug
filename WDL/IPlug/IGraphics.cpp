@@ -526,8 +526,8 @@ LICE_IFont* IGraphics::CacheFont(IText* pTxt)
     font = new LICE_CachedFont;
     int h = pTxt->mSize;
     int esc = 10 * pTxt->mOrientation;
-    int wt = (pTxt->mStyle == IText::kStyleBold ? FW_BOLD : FW_NORMAL);
-    int it = (pTxt->mStyle == IText::kStyleItalic ? TRUE : FALSE);
+    int wt = (pTxt->mStyle & IText::kStyleBold ? FW_BOLD : FW_NORMAL);
+    int it = (pTxt->mStyle & IText::kStyleItalic ? TRUE : FALSE);
 
     int q;
     if (pTxt->mQuality == IText::kQualityDefault)

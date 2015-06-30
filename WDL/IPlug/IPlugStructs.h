@@ -62,7 +62,7 @@ struct IText
 	char mFont[FONT_LEN];
 	int mSize;
 	IColor mColor;
-	enum EStyle { kStyleNormal, kStyleBold, kStyleItalic } mStyle;
+	enum EStyle { kStyleNormal = 0, kStyleBold, kStyleItalic, kStyleBoldItalic } mStyle;
 	enum EAlign { kAlignNear, kAlignCenter, kAlignFar } mAlign;
 	int mOrientation;   // Degrees ccwise from normal.
 	enum EQuality { kQualityDefault, kQualityNonAntiAliased, kQualityAntiAliased, kQualityClearType } mQuality;
