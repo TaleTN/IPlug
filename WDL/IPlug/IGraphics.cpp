@@ -518,6 +518,33 @@ bool IGraphics::DrawIText(IText* pTxt, char* str, IRECT* pR)
   return true;
 }
 
+bool IGraphics::MeasureIText(IText* pTxt, char* str, IRECT* pR)
+{
+  LICE_IFont* font = pTxt->mCached;
+  if (!font)
+  {
+    font = CacheFont(pTxt);
+    if (!font) return false;
+  }
+
+  if (!str || str[0] == '\0') {
+    pR->R = pR->L;
+    pR->B = pR->T + font->GetLineHeight();
+    return true;
+  }
+
+  const UINT fmt = DT_CALCRECT | DT_NOCLIP | DT_LEFT;
+  RECT R = { 0 };
+  font->DrawText(mDrawBitmap, str, -1, &R, fmt);
+
+  pR->L += R.left;
+  pR->T += R.top;
+  pR->R = pR->L + R.right - R.left;
+  pR->B = pR->T + R.bottom - R.top;
+
+  return true;
+}
+
 LICE_IFont* IGraphics::CacheFont(IText* pTxt)
 {
   LICE_CachedFont* font = (LICE_CachedFont*)s_fontCache.Find(pTxt);

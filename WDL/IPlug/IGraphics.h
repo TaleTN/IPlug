@@ -58,6 +58,7 @@ public:
 
 	static inline void PrepDrawIText(IText* pTxt) { if (!pTxt->mCached) CacheFont(pTxt); }
 	bool DrawIText(IText* pTxt, char* str, IRECT* pR);
+	bool MeasureIText(IText* pTxt, char* str, IRECT* pR);
   IColor GetPoint(int x, int y);
   void* GetData() { return GetBits(); }
 
