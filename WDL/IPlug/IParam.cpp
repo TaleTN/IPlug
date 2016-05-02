@@ -54,7 +54,7 @@ void IParam::InitDouble(const char* name, double defaultVal, double minVal, doub
 	strcpy(mLabel, label);
 	mValue = defaultVal;
 	mMin = minVal;
-	mMax = MAX(maxVal, minVal + step);
+	mMax = minVal > maxVal ? MIN(maxVal, minVal + step) : MAX(maxVal, minVal + step);
 	mStep = step;
 
 	for (mDisplayPrecision = 0; 
@@ -98,7 +98,7 @@ void IParam::SetNormalized(double normalizedValue)
 	if (mType != kTypeDouble) {
 		mValue = floor(0.5 + mValue / mStep) * mStep;
 	}
-	mValue = MIN(mValue, mMax);
+	mValue = mMin > mMax ? MAX(mValue, mMax) : MIN(mValue, mMax);
 }
 
 double IParam::GetNormalized()
