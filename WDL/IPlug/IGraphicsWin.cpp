@@ -797,7 +797,7 @@ bool IGraphicsWin::OpenURL(const char* url,
   }
   DWORD inetStatus = 0;
   if (InternetGetConnectedState(&inetStatus, 0)) {
-    if ((int) ShellExecute(mPlugWnd, "open", url, 0, 0, SW_SHOWNORMAL) > MAX_INET_ERR_CODE) {
+    if ((INT_PTR) ShellExecute(mPlugWnd, "open", url, 0, 0, SW_SHOWNORMAL) > MAX_INET_ERR_CODE) {
       return true;
     }
   }
