@@ -218,13 +218,19 @@ void IPlugBase::SetBlockSize(int blockSize)
     int i, nIn = NInChannels(), nOut = NOutChannels();
     for (i = 0; i < nIn; ++i) {
       InChannel* pInChannel = mInChannels.Get(i);
-      pInChannel->mScratchBuf.Resize(blockSize);
-      memset(pInChannel->mScratchBuf.Get(), 0, blockSize * sizeof(double));
+      double* pScratch = pInChannel->mScratchBuf.Resize(blockSize);
+      memset(pScratch, 0, blockSize * sizeof(double));
+      if (!pInChannel->mConnected) {
+        *(pInChannel->mSrc) = pScratch;
+      }
     }
     for (i = 0; i < nOut; ++i) {
       OutChannel* pOutChannel = mOutChannels.Get(i);
-      pOutChannel->mScratchBuf.Resize(blockSize);
-      memset(pOutChannel->mScratchBuf.Get(), 0, blockSize * sizeof(double));
+      double* pScratch = pOutChannel->mScratchBuf.Resize(blockSize);
+      memset(pScratch, 0, blockSize * sizeof(double));
+      if (!pOutChannel->mConnected) {
+        *(pOutChannel->mDest) = pScratch;
+      }
     }
     mBlockSize = blockSize;
   }
