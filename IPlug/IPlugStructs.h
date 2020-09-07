@@ -232,7 +232,8 @@ struct IMidiMsg
 	int mOffset;
 	unsigned char mStatus, mData1, mData2, _padding;
 
-  enum EStatusMsg {
+	enum EStatusMsg
+	{
 		kNone = 0,
 		kNoteOff = 8,
 		kNoteOn = 9,
@@ -240,7 +241,8 @@ struct IMidiMsg
 		kControlChange = 11,
 		kProgramChange = 12,
 		kChannelAftertouch = 13,
-		kPitchWheel = 14
+		kPitchWheel = 14,
+		kSystemMsg = 15
 	};
 
   enum EControlChangeMsg {
