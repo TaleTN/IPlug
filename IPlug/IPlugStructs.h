@@ -375,10 +375,11 @@ struct IMidiMsg
 
 struct ISysEx
 {
-  int mOffset, mSize;
-  const BYTE* mData;
+	int mOffset, mSize;
+	const void* mData;
 
-  ISysEx(int offs = 0, const BYTE* pData = NULL, int size = 0) : mOffset(offs), mData(pData), mSize(size) {}
+	ISysEx(const int offs = 0, const void* const pData = NULL, const int size = 0)
+	: mOffset(offs), mData(pData), mSize(size) {}
 
   void Clear();
   void LogMsg();
