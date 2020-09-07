@@ -10,26 +10,6 @@ const IColor IColor::kBlue(255, 0, 0, 255);
 const IColor IColor::kYellow(255, 255, 255, 0);
 const IColor IColor::kOrange(255, 255, 127, 0);
 
-//bool IText::operator==(const IText& rhs) const
-//{
-//	int s = sizeof(*this);
-//	int r = sizeof(rhs);
-//	return (s == r && !strcmp(mFont.Get(), rhs.mFont.Get()) && memcmp(this, &rhs, s) == 0);
-//}
-//
-//bool IText::operator<(const IText& rhs) const
-//{
-//	if (mFont != rhs.mFont) {
-//		return (mFont < rhs.mFont);
-//	}
-//	int s = sizeof(*this);
-//	int r = sizeof(rhs);
-//	if (s != r) {
-//		return (s < r);
-//	}
-//	return memcmp(this, &rhs, MIN(s, r));
-//}
-
 void IMidiMsg::MakeNoteOnMsg(int noteNumber, int velocity, int offset)
 {
   Clear();

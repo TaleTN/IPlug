@@ -130,10 +130,6 @@ struct IText
 		_padding(0),
 		mOrientation(0)
 	{}
-
- //   bool operator==(const IText& rhs) const;
- //   bool operator!=(const IText& rhs) const { return !operator==(rhs); }
- //	bool operator<(const IText& rhs) const;	// For sorting.
 };
 
 struct IRECT 
