@@ -56,92 +56,41 @@ public:
 		return GetBytes(pVal, (int)sizeof(T), startPos);
 	}
 
-// Handle endian conversion for integer and floating point data types.
-// Data is always stored in the chunk in little endian format, so nothing needs
-//  changing on Intel x86 platforms.
+	// Handle endian conversion for integer and floating point data types.
+	// Data is always stored in the chunk in little endian format, so nothing needs
+	// changing on Intel x86 platforms.
 
-#ifdef WDL_BIG_ENDIAN
+	inline int Put(const bool* const pVal) { return PutByte(*pVal); }
+	inline int Put(const unsigned char* const pVal) { return PutByte(*pVal); }
+	inline int Put(const unsigned short* const pVal) { return PutInt((short)*pVal); }
+	inline int Put(const unsigned int* const pVal) { return PutInt((int)*pVal); }
+	inline int Put(const WDL_UINT64* const pVal) { return PutInt((WDL_INT64)*pVal); }
 
-	inline int Put(const unsigned short* pVal)
-	{
-		unsigned short i = WDL_bswap16_if_be(*pVal);
-		return PutBytes(&i, 2);
-	}
-
-	inline int Get(unsigned short* pVal, int startPos)
-	{
-		startPos = GetBytes(pVal, 2, startPos);
-		WDL_BSWAP16_IF_BE(*pVal);
-		return startPos;
-	}
-
-	inline int Put(const unsigned int* pVal)
-	{
-		unsigned int i = WDL_bswap32_if_be(*pVal);
-		return PutBytes(&i, 4);
-	}
-
-	inline int Get(unsigned int* pVal, int startPos)
-	{
-		startPos = GetBytes(pVal, 4, startPos);
-		WDL_BSWAP32_IF_BE(*pVal);
-		return startPos;
-	}
-
-	inline int Put(const WDL_UINT64* pVal)
-	{
-		WDL_UINT64 i = WDL_bswap64_if_be(*pVal);
-		return PutBytes(&i, 8);
-	}
-
-	inline int Get(WDL_UINT64* pVal, int startPos)
-	{
-		startPos = GetBytes(pVal, 8, startPos);
-		WDL_BSWAP64_IF_BE(*pVal);
-		return startPos;
-	}
+	inline int Get(bool* const pVal, const int startPos) const { return GetBool(pVal, startPos); }
+	inline int Get(unsigned char* const pVal, const int startPos) const { return GetByte((char*)pVal, startPos); }
+	inline int Get(unsigned short* const pVal, const int startPos) const { return GetInt((short*)pVal, startPos); }
+	inline int Get(unsigned int* const pVal, const int startPos) const { return GetInt((int*)pVal, startPos); }
+	inline int Get(WDL_UINT64* const pVal, const int startPos) const { return GetInt((WDL_INT64*)pVal, startPos); }
 
 	// Signed
 
-	inline int Put(const short*     pVal) { return Put((const unsigned short*) pVal); }
-	inline int Put(const int*       pVal) { return Put((const unsigned int*)   pVal); }
-	inline int Put(const WDL_INT64* pVal) { return Put((const WDL_UINT64*)     pVal); }
+	inline int Put(const signed char* const pVal) { return PutByte(*pVal); }
+	inline int Put(const short* const pVal) { return PutInt(*pVal); }
+	inline int Put(const int* const pVal) { return PutInt(*pVal); }
+	inline int Put(const WDL_INT64* const pVal) { return PutInt(*pVal); }
 
-	inline int Get(short*     pVal, int startPos) { return Get((unsigned short*) pVal, startPos); }
-	inline int Get(int*       pVal, int startPos) { return Get((unsigned int*)   pVal, startPos); }
-	inline int Get(WDL_INT64* pVal, int startPos) { return Get((WDL_UINT64*)     pVal, startPos); }
+	inline int Get(signed char* const pVal, const int startPos) const { return GetByte((char*)pVal, startPos); }
+	inline int Get(short* const pVal, const int startPos) const { return GetInt(pVal, startPos); }
+	inline int Get(int* const pVal, const int startPos) const { return GetInt(pVal, startPos); }
+	inline int Get(WDL_INT64* const pVal, const int startPos) const { return GetInt(pVal, startPos); }
 
 	// Floats
 
-	inline int Put(const float* pVal)
-	{
-		unsigned int i = WDL_bswapf_if_be(*pVal);
-		return PutBytes(&i, 4);
-	}
+	inline int Put(const float* const pVal) { return PutFloat(*pVal); }
+	inline int Put(const double* const pVal) { return PutFloat(*pVal); }
 
-	inline int Get(float* pVal, int startPos)
-	{
-		unsigned int i;
-		startPos = GetBytes(&i, 4, startPos);
-		*pVal = WDL_bswapf_if_be(i);
-		return startPos;
-	}
-
-	inline int Put(const double* pVal)
-	{
-		WDL_UINT64 i = WDL_bswapf_if_be(*pVal);
-		return PutBytes(&i, 8);
-	}
-
-	inline int Get(double* pVal, int startPos)
-	{
-		WDL_UINT64 i;
-		startPos = GetBytes(&i, 8, startPos);
-		*pVal = WDL_bswapf_if_be(i);
-		return startPos;
-	}
-
-#endif // WDL_BIG_ENDIAN
+	inline int Get(float* const pVal, const int startPos) const { return GetFloat(pVal, startPos); }
+	inline int Get(double* const pVal, const int startPos) const { return GetFloat(pVal, startPos); }
 
 	inline int PutStr(const char* str) 
   {
