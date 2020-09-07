@@ -75,12 +75,12 @@ namespace IChannelBlend
 	static const int kBlendColorDodge = LICE_BLIT_MODE_DODGE | LICE_BLIT_USE_ALPHA;
 }
 
-const int DEFAULT_TEXT_SIZE = 14;
-const IColor DEFAULT_TEXT_COLOR = COLOR_BLACK;
-const char* const DEFAULT_FONT = "Arial";
-
 struct IText
 {
+	static const int kDefaultSize = 14;
+	static const IColor kDefaultColor;
+	static const char* const kDefaultFont;
+
 	LICE_IFont* mCached;
 	const char* mFont;
 	int mSize;
@@ -94,8 +94,8 @@ struct IText
 	int mOrientation; // Degrees ccwise from normal.
 
 	IText(
-		const int size = DEFAULT_TEXT_SIZE,
-		const IColor* const pColor = NULL,
+		const int size = kDefaultSize,
+		const IColor color = kDefaultColor,
 		const char* const font = NULL,
 		const int style = kStyleNormal,
 		const int align = kAlignCenter,
@@ -103,9 +103,9 @@ struct IText
 		const int quality = kQualityDefault
 	):
 		mCached(NULL),
-		mFont(font ? font : DEFAULT_FONT),
+		mFont(font ? font : kDefaultFont),
 		mSize(size),
-		mColor(pColor ? *pColor : DEFAULT_TEXT_COLOR),
+		mColor(color),
 		mStyle(style),
 		mAlign(align),
 		mQuality(quality),
@@ -118,12 +118,12 @@ struct IText
 	}
 
 	IText(
-		const IColor* const pColor
+		const IColor color
 	):
 		mCached(NULL),
-		mFont(DEFAULT_FONT),
-		mSize(DEFAULT_TEXT_SIZE),
-		mColor(*pColor),
+		mFont(kDefaultFont),
+		mSize(kDefaultSize),
+		mColor(color),
 		mStyle(kStyleNormal),
 		mAlign(kAlignCenter),
 		mQuality(kQualityDefault),

@@ -10,6 +10,9 @@ const IColor IColor::kBlue(255, 0, 0, 255);
 const IColor IColor::kYellow(255, 255, 255, 0);
 const IColor IColor::kOrange(255, 255, 127, 0);
 
+const char* const IText::kDefaultFont = "Arial";
+const IColor IText::kDefaultColor = IColor::kBlack;
+
 void IMidiMsg::MakeNoteOnMsg(int noteNumber, int velocity, int offset)
 {
   Clear();
