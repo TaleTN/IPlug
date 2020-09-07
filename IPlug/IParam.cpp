@@ -7,6 +7,7 @@
 	#define stricmp _stricmp
 #endif
 
+#include "WDL/db2val.h"
 #include "WDL/wdlcstring.h"
 
 IBoolParam::IBoolParam(
@@ -311,5 +312,174 @@ void IIntParam::AssertInt(const int intVal) const
 	const int maxVal = wdl_max(mMin, mMax);
 
 	assert(intVal >= minVal && intVal <= maxVal);
+}
+#endif
+
+IDoubleParam::IDoubleParam(
+	const char* const name,
+	const double defaultVal,
+	const double minVal,
+	const double maxVal,
+	const int displayPrecision,
+	const char* const label
+):
+	IParam(kTypeDouble, name),
+	mValue(defaultVal),
+	mMin(minVal),
+	mMax(maxVal),
+	mDisplayTexts(Delete),
+	mLabel(label)
+{
+	#ifndef NDEBUG
+	assert(minVal != maxVal);
+	AssertValue(defaultVal);
+	assert(displayPrecision >= 0);
+	#endif
+
+	mDisplayPrecision = displayPrecision;
+}
+
+void IDoubleParam::SetDisplayText(const double normalizedValue, const char* const text)
+{
+	const int key = ToIntKey(normalizedValue);
+	WDL_FastString* pDT = mDisplayTexts.Get(key);
+
+	if (!pDT) mDisplayTexts.Insert(key, pDT = new WDL_FastString);
+
+	pDT->Set(text);
+}
+
+double IDoubleParam::DBToAmp() const
+{
+	return DB2VAL(mValue);
+}
+
+void IDoubleParam::SetNormalized(const double normalizedValue)
+{
+	mValue = FromNormalized(normalizedValue);
+}
+
+double IDoubleParam::GetNormalized() const
+{
+	return ToNormalized(mValue);
+}
+
+double IDoubleParam::GetNormalized(const double nonNormalizedValue) const
+{
+	return ToNormalized(Bounded(nonNormalizedValue));
+}
+
+char* IDoubleParam::ToString(const double nonNormalizedValue, char* const buf, const int bufSize, const double* const pNormalizedValue) const
+{
+	const char* displayText = NULL;
+
+	// Limits min/max value and precision, but should be fine for anything
+	// reasonable.
+	char tmp[16];
+
+	if (GetNDisplayTexts())
+	{
+		const double normalizedValue = pNormalizedValue ? *pNormalizedValue : GetNormalized();
+		displayText = GetDisplayText(normalizedValue);
+	}
+
+	if (!displayText)
+	{
+		displayText = tmp;
+
+		double displayValue = nonNormalizedValue;
+		const bool nz = displayValue != 0.0;
+		if (nz && DisplayIsNegated()) displayValue = -displayValue;
+
+		const bool sign = nz && (mMin >= 0.0) != (mMax >= 0.0);
+		sprintf(tmp, sign ? "%+.*f" : "%.*f", (int)mDisplayPrecision, displayValue);
+	}
+
+	lstrcpyn_safe(buf, displayText, bufSize);
+	return buf;
+}
+
+char* IDoubleParam::GetDisplayForHost(char* const buf, const int bufSize)
+{
+	return ToString(mValue, buf, bufSize);
+}
+
+char* IDoubleParam::GetDisplayForHost(const double normalizedValue, char* const buf, const int bufSize)
+{
+	const double nonNormalizedValue = FromNormalized(normalizedValue);
+	return ToString(nonNormalizedValue, buf, bufSize, &normalizedValue);
+}
+
+const char* IDoubleParam::GetLabelForHost() const
+{
+	return mLabel.Get();
+}
+
+int IDoubleParam::ToIntKey(const double normalizedValue)
+{
+	assert(normalizedValue >= 0.0 && normalizedValue <= 1.0);
+
+	const double x = normalizedValue + 1.0;
+	const WDL_UINT64 i = *(const WDL_UINT64*)&x;
+
+	const int y = (int)(i >> 20) + (int)((i >> 19) & 1);
+	return (int)(i >> 62) ? 0xFFFFFFFF : y;
+}
+
+double IDoubleParam::FromIntKey(const int key)
+{
+	WDL_UINT64 i = ((WDL_UINT64)(unsigned int)key << 20) | WDL_UINT64_CONST(0x3FF0000000000000);
+	i = key == 0xFFFFFFFF ? WDL_UINT64_CONST(0x4000000000000000) : i;
+
+	const double normalizedValue = *(const double*)&i - 1.0;
+	return normalizedValue;
+}
+
+const char* IDoubleParam::GetDisplayText(const double normalizedValue) const
+{
+	const int key = ToIntKey(normalizedValue);
+	const WDL_FastString* const pDT = mDisplayTexts.Get(key);
+
+	return pDT ? pDT->Get() : NULL;
+}
+
+bool IDoubleParam::MapDisplayText(const char* const str, double* const pNormalizedValue) const
+{
+	const int n = mDisplayTexts.GetSize();
+
+	for (int i = 0; i < n; ++i)
+	{
+		int key;
+		const WDL_FastString* const pDT = mDisplayTexts.Enumerate(i, &key);
+
+		if (!stricmp(str, pDT->Get()))
+		{
+			*pNormalizedValue = FromIntKey(key);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool IDoubleParam::Serialize(ByteChunk* const pChunk) const
+{
+	return !!pChunk->PutDouble(mValue);
+}
+
+int IDoubleParam::Unserialize(const ByteChunk* const pChunk, const int startPos)
+{
+	return pChunk->GetDouble(&mValue, startPos);
+}
+
+#ifndef NDEBUG
+void IDoubleParam::AssertValue(const double nonNormalizedValue) const
+{
+	const float value = (float)nonNormalizedValue;
+
+	const float minVal = (float)wdl_min(mMin, mMax);
+	const float maxVal = (float)wdl_max(mMin, mMax);
+
+	assert(value >= minVal && value <= maxVal);
 }
 #endif

@@ -245,3 +245,99 @@ protected:
 	WDL_IntKeyedArray<WDL_FastString*> mDisplayTexts;
 	WDL_FastString mLabel;
 };
+
+class IDoubleParam: public IParam
+{
+public:
+	IDoubleParam(
+		const char* name,
+		double defaultVal = 0.0,
+		double minVal = 0.0,
+		double maxVal = 1.0,
+		int displayPrecision = 6,
+		const char* label = NULL
+	);
+
+	inline void Set(const double nonNormalizedValue)
+	{
+		#ifndef NDEBUG
+		AssertValue(nonNormalizedValue);
+		#endif
+
+		mValue = nonNormalizedValue;
+	}
+
+	void SetDisplayText(double normalizedValue, const char* text);
+
+	// These return the readable value, not the normalized [0, 1].
+	inline double Value() const { return mValue; }
+	inline double Min() const { return mMin; }
+	inline double Max() const { return mMax; }
+	inline int GetDisplayPrecision() const { return mDisplayPrecision; }
+	double DBToAmp() const;
+
+	double FromNormalized(const double normalizedValue) const
+	{
+		assert(normalizedValue >= 0.0 && normalizedValue <= 1.0);
+		return (mMax - mMin) * normalizedValue + mMin;
+	}
+
+	double ToNormalized(const double nonNormalizedValue) const
+	{
+		#ifndef NDEBUG
+		AssertValue(nonNormalizedValue);
+		#endif
+
+		return fabs((nonNormalizedValue - mMin) / (mMax - mMin));
+	}
+
+	double Bounded(double nonNormalizedValue) const
+	{
+		const double minVal = wdl_min(mMin, mMax);
+		nonNormalizedValue = wdl_max(nonNormalizedValue, minVal);
+
+		const double maxVal = wdl_max(mMin, mMax);
+		nonNormalizedValue = wdl_min(nonNormalizedValue, maxVal);
+
+		return nonNormalizedValue;
+	}
+
+	void SetNormalized(double normalizedValue);
+	double GetNormalized() const;
+	double GetNormalized(double nonNormalizedValue) const;
+	char* GetDisplayForHost(char* buf, int bufSize = 128);
+	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
+	const char* GetLabelForHost() const;
+
+	char* ToString(double nonNormalizedValue, char* buf, int bufSize = 128, const double* pNormalizedValue = NULL) const;
+
+	static int ToIntKey(double normalizedValue);
+	static double FromIntKey(int key); // To normalized value
+
+	int GetNDisplayTexts() const { return mDisplayTexts.GetSize(); }
+	const char* GetDisplayText(double normalizedValue) const;
+	bool MapDisplayText(const char* str, double* pNormalizedValue) const;
+
+	void GetBounds(double* const pMin, double* const pMax) const
+	{
+		*pMin = mMin;
+		*pMax = mMax;
+	}
+
+	bool Serialize(ByteChunk* pChunk) const;
+	int Unserialize(const ByteChunk* pChunk, int startPos);
+	int Size() const { return (int)sizeof(double); }
+
+protected:
+	#ifndef NDEBUG
+	void AssertValue(double nonNormalizedValue) const;
+	#endif
+
+	// All we store is the readable values.
+	// SetNormalized() and GetNormalized() handle conversion from/to [0, 1].
+	double WDL_FIXALIGN mValue, mMin, mMax;
+
+	WDL_IntKeyedArray<WDL_FastString*> mDisplayTexts;
+	WDL_FastString mLabel;
+}
+WDL_FIXALIGN;
