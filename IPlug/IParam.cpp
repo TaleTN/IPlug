@@ -81,3 +81,93 @@ int IBoolParam::Unserialize(const ByteChunk* const pChunk, const int startPos)
 {
 	return pChunk->GetBool(&mBoolVal, startPos);
 }
+
+IEnumParam::IEnumParam(
+	const char* const name,
+	const int defaultVal,
+	const int nEnums
+):
+	IParam(kTypeEnum, name),
+	mIntVal(defaultVal),
+	mEnums(nEnums)
+{
+	assert(nEnums >= 2);
+	assert(defaultVal >= 0 && defaultVal < nEnums);
+
+	for (int i = 0; i < nEnums; ++i)
+	{
+		mDisplayTexts.Add(new WDL_FastString);
+	}
+}
+
+void IEnumParam::SetDisplayText(const int intVal, const char* const text)
+{
+	assert(intVal >= 0 && intVal < mEnums);
+	mDisplayTexts.Get(intVal)->Set(text);
+}
+
+void IEnumParam::SetNormalized(const double normalizedValue)
+{
+	mIntVal = FromNormalized(normalizedValue);
+}
+
+double IEnumParam::GetNormalized() const
+{
+	return ToNormalized(mIntVal);
+}
+
+double IEnumParam::GetNormalized(const double nonNormalizedValue) const
+{
+	const int intVal = (int)(nonNormalizedValue + 0.5);
+	return ToNormalized(Bounded(intVal));
+}
+
+char* IEnumParam::ToString(const int intVal, char* const buf, const int bufSize) const
+{
+	lstrcpyn_safe(buf, GetDisplayText(intVal), bufSize);
+	return buf;
+}
+
+char* IEnumParam::GetDisplayForHost(char* const buf, const int bufSize)
+{
+	return ToString(mIntVal, buf, bufSize);
+}
+
+char* IEnumParam::GetDisplayForHost(const double normalizedValue, char* const buf, const int bufSize)
+{
+	const int intVal = FromNormalized(normalizedValue);
+	return ToString(intVal, buf, bufSize);
+}
+
+const char* IEnumParam::GetDisplayText(const int intVal) const
+{
+	assert(intVal >= 0 && intVal < mEnums);
+	return mDisplayTexts.Get(intVal)->Get();
+}
+
+bool IEnumParam::MapDisplayText(const char* const str, double* const pNormalizedValue) const
+{
+	const WDL_FastString* const* const ppDT = mDisplayTexts.GetList();
+	const int n = mDisplayTexts.GetSize();
+
+	for (int i = 0; i < n; ++i)
+	{
+		if (!stricmp(str, ppDT[i]->Get()))
+		{
+			*pNormalizedValue = ToNormalized(i);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool IEnumParam::Serialize(ByteChunk* const pChunk) const
+{
+	return !!pChunk->PutInt32(mIntVal);
+}
+
+int IEnumParam::Unserialize(const ByteChunk* const pChunk, const int startPos)
+{
+	return pChunk->GetInt32(&mIntVal, startPos);
+}
