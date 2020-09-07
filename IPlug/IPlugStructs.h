@@ -138,7 +138,7 @@ struct IRECT
 
 	IRECT() { L = T = R = B = 0; }
 	IRECT(const int l, const int t, const int r, const int b): L(l), R(r), T(t), B(b) {}
-	IRECT(const int x, const int y, const IBitmap* const pBitmap) : L(x), T(y), R(x + pBitmap->W), B(y + pBitmap->H / pBitmap->N) {}
+	IRECT(const int x, const int y, const IBitmap* const pBitmap): L(x), T(y), R(x + pBitmap->W), B(y + pBitmap->H) {}
 
 	bool Empty() const {
 		return (L == 0 && T == 0 && R == 0 && B == 0); 
