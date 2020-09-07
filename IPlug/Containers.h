@@ -11,7 +11,6 @@
 	#include "WDL/wdlendian.h"
 #endif
 
-typedef unsigned char BYTE;
 class ByteChunk
 {
 public:
@@ -204,10 +203,15 @@ public:
     return n;
   }
 
-  inline BYTE* GetBytes()
-  {
-    return mBytes.Get();
-  }
+	inline void* GetBytes()
+	{
+		return mBytes.Get();
+	}
+
+	inline const void* GetBytes() const
+	{
+		return mBytes.Get();
+	}
 
   inline bool IsEqual(ByteChunk* pRHS)
   {
@@ -215,6 +219,5 @@ public:
   }
 
 private:
-
-  WDL_TypedBuf<unsigned char> mBytes;
+	WDL_HeapBuf mBytes;
 };
