@@ -4,92 +4,13 @@
 #define MAX_PARAM_DISPLAY_PRECISION 6
 
 IParam::IParam()
-:	mType(kTypeNone), mValue(0.0), mMin(0.0), mMax(1.0), mStep(1.0), 
-    mDisplayPrecision(0), mNegateDisplay(false), mShape(1.0)
+:	mType(kTypeNone), mNegateDisplay(false)
 {
     memset(mName, 0, MAX_PARAM_NAME_LEN * sizeof(char));
-    memset(mLabel, 0, MAX_PARAM_NAME_LEN * sizeof(char));
 }
 
 IParam::~IParam()
 {
-}
-
-void IParam::InitBool(const char* name, bool defaultVal)
-{
-	if (mType == kTypeNone) {
-		mType = kTypeBool;
-	}
-	InitEnum(name, (defaultVal ? 1 : 0), 2);
-
-  SetDisplayText(0, "off");
-  SetDisplayText(1, "on");
-}
-
-void IParam::InitEnum(const char* name, int defaultVal, int nEnums, const char* label)
-{
-	if (mType == kTypeNone) {
-		mType = kTypeEnum;
-	}
-	InitInt(name, defaultVal, 0, nEnums - 1, label);
-}
-
-void IParam::InitInt(const char* name, int defaultVal, int minVal, int maxVal, const char* label)
-{
-	if (mType == kTypeNone) {
-		mType = kTypeInt;
-	}
-	InitDouble(name, (double) defaultVal, (double) minVal, (double) maxVal, 1.0, label);
-}
-
-void IParam::InitDouble(const char* name, double defaultVal, double minVal, double maxVal, double step, const char* label)
-{
-	assert(strlen(name) < MAX_PARAM_NAME_LEN);
-	assert(strlen(label) < MAX_PARAM_NAME_LEN);
-
-	if (mType == kTypeNone) {
-		mType = kTypeDouble;
-	}
-	strcpy(mName, name);
-	strcpy(mLabel, label);
-	mValue = defaultVal;
-	mMin = minVal;
-	mMax = minVal > maxVal ? MIN(maxVal, minVal + step) : MAX(maxVal, minVal + step);
-	mStep = step;
-
-	for (mDisplayPrecision = 0; 
-		mDisplayPrecision < MAX_PARAM_DISPLAY_PRECISION && step != floor(step);
-		++mDisplayPrecision, step *= 10.0) {
-		;
-	}
-}
-    
-void IParam::SetShape(double shape)
-{
-    if (shape != 0.0) {
-        mShape = shape;
-    }
-}
-
-void IParam::SetShape(double nonNormalizedValue, double normalizedValue)
-{
-    if (nonNormalizedValue > mMin && nonNormalizedValue < mMax && normalizedValue > 0.0 && normalizedValue < 1.0) {
-        SetShape(log((nonNormalizedValue - mMin) / (mMax - mMin)) / log(normalizedValue));
-    }
-}
-
-void IParam::SetDisplayText(int value, const char* text) 
-{
-  int n = mDisplayTexts.GetSize();
-  mDisplayTexts.Resize(n + 1);
-  DisplayText* pDT = mDisplayTexts.Get() + n;
-  pDT->mValue = value;
-  strcpy(pDT->mText, text);
-}
-
-double IParam::DBToAmp()
-{
-	return DB2VAL(mValue);
 }
 
 void IParam::SetNormalized(double normalizedValue)
@@ -156,20 +77,6 @@ int IParam::GetNDisplayTexts()
   return mDisplayTexts.GetSize();
 }
 
-const char* IParam::GetDisplayText(int value)
-{
-  int n = mDisplayTexts.GetSize();
-  if (n) {
-    DisplayText* pDT = mDisplayTexts.Get();
-    for (int i = 0; i < n; ++i, ++pDT) {
-      if (value == pDT->mValue) {
-        return pDT->mText;
-      }
-    }
-  }
-  return "";
-}
-
 bool IParam::MapDisplayText(char* str, int* pValue)
 {
   int n = mDisplayTexts.GetSize();
@@ -183,10 +90,4 @@ bool IParam::MapDisplayText(char* str, int* pValue)
     }
   }
   return false;
-}
-
-void IParam::GetBounds(double* pMin, double* pMax)
-{
-  *pMin = mMin;
-  *pMax = mMax;
 }
