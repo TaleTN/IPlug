@@ -556,3 +556,61 @@ double IDoubleExpParam::GetNormalized(const double nonNormalizedValue) const
 {
 	return ToNormalized(Bounded(nonNormalizedValue));
 }
+
+INormalizedParam::INormalizedParam(
+	const char* const name,
+	const double defaultVal
+):
+	IParam(kTypeNormalized, name),
+	mValue(defaultVal)
+{
+	assert(defaultVal >= 0.0 && defaultVal <= 1.0);
+}
+
+void INormalizedParam::SetNormalized(const double normalizedValue)
+{
+	Set(normalizedValue);
+}
+
+double INormalizedParam::GetNormalized(const double nonNormalizedValue) const
+{
+	return Bounded(nonNormalizedValue);
+}
+
+char* INormalizedParam::ToString(const double normalizedValue, char* const buf, const int bufSize) const
+{
+	assert(normalizedValue >= 0.0 && normalizedValue <= 1.0);
+
+	char tmp[12];
+	sprintf(tmp, "%.6g", normalizedValue);
+
+	if (tmp[0] && !tmp[1])
+	{
+		tmp[1] = '.';
+		tmp[2] = '0';
+		tmp[3] = 0;
+	}
+
+	lstrcpyn_safe(buf, tmp, bufSize);
+	return buf;
+}
+
+char* INormalizedParam::GetDisplayForHost(char* const buf, const int bufSize)
+{
+	return ToString(mValue, buf, bufSize);
+}
+
+char* INormalizedParam::GetDisplayForHost(const double normalizedValue, char* const buf, const int bufSize)
+{
+	return ToString(normalizedValue, buf, bufSize);
+}
+
+bool INormalizedParam::Serialize(ByteChunk* const pChunk) const
+{
+	return !!pChunk->PutDouble(mValue);
+}
+
+int INormalizedParam::Unserialize(const ByteChunk* const pChunk, const int startPos)
+{
+	return pChunk->GetDouble(&mValue, startPos);
+}

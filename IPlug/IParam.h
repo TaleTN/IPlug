@@ -13,7 +13,7 @@
 class IParam
 {
 public:
-	enum EParamType { kTypeNone = 0, kTypeBool, kTypeInt, kTypeEnum, kTypeDouble };
+	enum EParamType { kTypeNone = 0, kTypeBool, kTypeInt, kTypeEnum, kTypeDouble, kTypeNormalized };
 
 	IParam(
 		const int type,
@@ -425,5 +425,42 @@ public:
 
 protected:
 	double WDL_FIXALIGN mShape, mExpMin1;
+}
+WDL_FIXALIGN;
+
+class INormalizedParam: public IParam
+{
+public:
+	INormalizedParam(const char* name, double defaultVal = 0.0);
+
+	inline void Set(const double normalizedValue)
+	{
+		assert(normalizedValue >= 0.0 && normalizedValue <= 1.0);
+		mValue = normalizedValue;
+	}
+
+	inline double Value() const { return mValue; }
+
+	static double Bounded(double normalizedValue)
+	{
+		normalizedValue = wdl_max(normalizedValue, 0.0);
+		normalizedValue = wdl_min(normalizedValue, 1.0);
+		return normalizedValue;
+	}
+
+	void SetNormalized(double normalizedValue);
+	double GetNormalized() const { return mValue; }
+	double GetNormalized(double nonNormalizedValue) const;
+	char* GetDisplayForHost(char* buf, int bufSize = 128);
+	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
+
+	char* ToString(double normalizedValue, char* buf, int bufSize = 128) const;
+
+	bool Serialize(ByteChunk* pChunk) const;
+	int Unserialize(const ByteChunk* pChunk, int startPos);
+	int GetSize() const { return (int)sizeof(double); }
+
+protected:
+	double WDL_FIXALIGN mValue;
 }
 WDL_FIXALIGN;
