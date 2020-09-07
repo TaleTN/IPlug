@@ -527,3 +527,32 @@ double IDoublePowParam::GetNormalized(const double nonNormalizedValue) const
 {
 	return ToNormalized(Bounded(nonNormalizedValue));
 }
+
+IDoubleExpParam::IDoubleExpParam(
+	const double shape,
+	const char* const name,
+	const double defaultVal,
+	const double minVal,
+	const double maxVal,
+	const int displayPrecision,
+	const char* const label
+):
+	IDoubleParam(name, defaultVal, minVal, maxVal, displayPrecision, label)
+{
+	SetShape(shape);
+}
+
+void IDoubleExpParam::SetNormalized(const double normalizedValue)
+{
+	mValue = FromNormalized(normalizedValue);
+}
+
+double IDoubleExpParam::GetNormalized() const
+{
+	return ToNormalized(mValue);
+}
+
+double IDoubleExpParam::GetNormalized(const double nonNormalizedValue) const
+{
+	return ToNormalized(Bounded(nonNormalizedValue));
+}
