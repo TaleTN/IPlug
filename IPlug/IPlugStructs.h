@@ -6,10 +6,7 @@
 #include <string.h>
 
 #include "WDL/lice/lice.h"
-
-// The order is important here, so 1st include swell.h, then lice_text.h.
-#include "../swell/swell.h"
-#include "../lice/lice_text.h"
+#include "WDL/lice/lice_text.h"
 
 // Abstracting the graphics made it easy to go ahead and abstract the OS...
 // the cost is this crap redefining some basic stuff.
@@ -81,33 +78,58 @@ namespace IChannelBlend
 const int DEFAULT_TEXT_SIZE = 14;
 const IColor DEFAULT_TEXT_COLOR = COLOR_BLACK;
 const char* const DEFAULT_FONT = "Arial";
-const int FONT_LEN = 32;
 
-struct IText 
+struct IText
 {
-	char mFont[FONT_LEN];
+	LICE_IFont* mCached;
+	const char* mFont;
 	int mSize;
 	IColor mColor;
-	enum EStyle { kStyleNormal = 0, kStyleBold, kStyleItalic, kStyleBoldItalic } mStyle;
-	enum EAlign { kAlignNear, kAlignCenter, kAlignFar } mAlign;
-	int mOrientation;   // Degrees ccwise from normal.
-	enum EQuality { kQualityDefault, kQualityNonAntiAliased, kQualityAntiAliased, kQualityClearType } mQuality;
-	LICE_IFont* mCached;
 
-	IText(int size = DEFAULT_TEXT_SIZE, const IColor* pColor = 0, char* font = 0,
-		EStyle style = kStyleNormal, EAlign align = kAlignCenter, int orientation = 0, EQuality quality = kQualityDefault)
-    :	mSize(size), mColor(pColor ? *pColor : DEFAULT_TEXT_COLOR), //mFont(font ? font : DEFAULT_FONT),
-        mStyle(style), mAlign(align), mOrientation(orientation), mQuality(quality), mCached(0)
-    {
-        strcpy(mFont, (font ? font : DEFAULT_FONT));     
-    }
+	enum EStyle { kStyleNormal = 0, kStyleBold, kStyleItalic, kStyleBoldItalic };
+	enum EAlign	{ kAlignNear = 0, kAlignCenter, kAlignFar };
+	enum EQuality { kQualityDefault = 0, kQualityNonAntiAliased, kQualityAntiAliased, kQualityClearType };
+	char mStyle, mAlign, mQuality, _padding;
 
-    IText(const IColor* pColor) 
-	:	mSize(DEFAULT_TEXT_SIZE), mColor(*pColor), //mFont(DEFAULT_FONT), 
-        mStyle(kStyleNormal), mAlign(kAlignCenter), mOrientation(0), mQuality(kQualityDefault), mCached(0)
-    {
-        strcpy(mFont, DEFAULT_FONT);     
-    }
+	int mOrientation; // Degrees ccwise from normal.
+
+	IText(
+		const int size = DEFAULT_TEXT_SIZE,
+		const IColor* const pColor = NULL,
+		const char* const font = NULL,
+		const int style = kStyleNormal,
+		const int align = kAlignCenter,
+		const int orientation = 0,
+		const int quality = kQualityDefault
+	):
+		mCached(NULL),
+		mFont(font ? font : DEFAULT_FONT),
+		mSize(size),
+		mColor(pColor ? *pColor : DEFAULT_TEXT_COLOR),
+		mStyle(style),
+		mAlign(align),
+		mQuality(quality),
+		_padding(0),
+		mOrientation(orientation)
+	{
+		assert(style >= kStyleNormal && style <= kStyleBoldItalic);
+		assert(align >= kAlignNear && align <= kAlignFar);
+		assert(quality >= kQualityDefault && quality <= kQualityClearType);
+	}
+
+	IText(
+		const IColor* const pColor
+	):
+		mCached(NULL),
+		mFont(DEFAULT_FONT),
+		mSize(DEFAULT_TEXT_SIZE),
+		mColor(*pColor),
+		mStyle(kStyleNormal),
+		mAlign(kAlignCenter),
+		mQuality(kQualityDefault),
+		_padding(0),
+		mOrientation(0)
+	{}
 
  //   bool operator==(const IText& rhs) const;
  //   bool operator!=(const IText& rhs) const { return !operator==(rhs); }
