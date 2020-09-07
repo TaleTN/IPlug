@@ -358,6 +358,12 @@ struct IMidiMsg
 		#endif
 	}
 
+	IMidiMsg(const int offs, const void* const buf)
+	{
+		mOffset = offs;
+		*(unsigned int*)&mStatus = *(const unsigned int*)buf;
+	}
+
   void MakeNoteOnMsg(int noteNumber, int velocity, int offset);
   void MakeNoteOffMsg(int noteNumber, int offset);
   void MakePitchWheelMsg(double value);    // Value in [-1, 1], converts to [0, 16384) where 8192 = no pitch change.
