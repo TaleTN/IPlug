@@ -194,6 +194,18 @@ struct IRECT
 	}
 
 	void Clank(const IRECT* pRHS);
+
+	void Downscale(const int scale)
+	{
+		assert(scale >= 0 && scale < 32);
+		L >>= scale; T >>= scale; R >>= scale; B >>= scale;
+	}
+
+	void Upscale(const int scale)
+	{
+		assert(scale >= 0 && scale < 32);
+		L <<= scale; T <<= scale; R <<= scale; B <<= scale;
+	}
 };
 
 struct IMouseMod 
