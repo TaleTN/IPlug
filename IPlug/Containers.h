@@ -35,14 +35,15 @@ public:
 		return delta;
 	}
 
-	inline int GetBytes(void* pBuf, int size, int startPos)
+	int GetBytes(void* const pBuf, const int size, const int startPos) const
 	{
 		int endPos = startPos + size;
-    if (startPos >= 0 && endPos <= mBytes.GetSize()) {
-		memcpy(pBuf, mBytes.Get() + startPos, size);
-      return endPos;
-    }
-    return -1;
+		if (startPos >= 0 && endPos <= mBytes.GetSize())
+			memcpy(pBuf, (const char*)mBytes.GetFast() + startPos, size);
+		else
+			endPos = -1;
+
+		return endPos;
 	}
 
 	template <class T> inline int Put(const T* const pVal)
@@ -50,9 +51,9 @@ public:
 		return PutBytes(pVal, (int)sizeof(T));
 	}
 
-	template <class T> inline int Get(T* pVal, int startPos) 
-  {
-		return GetBytes(pVal, sizeof(T), startPos);
+	template <class T> inline int Get(T* const pVal, const int startPos) const
+	{
+		return GetBytes(pVal, (int)sizeof(T), startPos);
 	}
 
 // Handle endian conversion for integer and floating point data types.
