@@ -17,12 +17,22 @@ public:
 	ByteChunk(): mSize(0) {}
 	~ByteChunk() {}
 
-	inline int PutBytes(const void* pBuf, int size)
+	int PutBytes(const void* const pBuf, const int size)
 	{
-		int n = mBytes.GetSize();
-		mBytes.Resize(n + size);
-		memcpy(mBytes.Get() + n, pBuf, size);
-		return mBytes.GetSize();
+		#ifndef NDEBUG
+		AssertSize(size);
+		#endif
+
+		const int oldSize = mSize, newSize = oldSize + size;
+		const int delta = newSize > mBytes.GetSize() ? 0 : size;
+
+		if (delta)
+		{
+			mSize = newSize;
+			memcpy((char*)mBytes.GetFast() + oldSize, pBuf, size);
+		}
+
+		return delta;
 	}
 
 	inline int GetBytes(void* pBuf, int size, int startPos)
@@ -35,9 +45,9 @@ public:
     return -1;
 	}
 
-	template <class T> inline int Put(const T* pVal) 
-  {
-		return PutBytes(pVal, sizeof(T));
+	template <class T> inline int Put(const T* const pVal)
+	{
+		return PutBytes(pVal, (int)sizeof(T));
 	}
 
 	template <class T> inline int Get(T* pVal, int startPos) 
