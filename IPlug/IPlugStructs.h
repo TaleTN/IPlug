@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <string.h>
 
+#include "WDL/wdltypes.h"
+
 #include "WDL/lice/lice.h"
 #include "WDL/lice/lice_text.h"
 
@@ -136,67 +138,62 @@ struct IRECT
 {
 	int L, T, R, B;
 
-	IRECT() { L = T = R = B = 0; }
+	inline IRECT() { Clear(); }
 	IRECT(const int l, const int t, const int r, const int b): L(l), R(r), T(t), B(b) {}
 	IRECT(const int x, const int y, const IBitmap* const pBitmap): L(x), T(y), R(x + pBitmap->W), B(y + pBitmap->H) {}
 
-	bool Empty() const {
-		return (L == 0 && T == 0 && R == 0 && B == 0); 
-	}
-  void Clear() {
-      L = T = R = B = 0;
-  }
-  bool operator==(const IRECT& rhs) const {
-      return (L == rhs.L && T == rhs.T && R == rhs.R && B == rhs.B);
-  }
-  bool operator!=(const IRECT& rhs) const {
-      return !(*this == rhs);
-  }
-
-  inline int W() const { return R - L; }
-  inline int H() const { return B - T; }
-  inline float MW() const { return 0.5f * (float) (L + R); }
-  inline float MH() const { return 0.5f * (float) (T + B); }
-
-	inline IRECT Union(IRECT* pRHS) {
-		if (Empty()) { return *pRHS; }
-		if (pRHS->Empty()) { return *this; }
-		return IRECT(MIN(L, pRHS->L), MIN(T, pRHS->T), MAX(R, pRHS->R), MAX(B, pRHS->B));
-	}
-	inline IRECT Intersect(IRECT* pRHS) {
-		if (Intersects(pRHS)) {
-			return IRECT(MAX(L, pRHS->L), MAX(T, pRHS->T), MIN(R, pRHS->R), MIN(B, pRHS->B));
-		}
-		return IRECT();
-	}
-	inline bool Intersects(IRECT* pRHS) {
-		return (!Empty() && !pRHS->Empty() && R > pRHS->L && L < pRHS->R && B > pRHS->T && T < pRHS->B);
-	}
-	inline bool Contains(IRECT* pRHS) {
-		return (!Empty() && pRHS->L >= L && pRHS->R <= R && pRHS->T >= T && pRHS->B <= B);
-	}
-	inline bool Contains(int x, int y) {
-		return (x >= L && x < R && y >= T && y < B);
+	bool Empty() const
+	{
+		#if defined(_WIN64) || defined(__LP64__)
+		const WDL_UINT64* const p = Ptr();
+		return !(p[0] || p[1]);
+		#else
+		return !(L || T || R || B);
+		#endif
 	}
 
-  void Clank(IRECT* pRHS) {
-    if (L < pRHS->L) {
-      R = MIN(pRHS->R - 1, R + pRHS->L - L);
-      L = pRHS->L;
-    }
-    if (T < pRHS->T) {
-      B = MIN(pRHS->B - 1, B + pRHS->T - T);
-      T = pRHS->T;
-    }
-    if (R >= pRHS->R) {
-      L = MAX(pRHS->L, L - (R - pRHS->R + 1));
-      R = pRHS->R - 1;
-    }
-    if (B >= pRHS->B) {
-      T = MAX(pRHS->T, T - (B - pRHS->B + 1));
-      B = pRHS->B - 1;
-    }
-  }
+	inline WDL_UINT64* Ptr() const { return (WDL_UINT64*)&L; }
+
+	void Clear()
+	{
+		memset(&L, 0, 4 * sizeof(int));
+	}
+
+	bool operator ==(const IRECT& rhs) const
+	{
+		#if defined(_WIN64) || defined(__LP64__)
+		const WDL_UINT64* const p = Ptr(), *const q = rhs.Ptr();
+		return p[0] == q[0] && p[1] == q[1];
+		#else
+		return L == rhs.L && T == rhs.T && R == rhs.R && B == rhs.B;
+		#endif
+	}
+
+	bool operator !=(const IRECT& rhs) const
+	{
+		return !(*this == rhs);
+	}
+
+	inline int W() const { return R - L; }
+	inline int H() const { return B - T; }
+	float MW() const { return 0.5f * (float)(L + R); }
+	float MH() const { return 0.5f * (float)(T + B); }
+
+	IRECT Union(const IRECT* pRHS) const;
+	IRECT Intersect(const IRECT* pRHS) const;
+	bool Intersects(const IRECT* pRHS) const;
+
+	bool Contains(const IRECT* pRHS) const
+	{
+		return !Empty() && L <= pRHS->L && R >= pRHS->R && T <= pRHS->T && B >= pRHS->B;
+	}
+
+	bool Contains(const int x, const int y) const
+	{
+		return x >= L && x < R && y >= T && y < B;
+	}
+
+	void Clank(const IRECT* pRHS);
 };
 
 struct IMouseMod 

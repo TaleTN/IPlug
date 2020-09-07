@@ -13,6 +13,52 @@ const IColor IColor::kOrange(255, 255, 127, 0);
 const char* const IText::kDefaultFont = "Arial";
 const IColor IText::kDefaultColor = IColor::kBlack;
 
+IRECT IRECT::Union(const IRECT* const pRHS) const
+{
+	if (Empty()) return *pRHS;
+	if (pRHS->Empty()) return *this;
+	return IRECT(wdl_min(L, pRHS->L), wdl_min(T, pRHS->T), wdl_max(R, pRHS->R), wdl_max(B, pRHS->B));
+}
+
+IRECT IRECT::Intersect(const IRECT* const pRHS) const
+{
+	if (!Intersects(pRHS)) return IRECT();
+	return IRECT(wdl_max(L, pRHS->L), wdl_max(T, pRHS->T), wdl_min(R, pRHS->R), wdl_min(B, pRHS->B));
+}
+
+bool IRECT::Intersects(const IRECT* const pRHS) const
+{
+	return !Empty() && !pRHS->Empty() && R > pRHS->L && L < pRHS->R && B > pRHS->T && T < pRHS->B;
+}
+
+void IRECT::Clank(const IRECT* const pRHS)
+{
+	if (L < pRHS->L)
+	{
+		R += pRHS->L - L;
+		R = wdl_min(pRHS->R, R);
+		L = pRHS->L;
+	}
+	if (T < pRHS->T)
+	{
+		B += pRHS->T - T;
+		B = wdl_min(pRHS->B, B);
+		T = pRHS->T;
+	}
+	if (R > pRHS->R)
+	{
+		L -= R - pRHS->R;
+		L = wdl_max(pRHS->L, L);
+		R = pRHS->R;
+	}
+	if (B > pRHS->B)
+	{
+		T -= B - pRHS->B;
+		T = wdl_max(pRHS->T, T);
+		B = pRHS->B;
+	}
+}
+
 void IMidiMsg::MakeNoteOnMsg(int noteNumber, int velocity, int offset)
 {
   Clear();
