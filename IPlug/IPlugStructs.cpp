@@ -1,5 +1,4 @@
 #include "IPlugStructs.h"
-#include "Log.h"
 
 //bool IText::operator==(const IText& rhs) const
 //{

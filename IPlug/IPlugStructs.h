@@ -1,13 +1,15 @@
-#ifndef _IPLUGSTRUCTS_
-#define _IPLUGSTRUCTS_
+#pragma once
 
 #include "Containers.h"
+
+#include <assert.h>
+#include <string.h>
 
 // The order is important here, so 1st include swell.h, then lice_text.h.
 #include "../swell/swell.h"
 #include "../lice/lice_text.h"
 
-// Abstracting the graphics made it easy to go ahead and abstract the OS ... 
+// Abstracting the graphics made it easy to go ahead and abstract the OS...
 // the cost is this crap redefining some basic stuff.
 
 struct IBitmap 
@@ -317,5 +319,3 @@ enum
   KEY_ALPHA_A,
   KEY_ALPHA_Z=KEY_ALPHA_A+25
 };
-
-#endif
