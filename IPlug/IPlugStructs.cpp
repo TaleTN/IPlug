@@ -1,5 +1,15 @@
 #include "IPlugStructs.h"
 
+const IColor IColor::kTransparent(0, 0, 0, 0);
+const IColor IColor::kBlack(255, 0, 0, 0);
+const IColor IColor::kGray(255, 127, 127, 127);
+const IColor IColor::kWhite(255, 255, 255, 255);
+const IColor IColor::kRed(255, 255, 0, 0);
+const IColor IColor::kGreen(255, 0, 255, 0);
+const IColor IColor::kBlue(255, 0, 0, 255);
+const IColor IColor::kYellow(255, 255, 255, 0);
+const IColor IColor::kOrange(255, 255, 127, 0);
+
 //bool IText::operator==(const IText& rhs) const
 //{
 //	int s = sizeof(*this);

@@ -60,17 +60,9 @@ struct IColor
 	inline bool operator ==(const IColor& rhs) const { return Get() == rhs.Get(); }
 	inline bool operator !=(const IColor& rhs) const { return !operator==(rhs); }
 	inline bool Empty() const { return !Get(); }
-};
 
-const IColor COLOR_TRANSPARENT(0, 0, 0, 0);
-const IColor COLOR_BLACK(255, 0, 0, 0);
-const IColor COLOR_GRAY(255, 127, 127, 127);
-const IColor COLOR_WHITE(255, 255, 255, 255);
-const IColor COLOR_RED(255, 255, 0, 0);
-const IColor COLOR_GREEN(255, 0, 255, 0);
-const IColor COLOR_BLUE(255, 0, 0, 255);
-const IColor COLOR_YELLOW(255, 255, 255, 0);
-const IColor COLOR_ORANGE(255, 255, 127, 0);
+	static const IColor kTransparent, kBlack, kGray, kWhite, kRed, kGreen, kBlue, kYellow, kOrange;
+};
 
 struct IChannelBlend 
 {
