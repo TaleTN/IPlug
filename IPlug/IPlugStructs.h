@@ -17,9 +17,16 @@ struct IBitmap
 	void* mData;
 	int W, H; // W*H of single frame.
 	int N;    // N = number of frames (for multibitmaps).
+	int mID;  // Image resource ID, bit 0 is scale (0 = full, 1 = half).
+
+	IBitmap(const int id, const int w = 0, const int h = 0, const int n = 1)
+	: mData(NULL), W(w), H(h), N(n), mID(id) {}
 
 	IBitmap(void* const pData = NULL, const int w = 0, const int h = 0, const int n = 1)
-	: mData(pData), W(w), H(h), N(n) {}
+	: mData(pData), W(w), H(h), N(n), mID(0) {}
+
+	inline int ID() const { return mID & ~1; }
+	inline int Scale() const { return mID & 1; }
 };
 
 struct IColor 
