@@ -315,10 +315,10 @@ public:
 
 	inline int GetDouble(double* const pVal, const int startPos) const { return GetFloat(pVal, startPos); }
 
-  inline int PutChunk(ByteChunk* pRHS)
-  {
-    return PutBytes(pRHS->GetBytes(), pRHS->Size());
-  }
+	inline int PutChunk(const ByteChunk* const pRHS)
+	{
+		return PutBytes(pRHS->GetBytes(), pRHS->Size());
+	}
 
 	// Optimal default size = 4095 - 96, see WDL_HeapBuf.
 	static const int kDefaultSize = 3999;
