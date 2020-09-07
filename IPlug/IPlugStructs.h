@@ -29,14 +29,37 @@ struct IBitmap
 	inline int Scale() const { return mID & 1; }
 };
 
-struct IColor 
+struct IColor
 {
-	int A, R, G, B;
-	IColor(int a = 255, int r = 0, int g = 0, int b = 0) : A(a), R(r), G(g), B(b) {} 
-    bool operator==(const IColor& rhs) { return (rhs.A == A && rhs.R == R && rhs.G == G && rhs.B == B); }
-    bool operator!=(const IColor& rhs) { return !operator==(rhs); }
-    bool Empty() const { return A == 0 && R == 0 && G == 0 && B == 0; }
-    void Clamp() { A = MIN(A, 255); R = MIN(R, 255); G = MIN(G, 255); B = MIN(B, 255); }
+	#if LICE_PIXEL_B == 0 && LICE_PIXEL_G == 1 && LICE_PIXEL_R == 2 && LICE_PIXEL_A == 3
+	LICE_pixel_chan B, G, R, A;
+	#elif LICE_PIXEL_A == 0 && LICE_PIXEL_R == 1 && LICE_PIXEL_G == 2 && LICE_PIXEL_B == 3
+	LICE_pixel_chan A, R, G, B;
+	#endif
+
+	IColor(const int a = 255, const int r = 0, const int g = 0, const int b = 0)
+	{
+		Set(LICE_RGBA(r, g, b, a));
+	}
+
+	inline IColor(const IColor& rhs) { Set(rhs.Get()); }
+
+	inline void Set(const LICE_pixel color) { *Ptr() = color; }
+	inline LICE_pixel Get() const { return *Ptr(); }
+
+	inline LICE_pixel* Ptr() const
+	{
+		return (LICE_pixel*)
+		#if LICE_PIXEL_B == 0
+		&B;
+		#elif LICE_PIXEL_A == 0
+		&A;
+		#endif
+	}
+
+	inline bool operator ==(const IColor& rhs) const { return Get() == rhs.Get(); }
+	inline bool operator !=(const IColor& rhs) const { return !operator==(rhs); }
+	inline bool Empty() const { return !Get(); }
 };
 
 const IColor COLOR_TRANSPARENT(0, 0, 0, 0);
