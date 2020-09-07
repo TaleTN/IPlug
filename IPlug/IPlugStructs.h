@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "WDL/wdlstring.h"
 #include "WDL/wdltypes.h"
 
 #include "WDL/lice/lice.h"
@@ -398,16 +399,15 @@ const int MAX_PRESET_NAME_LEN = 256;
 
 struct IPreset
 {
-  bool mInitialized;
-  char mName[MAX_PRESET_NAME_LEN];
-  ByteChunk mChunk;
+	bool mInitialized;
+	WDL_FastString mName;
+	ByteChunk mChunk;
 
-  IPreset(int idx)
-  : mInitialized(false)
-  {
-    sprintf(mName, "- %d -", idx+1);
-    assert(strlen(mName) < MAX_PRESET_NAME_LEN); // Too late, but meh.
-  }
+	IPreset(const int idx)
+	: mInitialized(false)
+	{
+		mName.SetFormatted(kMaxNameLen, "- %d -", idx + 1);
+	}
 };
 
 enum 
