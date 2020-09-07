@@ -1,10 +1,15 @@
-#ifndef _CONTAINERS_
-#define _CONTAINERS_
+#pragma once
 
-#include <string.h>
 #include <assert.h>
-#include "../wdlstring.h"
-#include "../wdlendian.h"
+#include <string.h>
+
+#include "WDL/heapbuf.h"
+#include "WDL/wdlstring.h"
+#include "WDL/wdltypes.h"
+
+#if defined(__APPLE__) && __BIG_ENDIAN__
+	#include "WDL/wdlendian.h"
+#endif
 
 typedef unsigned char BYTE;
 class ByteChunk
@@ -213,5 +218,3 @@ private:
 
   WDL_TypedBuf<unsigned char> mBytes;
 };
-
-#endif
