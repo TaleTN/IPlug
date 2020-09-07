@@ -186,6 +186,30 @@ public:
 		return delta;
 	}
 
+	template <class T> int PutInt(const T n)
+	{
+		int delta = (int)sizeof(T);
+
+		#ifndef NDEBUG
+		AssertSize(delta);
+		#endif
+
+		const int oldSize = mSize, newSize = oldSize + delta;
+		delta = newSize > mBytes.GetSize() ? 0 : delta;
+
+		if (delta)
+		{
+			mSize = newSize;
+			*(T*)((char*)mBytes.GetFast() + oldSize) = bswap_if_be(n);
+		}
+
+		return delta;
+	}
+
+	inline int PutInt16(const int n) { return PutInt((short)n); }
+	inline int PutInt32(const int n) { return PutInt(n); }
+	inline int PutInt64(const WDL_INT64 n) { return PutInt(n); }
+
 	int GetBool(bool* const pB, const int startPos) const
 	{
 		int endPos = startPos + 1;
@@ -207,6 +231,21 @@ public:
 
 		return endPos;
 	}
+
+	template <class T> int GetInt(T* const pVal, const int startPos) const
+	{
+		int endPos = startPos + (int)sizeof(T);
+		if (startPos >= 0 && endPos <= mBytes.GetSize())
+			*pVal = bswap_if_be(*(const T*)((const char*)mBytes.GetFast() + startPos));
+		else
+			endPos = -1;
+
+		return endPos;
+	}
+
+	inline int GetInt16(short* const pVal, const int startPos) const { return GetInt(pVal, startPos); }
+	inline int GetInt32(int* const pVal, const int startPos) const { return GetInt(pVal, startPos); }
+	inline int GetInt64(WDL_INT64* const pVal, const int startPos) const { return GetInt(pVal, startPos); }
 
   inline int PutChunk(ByteChunk* pRHS)
   {
@@ -258,6 +297,15 @@ public:
   }
 
 protected:
+	template <class T> static inline T bswap_if_be(const T i)
+	{
+		#ifdef WDL_BIG_ENDIAN
+		return WDL_bswap_if_be(i);
+		#else
+		return i;
+		#endif
+	}
+
 	#ifndef NDEBUG
 	void AssertSize(const int size) const
 	{
