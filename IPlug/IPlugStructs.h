@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <string.h>
 
+#include "WDL/lice/lice.h"
+
 // The order is important here, so 1st include swell.h, then lice_text.h.
 #include "../swell/swell.h"
 #include "../lice/lice_text.h"
@@ -64,20 +66,17 @@ struct IColor
 	static const IColor kTransparent, kBlack, kGray, kWhite, kRed, kGreen, kBlue, kYellow, kOrange;
 };
 
-struct IChannelBlend 
+namespace IChannelBlend
 {
-	enum EBlendMethod {
-		kBlendNone,		// Copy over whatever is already there, but look at src alpha.
-		kBlendClobber,	// Copy completely over whatever is already there.
-		kBlendAdd,
-        kBlendColorDodge,
-		// etc
-	};
-	EBlendMethod mMethod;
-	float mWeight;
+	// Copy over whatever is already there, but look at src alpha.
+	static const int kBlendNone = LICE_BLIT_MODE_COPY | LICE_BLIT_USE_ALPHA;
 
-	IChannelBlend(EBlendMethod method = kBlendNone, float weight = 1.0f) : mMethod(method), mWeight(weight) {}
-};
+	// Copy completely over whatever is already there.
+	static const int kBlendClobber = LICE_BLIT_MODE_COPY;
+
+	static const int kBlendAdd = LICE_BLIT_MODE_ADD | LICE_BLIT_USE_ALPHA;
+	static const int kBlendColorDodge = LICE_BLIT_MODE_DODGE | LICE_BLIT_USE_ALPHA;
+}
 
 const int DEFAULT_TEXT_SIZE = 14;
 const IColor DEFAULT_TEXT_COLOR = COLOR_BLACK;
