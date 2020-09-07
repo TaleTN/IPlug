@@ -36,4 +36,4 @@ enum EHost {
 	// MiniHost
 };
 
-EHost LookUpHost(const char* host);
+int LookUpHost(const char* host);
