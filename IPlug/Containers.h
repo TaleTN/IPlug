@@ -116,6 +116,31 @@ public:
 	}
 
 	inline int PutStr(const char* const str) { return PutStr(str, (int)strlen(str)); }
+	inline int PutStr(const WDL_String* const str) { return PutStr(str->Get(), str->GetLength()); }
+	inline int PutStr(const WDL_FastString* const str) { return PutStr(str->Get(), str->GetLength()); }
+
+	int GetStr(char* const pBuf, const int bufSize, const int startPos) const
+	{
+		int endPos = -1;
+
+		const int strStartPos = startPos + (int)sizeof(int);
+		if (startPos >= 0 && strStartPos <= mBytes.GetSize())
+		{
+			const char* const pBytes = (const char*)mBytes.GetFast();
+			const int len = bswap_if_be(*(const int*)(pBytes + startPos));
+
+			const int strEndPos = strStartPos + len;
+			if (strEndPos <= mBytes.GetSize() && len < bufSize)
+			{
+				memcpy(pBuf, pBytes + strStartPos, len);
+				pBuf[len] = 0;
+
+				endPos = strEndPos;
+			}
+		}
+
+		return endPos;
+	}
 
 	int GetStr(WDL_String* const pStr, const int startPos) const
 	{
@@ -132,6 +157,27 @@ public:
 			{
 				memcpy(pStr->Get(), pBytes + strStartPos, len);
 				endPos = strEndPos;
+			}
+		}
+
+		return endPos;
+	}
+
+	int GetStr(WDL_FastString* const pStr, const int startPos) const
+	{
+		int endPos = -1;
+
+		const int strStartPos = startPos + (int)sizeof(int);
+		if (startPos >= 0 && strStartPos <= mBytes.GetSize())
+		{
+			const char* const pBytes = (const char*)mBytes.GetFast();
+			const int len = bswap_if_be(*(const int*)(pBytes + startPos));
+
+			const int strEndPos = strStartPos + len;
+			if (strEndPos <= mBytes.GetSize())
+			{
+				pStr->SetRaw(pBytes + strStartPos, len);
+				endPos = pStr->GetLength() == len ? strEndPos : endPos;
 			}
 		}
 
