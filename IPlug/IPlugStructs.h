@@ -399,6 +399,8 @@ struct IPreset
 	WDL_FastString mName;
 	ByteChunk mChunk;
 
+	IPreset(): mInitialized(false) {}
+
 	IPreset(const int idx)
 	: mInitialized(false)
 	{
