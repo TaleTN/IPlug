@@ -46,6 +46,10 @@ public:
 		return false;
 	}
 
+	virtual bool Serialize(ByteChunk* pChunk) const = 0;
+	virtual int Unserialize(const ByteChunk* pChunk, int startPos) = 0;
+	virtual int Size() const = 0;
+
 protected:
 	char mType, mDisplayPrecision;
 	unsigned int mNegateDisplay:1, mGlobalParam:1, _unused:30;
