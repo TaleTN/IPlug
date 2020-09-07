@@ -169,24 +169,44 @@ public:
     return -1;
 	}
 
-  inline int PutBool(bool b)
-  {
-    int n = mBytes.GetSize();
-    mBytes.Resize(n + 1);
-    *(mBytes.Get() + n) = (BYTE) (b ? 1 : 0);
-    return mBytes.GetSize();
-  }
+	inline int PutBool(const bool b)
+	{
+		return PutByte(b);
+	}
 
-  inline int GetBool(bool* pB, int startPos)
-  {
-    int endPos = startPos + 1;
-    if (startPos >= 0 && endPos <= mBytes.GetSize()) {
-      BYTE byt = *(mBytes.Get() + startPos);
-      *pB = (byt);
-      return endPos;
-    }
-    return -1;
-  }
+	int PutByte(const int byte)
+	{
+		#ifndef NDEBUG
+		AssertSize(1);
+		#endif
+
+		const int delta = mSize < mBytes.GetSize();
+		if (delta) *((char*)mBytes.GetFast() + mSize++) = (char)byte;
+
+		return delta;
+	}
+
+	int GetBool(bool* const pB, const int startPos) const
+	{
+		int endPos = startPos + 1;
+		if (startPos >= 0 && startPos < mBytes.GetSize())
+			*pB = !!*((const char*)mBytes.GetFast() + startPos);
+		else
+			endPos = -1;
+
+		return endPos;
+	}
+
+	int GetByte(char* const pVal, const int startPos) const
+	{
+		int endPos = startPos + 1;
+		if (startPos >= 0 && startPos < mBytes.GetSize())
+			*pVal = *((const char*)mBytes.GetFast() + startPos);
+		else
+			endPos = -1;
+
+		return endPos;
+	}
 
   inline int PutChunk(ByteChunk* pRHS)
   {
