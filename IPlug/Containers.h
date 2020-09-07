@@ -14,8 +14,7 @@
 class ByteChunk
 {
 public:
-
-	ByteChunk() {}
+	ByteChunk(): mSize(0) {}
 	~ByteChunk() {}
 
 	inline int PutBytes(const void* pBuf, int size)
@@ -183,15 +182,24 @@ public:
     return PutBytes(pRHS->GetBytes(), pRHS->Size());
   }
 
-  inline void Clear() 
-  {
-    mBytes.Resize(0);
-  }
+	// Optimal default size = 4095 - 96, see WDL_HeapBuf.
+	static const int kDefaultSize = 3999;
 
-  inline int Size() 
-  {
-    return mBytes.GetSize();
-  }
+	void Alloc(const int size = kDefaultSize, const bool resizeDown = true)
+	{
+		mBytes.Resize(size, resizeDown);
+		Clear();
+	}
+
+	inline void Clear()
+	{
+		mSize = 0;
+	}
+
+	inline int Size() const
+	{
+		return mSize;
+	}
 
   inline int Resize(int newSize) 
   {
@@ -218,6 +226,17 @@ public:
     return (pRHS && pRHS->Size() == Size() && !memcmp(pRHS->GetBytes(), GetBytes(), Size()));
   }
 
+protected:
+	#ifndef NDEBUG
+	void AssertSize(const int size) const
+	{
+		// Oops, should have allocated larger size.
+		const bool notEnoughAllocated = mSize + size <= mBytes.GetSize();
+		assert(notEnoughAllocated);
+	}
+	#endif
+
 private:
 	WDL_HeapBuf mBytes;
+	int mSize;
 };
