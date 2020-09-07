@@ -230,7 +230,7 @@ struct IMouseMod
 struct IMidiMsg
 {
 	int mOffset;
-	BYTE mStatus, mData1, mData2;
+	unsigned char mStatus, mData1, mData2, _padding;
 
   enum EStatusMsg {
 		kNone = 0,
@@ -320,7 +320,15 @@ struct IMidiMsg
     kAllNotesOff = 123
   };
 
-	IMidiMsg(int offs = 0, BYTE s = 0, BYTE d1 = 0, BYTE d2 = 0) : mOffset(offs), mStatus(s), mData1(d1), mData2(d2) {}
+	IMidiMsg(const int offs = 0, const int s = 0, const int d1 = 0, const int d2 = 0)
+	: mOffset(offs), mStatus(s), mData1(d1), mData2(d2), _padding(0)
+	{
+		#ifndef NDEBUG
+		if (s) assert(s & 0x80);
+		assert(d1 >= 0 && d1 <= 127);
+		assert(d2 >= 0 && d2 <= 127);
+		#endif
+	}
 
   void MakeNoteOnMsg(int noteNumber, int velocity, int offset);
   void MakeNoteOffMsg(int noteNumber, int offset);
