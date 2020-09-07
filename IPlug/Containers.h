@@ -339,15 +339,26 @@ public:
 		return mSize;
 	}
 
-  inline int Resize(int newSize) 
-  {
-    int n = mBytes.GetSize();
-    mBytes.Resize(newSize);
-    if (newSize > n) {
-      memset(mBytes.Get() + n, 0, (newSize - n));
-    }
-    return n;
-  }
+	int Resize(int newSize, const bool resizeDown = false)
+	{
+		int allocSize = newSize;
+		if (!mBytes.GetSize() && !resizeDown)
+		{
+			allocSize = allocSize < kDefaultSize ? kDefaultSize : allocSize;
+		}
+
+		if (allocSize > mBytes.GetSize() || resizeDown)
+		{
+			mBytes.Resize(allocSize, resizeDown);
+			allocSize = mBytes.GetSize();
+			newSize = newSize > allocSize ? allocSize : newSize;
+		}
+
+		const int oldSize = mSize;
+		mSize = newSize;
+
+		return oldSize;
+	}
 
 	inline void* GetBytes()
 	{
