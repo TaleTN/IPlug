@@ -1,12 +1,13 @@
 #pragma once
 
-enum EHost {
-  kHostUninit = -1,
+enum EHost
+{
+	kHostUninit = -1,
 	kHostUnknown = 0,
 	kHostReaper,
 	kHostProTools,
 	kHostCubase,
-  kHostNuendo,
+	kHostNuendo,
 	kHostSonar,
 	kHostVegas,
 	kHostFL,
@@ -16,23 +17,23 @@ enum EHost {
 	kHostNTracks,
 	kHostMelodyneStudio,
 	kHostVSTScanner,
-  kHostAULab,
-  kHostForte,
-  kHostChainer,
-  kHostAudition,
-  kHostOrion,
-  kHostBias,
-  kHostSAWStudio,
+	kHostAULab,
+	kHostForte,
+	kHostChainer,
+	kHostAudition,
+	kHostOrion,
+	kHostBias,
+	kHostSAWStudio,
 	kHostLogic,
 	kHostDigitalPerformer,
-  kHostAudioMulch,
-  kHostStudioOne,
+	kHostAudioMulch,
+	kHostStudioOne,
 	kHostMixcraft,
-  kHostGarageBand,
-  kHostArdour,
+	kHostGarageBand,
+	kHostArdour,
 
 	// These hosts don't report the host name:
-  // EnergyXT2
+	// EnergyXT2
 	// MiniHost
 };
 
