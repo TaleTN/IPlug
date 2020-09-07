@@ -210,6 +210,37 @@ public:
 	inline int PutInt32(const int n) { return PutInt(n); }
 	inline int PutInt64(const WDL_INT64 n) { return PutInt(n); }
 
+	#ifndef WDL_BIG_ENDIAN
+
+	template <class T> int PutFloat(const T x)
+	{
+		int delta = (int)sizeof(T);
+
+		#ifndef NDEBUG
+		AssertSize(delta);
+		#endif
+
+		const int oldSize = mSize, newSize = oldSize + delta;
+		delta = newSize > mBytes.GetSize() ? 0 : delta;
+
+		if (delta)
+		{
+			mSize = newSize;
+			*(T*)((char*)mBytes.GetFast() + oldSize) = x;
+		}
+
+		return delta;
+	}
+
+	#else
+
+	inline int PutFloat(const float x) { return PutInt(*(const int*)&x); }
+	inline int PutFloat(const double x) { return PutInt(*(const WDL_INT64*)&x); }
+
+	#endif
+
+	inline int PutDouble(const double x) { return PutFloat(x); }
+
 	int GetBool(bool* const pB, const int startPos) const
 	{
 		int endPos = startPos + 1;
@@ -246,6 +277,28 @@ public:
 	inline int GetInt16(short* const pVal, const int startPos) const { return GetInt(pVal, startPos); }
 	inline int GetInt32(int* const pVal, const int startPos) const { return GetInt(pVal, startPos); }
 	inline int GetInt64(WDL_INT64* const pVal, const int startPos) const { return GetInt(pVal, startPos); }
+
+	#ifndef WDL_BIG_ENDIAN
+
+	template <class T> int GetFloat(T* const pVal, const int startPos) const
+	{
+		int endPos = startPos + (int)sizeof(T);
+		if (startPos >= 0 && endPos <= mBytes.GetSize())
+			*pVal = *(const T*)((const char*)mBytes.GetFast() + startPos);
+		else
+			endPos = -1;
+
+		return endPos;
+	}
+
+	#else
+
+	inline int GetFloat(float* const pVal, const int startPos) const { return GetInt((int*)pVal, startPos); }
+	inline int GetFloat(double* const pVal, const int startPos) const { return GetInt((WDL_INT64*)pVal, startPos); }
+
+	#endif
+
+	inline int GetDouble(double* const pVal, const int startPos) const { return GetFloat(pVal, startPos); }
 
   inline int PutChunk(ByteChunk* pRHS)
   {
