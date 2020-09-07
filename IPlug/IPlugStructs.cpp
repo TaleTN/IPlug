@@ -112,12 +112,6 @@ char* IMidiMsg::ToString(char* const buf, const int bufSize) const
 	return HexStr(buf, bufSize, &mStatus, size);
 }
 
-void ISysEx::Clear()
-{
-  mOffset = mSize = 0;
-  mData = NULL;
-}
-
 char* SysExStr(char *str, int maxlen, const BYTE* pData, int size)
 {
   assert(str != NULL && maxlen >= 3);

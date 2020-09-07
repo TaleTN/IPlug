@@ -381,7 +381,12 @@ struct ISysEx
 	ISysEx(const int offs = 0, const void* const pData = NULL, const int size = 0)
 	: mOffset(offs), mData(pData), mSize(size) {}
 
-  void Clear();
+	void Clear()
+	{
+		mSize = mOffset = 0;
+		mData = NULL;
+	}
+
   void LogMsg();
 };
 
