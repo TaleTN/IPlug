@@ -1,8 +1,4 @@
-#ifndef _PLUGINHOSTS_
-#define _PLUGINHOSTS_
-
-#include <stdlib.h>
-#include <string.h>
+#pragma once
 
 enum EHost {
   kHostUninit = -1,
@@ -41,8 +37,3 @@ enum EHost {
 };
 
 EHost LookUpHost(const char* host);
-
-#endif
-				
-
-	

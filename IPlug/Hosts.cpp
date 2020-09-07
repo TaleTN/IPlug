@@ -1,6 +1,8 @@
 #include "Hosts.h"
 #include "Log.h"
 
+#include <string.h>
+
 EHost LookUpHost(const char* inHost)
 {
   char host[256];
