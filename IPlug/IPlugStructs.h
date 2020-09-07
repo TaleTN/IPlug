@@ -364,20 +364,6 @@ struct IMidiMsg
 		*(unsigned int*)&mStatus = *(const unsigned int*)buf;
 	}
 
-  void MakeNoteOnMsg(int noteNumber, int velocity, int offset);
-  void MakeNoteOffMsg(int noteNumber, int offset);
-  void MakePitchWheelMsg(double value);    // Value in [-1, 1], converts to [0, 16384) where 8192 = no pitch change.
-  void MakeControlChangeMsg(EControlChangeMsg idx, double value);           //  Value in [0, 1].
-
-	EStatusMsg StatusMsg() const;
-	int NoteNumber() const;		  // Returns [0, 128), -1 if NA.
-	int Velocity() const;		    // Returns [0, 128), -1 if NA.
-  int Program() const;        // Returns [0, 128), -1 if NA.
-  double PitchWheel() const;  // Returns [-1.0, 1.0], zero if NA.
-  EControlChangeMsg ControlChangeIdx() const;
-  double ControlChange(EControlChangeMsg idx) const;      // return [0, 1], -1 if NA.
-  static bool ControlChangeOnOff(double msgValue) { return (msgValue >= 0.5); }  // true = on.
-
 	void Clear()
 	{
 		memset(&mOffset, 0, sizeof(int) + 4 * sizeof(unsigned char));
