@@ -208,11 +208,23 @@ struct IRECT
 	}
 };
 
-struct IMouseMod 
+struct IMouseMod
 {
-	bool L, R, S, C, A;
-	IMouseMod(bool l = false, bool r = false, bool s = false, bool c = false, bool a = false)
-    : L(l), R(r), S(s), C(c), A(a) {} 
+	unsigned int L:1, R:1, S:1, C:1, A:1, _unused:27;
+	inline IMouseMod(): L(0), R(0), S(0), C(0), A(0), _unused(0) {}
+
+	IMouseMod(const bool l, const bool r = false, const bool s = false, const bool c = false, const bool a = false)
+	: L(l), R(r), S(s), C(c), A(a), _unused(0) {}
+
+	unsigned int Get() const
+	{
+		return (A << 4) | (C << 3) | (S << 2) | (R << 1) | L;
+	}
+
+	void Set(const unsigned int i)
+	{
+		*this = IMouseMod(i & 1, (i >> 1) & 1, (i >> 2) & 1, (i >> 3) & 1, (i >> 4) & 1);
+	}
 };
 
 struct IMidiMsg
