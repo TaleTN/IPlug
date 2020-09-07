@@ -1,53 +1,10 @@
 #ifndef _CONTAINERS_
 #define _CONTAINERS_
 
-#ifdef WIN32
-#undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501 
-#undef WINVER
-#define WINVER 0x0501
-#pragma warning(disable:4018 4267)	// size_t/signed/unsigned mismatch..
-#pragma warning(disable:4800)		// if (pointer) ...
-#pragma warning(disable:4805)		// Compare bool and BOOL.
-#endif
-
-#include <math.h>
 #include <string.h>
-#include <stdio.h>
 #include <assert.h>
-#include "../mutex.h"
 #include "../wdlstring.h"
-#include "../ptrlist.h"
 #include "../wdlendian.h"
-#include "../db2val.h"
-#include "../reminder.h"
-
-#define FREE_NULL(p) {free(p);p=0;}
-#define DELETE_NULL(p) {delete(p); p=0;}
-#define MIN(x,y) ((x)<(y)?(x):(y))
-#define MAX(x,y) ((x)<(y)?(y):(x))
-#define BOUNDED(x,lo,hi) ((x) < (lo) ? (lo) : (x) > (hi) ? (hi) : (x))
-#define CSTR_NOT_EMPTY(cStr) ((cStr) && (cStr)[0] != '\0')
-
-#define PI 3.141592653589793238
-#define AMP_DB TWENTY_OVER_LN10
-#define IAMP_DB LN10_OVER_TWENTY
-
-inline double DBToAmp(double dB)
-{
-    return DB2VAL(dB);
-}
-
-// Unsafe for amp == 0.0, better use VAL2DB() or VAL2DB_EX() instead.
-inline double AmpToDB(double amp)
-{
-	return AMP_DB * log(fabs(amp));
-}
-
-template <class T> inline void SWAP(T& a, T& b) 
-{
-    T tmp = a; a = b; b = tmp; 
-}
 
 typedef unsigned char BYTE;
 class ByteChunk
