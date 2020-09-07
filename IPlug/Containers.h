@@ -370,10 +370,17 @@ public:
 		return mBytes.Get();
 	}
 
-  inline bool IsEqual(ByteChunk* pRHS)
-  {
-    return (pRHS && pRHS->Size() == Size() && !memcmp(pRHS->GetBytes(), GetBytes(), Size()));
-  }
+	bool IsEqual(const ByteChunk* const pRHS) const
+	{
+		if (!pRHS) return false;
+
+		const void* const ptr1 = mBytes.Get();
+		const void* const ptr2 = pRHS->GetBytes();
+
+		if (!((INT_PTR)ptr1 & (INT_PTR)ptr2) || (pRHS->Size() != mSize)) return false;
+
+		return !memcmp(ptr1, ptr2, mSize);
+	}
 
 protected:
 	template <class T> static inline T bswap_if_be(const T i)
