@@ -59,26 +59,57 @@ void IRECT::Clank(const IRECT* const pRHS)
 	}
 }
 
-const char* StatusMsgStr(IMidiMsg::EStatusMsg msg)
+static char* HexStr(char* const str, const int maxlen, const unsigned char* pData, const int size)
 {
-  switch (msg) {
-    case IMidiMsg::kNone: return "none";
-    case IMidiMsg::kNoteOff: return "noteoff";
-    case IMidiMsg::kNoteOn: return "noteon";
-    case IMidiMsg::kPolyAftertouch: return "aftertouch";
-    case IMidiMsg::kControlChange: return "controlchange";
-    case IMidiMsg::kProgramChange: return "programchange";
-    case IMidiMsg::kChannelAftertouch: return "channelaftertouch";
-    case IMidiMsg::kPitchWheel: return "pitchwheel";
-    default:  return "unknown";
+	assert(maxlen >= 3);
+
+	if (!pData || !size)
+	{
+		*str = 0;
+		return str;
+	}
+
+	static const char hex[16] =
+	{
+		'0', '1', '2', '3', '4', '5', '6', '7',
+		'8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
 	};
+
+	char* pStr = str;
+	int n = maxlen / 3;
+	n = wdl_min(n, size);
+	for (int i = 0; i < n; ++i)
+	{
+		const int byte = pData[i];
+		pStr[0] = hex[byte >> 4];
+		pStr[1] = hex[byte & 15];
+		pStr[2] = ' ';
+		pStr += 3;
+	}
+	pStr[-1] = 0;
+
+	return str;
 }
 
-void IMidiMsg::LogMsg()
+int IMidiMsg::Size() const
 {
-#ifdef TRACER_BUILD
-  Trace(TRACELOC, "midi:(%s:%d:%d)", StatusMsgStr(StatusMsg()), NoteNumber(), Velocity());
-#endif
+	static const char tbl[32] =
+	{
+		0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 2, 2, 3, 0,
+		0, 2, 3, 2, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1
+	};
+	static const unsigned int ofs = (kSystemMsg << 4) - 16;
+
+	const int sysMsg = mStatus - ofs, chMsg = mStatus >> 4;
+	return tbl[chMsg < kSystemMsg ? chMsg : sysMsg];
+}
+
+char* IMidiMsg::ToString(char* const buf, const int bufSize) const
+{
+	int size = Size();
+	size = size ? size : 3;
+
+	return HexStr(buf, bufSize, &mStatus, size);
 }
 
 void ISysEx::Clear()

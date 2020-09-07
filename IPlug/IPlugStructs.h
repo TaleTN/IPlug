@@ -369,7 +369,8 @@ struct IMidiMsg
 		memset(&mOffset, 0, sizeof(int) + 4 * sizeof(unsigned char));
 	}
 
-  void LogMsg();
+	int Size() const;
+	char* ToString(char* buf, int bufSize = 9) const;
 };
 
 struct ISysEx
