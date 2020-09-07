@@ -92,30 +92,50 @@ public:
 	inline int Get(float* const pVal, const int startPos) const { return GetFloat(pVal, startPos); }
 	inline int Get(double* const pVal, const int startPos) const { return GetFloat(pVal, startPos); }
 
-	inline int PutStr(const char* str) 
-  {
-    int slen = strlen(str);
-        #ifdef WDL_BIG_ENDIAN
-        { const unsigned int i = WDL_bswap32_if_be(slen); Put(&i); }
-        #else
-		Put(&slen);
+	int PutStr(const char* const str, const int slen)
+	{
+		int delta = (int)sizeof(int) + slen;
+
+		#ifndef NDEBUG
+		AssertSize(delta);
 		#endif
-		return PutBytes(str, slen);
+
+		const int oldSize = mSize, newSize = oldSize + delta;
+		delta = newSize > mBytes.GetSize() ? 0 : delta;
+
+		if (delta)
+		{
+			mSize = newSize;
+			char* const pBytes = (char*)mBytes.GetFast() + oldSize;
+
+			*(int*)pBytes = bswap_if_be(slen);
+			memcpy(pBytes + sizeof(int), str, slen);
+		}
+
+		return delta;
 	}
 
-	inline int GetStr(WDL_String* pStr, int startPos)
-  {
-		int len;
-    int strStartPos = Get(&len, startPos);
-    if (strStartPos >= 0) {
-      WDL_BSWAP32_IF_BE(len);
-      int strEndPos = strStartPos + len;
-      if (strEndPos <= mBytes.GetSize() && len > 0) {
-        pStr->Set((char*) (mBytes.Get() + strStartPos), len);
-      }
-      return strEndPos;
-    }
-    return -1;
+	inline int PutStr(const char* const str) { return PutStr(str, (int)strlen(str)); }
+
+	int GetStr(WDL_String* const pStr, const int startPos) const
+	{
+		int endPos = -1;
+
+		const int strStartPos = startPos + (int)sizeof(int);
+		if (startPos >= 0 && strStartPos <= mBytes.GetSize())
+		{
+			const char* const pBytes = (const char*)mBytes.GetFast();
+			const int len = bswap_if_be(*(const int*)(pBytes + startPos));
+
+			const int strEndPos = strStartPos + len;
+			if (strEndPos <= mBytes.GetSize() && pStr->SetLen(len))
+			{
+				memcpy(pStr->Get(), pBytes + strStartPos, len);
+				endPos = strEndPos;
+			}
+		}
+
+		return endPos;
 	}
 
 	inline int PutBool(const bool b)
