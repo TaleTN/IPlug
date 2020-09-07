@@ -3,7 +3,9 @@
 #include "Containers.h"
 
 #include <assert.h>
+#include <math.h>
 
+#include "WDL/assocarray.h"
 #include "WDL/ptrlist.h"
 #include "WDL/wdlstring.h"
 #include "WDL/wdltypes.h"
@@ -56,6 +58,8 @@ public:
 	virtual int Size() const = 0;
 
 protected:
+	static void Delete(WDL_FastString* const str) { delete str; }
+
 	char mType, mDisplayPrecision;
 	bool mBoolVal;
 
@@ -160,4 +164,84 @@ protected:
 	const int mEnums;
 
 	WDL_PtrList_DeleteOnDestroy<WDL_FastString> mDisplayTexts;
+};
+
+class IIntParam: public IParam
+{
+public:
+	IIntParam(
+		const char* name,
+		int defaultVal = 0,
+		int minVal = 0,
+		int maxVal = 1,
+		const char* label = NULL
+	);
+
+	inline void Set(const int intVal)
+	{
+		#ifndef NDEBUG
+		AssertInt(intVal);
+		#endif
+
+		mIntVal = intVal;
+	}
+
+	void SetDisplayText(int intVal, const char* text);
+
+	inline int Int() const { return mIntVal; }
+	inline int Min() const { return mMin; }
+	inline int Max() const { return mMax; }
+
+	int FromNormalized(const double normalizedValue) const
+	{
+		assert(normalizedValue >= 0.0 && normalizedValue <= 1.0);
+		return (int)floor((double)(mMax - mMin) * normalizedValue + (double)mMin + 0.5);
+	}
+
+	double ToNormalized(const int intVal) const
+	{
+		#ifndef NDEBUG
+		AssertInt(intVal);
+		#endif
+
+		return fabs((double)(intVal - mMin) / (double)(mMax - mMin));
+	}
+
+	int Bounded(int intVal) const
+	{
+		const int minVal = wdl_min(mMin, mMax);
+		intVal = wdl_max(intVal, minVal);
+
+		const int maxVal = wdl_max(mMin, mMax);
+		intVal = wdl_min(intVal, maxVal);
+
+		return intVal;
+	}
+
+	void SetNormalized(double normalizedValue);
+	double GetNormalized() const;
+	double GetNormalized(double nonNormalizedValue) const;
+	char* GetDisplayForHost(char* buf, int bufSize = 128);
+	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
+	const char* GetLabelForHost() const;
+
+	char* ToString(int intVal, char* buf, int bufSize = 128) const;
+
+	int GetNDisplayTexts() const { return mDisplayTexts.GetSize(); }
+	const char* GetDisplayText(int intVal) const;
+	bool MapDisplayText(const char* str, double* pNormalizedValue) const;
+
+	bool Serialize(ByteChunk* pChunk) const;
+	int Unserialize(const ByteChunk* pChunk, int startPos);
+	int Size() const { return (int)sizeof(int); }
+
+protected:
+	#ifndef NDEBUG
+	void AssertInt(int intVal) const;
+	#endif
+
+	int mIntVal, mMin, mMax;
+
+	WDL_IntKeyedArray<WDL_FastString*> mDisplayTexts;
+	WDL_FastString mLabel;
 };
