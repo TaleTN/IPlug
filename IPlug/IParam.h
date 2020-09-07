@@ -13,7 +13,9 @@ public:
 		const char* const name
 	):
 		mType(type),
-		mNegateDisplay(false),
+		mNegateDisplay(0),
+		mGlobalParam(0),
+		_unused(0),
 		mName(name)
 	{}
 
@@ -21,9 +23,12 @@ public:
 
 	inline int Type() const { return mType; }
 
-	// Call this if your param is (x, y) but you want to always display (-x, -y).
-	void NegateDisplay() { mNegateDisplay = true; }
-	bool DisplayIsNegated() const { return mNegateDisplay; }
+	// Call this if your param is [x, y], but you want to always display [-x, -y].
+	inline void NegateDisplay(const bool negate = true) { mNegateDisplay = negate; }
+	inline bool DisplayIsNegated() const { return mNegateDisplay; }
+
+	inline void SetGlobal(const bool global) { mGlobalParam = global; }
+	inline bool IsGlobal() const { return mGlobalParam; }
 
 	virtual void SetNormalized(double normalizedValue) = 0;
 	virtual double GetNormalized() const = 0;
@@ -43,7 +48,7 @@ public:
 
 protected:
 	char mType, mDisplayPrecision;
-	bool mNegateDisplay;
+	unsigned int mNegateDisplay:1, mGlobalParam:1, _unused:30;
 
 	WDL_FastString mName;
 };
