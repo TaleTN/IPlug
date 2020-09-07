@@ -156,12 +156,6 @@ double IMidiMsg::ControlChange(EControlChangeMsg idx) const
   return -1.0;
 }
 
-void IMidiMsg::Clear()
-{
-  mOffset = 0;
-  mStatus = mData1 = mData2 = 0;
-}
-
 const char* StatusMsgStr(IMidiMsg::EStatusMsg msg)
 {
   switch (msg) {

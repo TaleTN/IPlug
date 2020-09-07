@@ -346,7 +346,9 @@ struct IMidiMsg
 		kPolyModeOn = 127
 	};
 
-	IMidiMsg(const int offs = 0, const int s = 0, const int d1 = 0, const int d2 = 0)
+	inline IMidiMsg() { Clear(); }
+
+	IMidiMsg(const int offs, const int s = 0, const int d1 = 0, const int d2 = 0)
 	: mOffset(offs), mStatus(s), mData1(d1), mData2(d2), _padding(0)
 	{
 		#ifndef NDEBUG
@@ -369,7 +371,12 @@ struct IMidiMsg
   EControlChangeMsg ControlChangeIdx() const;
   double ControlChange(EControlChangeMsg idx) const;      // return [0, 1], -1 if NA.
   static bool ControlChangeOnOff(double msgValue) { return (msgValue >= 0.5); }  // true = on.
-  void Clear();
+
+	void Clear()
+	{
+		memset(&mOffset, 0, sizeof(int) + 4 * sizeof(unsigned char));
+	}
+
   void LogMsg();
 };
 
