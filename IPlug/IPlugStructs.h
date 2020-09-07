@@ -12,11 +12,14 @@
 // Abstracting the graphics made it easy to go ahead and abstract the OS...
 // the cost is this crap redefining some basic stuff.
 
-struct IBitmap 
+struct IBitmap
 {
 	void* mData;
-	int W, H, N;		// N = number of states (for multibitmaps).
-	IBitmap(void* pData = 0, int w = 0, int h = 0, int n = 1) : mData(pData), W(w), H(h), N(n) {}
+	int W, H; // W*H of single frame.
+	int N;    // N = number of frames (for multibitmaps).
+
+	IBitmap(void* const pData = NULL, const int w = 0, const int h = 0, const int n = 1)
+	: mData(pData), W(w), H(h), N(n) {}
 };
 
 struct IColor 
