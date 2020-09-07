@@ -483,3 +483,47 @@ void IDoubleParam::AssertValue(const double nonNormalizedValue) const
 	assert(value >= minVal && value <= maxVal);
 }
 #endif
+
+IDoublePowParam::IDoublePowParam(
+	const double shape,
+	const char* const name,
+	const double defaultVal,
+	const double minVal,
+	const double maxVal,
+	const int displayPrecision,
+	const char* const label
+):
+	IDoubleParam(name, defaultVal, minVal, maxVal, displayPrecision, label)
+{
+	SetShape(shape);
+}
+
+void IDoublePowParam::SetShape(const double nonNormalizedValue, const double normalizedValue)
+{
+	#ifndef NDEBUG
+	{
+		const double minVal = wdl_min(mMin, mMax);
+		const double maxVal = wdl_max(mMin, mMax);
+
+		assert(nonNormalizedValue > minVal && nonNormalizedValue < maxVal);
+		assert(normalizedValue > 0.0 && normalizedValue < 1.0);
+	}
+	#endif
+
+	SetShape(log(IDoubleParam::ToNormalized(nonNormalizedValue)) / log(normalizedValue));
+}
+
+void IDoublePowParam::SetNormalized(const double normalizedValue)
+{
+	mValue = FromNormalized(normalizedValue);
+}
+
+double IDoublePowParam::GetNormalized() const
+{
+	return ToNormalized(mValue);
+}
+
+double IDoublePowParam::GetNormalized(const double nonNormalizedValue) const
+{
+	return ToNormalized(Bounded(nonNormalizedValue));
+}

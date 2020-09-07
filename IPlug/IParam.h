@@ -341,3 +341,46 @@ protected:
 	WDL_FastString mLabel;
 }
 WDL_FIXALIGN;
+
+class IDoublePowParam: public IDoubleParam
+{
+public:
+	IDoublePowParam(
+		double shape,
+		const char* name,
+		double defaultVal = 0.0,
+		double minVal = 0.0,
+		double maxVal = 1.0,
+		int displayPrecision = 6,
+		const char* label = NULL
+	);
+
+	// The higher the shape, the more resolution around host value zero.
+	inline void SetShape(const double shape)
+	{
+		assert(shape > 0.0);
+		mShape = shape;
+	}
+
+	// Adjusts the shape so nonNormalizedValue corresponds to normalizedValue.
+	void SetShape(double nonNormalizedValue, double normalizedValue);
+	inline double GetShape() const { return mShape; }
+
+	double FromNormalized(const double normalizedValue) const
+	{
+		return IDoubleParam::FromNormalized(pow(normalizedValue, mShape));
+	}
+
+	double ToNormalized(const double nonNormalizedValue) const
+	{
+		return pow(IDoubleParam::ToNormalized(nonNormalizedValue), 1.0 / mShape);
+	}
+
+	void SetNormalized(double normalizedValue);
+	double GetNormalized() const;
+	double GetNormalized(double nonNormalizedValue) const;
+
+protected:
+	double WDL_FIXALIGN mShape;
+}
+WDL_FIXALIGN;
