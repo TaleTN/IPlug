@@ -52,7 +52,44 @@ public:
 
 protected:
 	char mType, mDisplayPrecision;
+	bool mBoolVal;
+
 	unsigned int mNegateDisplay:1, mGlobalParam:1, _unused:30;
 
 	WDL_FastString mName;
+};
+
+class IBoolParam: public IParam
+{
+public:
+	IBoolParam(
+		const char* name,
+		bool defaultVal = false,
+		const char* off = NULL,
+		const char* on = NULL
+	);
+
+	inline void Set(const bool boolVal) { mBoolVal = boolVal; }
+	void SetDisplayText(bool boolVal, const char* text);
+
+	inline bool Bool() const { return mBoolVal; }
+
+	void SetNormalized(double normalizedValue);
+	double GetNormalized() const { return (double)mBoolVal; }
+	double GetNormalized(double nonNormalizedValue) const;
+	char* GetDisplayForHost(char* buf, int bufSize = 128);
+	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
+
+	char* ToString(bool boolVal, char* buf, int bufSize = 128) const;
+
+	int GetNDisplayTexts() const { return 2; }
+	const char* GetDisplayText(bool boolVal) const;
+	bool MapDisplayText(const char* str, double* pNormalizedValue) const;
+
+	bool Serialize(ByteChunk* pChunk) const;
+	int Unserialize(const ByteChunk* pChunk, int startPos);
+	int Size() const { return (int)sizeof(char); }
+
+protected:
+	WDL_FastString mDisplayTexts[2];
 };
