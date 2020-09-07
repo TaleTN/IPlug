@@ -408,6 +408,11 @@ struct IPreset
 	{
 		mName.SetFormatted(kMaxNameLen, "- %d -", idx + 1);
 	}
+
+	void SetName(const char* const name)
+	{
+		mName.Set(name, kMaxNameLen);
+	}
 };
 
 enum 
