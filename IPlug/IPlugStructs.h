@@ -132,13 +132,13 @@ struct IText
 	{}
 };
 
-struct IRECT 
-{ 
+struct IRECT
+{
 	int L, T, R, B;
 
 	IRECT() { L = T = R = B = 0; }
-	IRECT(int l, int t, int r, int b) : L(l), R(r), T(t), B(b) {} 
-	IRECT(int x, int y, IBitmap* pBitmap) : L(x), T(y), R(x + pBitmap->W), B(y + pBitmap->H / pBitmap->N) {}
+	IRECT(const int l, const int t, const int r, const int b): L(l), R(r), T(t), B(b) {}
+	IRECT(const int x, const int y, const IBitmap* const pBitmap) : L(x), T(y), R(x + pBitmap->W), B(y + pBitmap->H / pBitmap->N) {}
 
 	bool Empty() const {
 		return (L == 0 && T == 0 && R == 0 && B == 0); 
