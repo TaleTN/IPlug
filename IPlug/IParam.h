@@ -1,10 +1,7 @@
 #pragma once
 
 #include "Containers.h"
-
-#ifndef MAX_PARAM_NAME_LEN
-const int MAX_PARAM_NAME_LEN = 32;
-#endif
+#include "WDL/wdlstring.h"
 
 class IParam
 {
@@ -12,10 +9,12 @@ public:
 	enum EParamType { kTypeNone = 0, kTypeBool, kTypeInt, kTypeEnum, kTypeDouble };
 
 	IParam(
-		const int type
+		const int type,
+		const char* const name
 	):
 		mType(type),
-		mNegateDisplay(false)
+		mNegateDisplay(false),
+		mName(name)
 	{}
 
 	virtual ~IParam() {}
@@ -31,7 +30,7 @@ public:
 	virtual double GetNormalized(double nonNormalizedValue) const = 0;
 	virtual char* GetDisplayForHost(char* buf, int bufSize = 128) = 0;
 	virtual char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128) = 0;
-	const char* GetNameForHost();
+	const char* GetNameForHost() const { return mName.Get(); }
 	virtual const char* GetLabelForHost() const { return ""; }
 
 	virtual int GetNDisplayTexts() const { return 0; }
@@ -44,6 +43,7 @@ public:
 
 protected:
 	char mType, mDisplayPrecision;
-	char mName[MAX_PARAM_NAME_LEN];
 	bool mNegateDisplay;
+
+	WDL_FastString mName;
 };
