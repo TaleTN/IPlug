@@ -391,14 +391,10 @@ struct ISysEx
 	char* ToString(char* buf, int bufSize = 128) const;
 };
 
-#ifndef MAX_PRESET_NAME_LEN
-const int MAX_PRESET_NAME_LEN = 256;
-#endif
-
-#define UNUSED_PRESET_NAME "empty"
-
 struct IPreset
 {
+	static const int kMaxNameLen = 256;
+
 	bool mInitialized;
 	WDL_FastString mName;
 	ByteChunk mChunk;
