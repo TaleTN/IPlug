@@ -387,7 +387,7 @@ struct ISysEx
 		mData = NULL;
 	}
 
-  void LogMsg();
+	char* ToString(char* buf, int bufSize = 128) const;
 };
 
 #ifndef MAX_PRESET_NAME_LEN

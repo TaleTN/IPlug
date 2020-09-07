@@ -112,32 +112,7 @@ char* IMidiMsg::ToString(char* const buf, const int bufSize) const
 	return HexStr(buf, bufSize, &mStatus, size);
 }
 
-char* SysExStr(char *str, int maxlen, const BYTE* pData, int size)
+char* ISysEx::ToString(char* const buf, const int bufSize) const
 {
-  assert(str != NULL && maxlen >= 3);
-
-  if (!pData || !size) {
-    *str = '\0';
-    return str;
-  }
-
-  char* pStr = str;
-  int n = maxlen / 3;
-  if (n > size) n = size;
-  for (int i = 0; i < n; ++i, ++pData) {
-    sprintf(pStr, "%02X", (int)*pData);
-    pStr += 2;
-    *pStr++ = ' ';
-  }
-  *--pStr = '\0';
-
-  return str;
-}
-
-void ISysEx::LogMsg()
-{
-#ifdef TRACER_BUILD
-  char str[96];
-  Trace(TRACELOC, "sysex:(%d:%s)", mSize, SysExStr(str, sizeof(str), mData, mSize));
-#endif
+	return HexStr(buf, bufSize, (const unsigned char*)mData, mSize);
 }
