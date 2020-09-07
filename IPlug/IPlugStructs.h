@@ -210,20 +210,20 @@ struct IRECT
 
 struct IMouseMod
 {
-	unsigned int L:1, R:1, S:1, C:1, A:1, _unused:27;
-	inline IMouseMod(): L(0), R(0), S(0), C(0), A(0), _unused(0) {}
+	unsigned int L:1, R:1, S:1, C:1, A:1, W:1, _unused:26;
+	inline IMouseMod(): L(0), R(0), S(0), C(0), A(0), W(0), _unused(0) {}
 
-	IMouseMod(const bool l, const bool r = false, const bool s = false, const bool c = false, const bool a = false)
-	: L(l), R(r), S(s), C(c), A(a), _unused(0) {}
+	IMouseMod(const bool l, const bool r = false, const bool s = false, const bool c = false, const bool a = false, const bool w = false)
+	: L(l), R(r), S(s), C(c), A(a), W(w), _unused(0) {}
 
 	unsigned int Get() const
 	{
-		return (A << 4) | (C << 3) | (S << 2) | (R << 1) | L;
+		return (W << 5) | (A << 4) | (C << 3) | (S << 2) | (R << 1) | L;
 	}
 
 	void Set(const unsigned int i)
 	{
-		*this = IMouseMod(i & 1, (i >> 1) & 1, (i >> 2) & 1, (i >> 3) & 1, (i >> 4) & 1);
+		*this = IMouseMod(i & 1, (i >> 1) & 1, (i >> 2) & 1, (i >> 3) & 1, (i >> 4) & 1, (i >> 5) & 1);
 	}
 };
 
