@@ -10,9 +10,6 @@
 #include "WDL/mutex.h"
 #include "WDL/wdltypes.h"
 
-// Uncomment to enable IPlug::OnIdle() and IGraphics::OnGUIIdle().
-// #define USE_IDLE_CALLS
-
 // All version ints are stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
 
 class IGraphics;
@@ -69,10 +66,12 @@ public:
 	virtual void OnGUIOpen() { TRACE; }
 	virtual void OnGUIClose() { TRACE; }
 
-	// This is an idle call from the audio processing thread, as opposed to 
+	// This is an idle call from the audio processing thread, as opposed to
 	// IGraphics::OnGUIIdle which is called from the GUI thread.
-  // Only active if USE_IDLE_CALLS is defined.
+	// Only active if IPLUG_USE_IDLE_CALLS is defined.
+	#ifdef IPLUG_USE_IDLE_CALLS
 	virtual void OnIdle() {}
+	#endif
 
 	// Not usually needed... Also different hosts have different interpretations of "activate".
 	// Not all hosts will notify plugin on bypass. Mutex is already locked.
