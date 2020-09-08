@@ -278,7 +278,7 @@ protected:
 	inline bool IsOffline() const { return !!(mPlugFlags & kPlugFlagsOffline); }
 
 	virtual void AttachGraphics(IGraphics* pGraphics);
-  
+
 	virtual void SetSampleRate(const double sampleRate) { mSampleRate = sampleRate; }
 	virtual void SetBlockSize(int blockSize);
 	// If latency changes after initialization (often not supported by the host).

@@ -183,16 +183,20 @@ void IPlugBase::SetHost(const char* const host, const int version)
 	mHostVersion = version;
 }
 
-void IPlugBase::AttachGraphics(IGraphics* pGraphics)
+void IPlugBase::AttachGraphics(IGraphics* const pGraphics)
 {
-	if (pGraphics) {
-    WDL_MutexLock lock(&mMutex);
-    int i, n = mParams.GetSize();
-		for (i = 0; i < n; ++i) {
+	if (pGraphics)
+	{
+		mMutex.Enter();
+
+		const int n = mParams.GetSize();
+		for (int i = 0; i < n; ++i)
+		{
 			pGraphics->SetParameterFromPlug(i, GetParam(i)->GetNormalized(), true);
 		}
-    pGraphics->PrepDraw();
 		mGraphics = pGraphics;
+
+		mMutex.Leave();
 	}
 }
 
