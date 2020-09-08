@@ -58,6 +58,7 @@ public:
 	// Mutex is already locked.
 	virtual void Reset() {} // Called (at least) once.
 	virtual void OnParamChange(int paramIdx) {}
+	virtual void OnPresetChange(int presetIdx) {}
 
 	// Default passthrough.  Inputs and outputs are [nChannel][nSample].
   // Mutex is already locked.
