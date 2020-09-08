@@ -85,54 +85,45 @@ IPlugBase::IPlugBase(
 {
 	assert(plugDoes == (plugDoes & (kPlugIsInst | kPlugDoesMidi)));
 
-  for (int i = 0; i < nParams; ++i) {
-    mParams.Add(new IParam);
-  }
+	for (int i = 0; i < nPresets; ++i)
+	{
+		mPresets.Add(new IPreset(i));
+	}
 
-  for (int i = 0; i < nPresets; ++i) {
-    mPresets.Add(new IPreset(i));
-  }
+	int nInputs = 0, nOutputs = 0;
+	while (channelIOStr)
+	{
+		int nIn = 0, nOut = 0;
+		const bool channelIOStrInvalid = sscanf(channelIOStr, "%d-%d", &nIn, &nOut) == 2;
+		assert(channelIOStrInvalid);
 
-  assert(strlen(effectName) < MAX_EFFECT_NAME_LEN);
-  assert(strlen(productName) < MAX_PRODUCT_NAME_LEN);
-  assert(strlen(mfrName) < MAX_MFR_NAME_LEN);
+		nInputs = wdl_max(nInputs, nIn);
+		nOutputs = wdl_max(nOutputs, nOut);
 
-  strcpy(mEffectName, effectName);
-  strcpy(mProductName, productName);
-  strcpy(mMfrName, mfrName);
+		const ChannelIO io(nIn, nOut);
+		mChannelIO.Add(&io, 1);
 
-  int nInputs = 0, nOutputs = 0;
-  while (channelIOStr) {
-    int nIn = 0, nOut = 0;
-    bool channelIOStrValid = sscanf(channelIOStr, "%d-%d", &nIn, &nOut) == 2;
-    assert(channelIOStrValid);
-    nInputs = MAX(nInputs, nIn);
-    nOutputs = MAX(nOutputs, nOut);
-    mChannelIO.Add(new ChannelIO(nIn, nOut));
-    channelIOStr = strstr(channelIOStr, " ");
-    if (channelIOStr) {
-      ++channelIOStr;
-    }
-  }
+		channelIOStr = strchr(channelIOStr, ' ');
+		if (channelIOStr) ++channelIOStr;
+	}
 
-  mInData.Resize(nInputs);
-  mOutData.Resize(nOutputs);
+	mInData.Resize(nInputs);
+	nInputs = mInData.GetSize();
 
-  double** ppInData = mInData.Get();
-  for (int i = 0; i < nInputs; ++i, ++ppInData) {
-    InChannel* pInChannel = new InChannel;
-    pInChannel->mConnected = false;
-    pInChannel->mSrc = ppInData;
-    mInChannels.Add(pInChannel);
-  }
-  double** ppOutData = mOutData.Get();
-  for (int i = 0; i < nOutputs; ++i, ++ppOutData) {
-    OutChannel* pOutChannel = new OutChannel;
-    pOutChannel->mConnected = false;
-    pOutChannel->mDest = ppOutData;
-    pOutChannel->mFDest = 0;
-    mOutChannels.Add(pOutChannel);
-  }
+	mOutData.Resize(nOutputs);
+	nOutputs = mOutData.GetSize();
+
+	const double** const ppInData = mInData.Get();
+	for (int i = 0; i < nInputs; ++i)
+	{
+		mInChannels.Add(new InChannel(ppInData + i));
+	}
+
+	double** const ppOutData = mOutData.Get();
+	for (int i = 0; i < nOutputs; ++i)
+	{
+		mOutChannels.Add(new OutChannel(ppOutData + i));
+	}
 }
 
 IPlugBase::~IPlugBase()
