@@ -218,9 +218,11 @@ void IPlugVST::ResizeGraphics(int w, int h)
   }
 }
 
-bool IPlugVST::IsRenderingOffline()
-{ 
-  return mHostCallback(&mAEffect, audioMasterGetCurrentProcessLevel, 0, 0, 0, 0.0f) == kVstProcessLevelOffline;
+bool IPlugVST2::IsRenderingOffline()
+{
+	const bool offline = mHostCallback(&mAEffect, audioMasterGetCurrentProcessLevel, 0, 0, NULL, 0.0f) == kVstProcessLevelOffline;
+	if (IsOffline() != offline) mPlugFlags ^= kPlugFlagsOffline;
+	return offline;
 }
 
 void IPlugVST::SetLatency(int samples)
