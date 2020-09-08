@@ -3,7 +3,6 @@
 #include "Containers.h"
 #include "IPlugStructs.h"
 #include "IParam.h"
-#include "Hosts.h"
 
 #include <assert.h>
 
@@ -185,7 +184,7 @@ public:
 	double GetSamplesPerBeat();
 	virtual void GetTimeSig(int* pNum, int* pDenom) = 0;
   
-	virtual EHost GetHost() { return mHost; }
+	virtual int GetHost() { return mHost; } // See EHost in Hosts.h.
 	int GetHostVersion(bool decimal); // Decimal = VVVVRRMM, otherwise 0xVVVVRRMM.
 	char* GetHostVersionStr(char* str);
   
@@ -216,8 +215,8 @@ protected:
 	static int GetDecimalVersion(int version);
 	static char* GetVersionStr(char* str, int version);
 
-  void SetHost(const char* host, int version);   // Version = 0xVVVVRRMM.
-  virtual void HostSpecificInit() = 0;
+	void SetHost(const char* host, int version); // Version = 0xVVVVRRMM.
+	virtual void HostSpecificInit() = 0;
   
 	enum EPlugInit
 	{
@@ -348,9 +347,8 @@ protected:
 
 	WDL_FastString mEffectName, mProductName, mMfrName;
 	int mUniqueID, mMfrID, mVersion; // Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
-  
-  EHost mHost;
-	int mHostVersion; // Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
+
+	int mHost, mHostVersion; // Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
 
 	int mPlugFlags; // See EPlugDoes, EPlugInit, EPlugFlags.
   double WDL_FIXALIGN mSampleRate;

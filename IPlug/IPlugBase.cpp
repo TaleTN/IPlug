@@ -1,5 +1,6 @@
 #include "IPlugBase.h"
 #include "IGraphics.h"
+#include "Hosts.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -168,14 +169,10 @@ void IPlugBase::LimitToStereoIO()
   }
 }
 
-void IPlugBase::SetHost(const char* host, int version)
+void IPlugBase::SetHost(const char* const host, const int version)
 {
-  mHost = LookUpHost(host);
-  mHostVersion = version;
-  
-  char vStr[32];
-  GetVersionStr(version, vStr);
-  Trace(TRACELOC, "host_%sknown:%s:%s", (mHost == kHostUnknown ? "un" : ""), host, vStr);
+	mHost = host && *host ? LookUpHost(host) : kHostUnknown;
+	mHostVersion = version;
 }
 
 void IPlugBase::AttachGraphics(IGraphics* pGraphics)
