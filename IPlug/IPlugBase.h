@@ -75,8 +75,9 @@ public:
 	virtual void OnIdle() {}
 
 	// Not usually needed... Also different hosts have different interpretations of "activate".
-	// Mutex is already locked.
+	// Not all hosts will notify plugin on bypass. Mutex is already locked.
 	virtual void OnActivate(bool active) {}
+	virtual void OnBypass(bool bypassed) {}
     
 	virtual void ProcessMidiMsg(IMidiMsg* pMsg) {}
 	virtual void ProcessSysEx(ISysEx* pSysEx) {}
