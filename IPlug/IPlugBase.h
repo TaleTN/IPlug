@@ -107,10 +107,12 @@ public:
 	virtual bool SerializeBank(ByteChunk* pChunk);
 	virtual int UnserializeBank(const ByteChunk* pChunk, int startPos);
 
-  // ----------------------------------------
-  // Your plugin class, or a control class, can call these functions.
+	// ----------------------------------------
+	// Your plugin class, or a control class, can call these functions.
 
-  int NParams() { return mParams.GetSize(); }
+	int NParams() const { return mParams.GetSize(); }
+	bool NParams(const int idx) const { return (unsigned int)idx < (unsigned int)NParams(); }
+
 	IParam* GetParam(int idx) { return mParams.Get(idx); }
 	IGraphics* GetGUI() { return mGraphics; }
   
