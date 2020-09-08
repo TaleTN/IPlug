@@ -43,28 +43,37 @@ IGraphics* MakeGraphics(IPlug* const pPlug, const int w, const int h, const int 
 	#error "No OS defined!"
 #endif
 
-#if defined VST_API
-  extern "C"
-  {
-    EXPORT void* VSTPluginMain(audioMasterCallback hostCallback)
-    {    
-      static WDL_Mutex sMutex;
-      WDL_MutexLock lock(&sMutex);
-      IPlugInstanceInfo instanceInfo;
-      instanceInfo.mVSTHostCallback = hostCallback;
-      IPlugVST* pPlug = new PLUG_CLASS_NAME(instanceInfo);
-      if (pPlug) { 
-        pPlug->EnsureDefaultPreset();
-        pPlug->mAEffect.numPrograms = MAX(pPlug->mAEffect.numPrograms, 1);
-        return &(pPlug->mAEffect);
-      }
-	    return 0;
-    }
-    EXPORT int main(audioMasterCallback hostCallback)
-    {
-      return (VstIntPtr) VSTPluginMain(hostCallback);
-    }
-  };
+#ifdef VST2_API
+
+extern "C" {
+
+EXPORT void* VSTPluginMain(audioMasterCallback const hostCallback)
+{
+	static WDL_Mutex sMutex;
+	sMutex.Enter();
+
+	AEffect* pEffect = NULL;
+	IPlugVST2* const pPlug = new PLUG_CLASS_NAME((void*)hostCallback);
+	if (pPlug)
+	{
+		pPlug->EnsureDefaultPreset();
+		pEffect = pPlug->GetAEffect();
+		pEffect->numPrograms = wdl_max(pEffect->numPrograms, 1);
+	}
+
+	sMutex.Leave();
+	return pEffect;
+}
+
+#if defined(_WIN32) && !defined(_WIN64)
+EXPORT int main(audioMasterCallback const hostCallback)
+{
+	return (VstIntPtr)VSTPluginMain(hostCallback);
+}
+#endif
+
+} // extern "C"
+
 #elif defined AU_API
   IPlug* MakePlug()
   {
