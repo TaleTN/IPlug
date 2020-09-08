@@ -638,6 +638,12 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effCanBeAutomated:
+		{
+			/* if (_this->NParams(idx)) */ ret = 1;
+			break;
+		}
+
     case effString2Parameter:
     {
       if (idx >= 0 && idx < _this->NParams())
@@ -653,9 +659,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
         return 1;
       }
       return 0;
-    }
-	  case effCanBeAutomated: {
-	  	return 1;
     }
 	  case effGetInputProperties: {
       if (ptr && idx >= 0 && idx < _this->NInChannels()) {
