@@ -1,6 +1,7 @@
 #include "IPlugBase.h"
 #include "IGraphics.h"
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -491,135 +492,122 @@ bool IPlugBase::AllocPresetChunk(int chunkSize)
 	return true;
 }
 
-IPreset* GetNextUninitializedPreset(WDL_PtrList<IPreset>* pPresets)
+static IPreset* GetNextUninitializedPreset(const WDL_PtrList<IPreset>* const pPresets, int* const pIdx)
 {
-  int n = pPresets->GetSize();
-  for (int i = 0; i < n; ++i) {
-    IPreset* pPreset = pPresets->Get(i);
-    if (!(pPreset->mInitialized)) {
-      return pPreset;
-    }
-  }
-  return 0;
+	const int n = pPresets->GetSize();
+	for (int i = *pIdx; i < n;)
+	{
+		IPreset* const pPreset = pPresets->Get(i++);
+		if (!(pPreset->mInitialized))
+		{
+			*pIdx = i;
+			return pPreset;
+		}
+	}
+	return NULL;
 }
 
-void IPlugBase::MakeDefaultPreset(char* name, int nPresets)
+bool IPlugBase::MakeDefaultPreset(const char* const name, int nPresets)
 {
-  for (int i = 0; i < nPresets; ++i) {
-    IPreset* pPreset = GetNextUninitializedPreset(&mPresets);
-    if (pPreset) {
-      pPreset->mInitialized = true;
-      assert(name ? strlen(name) < MAX_PRESET_NAME_LEN : MAX_PRESET_NAME_LEN >= 8);
-      strcpy(pPreset->mName, (name ? name : "Default"));
-      SerializeParams(&(pPreset->mChunk)); 
-    }
-  }
+	if (nPresets < 0) nPresets = 0x7FFFFFFF;
+	for (int i = 0, idx = 0; i < nPresets; ++i)
+	{
+		IPreset* const pPreset = GetNextUninitializedPreset(&mPresets, &idx);
+		if (pPreset)
+		{
+			InitPresetChunk(pPreset, name);
+			SerializePreset(&pPreset->mChunk);
+		}
+		else
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
-#define GET_PARAM_FROM_VARARG(paramType, vp, v) \
+#define SET_PARAM_FROM_VARARG(pParam, vp) \
 { \
-  v = 0.0; \
-  switch (paramType) { \
-    case IParam::kTypeBool: \
-    case IParam::kTypeInt: \
-    case IParam::kTypeEnum: { \
-      v = (double) va_arg(vp, int); \
-      break; \
-    } \
-    case IParam::kTypeDouble: \
-    default: { \
-      v = (double) va_arg(vp, double); \
-      break; \
-    } \
-  } \
+	switch (pParam->Type()) \
+	{ \
+		case IParam::kTypeBool: \
+			((IBoolParam*)pParam)->Set(va_arg(vp, int)); \
+			break; \
+		case IParam::kTypeInt: \
+			((IIntParam*)pParam)->Set(va_arg(vp, int)); \
+			break; \
+		case IParam::kTypeEnum: \
+			((IEnumParam*)pParam)->Set(va_arg(vp, int)); \
+			break; \
+		case IParam::kTypeDouble: \
+			((IDoubleParam*)pParam)->Set(va_arg(vp, double)); \
+			break; \
+		case IParam::kTypeNormalized: \
+		default: \
+			pParam->SetNormalized(va_arg(vp, double)); \
+			break; \
+	} \
 }
 
-void IPlugBase::MakePreset(char* name, ...)
+bool IPlugBase::MakePreset(const char* const name, ...)
 {
-  IPreset* pPreset = GetNextUninitializedPreset(&mPresets);
-  if (pPreset) {
-    pPreset->mInitialized = true;
-    assert(strlen(name) < MAX_PRESET_NAME_LEN);
-    strcpy(pPreset->mName, name);
-    int i, n = mParams.GetSize();
-      
-    double v = 0.0;
-    va_list vp;
-    va_start(vp, name);
-    for (i = 0; i < n; ++i) {
-      GET_PARAM_FROM_VARARG(GetParam(i)->Type(), vp, v);
-      pPreset->mChunk.Put(&v);
-    }
-  }
+	va_list vp;
+	va_start(vp, name);
+	const int n = mParams.GetSize();
+	for (int i = 0; i < n; ++i)
+	{
+		IParam* const pParam = GetParam(i);
+		SET_PARAM_FROM_VARARG(pParam, vp);
+	}
+	va_end(vp);
+	return MakeDefaultPreset(name);
 }
 
-#define PARAM_UNINIT 99.99e-9
-
-void IPlugBase::MakePresetFromNamedParams(char* name, int nParamsNamed, ...)
+bool IPlugBase::MakePresetFromNamedParams(const char* const name, const int nParamsNamed, ...)
 {
-  IPreset* pPreset = GetNextUninitializedPreset(&mPresets);
-  if (pPreset) {
-    pPreset->mInitialized = true;
-    assert(strlen(name) < MAX_PRESET_NAME_LEN);
-    strcpy(pPreset->mName, name);
-
-    int i = 0, n = mParams.GetSize();
-
-    WDL_TypedBuf<double> vals;
-    vals.Resize(n);
-    double* pV = vals.Get();
-    for (i = 0; i < n; ++i, ++pV) {
-      *pV = PARAM_UNINIT;
-    }
-
-    va_list vp;
-    va_start(vp, nParamsNamed);
-    for (int i = 0; i < nParamsNamed; ++i) {
-      int paramIdx = (int) va_arg(vp, int);
-      // This assert will fire if any of the passed-in param values do not match
-      // the type that the param was initialized with (int for bool, int, enum; double for double).
-      assert(paramIdx >= 0 && paramIdx < n);
-      GET_PARAM_FROM_VARARG(GetParam(paramIdx)->Type(), vp, *(vals.Get() + paramIdx));
-    }
-    va_end(vp);
-
-    pV = vals.Get();
-    for (int i = 0; i < n; ++i, ++pV) {
-      if (*pV == PARAM_UNINIT) {      // Any that weren't explicitly set, use the defaults.
-        *pV = GetParam(i)->Value();
-      }
-      pPreset->mChunk.Put(pV);
-    }
-  }
+	va_list vp;
+	va_start(vp, nParamsNamed);
+	const int n = mParams.GetSize();
+	for (int i = 0; i < nParamsNamed; ++i)
+	{
+		const int paramIdx = va_arg(vp, int);
+		assert(paramIdx >= 0 && paramIdx < n);
+		IParam* const pParam = GetParam(paramIdx);
+		SET_PARAM_FROM_VARARG(pParam, vp);
+	}
+	va_end(vp);
+	return MakeDefaultPreset(name);
 }
 
-void IPlugBase::MakePresetFromChunk(char* name, ByteChunk* pChunk)
+bool IPlugBase::MakePresetFromChunk(const char* const name, const ByteChunk* pChunk)
 {
-  IPreset* pPreset = GetNextUninitializedPreset(&mPresets);
-  if (pPreset) {
-    pPreset->mInitialized = true;
-    assert(strlen(name) < MAX_PRESET_NAME_LEN);
-    strcpy(pPreset->mName, name);
-
-    pPreset->mChunk.PutChunk(pChunk);
-  }
+	int idx = 0;
+	IPreset* pPreset = GetNextUninitializedPreset(&mPresets, &idx);
+	if (pPreset)
+	{
+		InitPresetChunk(pPreset, name);
+		pPreset->mChunk.PutChunk(pChunk);
+		return true;
+	}
+	return false;
 }
 
-#define DEFAULT_USER_PRESET_NAME "user preset"
-
-void MakeDefaultUserPresetName(WDL_PtrList<IPreset>* pPresets, char* str)
+/* static void MakeDefaultUserPresetName(const WDL_PtrList<IPreset>* const pPresets, IPreset* const pPreset)
 {
-  int nDefaultNames = 0;
-  int n = pPresets->GetSize();
-  for (int i = 0; i < n; ++i) {
-    IPreset* pPreset = pPresets->Get(i);
-    if (strstr(pPreset->mName, DEFAULT_USER_PRESET_NAME)) {
-      ++nDefaultNames;
-    }
-  }
-  sprintf(str, "%s %d", DEFAULT_USER_PRESET_NAME, nDefaultNames + 1);
-  assert(strlen(str) < MAX_PRESET_NAME_LEN); // Too late, but meh.
-}
+	static const char* const DEFAULT_USER_PRESET_NAME = "User Preset %d";
+	static const size_t len = 11; // strlen("User Preset")
+
+	int nDefaultNames = 0;
+	const int n = pPresets->GetSize();
+	for (int i = 0; i < n; ++i)
+	{
+		if (!strncmp(pPresets->Get(i)->mName.Get(), DEFAULT_USER_PRESET_NAME, len))
+		{
+			++nDefaultNames;
+		}
+	}
+	pPreset->mName.SetFormatted(IPreset::kMaxNameLen, "%s %d", DEFAULT_USER_PRESET_NAME, nDefaultNames + 1);
+} */
 
 void IPlugBase::EnsureDefaultPreset()
 {

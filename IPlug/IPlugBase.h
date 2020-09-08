@@ -232,13 +232,14 @@ protected:
 		return !!(mPlugFlags & plugDoes);
 	}
 
-  void MakeDefaultPreset(char* name = 0, int nPresets = 1);
-  // MakePreset(name, param1, param2, ..., paramN)
-  void MakePreset(char* name, ...);
-  // MakePresetFromNamedParams(name, nParamsNamed, paramEnum1, paramVal1, paramEnum2, paramVal2, ..., paramEnumN, paramVal2)
-  // nParamsNamed may be less than the total number of params.
-  void MakePresetFromNamedParams(char* name, int nParamsNamed, ...);
-  void MakePresetFromChunk(char* name, ByteChunk* pChunk);
+	bool MakeDefaultPreset(const char* name = NULL, int nPresets = 1);
+	// MakePreset(name, param1, param2, ..., paramN)
+	bool MakePreset(const char* name, ...);
+	// MakePresetFromNamedParams(name, nParamsNamed, paramEnum1, paramVal1, paramEnum2, paramVal2, ..., paramEnumN, paramVal2)
+	// nParamsNamed may be less than the total number of params.
+	bool MakePresetFromNamedParams(const char* name, int nParamsNamed, ...);
+	bool MakePresetFromChunk(const char* name, const ByteChunk* pChunk);
+	inline void PopulateUninitializedPresets() { MakeDefaultPreset(NULL, -1); }
 
 	// Define IPLUG_NO_STATE_CHUNKS for compatability with original IPlug
 	// with state chunks disabled.
