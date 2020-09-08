@@ -6,15 +6,11 @@
 
 const int VST_VERSION = 2400;
 
-
-int VSTSpkrArrType(int nchan)
+static int VSTSpkrArrType(const int nchan)
 {
-  if (!nchan) return kSpeakerArrEmpty;
-  if (nchan == 1) return kSpeakerArrMono;
-  if (nchan == 2) return kSpeakerArrStereo;
-  return kSpeakerArrUserDefined;
+	const int type = nchan - 1;
+	return (unsigned int)nchan <= 2 ? type : kSpeakerArrUserDefined;
 }
-
 
 IPlugVST2::IPlugVST2(
 	void* const instanceInfo,

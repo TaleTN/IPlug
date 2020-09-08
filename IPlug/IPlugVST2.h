@@ -64,7 +64,7 @@ private:
   bool SendVSTEvent(VstEvent* pEvent);
   bool SendVSTEvents(WDL_TypedBuf<VstEvent>* pEvents);
 
-  VstSpeakerArrangement mInputSpkrArr, mOutputSpkrArr;
+	VstSpeakerArrangement mInputSpkrArr, mOutputSpkrArr;
 
   bool mHostSpecificInitDone;
   
