@@ -86,6 +86,12 @@ public:
 	virtual void ProcessSysEx(const ISysEx* pSysEx) {}
 	virtual bool MidiNoteName(int noteNumber, char* buf, int bufSize = 128);
 
+	// Call these after adding all parameters, but before making any
+	// presets, to customize/pre-allocate state chunk buffers.
+	bool AllocPresetChunk(int chunkSize = -1);
+	virtual bool AllocStateChunk(int chunkSize = -1) = 0;
+	virtual bool AllocBankChunk(int chunkSize = -1) = 0;
+
   // Implementations should set a mutex lock.
 	virtual bool SerializeState(ByteChunk* pChunk) { return SerializeParams(pChunk); }
   // Return the new chunk position (endPos).
@@ -313,4 +319,7 @@ private:
   };
   WDL_PtrList<InChannel> mInChannels;
   WDL_PtrList<OutChannel> mOutChannels;
-} WDL_FIXALIGN;
+
+	int mPresetChunkSize;
+}
+WDL_FIXALIGN;

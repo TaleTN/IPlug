@@ -69,7 +69,8 @@ IPlugBase::IPlugBase(
 	mSampleRate(kDefaultSampleRate),
 	mBlockSize(0),
 	mLatency(latency),
-	mGraphics(NULL)
+	mGraphics(NULL),
+	mPresetChunkSize(-1)
 {
 	assert(plugDoes == (plugDoes & (kPlugIsInst | kPlugDoesMidi)));
 
@@ -472,6 +473,22 @@ void IPlugBase::ProcessDoubleReplacing(const double* const* const inputs, double
 	{
 		memset(outputs[i], 0, byteSize);
 	}
+}
+
+bool IPlugBase::AllocPresetChunk(int chunkSize)
+{
+	if (chunkSize < 0)
+	{
+		chunkSize = 0;
+		const int n = mParams.GetSize();
+		for (int i = 0; i < n; ++i)
+		{
+			const IParam* const pParam = mParams.Get(i);
+			if (!pParam->IsGlobal()) chunkSize += pParam->Size();
+		}
+	}
+	mPresetChunkSize = chunkSize;
+	return true;
 }
 
 IPreset* GetNextUninitializedPreset(WDL_PtrList<IPreset>* pPresets)
