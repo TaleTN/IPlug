@@ -389,18 +389,35 @@ protected:
 
 	IGraphics* mGraphics;
 
-  WDL_TypedBuf<double*> mInData, mOutData;
-  struct InChannel {
-    bool mConnected;
-    double** mSrc;   // Points into mInData.
-    WDL_TypedBuf<double> mScratchBuf;
-  };
-  struct OutChannel {
-    bool mConnected;
-    double** mDest;  // Points into mOutData.
-    float* mFDest;
-    WDL_TypedBuf<double> mScratchBuf;
-  };
+	WDL_TypedBuf<const double*> mInData;
+	WDL_TypedBuf<double*> mOutData;
+
+	struct InChannel
+	{
+		bool mConnected;
+		const double** mSrc; // Points into mInData.
+		WDL_TypedBuf<double> mScratchBuf;
+
+		InChannel(const double** pSrc);
+		void SetConnection(bool connected);
+		void AttachInputBuffer(const double* const*& ppData);
+		double* ResizeScratchBuffer(int size);
+		double* AttachScratchBuffer();
+	};
+
+	struct OutChannel
+	{
+		bool mConnected;
+		double** mDest; // Points into mOutData.
+		float* mFDest;
+		WDL_TypedBuf<double> mScratchBuf;
+
+		OutChannel(double** pDest);
+		void SetConnection(bool connected);
+		void AttachOutputBuffer(double* const*& ppData);
+		double* ResizeScratchBuffer(int size);
+		void AttachScratchBuffer(float* const*& ppData);
+	};
 
 	WDL_PtrList_DeleteOnDestroy<InChannel> mInChannels;
 	WDL_PtrList_DeleteOnDestroy<OutChannel> mOutChannels;

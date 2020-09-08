@@ -827,6 +827,75 @@ bool IPlugBase::OnGUIRescale(int /* wantScale */)
 	return true;
 }
 
+IPlugBase::InChannel::InChannel(
+	const double** const pSrc
+):
+	mConnected(false),
+	mSrc(pSrc)
+{}
+
+void IPlugBase::InChannel::SetConnection(const bool connected)
+{
+	mConnected = connected;
+	if (!connected) *mSrc = mScratchBuf.Get();
+}
+
+void IPlugBase::InChannel::AttachInputBuffer(const double* const*& ppData)
+{
+	if (mConnected) *mSrc = *ppData++;
+}
+
+double* IPlugBase::InChannel::ResizeScratchBuffer(const int size)
+{
+	double* const buf = mScratchBuf.ResizeOK(size);
+	if (!mConnected) *mSrc = buf;
+
+	return buf;
+}
+
+double* IPlugBase::InChannel::AttachScratchBuffer()
+{
+	double* const buf = mScratchBuf.Get();
+	*mSrc = buf;
+
+	return buf;
+}
+
+IPlugBase::OutChannel::OutChannel(
+	double** const pDest
+):
+	mConnected(false),
+	mDest(pDest),
+	mFDest(NULL)
+{}
+
+void IPlugBase::OutChannel::SetConnection(const bool connected)
+{
+	mConnected = connected;
+	if (!connected) *mDest = mScratchBuf.Get();
+}
+
+void IPlugBase::OutChannel::AttachOutputBuffer(double* const*& ppData)
+{
+	if (mConnected) *mDest = *ppData++;
+}
+
+double* IPlugBase::OutChannel::ResizeScratchBuffer(const int size)
+{
+	double* const buf = mScratchBuf.ResizeOK(size);
+	if (!mConnected) *mDest = buf;
+	return buf;
+}
+
+void IPlugBase::OutChannel::AttachScratchBuffer(float* const*& ppData)
+{
+	if (mConnected)
+	{
+		*mDest = mScratchBuf.Get();
+		mFDest = *ppData++;
+	}
+}
+
 #ifndef NDEBUG
 
 void IPlugBase::DebugLog(const char* format, ...)
