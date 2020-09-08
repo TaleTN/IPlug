@@ -485,6 +485,16 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effEditGetRect:
+		{
+			if (ptr && _this->GetGUI())
+			{
+				*(ERect**)ptr = &_this->mEditRect;
+				ret = 1;
+			}
+			break;
+		}
+
     case effString2Parameter:
     {
       if (idx >= 0 && idx < _this->NParams())
@@ -500,14 +510,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
         return 1;
       }
       return 0;
-    }
-    case effEditGetRect: {
-	    if (ptr && _this->GetGUI()) {
-		    *(ERect**) ptr = &(_this->mEditRect);
-		    return 1;
-	    }
-	    ptr = 0;
-	    return 0;
     }
     case effEditOpen:
     {
