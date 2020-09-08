@@ -699,10 +699,12 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
-    case effGetPlugCategory: {
-      if (_this->IsInst()) return kPlugCategSynth;
-	    return kPlugCategEffect;
-    }
+		case effGetPlugCategory:
+		{
+			ret = _this->IsInst() ? kPlugCategSynth : kPlugCategEffect;
+			break;
+		}
+
     case effProcessVarIo: {
 	    // VstVariableIo* pIO = (VstVariableIo*) ptr;		// For offline processing (of audio files?)
 	    return 0;
