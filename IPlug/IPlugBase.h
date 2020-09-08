@@ -82,9 +82,9 @@ public:
 	virtual void OnActivate(bool active) {}
 	virtual void OnBypass(bool bypassed) {}
     
-	virtual void ProcessMidiMsg(IMidiMsg* pMsg) {}
-	virtual void ProcessSysEx(ISysEx* pSysEx) {}
-	virtual bool MidiNoteName(int noteNumber, char* rName) { *rName = '\0'; return false; }
+	virtual void ProcessMidiMsg(const IMidiMsg* pMsg) {}
+	virtual void ProcessSysEx(const ISysEx* pSysEx) {}
+	virtual bool MidiNoteName(int noteNumber, char* buf, int bufSize = 128);
 
   // Implementations should set a mutex lock.
 	virtual bool SerializeState(ByteChunk* pChunk) { return SerializeParams(pChunk); }
@@ -204,9 +204,10 @@ protected:
   virtual void SetBlockSize(int blockSize); 
   // If latency changes after initialization (often not supported by the host).
   virtual void SetLatency(int samples);
-	virtual bool SendMidiMsg(IMidiMsg* pMsg) = 0;
-  virtual bool SendMidiMsgs(WDL_TypedBuf<IMidiMsg>* pMsgs);
-  virtual bool SendSysEx(ISysEx* pSysEx) = 0;
+
+	virtual bool SendMidiMsg(const IMidiMsg* pMsg) = 0;
+	virtual bool SendMidiMsgs(const IMidiMsg* pMsgs, int n);
+	virtual bool SendSysEx(const ISysEx* pSysEx) = 0;
 	inline bool IsInst() const { return !!(mPlugFlags & kPlugIsInst); }
 
 	inline bool DoesMIDI(const int plugDoes = kPlugDoesMidi) const

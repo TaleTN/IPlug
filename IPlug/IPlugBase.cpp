@@ -390,15 +390,21 @@ void IPlugBase::SetLatency(int samples)
   mLatency = samples;
 }
 
-bool IPlugBase::SendMidiMsgs(WDL_TypedBuf<IMidiMsg>* pMsgs)
+bool IPlugBase::MidiNoteName(int /* noteNumber */, char* const buf, const int bufSize)
 {
-  bool rc = true;
-  int n = pMsgs->GetSize();
-  IMidiMsg* pMsg = pMsgs->Get();
-  for (int i = 0; i < n; ++i, ++pMsg) {
-    rc &= SendMidiMsg(pMsg);
-  }
-  return rc;
+	assert(bufSize >= 1);
+	*buf = 0;
+	return false;
+}
+
+bool IPlugBase::SendMidiMsgs(const IMidiMsg* const pMsgs, const int n)
+{
+	bool rc = true;
+	for (int i = 0; i < n; ++i)
+	{
+		rc &= SendMidiMsg(pMsgs + i);
+	}
+	return rc;
 }
 
 void IPlugBase::SetParameterFromGUI(int idx, double normalizedValue)
