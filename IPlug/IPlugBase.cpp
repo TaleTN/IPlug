@@ -1,8 +1,8 @@
 #include "IPlugBase.h"
 #include "IGraphics.h"
-#include "IControl.h"
-#include <math.h>
+
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 const double DEFAULT_SAMPLE_RATE = 44100.0;

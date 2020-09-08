@@ -1,5 +1,4 @@
-#ifndef _IPLUGBASE_
-#define _IPLUGBASE_
+#pragma once
 
 #define IPLUG_VERSION 0x010000
 
@@ -7,7 +6,9 @@
 #include "IPlugStructs.h"
 #include "IParam.h"
 #include "Hosts.h"
-#include "Log.h"
+
+#include "WDL/mutex.h"
+#include "WDL/wdltypes.h"
 
 // Uncomment to enable IPlug::OnIdle() and IGraphics::OnGUIIdle().
 // #define USE_IDLE_CALLS
@@ -268,5 +269,3 @@ private:
   WDL_PtrList<InChannel> mInChannels;
   WDL_PtrList<OutChannel> mOutChannels;
 } WDL_FIXALIGN;
-
-#endif
