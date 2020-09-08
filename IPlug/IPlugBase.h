@@ -197,9 +197,9 @@ public:
 	// Not fully supported. A call back from the host saying the user has resized the window.
 	// If the plugin supports different sizes, it may wish to resize.
 	// virtual void UserResizedWindow(const IRECT* pR) {}
+    
+	void EnsureDefaultPreset();
 
-  void EnsureDefaultPreset();
-  
 protected:
 
   // ----------------------------------------
@@ -310,12 +310,13 @@ protected:
 	int NPresets() const { return mPresets.GetSize(); }
 	bool NPresets(const int idx) const { return (unsigned int)idx < (unsigned int)NPresets(); }
 
-  int GetCurrentPresetIdx() { return mCurrentPresetIdx; }
-  void PruneUninitializedPresets();
-  bool RestorePreset(int idx);
-  bool RestorePreset(const char* name);
-  const char* GetPresetName(int idx);
-  void ModifyCurrentPreset(const char* name = 0);     // Sets the currently active preset to whatever current params are.
+	void InitPresetChunk(IPreset* pPreset, const char* name = NULL);
+	inline int GetCurrentPresetIdx() const { return mCurrentPresetIdx; }
+	void PruneUninitializedPresets();
+	bool RestorePreset(int idx = -1);
+	bool RestorePreset(const char* name);
+	const char* GetPresetName(int idx) const;
+	void ModifyCurrentPreset(const char* name = NULL); // Sets the currently active preset to whatever current params are.
 
 	bool SerializePresets(int fromIdx, int toIdx /* up to not *not* including */, ByteChunk* pChunk) const;
 	// Returns the new chunk position (endPos).

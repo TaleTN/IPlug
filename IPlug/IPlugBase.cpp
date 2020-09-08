@@ -483,6 +483,15 @@ bool IPlugBase::AllocPresetChunk(int chunkSize)
 	return true;
 }
 
+void IPlugBase::InitPresetChunk(IPreset* const pPreset, const char* const name)
+{
+	pPreset->mInitialized = true;
+	if (name) pPreset->SetName(name);
+	if (mPresetChunkSize < 0) AllocPresetChunk();
+	pPreset->mChunk.Alloc(mPresetChunkSize);
+	pPreset->mChunk.Clear();
+}
+
 static IPreset* GetNextUninitializedPreset(const WDL_PtrList<IPreset>* const pPresets, int* const pIdx)
 {
 	const int n = pPresets->GetSize();
@@ -602,86 +611,92 @@ bool IPlugBase::MakePresetFromChunk(const char* const name, const ByteChunk* pCh
 
 void IPlugBase::EnsureDefaultPreset()
 {
-  if (!(mPresets.GetSize())) {
-    mPresets.Add(new IPreset(0));
-    MakeDefaultPreset();
-  }
+	if (!(mPresets.GetSize()))
+	{
+		mPresets.Add(new IPreset);
+		MakeDefaultPreset();
+	}
 }
 
 void IPlugBase::PruneUninitializedPresets()
 {
-  int i = 0;
-  while (i < mPresets.GetSize()) {
-    IPreset* pPreset = mPresets.Get(i);
-    if (pPreset->mInitialized) {
-      ++i;
-    }
-    else {
-      mPresets.Delete(i, true);
-    }
-  }
+	int i = 0;
+	while (i < mPresets.GetSize())
+	{
+		IPreset* pPreset = mPresets.Get(i);
+		if (pPreset->mInitialized)
+			++i;
+		else
+			mPresets.Delete(i, true);
+	}
 }
 
 bool IPlugBase::RestorePreset(int idx)
 {
-  bool restoredOK = false;
-  if (idx >= 0 && idx < mPresets.GetSize()) {
-    IPreset* pPreset = mPresets.Get(idx);
+	bool restoredOK = false;
+	if (idx < 0) idx = mCurrentPresetIdx;
+	IPreset* const pPreset = mPresets.Get(idx);
+	if (pPreset)
+	{
+		if (!pPreset->mInitialized)
+		{
+			InitPresetChunk(pPreset);
+			// MakeDefaultUserPresetName(&mPresets, pPreset);
+			restoredOK = SerializePreset(&pPreset->mChunk);
+		}
+		else
+		{
+			restoredOK = UnserializePreset(&pPreset->mChunk, 0) >= 0;
+			OnParamReset();
+		}
 
-    if (!(pPreset->mInitialized)) {
-      pPreset->mInitialized = true;
-      MakeDefaultUserPresetName(&mPresets, pPreset->mName);
-      restoredOK = SerializeParams(&(pPreset->mChunk)); 
-    }
-    else {
-      restoredOK = (UnserializeParams(&(pPreset->mChunk), 0) > 0);
-    }
-
-    if (restoredOK) {
-      mCurrentPresetIdx = idx;
-      RedrawParamControls();
-    }
-  }
-  return restoredOK;
+		if (restoredOK)
+		{
+			OnPresetChange(idx);
+			mCurrentPresetIdx = idx;
+			RedrawParamControls();
+		}
+	}
+	return restoredOK;
 }
 
-bool IPlugBase::RestorePreset(const char* name)
+bool IPlugBase::RestorePreset(const char* const name)
 {
-  if (CSTR_NOT_EMPTY(name)) {
-    int n = mPresets.GetSize();
-    for (int i = 0; i < n; ++i) {
-      IPreset* pPreset = mPresets.Get(i);
-      if (!strcmp(pPreset->mName, name)) {
-        return RestorePreset(i);
-      }
-    }
-  }
-  return false;
+	if (name && *name)
+	{
+		const int n = mPresets.GetSize();
+		for (int i = 0; i < n; ++i)
+		{
+			IPreset* const pPreset = mPresets.Get(i);
+			if (!strcmp(pPreset->mName.Get(), name))
+			{
+				return RestorePreset(i);
+			}
+		}
+	}
+	return false;
 }
 
-const char* IPlugBase::GetPresetName(int idx)
+const char* IPlugBase::GetPresetName(const int idx) const
 {
-  if (idx >= 0 && idx < mPresets.GetSize()) {
-    return mPresets.Get(idx)->mName;
-  }
-  return "";
+	const IPreset* const pPreset = mPresets.Get(idx);
+	return pPreset ? pPreset->mName.Get() : "";
 }
 
-void IPlugBase::ModifyCurrentPreset(const char* name)
+void IPlugBase::ModifyCurrentPreset(const char* const name)
 {
-  if (mCurrentPresetIdx >= 0 && mCurrentPresetIdx < mPresets.GetSize()) {
-    IPreset* pPreset = mPresets.Get(mCurrentPresetIdx);
-    pPreset->mChunk.Clear();
+	IPreset* const pPreset = mPresets.Get(mCurrentPresetIdx);
+	if (pPreset)
+	{
+		if (!pPreset->mInitialized)
+			InitPresetChunk(pPreset);
+		else
+			pPreset->mChunk.Clear();
 
+		SerializePreset(&pPreset->mChunk);
 
-    SerializeParams(&(pPreset->mChunk));
-
-    if (CSTR_NOT_EMPTY(name)) 
-    {
-      assert(strlen(name) < MAX_PRESET_NAME_LEN);
-      strcpy(pPreset->mName, name);
-    }
-  }
+		if (name && *name) pPreset->SetName(name);
+	}
 }
 
 bool IPlugBase::SerializePresets(const int fromIdx, const int toIdx, ByteChunk* const pChunk) const
