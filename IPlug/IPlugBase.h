@@ -166,6 +166,20 @@ protected:
   void SetHost(const char* host, int version);   // Version = 0xVVVVRRMM.
   virtual void HostSpecificInit() = 0;
   
+	enum EPlugInit
+	{
+		kPlugInitSampleRate = 8,
+		kPlugInitBlockSize = 16,
+		kPlugInit = kPlugInitSampleRate | kPlugInitBlockSize
+	};
+
+	// Returns true if host has set both sample rate and block size.
+	inline bool PlugInit(const int plugInit = kPlugInit) const
+	{
+		assert(plugInit == (plugInit & kPlugInit));
+		return (mPlugFlags & plugInit) == plugInit;
+	}
+
 	virtual void AttachGraphics(IGraphics* pGraphics);
   
   void SetSampleRate(double sampleRate);
@@ -260,7 +274,7 @@ private:
   EHost mHost;
   int mHostVersion;   //  Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
 
-	int mPlugFlags; // See EPlugDoes.
+	int mPlugFlags; // See EPlugDoes, EPlugInit.
   double WDL_FIXALIGN mSampleRate;
   int mBlockSize, mLatency;
 
