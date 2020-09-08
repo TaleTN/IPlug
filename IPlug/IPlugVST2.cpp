@@ -366,16 +366,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 
 	_this->mMutex.Enter();
 
-  // Handle a couple of opcodes here to make debugging easier.
-  switch (opCode) {
-    case effEditIdle:
-    case __effIdleDeprecated:
-      #ifdef USE_IDLE_CALLS
-        _this->OnIdle();
-      #endif
-    	return 0;
-  }
-
 	switch (opCode)
 	{
 		case effOpen:
@@ -531,6 +521,15 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			}
 			break;
 		}
+
+		#ifdef IPLUG_USE_IDLE_CALLS
+		case effEditIdle:
+		case DECLARE_VST_DEPRECATED(effIdle):
+		{
+			_this->OnIdle();
+			break;
+		}
+		#endif
 
     case effString2Parameter:
     {
