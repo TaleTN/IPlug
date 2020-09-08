@@ -1,9 +1,7 @@
-#ifndef _IPLUGAPI_
-#define _IPLUGAPI_
-// Only load one API class!
+#pragma once
 
 #include "IPlugBase.h"
-#include "../../VST_SDK/aeffectx.h"
+#include "VST2_SDK/aeffectx.h"
 
 struct IPlugInstanceInfo
 {
@@ -85,5 +83,3 @@ public:
 };
 
 IPlugVST* MakePlug();
-
-#endif

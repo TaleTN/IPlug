@@ -1,4 +1,4 @@
-#include "IPlugVST.h"
+#include "IPlugVST2.h"
 #include "IGraphics.h"
 #include <stdio.h>
 
