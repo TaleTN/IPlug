@@ -420,10 +420,11 @@ void IPlugBase::SetParameterFromGUI(int idx, double normalizedValue)
 
 void IPlugBase::OnParamReset()
 {
-	for (int i = 0; i < mParams.GetSize(); ++i) {
+	const int n = mParams.GetSize();
+	for (int i = 0; i < n; ++i)
+	{
 		OnParamChange(i);
 	}
-	//Reset();
 }
 
 void IPlugBase::DelayEndInformHostOfParamChange(int idx)

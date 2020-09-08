@@ -291,7 +291,7 @@ protected:
 	// ----------------------------------------
 	// Internal IPlug stuff (but API classes need to get at it).
 
-  void OnParamReset();	// Calls OnParamChange(each param) + Reset().
+	void OnParamReset(); // Calls OnParamChange(each param).
 
   int NPresets() { return mPresets.GetSize(); }
   int GetCurrentPresetIdx() { return mCurrentPresetIdx; }
