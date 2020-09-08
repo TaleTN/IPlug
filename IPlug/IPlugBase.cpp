@@ -776,6 +776,16 @@ int IPlugBase::UnserializePreset(const ByteChunk* const pChunk, int pos)
 	return pos;
 }
 
+int IPlugBase::GetParamsChunkSize(const int fromIdx, const int toIdx) const
+{
+	int size = 0;
+	for (int i = fromIdx; i < toIdx; ++i)
+	{
+		size += mParams.Get(i)->Size();
+	}
+	return size;
+}
+
 bool IPlugBase::SerializeParams(const int fromIdx, const int toIdx, ByteChunk* const pChunk) const
 {
 	bool savedOK = true;

@@ -272,6 +272,15 @@ protected:
 		#endif
 	}
 
+	// Returns max chunk size that SerializePresets() will need.
+	static int GetBankChunkSize(const int nPresets, const int presetChunkSize)
+	{
+		static const int extraInfo = (int)sizeof(int) + IPreset::kMaxNameLen + 1;
+		return (extraInfo + presetChunkSize) * nPresets;
+	}
+
+	int GetParamsChunkSize(const int fromIdx, const int toIdx) const;
+
 	// Will append if the chunk is already started.
 	bool SerializeParams(int fromIdx, int toIdx /* up to but *not* including */, ByteChunk* pChunk) const;
 	// Returns the new chunk position (endPos).
@@ -279,9 +288,9 @@ protected:
 
 	void RedrawParamControls(); // Called after restoring state.
 
-  // ----------------------------------------
-  // Internal IPlug stuff (but API classes need to get at it).
-  
+	// ----------------------------------------
+	// Internal IPlug stuff (but API classes need to get at it).
+
   void OnParamReset();	// Calls OnParamChange(each param) + Reset().
 
   int NPresets() { return mPresets.GetSize(); }
