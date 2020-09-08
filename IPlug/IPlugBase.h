@@ -204,6 +204,9 @@ public:
 		return tempo > 0.0 ? mSampleRate * 60.0 / tempo : 0.0;
 	}
 
+	// Whether the plugin is being used for offline rendering.
+	virtual bool IsRenderingOffline() = 0;
+
 	virtual int GetHost() { return mHost; } // See EHost in Hosts.h.
 	int GetHostVersion(bool decimal); // Decimal = VVVVRRMM, otherwise 0xVVVVRRMM.
 	char* GetHostVersionStr(char* str);
