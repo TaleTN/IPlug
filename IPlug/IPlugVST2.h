@@ -28,6 +28,9 @@ public:
 	// Default implementation to mimic original IPlug VST2 behavior.
 	void OnActivate(const bool active) { if (!active) Reset(); }
 
+	bool AllocStateChunk(int chunkSize = -1);
+	bool AllocBankChunk(int chunkSize = -1);
+
   void BeginInformHostOfParamChange(int idx);
   void BeginDelayedInformHostOfParamChange(int idx);
 	void InformHostOfParamChange(int idx, double normalizedValue);

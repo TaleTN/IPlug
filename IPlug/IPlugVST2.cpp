@@ -89,6 +89,32 @@ IPlugBase(
 	SetBlockSize(kDefaultBlockSize);
 }
 
+// See InitializeVSTChunk().
+static const int kInitializeVSTChunkSize = 2 * (int)sizeof(int);
+
+bool IPlugVST2::AllocStateChunk(int chunkSize)
+{
+	if (chunkSize < 0)
+	{
+		chunkSize = GetParamsChunkSize(0, NParams());
+	}
+	chunkSize += kInitializeVSTChunkSize;
+	mState.Alloc(chunkSize);
+	return mState.Size() == chunkSize;
+}
+
+bool IPlugVST2::AllocBankChunk(int chunkSize)
+{
+	if (chunkSize < 0)
+	{
+		if (mPresetChunkSize < 0) AllocPresetChunk();
+		chunkSize = GetBankChunkSize(NPresets(), mPresetChunkSize);
+	}
+	chunkSize += kInitializeVSTChunkSize;
+	mBankState.Alloc(chunkSize);
+	return mBankState.Size() == chunkSize;
+}
+
 void IPlugVST::BeginInformHostOfParamChange(int idx)
 {
   EndDelayedInformHostOfParamChange();
