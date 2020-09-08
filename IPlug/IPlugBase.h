@@ -113,6 +113,7 @@ public:
 	int NParams() const { return mParams.GetSize(); }
 	bool NParams(const int idx) const { return (unsigned int)idx < (unsigned int)NParams(); }
 
+	IParam** GetParams() const { return mParams.GetList(); }
 	IParam* GetParam(int idx) { return mParams.Get(idx); }
 	IGraphics* GetGUI() { return mGraphics; }
   
