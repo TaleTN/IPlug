@@ -158,27 +158,23 @@ char* IPlugBase::GetHostVersionStr(char* const str)
 	return GetVersionStr(str, mHostVersion);
 }
 
-bool IPlugBase::LegalIO(int nIn, int nOut)
+bool IPlugBase::LegalIO(const int nIn, const int nOut) const
 {
-  bool legal = false;
-  int i, n = mChannelIO.GetSize();
-  for (i = 0; i < n && !legal; ++i) {
-    ChannelIO* pIO = mChannelIO.Get(i);
-    legal = ((nIn < 0 || nIn == pIO->mIn) && (nOut < 0 || nOut == pIO->mOut));
-  }
-  Trace(TRACELOC, "%d:%d:%s", nIn, nOut, (legal ? "legal" : "illegal"));
-  return legal;  
+	bool legal = false;
+	const int n = mChannelIO.GetSize();
+	const ChannelIO* const pIO = mChannelIO.Get();
+	for (int i = 0; i < n && !legal; ++i)
+	{
+		legal = (nIn < 0 || nIn == pIO[i].mIn) && (nOut < 0 || nOut == pIO[i].mOut);
+	}
+	return legal;
 }
 
 void IPlugBase::LimitToStereoIO()
 {
-  int nIn = NInChannels(), nOut = NOutChannels();
-  if (nIn > 2) {
-    SetInputChannelConnections(2, nIn - 2, false);
-  }
-  if (nOut > 2) {
-    SetOutputChannelConnections(2, nOut - 2, true);  
-  }
+	const int nIn = NInChannels(), nOut = NOutChannels();
+	if (nIn > 2) SetInputChannelConnections(2, nIn - 2, false);
+	if (nOut > 2) SetOutputChannelConnections(2, nOut - 2, true);
 }
 
 void IPlugBase::SetHost(const char* const host, const int version)
@@ -232,28 +228,28 @@ void IPlugBase::SetBlockSize(int blockSize)
 	mBlockSize = blockSize;
 }
 
-void IPlugBase::SetInputChannelConnections(int idx, int n, bool connected)
+void IPlugBase::SetInputChannelConnections(const int idx, int n, const bool connected)
 {
-  int iEnd = MIN(idx + n, mInChannels.GetSize());
-  for (int i = idx; i < iEnd; ++i) {
-    InChannel* pInChannel = mInChannels.Get(i);
-    pInChannel->mConnected = connected;
-    if (!connected) {
-      *(pInChannel->mSrc) = pInChannel->mScratchBuf.Get();
-    }
-  }
+	n += idx;
+	int iEnd = mInChannels.GetSize();
+	iEnd = wdl_min(n, iEnd);
+
+	for (int i = idx; i < iEnd; ++i)
+	{
+		mInChannels.Get(i)->SetConnection(connected);
+	}
 }
 
-void IPlugBase::SetOutputChannelConnections(int idx, int n, bool connected)
+void IPlugBase::SetOutputChannelConnections(const int idx, int n, const bool connected)
 {
-  int iEnd = MIN(idx + n, mOutChannels.GetSize());
-  for (int i = idx; i < iEnd; ++i) {
-    OutChannel* pOutChannel = mOutChannels.Get(i);
-    pOutChannel->mConnected = connected;
-    if (!connected) {
-      *(pOutChannel->mDest) = pOutChannel->mScratchBuf.Get();
-    } 
-  }
+	n += idx;
+	int iEnd = mOutChannels.GetSize();
+	iEnd = wdl_min(n, iEnd);
+
+	for (int i = idx; i < iEnd; ++i)
+	{
+		mOutChannels.Get(i)->SetConnection(connected);
+	}
 }
 
 void IPlugBase::AttachInputBuffers(const int idx, int n, const double* const* ppData, const int nFrames)

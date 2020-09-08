@@ -234,15 +234,15 @@ protected:
 	template <class SRC, class DEST> void CastCopy(DEST* pDest, const SRC* pSrc, int n);
 	template <class SRC, class DEST> static void CastCopyAccumulating(DEST* pDest, const SRC* pSrc, int n);
 
-  struct ChannelIO 
-  { 
-    int mIn, mOut; 
-    ChannelIO(int nIn, int nOut) : mIn(nIn), mOut(nOut) {}
-  };
-  WDL_PtrList<ChannelIO> mChannelIO;
-  bool LegalIO(int nIn, int nOut);    // -1 for either means check the other value only.
-  void LimitToStereoIO();
-  
+	struct ChannelIO
+	{
+		int mIn, mOut;
+		ChannelIO(const int nIn, const int nOut): mIn(nIn), mOut(nOut) {}
+	};
+	WDL_TypedBuf<ChannelIO> mChannelIO;
+	bool LegalIO(int nIn, int nOut) const; // -1 for either means check the other value only.
+	void LimitToStereoIO();
+
 	static int GetDecimalVersion(int version);
 	static char* GetVersionStr(char* str, int version);
 
@@ -354,11 +354,11 @@ protected:
   // Dump the current state as source code for a call to MakePresetFromNamedParams.
   void DumpPresetSrcCode(const char* filename, const char* paramEnumNames[]);
 
-  // Set connection state for n channels.
-  // If a channel is connected, we expect a call to attach the buffers before each process call.
-  // If a channel is not connected, we attach scratch buffers now and don't need to do anything else.
-  void SetInputChannelConnections(int idx, int n, bool connected);
-  void SetOutputChannelConnections(int idx, int n, bool connected);
+	// Set connection state for n channels.
+	// If a channel is connected, we expect a call to attach the buffers before each process call.
+	// If a channel is not connected, we attach scratch buffers now and don't need to do anything else.
+	void SetInputChannelConnections(int idx, int n, bool connected);
+	void SetOutputChannelConnections(int idx, int n, bool connected);
 
 	void AttachInputBuffers(int idx, int n, const double* const* ppData, int nFrames);
 	void AttachOutputBuffers(int idx, int n, double* const* ppData);
