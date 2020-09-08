@@ -1,25 +1,28 @@
-#ifndef _IPLUG_INCLUDE_SRC_
-#define _IPLUG_INCLUDE_SRC_
+#pragma once
 
-// Include this file in the main source for your plugin, 
+// Include this file in the main source for your plugin,
 // after #including the main header for your plugin.
 
-#if defined _WIN32
-  HINSTANCE gHInstance = 0;
-	#ifdef __MINGW32__
-	extern "C"
-	#endif
-	BOOL WINAPI DllMain(HINSTANCE hDllInst, DWORD fdwReason, LPVOID res)
-	{
-    gHInstance = hDllInst;
-    return TRUE;
-  }
-  IGraphics* MakeGraphics(IPlug* pPlug, int w, int h, int FPS = 0)
-  {
-    IGraphicsWin* pGraphics = new IGraphicsWin(pPlug, w, h, FPS);
-    pGraphics->SetHInstance(gHInstance);
-    return pGraphics;
-  }
+#ifdef _WIN32
+
+#include "IGraphicsWin.h"
+#define EXPORT __declspec(dllexport)
+
+HINSTANCE gHInstance = NULL;
+
+extern "C" BOOL WINAPI DllMain(HINSTANCE const hDllInst, DWORD /* fdwReason */, LPVOID /* res */)
+{
+	gHInstance = hDllInst;
+	return TRUE;
+}
+
+IGraphics* MakeGraphics(IPlug* const pPlug, const int w, const int h, const int FPS = 0)
+{
+	IGraphicsWin* const pGraphics = new IGraphicsWin(pPlug, w, h, FPS);
+	pGraphics->SetHInstance(gHInstance);
+	return pGraphics;
+}
+
 #elif defined __APPLE__
   IGraphics* MakeGraphics(IPlug* pPlug, int w, int h, int FPS = 0)
   {
@@ -87,6 +90,4 @@
   #define PUBLIC_NAME APPEND_TIMESTAMP(PLUG_NAME)
 #else
   #define PUBLIC_NAME PLUG_NAME
-#endif
-
 #endif

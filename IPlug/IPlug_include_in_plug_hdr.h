@@ -42,10 +42,7 @@
 	(PLUG_DOES_MIDI_OUT ? kPlugDoesMidiOut : 0) \
 )
 
-#if defined _WIN32
-  #include "IGraphicsWin.h"
-  #define EXPORT __declspec(dllexport)
-#elif defined __APPLE__
+#if defined __APPLE__
   #include "IGraphicsMac.h"
   #define EXPORT __attribute__((visibility("default")))
   #ifndef BUNDLE_DOMAIN
