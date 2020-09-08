@@ -834,6 +834,7 @@ bool IPlugBase::OnGUIRescale(int /* wantScale */)
 }
 
 #ifndef NDEBUG
+
 void IPlugBase::DebugLog(const char* format, ...)
 {
 	va_list va;
@@ -846,37 +847,44 @@ void IPlugBase::DebugLog(const char* format, ...)
 
 	IPlugDebugLog(str);
 }
-#endif
 
-void IPlugBase::DumpPresetSrcCode(const char* filename, const char* paramEnumNames[])
+void IPlugBase::DumpPresetSrcCode(const char* const paramEnumNames[], const char* const name)
 {
-  static bool sDumped = false;
-  if (!sDumped) {
-    sDumped = true;
-    int i, n = NParams();
-    FILE* fp = fopen(filename, "w");
-    fprintf(fp, "  MakePresetFromNamedParams(\"name\", %d", n - 1);
-    for (i = 0; i < n - 1; ++i) {
-      IParam* pParam = GetParam(i);
-      char paramVal[32];
-      switch (pParam->Type()) {
-        case IParam::kTypeBool:
-          sprintf(paramVal, "%s", (pParam->Bool() ? "true" : "false"));
-          break;
-        case IParam::kTypeInt: 
-          sprintf(paramVal, "%d", pParam->Int());
-          break;
-        case IParam::kTypeEnum:
-          sprintf(paramVal, "%d", pParam->Int());
-          break;
-        case IParam::kTypeDouble:
-        default:
-          sprintf(paramVal, "%.2f", pParam->Value());
-          break;
-      }
-      fprintf(fp, ",\n    %s, %s", paramEnumNames[i], paramVal);
-    }
-    fprintf(fp, ");\n");
-    fclose(fp);
-  } 
+	const int n = NParams();
+	WDL_FastString str;
+	str.SetFormatted(27 + IPreset::kMaxNameLen + 3 + 11, "MakePresetFromNamedParams(\"%s\", %d", name, n);
+	for (int i = 0; i < n; ++i)
+	{
+		str.AppendFormatted(3 + (int)strlen(paramEnumNames[i]) + 2, ",\n\t%s, ", paramEnumNames[i]);
+		const IParam* const pParam = GetParam(i);
+		const int type = pParam->Type();
+		switch (type)
+		{
+			case IParam::kTypeBool:
+			{
+				str.Append(((IBoolParam*)pParam)->Bool() ? "true" : "false");
+				break;
+			}
+			case IParam::kTypeInt:
+			case IParam::kTypeEnum:
+			{
+				const int v = type == IParam::kTypeInt ? ((IIntParam*)pParam)->Int() : ((IEnumParam*)pParam)->Int();
+				str.AppendFormatted(11, "%d", v);
+				break;
+			}
+			default:
+			{
+				const double v = type == IParam::kTypeDouble ? ((IDoubleParam*)pParam)->Value() : pParam->GetNormalized();
+				const int idx = str.GetLength();
+				str.AppendFormatted(24, "%.17g", v);
+				if (!strchr(str.Get() + idx, '.')) str.Append(".0");
+				break;
+			}
+		}
+	}
+	str.Append(");");
+
+	IPlugDebugLog(str.Get());
 }
+
+#endif // NDEBUG

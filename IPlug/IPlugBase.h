@@ -351,8 +351,10 @@ protected:
 	// Returns the new chunk position (endPos).
 	int UnserializePresets(int fromIdx, int toIdx, const ByteChunk* pChunk, int startPos);
 
-  // Dump the current state as source code for a call to MakePresetFromNamedParams.
-  void DumpPresetSrcCode(const char* filename, const char* paramEnumNames[]);
+	#ifndef NDEBUG
+	// Dump the current state as source code for a call to MakePresetFromNamedParams().
+	void DumpPresetSrcCode(const char* const paramEnumNames[], const char* name = "name");
+	#endif
 
 	// Set connection state for n channels.
 	// If a channel is connected, we expect a call to attach the buffers before each process call.
