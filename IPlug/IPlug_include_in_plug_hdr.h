@@ -1,21 +1,19 @@
-#ifndef _IPLUG_INCLUDE_HDR_
-#define _IPLUG_INCLUDE_HDR_
+#pragma once
 
-// Include this file in the main header for your plugin, 
-// after #defining either VST_API or AU_API.
+// Include this file in the main header for your plugin.
 
 #include "resource.h" // This is your plugin's resource.h.
 
-#if defined VST_API
-  #include "IPlugVST.h"
-  typedef IPlugVST IPlug;
-  #define API_EXT "vst"
+#ifdef VST2_API
+	#include "IPlugVST2.h"
+	typedef IPlugVST2 IPlug;
+	#define API_EXT "vst"
 #elif defined AU_API
-  #include "IPlugAU.h"
-  typedef IPlugAU IPlug;
-  #define API_EXT "audiounit"
+	#include "IPlugAU.h"
+	typedef IPlugAU IPlug;
+	#define API_EXT "audiounit"
 #else
-  #error "No API defined!"
+	#error "No API defined!"
 #endif
 
 #if defined _WIN32
@@ -30,6 +28,4 @@
   #define BUNDLE_ID BUNDLE_DOMAIN "." API_EXT "." BUNDLE_NAME
 #else
   #error "No OS defined!"
-#endif
-
 #endif
