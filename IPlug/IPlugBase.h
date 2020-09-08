@@ -194,11 +194,16 @@ public:
 		return pOutChannel && pOutChannel->mConnected;
 	}
 
-	virtual int GetSamplePos() = 0;   // Samples since start of project.
+	virtual double GetSamplePos() = 0; // Samples since start of project.
 	virtual double GetTempo() = 0;
-	double GetSamplesPerBeat();
 	virtual void GetTimeSig(int* pNum, int* pDenom) = 0;
-  
+
+	double GetSamplesPerBeat()
+	{
+		const double tempo = GetTempo();
+		return tempo > 0.0 ? mSampleRate * 60.0 / tempo : 0.0;
+	}
+
 	virtual int GetHost() { return mHost; } // See EHost in Hosts.h.
 	int GetHostVersion(bool decimal); // Decimal = VVVVRRMM, otherwise 0xVVVVRRMM.
 	char* GetHostVersionStr(char* str);

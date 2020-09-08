@@ -188,15 +188,6 @@ void IPlugBase::AttachGraphics(IGraphics* pGraphics)
 	}
 }
 
-double IPlugBase::GetSamplesPerBeat()
-{
-	double tempo = GetTempo();
-	if (tempo > 0.0) {
-		return GetSampleRate() * 60.0 / tempo;	
-	}
-	return 0.0;
-}
-
 void IPlugBase::SetBlockSize(int blockSize)
 {
 	assert(blockSize >= 0);
