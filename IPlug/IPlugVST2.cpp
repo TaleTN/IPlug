@@ -11,7 +11,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "WDL/wdlcstring.h"
 #include "WDL/wdltypes.h"
+
+#define vst_strncpy(y, x, n) lstrcpyn_safe(y, x, (n) + 1)
 
 const int VST_VERSION = 2400;
 
@@ -353,14 +356,15 @@ static double VSTString2Parameter(const IParam* const pParam, const char* const 
 	return v;
 }
 
-VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode, VstInt32 idx, VstIntPtr value, void *ptr, float opt)
+VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const VstInt32 opCode, const VstInt32 idx, const VstIntPtr value, void* const ptr, const float opt)
 {
-	// VSTDispatcher is an IPlugVST class member, we can access anything in IPlugVST from here.
-	IPlugVST* _this = (IPlugVST*) pEffect->object;
-	if (!_this) {
-		return 0;
-	}
-  IPlugBase::IMutexLock lock(_this);
+	VstIntPtr ret = 0;
+
+	// VSTDispatcher is an IPlugVST2 class member, we can access anything in IPlugVST2 from here.
+	IPlugVST2* const _this = (IPlugVST2*)pEffect->object;
+	if (!_this) return ret;
+
+	_this->mMutex.Enter();
 
   // Handle a couple of opcodes here to make debugging easier.
   switch (opCode) {
@@ -372,10 +376,8 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
     	return 0;
   }
 
-  Trace(TRACELOC, "%d(%s):%d:%d", opCode, VSTOpcodeStr(opCode), idx, (int) value);
-
-  switch (opCode) {
-
+	switch (opCode)
+	{
     case effOpen: {
       _this->HostSpecificInit();
 	    _this->OnParamReset();
@@ -779,10 +781,10 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
     case effGetMidiProgramCategory: 
     case effGetCurrentMidiProgram:
     case effSetBypass:
-    default: {
-	    return 0;
-    }
 	}
+
+	_this->mMutex.Leave();
+	return ret;
 }
 
 template <class SAMPLETYPE>
