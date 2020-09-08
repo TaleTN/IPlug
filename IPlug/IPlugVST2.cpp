@@ -673,32 +673,32 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
-	  case effGetInputProperties: {
-      if (ptr && idx >= 0 && idx < _this->NInChannels()) {
-        VstPinProperties* pp = (VstPinProperties*) ptr;
-        pp->flags = kVstPinIsActive;
-        if (!(idx%2) && idx < _this->NInChannels()-1)
-        {
-          pp->flags |= kVstPinIsStereo;
-        }
-        sprintf(pp->label, "Input %d", idx + 1);
-        return 1;
-      }
-      return 0;
-    }
-    case effGetOutputProperties: {
-	    if (ptr && idx >= 0 && idx < _this->NOutChannels()) {
-		    VstPinProperties* pp = (VstPinProperties*) ptr;
-			  pp->flags = kVstPinIsActive;
-        if (!(idx%2) && idx < _this->NOutChannels()-1)
-        {
-			  	pp->flags |= kVstPinIsStereo;
-			  }
-		    sprintf(pp->label, "Output %d", idx + 1);
-		    return 1;
-	    }
-	    return 0;
-    }
+		case effGetInputProperties:
+		{
+			if (ptr && _this->NInChannels(idx))
+			{
+				VstPinProperties* const pp = (VstPinProperties*)ptr;
+				const int i = idx + 1;
+				sprintf(pp->label, "Input %d", i);
+				pp->flags = (i & 1) & (i < _this->NInChannels()) ? kVstPinIsActive | kVstPinIsStereo : kVstPinIsActive;
+				ret = 1;
+			}
+			break;
+		}
+
+		case effGetOutputProperties:
+		{
+			if (ptr && _this->NOutChannels(idx))
+			{
+				VstPinProperties* const pp = (VstPinProperties*)ptr;
+				const int i = idx + 1;
+				sprintf(pp->label, "Output %d", i);
+				pp->flags = (i & 1) & (i < _this->NOutChannels()) ? kVstPinIsActive | kVstPinIsStereo : kVstPinIsActive;
+				ret = 1;
+			}
+			break;
+		}
+
     case effGetPlugCategory: {
       if (_this->IsInst()) return kPlugCategSynth;
 	    return kPlugCategEffect;
