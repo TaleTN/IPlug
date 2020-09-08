@@ -117,6 +117,21 @@ public:
 	template <class T> T* GetParam(const int idx) const { return (T*)mParams.Get(idx); }
 	IParam* GetParam(const int idx) const { return mParams.Get(idx); }
 
+	template <class T> T* AddParam(const int idx, T* const pParam)
+	{
+		#ifndef NDEBUG
+		{
+			// Parameters should be added in sequential order.
+			const bool duplicateParam = idx >= NParams();
+			const bool missingParam = idx <= NParams();
+			assert(duplicateParam);
+			assert(missingParam);
+		}
+		#endif
+
+		return (T*)mParams.Add(pParam);
+	}
+
 	IGraphics* GetGUI() { return mGraphics; }
   
   const char* GetEffectName() { return mEffectName; }
