@@ -16,6 +16,32 @@
 	#error "No API defined!"
 #endif
 
+#ifndef PLUG_PRODUCT
+	#define PLUG_PRODUCT ""
+#endif
+
+#if PLUG_DOES_MIDI
+	#define PLUG_DOES_MIDI_IN  1
+	#define PLUG_DOES_MIDI_OUT 1
+#endif
+
+#define IPLUG_CTOR(nParams, nPresets, instanceInfo) IPlug( \
+	instanceInfo, \
+	nParams, \
+	PLUG_CHANNEL_IO, \
+	nPresets, \
+	PLUG_NAME, \
+	PLUG_PRODUCT, \
+	PLUG_MFR, \
+	PLUG_VER, \
+	PLUG_UNIQUE_ID, \
+	PLUG_MFR_ID, \
+	PLUG_LATENCY, \
+	(PLUG_IS_INST ? kPlugIsInst : 0) | \
+	(PLUG_DOES_MIDI_IN ? kPlugDoesMidiIn : 0) | \
+	(PLUG_DOES_MIDI_OUT ? kPlugDoesMidiOut : 0) \
+)
+
 #if defined _WIN32
   #include "IGraphicsWin.h"
   #define EXPORT __declspec(dllexport)
