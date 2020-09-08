@@ -22,8 +22,11 @@ public:
 		int plugDoes
 	);
 
-  // ----------------------------------------
-  // See IPlugBase for the full list of methods that your plugin class can implement.
+	// ----------------------------------------
+	// See IPlugBase for the full list of methods that your plugin class can implement.
+
+	// Default implementation to mimic original IPlug VST2 behavior.
+	void OnActivate(const bool active) { if (!active) Reset(); }
 
   void BeginInformHostOfParamChange(int idx);
   void BeginDelayedInformHostOfParamChange(int idx);
