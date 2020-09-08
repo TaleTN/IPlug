@@ -55,10 +55,10 @@ public:
   
   virtual ~IPlugBase();
 
-  // Implementations should set a mutex lock like in the no-op!
-	virtual void Reset() { TRACE; IMutexLock lock(this); }
-	virtual void OnParamChange(int paramIdx) { IMutexLock lock(this); }
-	
+	// Mutex is already locked.
+	virtual void Reset() {} // Called (at least) once.
+	virtual void OnParamChange(int paramIdx) {}
+
 	// Default passthrough.  Inputs and outputs are [nChannel][nSample].
   // Mutex is already locked.
 	virtual void ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames);
@@ -73,10 +73,9 @@ public:
   // Only active if USE_IDLE_CALLS is defined.
 	virtual void OnIdle() {}
 
-  // Not usually needed ... Reset is called on activate regardless of whether this is implemented.
-  // Also different hosts have different interpretations of "activate".
-  // Implementations should set a mutex lock like in the no-op!  
-  virtual void OnActivate(bool active) { TRACE;  IMutexLock lock(this); }
+	// Not usually needed... Also different hosts have different interpretations of "activate".
+	// Mutex is already locked.
+	virtual void OnActivate(bool active) {}
     
 	virtual void ProcessMidiMsg(IMidiMsg* pMsg) {}
 	virtual void ProcessSysEx(ISysEx* pSysEx) {}
@@ -268,18 +267,8 @@ protected:
 
   int mParamChangeIdx;
 
-public:
-  
-  WDL_Mutex mMutex;
+	WDL_Mutex mMutex;
 
-  struct IMutexLock 
-  {
-    WDL_Mutex* mpMutex;
-    IMutexLock(IPlugBase* pPlug) : mpMutex(&(pPlug->mMutex)) { mpMutex->Enter(); }
-    ~IMutexLock() { if (mpMutex) { mpMutex->Leave(); } }
-    void Destroy() { mpMutex->Leave(); mpMutex = 0; }
-  };
- 
 private:
 
   char mEffectName[MAX_EFFECT_NAME_LEN], mProductName[MAX_PRODUCT_NAME_LEN], mMfrName[MAX_MFR_NAME_LEN];
