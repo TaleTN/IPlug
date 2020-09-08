@@ -115,35 +115,25 @@ bool IPlugVST2::AllocBankChunk(int chunkSize)
 	return mBankState.Size() == chunkSize;
 }
 
-void IPlugVST::BeginInformHostOfParamChange(int idx)
+void IPlugVST2::BeginInformHostOfParamChange(const int idx)
 {
-  EndDelayedInformHostOfParamChange();
-  mHostCallback(&mAEffect, audioMasterBeginEdit, idx, 0, 0, 0.0f);
+	EndDelayedInformHostOfParamChange();
+	mHostCallback(&mAEffect, audioMasterBeginEdit, idx, 0, NULL, 0.0f);
 }
 
-void IPlugVST::BeginDelayedInformHostOfParamChange(int idx)
+void IPlugVST2::InformHostOfParamChange(const int idx, const double normalizedValue)
 {
-  IMutexLock lock(this);
-
-  if (idx != mParamChangeIdx) {
-    EndDelayedInformHostOfParamChange();
-    mHostCallback(&mAEffect, audioMasterBeginEdit, idx, 0, 0, 0.0f);
-  }
+	mHostCallback(&mAEffect, audioMasterAutomate, idx, 0, NULL, (float)normalizedValue);
 }
 
-void IPlugVST::InformHostOfParamChange(int idx, double normalizedValue)
+void IPlugVST2::EndInformHostOfParamChange(const int idx)
 {
-	mHostCallback(&mAEffect, audioMasterAutomate, idx, 0, 0, (float) normalizedValue);
+	mHostCallback(&mAEffect, audioMasterEndEdit, idx, 0, NULL, 0.0f);
 }
 
-void IPlugVST::EndInformHostOfParamChange(int idx)
+void IPlugVST2::InformHostOfProgramChange()
 {
-  mHostCallback(&mAEffect, audioMasterEndEdit, idx, 0, 0, 0.0f);
-}
-
-void IPlugVST::InformHostOfProgramChange()
-{
-	mHostCallback(&mAEffect, audioMasterUpdateDisplay, 0, 0, 0, 0.0f);
+	mHostCallback(&mAEffect, audioMasterUpdateDisplay, 0, 0, NULL, 0.0f);
 }
 
 inline VstTimeInfo* GetTimeInfo(audioMasterCallback hostCallback, AEffect* pAEffect, int filter = 0)

@@ -31,10 +31,9 @@ public:
 	bool AllocStateChunk(int chunkSize = -1);
 	bool AllocBankChunk(int chunkSize = -1);
 
-  void BeginInformHostOfParamChange(int idx);
-  void BeginDelayedInformHostOfParamChange(int idx);
+	void BeginInformHostOfParamChange(int idx);
 	void InformHostOfParamChange(int idx, double normalizedValue);
-  void EndInformHostOfParamChange(int idx);
+	void EndInformHostOfParamChange(int idx);
 
 	void InformHostOfProgramChange();
 	
