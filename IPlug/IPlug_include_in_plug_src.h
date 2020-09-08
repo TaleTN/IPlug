@@ -23,16 +23,25 @@ IGraphics* MakeGraphics(IPlug* const pPlug, const int w, const int h, const int 
 	return pGraphics;
 }
 
-#elif defined __APPLE__
-  IGraphics* MakeGraphics(IPlug* pPlug, int w, int h, int FPS = 0)
-  {
-    IGraphicsMac* pGraphics = new IGraphicsMac(pPlug, w, h, FPS);
-    pGraphics->SetBundleID(BUNDLE_ID);
-    return pGraphics;
-  }   
-#else 
-  #error "No OS defined!"
-#endif 
+#elif defined(__APPLE__)
+
+#include "IGraphicsMac.h"
+#define EXPORT __attribute__((visibility("default")))
+#ifndef BUNDLE_DOMAIN
+	#define BUNDLE_DOMAIN "com." BUNDLE_MFR
+#endif
+#define BUNDLE_ID BUNDLE_DOMAIN "." API_EXT "." BUNDLE_NAME
+
+IGraphics* MakeGraphics(IPlug* const pPlug, const int w, const int h, const int FPS = 0)
+{
+	IGraphicsMac* const pGraphics = new IGraphicsMac(pPlug, w, h, FPS);
+	pGraphics->SetBundleID(BUNDLE_ID);
+	return pGraphics;
+}
+
+#else
+	#error "No OS defined!"
+#endif
 
 #if defined VST_API
   extern "C"

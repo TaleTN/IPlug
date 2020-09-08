@@ -41,14 +41,3 @@
 	(PLUG_DOES_MIDI_IN ? kPlugDoesMidiIn : 0) | \
 	(PLUG_DOES_MIDI_OUT ? kPlugDoesMidiOut : 0) \
 )
-
-#if defined __APPLE__
-  #include "IGraphicsMac.h"
-  #define EXPORT __attribute__((visibility("default")))
-  #ifndef BUNDLE_DOMAIN
-    #define BUNDLE_DOMAIN "com." BUNDLE_MFR
-  #endif
-  #define BUNDLE_ID BUNDLE_DOMAIN "." API_EXT "." BUNDLE_NAME
-#else
-  #error "No OS defined!"
-#endif
