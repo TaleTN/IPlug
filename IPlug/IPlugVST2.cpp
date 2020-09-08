@@ -1,6 +1,8 @@
 #include "IPlugVST2.h"
 #include "IGraphics.h"
+
 #include <stdio.h>
+#include <string.h>
 
 const int VST_VERSION = 2400;
 
@@ -14,63 +16,81 @@ int VSTSpkrArrType(int nchan)
 }
 
 
-IPlugVST::IPlugVST(IPlugInstanceInfo instanceInfo, int nParams, const char* channelIOStr, int nPresets,
-	const char* effectName, const char* productName, const char* mfrName,
-	int vendorVersion, int uniqueID, int mfrID, int latency, 
-  int plugDoesMidi, bool plugDoesChunks, bool plugIsInst)
-: IPlugBase(nParams, channelIOStr, nPresets, effectName, productName, mfrName,
-    vendorVersion, uniqueID, mfrID, latency,
-    plugDoesMidi, plugDoesChunks, plugIsInst),
-    mHostCallback(instanceInfo.mVSTHostCallback), mHostSpecificInitDone(false)
+IPlugVST2::IPlugVST2(
+	void* const instanceInfo,
+	const int nParams,
+	const char* const channelIOStr,
+	const int nPresets,
+	const char* const effectName,
+	const char* const productName,
+	const char* const mfrName,
+	const int vendorVersion,
+	const int uniqueID,
+	const int mfrID,
+	const int latency,
+	const int plugDoes
+):
+IPlugBase(
+	nParams,
+	channelIOStr,
+	nPresets,
+	effectName,
+	productName,
+	mfrName,
+	vendorVersion,
+	uniqueID,
+	mfrID,
+	latency,
+	plugDoes)
 {
-  Trace(TRACELOC, "%s", effectName);
+	const int nInputs = NInChannels(), nOutputs = NOutChannels();
 
-  mHasVSTExtensions = VSTEXT_NONE;
+	memset(&mEditRect, 0, sizeof(ERect));
+	mHostCallback = (audioMasterCallback)instanceInfo;
 
-  int nInputs = NInChannels(), nOutputs = NOutChannels();
+	memset(&mInputSpkrArr, 0, sizeof(VstSpeakerArrangement));
+	mInputSpkrArr.type = VSTSpkrArrType(nInputs);
+	mInputSpkrArr.numChannels = nInputs;
+
+	memset(&mOutputSpkrArr, 0, sizeof(VstSpeakerArrangement));
+	mOutputSpkrArr.type = VSTSpkrArrType(nOutputs);
+	mOutputSpkrArr.numChannels = nOutputs;
+
+	mHostSpecificInitDone = false;
+	mHasVSTExtensions = VSTEXT_NONE;
 
 	memset(&mAEffect, 0, sizeof(AEffect));
-	mAEffect.object = this;
 	mAEffect.magic = kEffectMagic;
 	mAEffect.dispatcher = VSTDispatcher;
-	mAEffect.getParameter = VSTGetParameter;
+	mAEffect.DECLARE_VST_DEPRECATED(process) = VSTProcess;
 	mAEffect.setParameter = VSTSetParameter;
+	mAEffect.getParameter = VSTGetParameter;
 	mAEffect.numPrograms = nPresets;
 	mAEffect.numParams = nParams;
 	mAEffect.numInputs = nInputs;
 	mAEffect.numOutputs = nOutputs;
+
+	mAEffect.flags = effFlagsCanReplacing | effFlagsCanDoubleReplacing
+	#ifndef IPLUG_NO_STATE_CHUNKS
+	| effFlagsProgramChunks
+	#endif
+	;
+	if (LegalIO(1, -1)) mAEffect.flags |= DECLARE_VST_DEPRECATED(effFlagsCanMono);
+	if (plugDoes & kPlugIsInst) mAEffect.flags |= effFlagsIsSynth;
+
+	mAEffect.initialDelay = latency;
+	mAEffect.DECLARE_VST_DEPRECATED(ioRatio) = 1.0f;
+	mAEffect.object = this;
 	mAEffect.uniqueID = uniqueID;
 	mAEffect.version = GetEffectVersion(true);
-	mAEffect.__ioRatioDeprecated = 1.0f;
-	mAEffect.__processDeprecated = VSTProcess;
 	mAEffect.processReplacing = VSTProcessReplacing;
 	mAEffect.processDoubleReplacing = VSTProcessDoubleReplacing;
-	mAEffect.initialDelay = latency;
-	mAEffect.flags = effFlagsCanReplacing | effFlagsCanDoubleReplacing;
-  if (plugDoesChunks) {
-    mAEffect.flags |= effFlagsProgramChunks;
-  }
-  if (LegalIO(1, -1)) {
-    mAEffect.flags |= __effFlagsCanMonoDeprecated;
-  }
-  if (plugIsInst) {
-    mAEffect.flags |= effFlagsIsSynth;
-  }
 
-  memset(&mEditRect, 0, sizeof(ERect));
+	// Default everything to connected, then disconnect pins if the host says to.
+	SetInputChannelConnections(0, nInputs, true);
+	SetOutputChannelConnections(0, nOutputs, true);
 
-  memset(&mInputSpkrArr, 0, sizeof(VstSpeakerArrangement));
-  memset(&mOutputSpkrArr, 0, sizeof(VstSpeakerArrangement));
-  mInputSpkrArr.numChannels = nInputs;
-  mOutputSpkrArr.numChannels = nOutputs;
-  mInputSpkrArr.type = VSTSpkrArrType(nInputs);
-  mOutputSpkrArr.type = VSTSpkrArrType(nOutputs);
-
-  // Default everything to connected, then disconnect pins if the host says to.
-  SetInputChannelConnections(0, nInputs, true);
-  SetOutputChannelConnections(0, nOutputs, true);  
-  
-  SetBlockSize(DEFAULT_BLOCK_SIZE);
+	SetBlockSize(kDefaultBlockSize);
 }
 
 void IPlugVST::BeginInformHostOfParamChange(int idx)
