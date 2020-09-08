@@ -180,6 +180,20 @@ protected:
 		return (mPlugFlags & plugInit) == plugInit;
 	}
 
+	enum EPlugFlags
+	{
+		kPlugFlagsActive = 32,
+		kPlugFlagsBypass = 64,
+		kPlugFlagsOffline = 128
+	};
+
+	inline bool IsActive() const { return !!(mPlugFlags & kPlugFlagsActive); }
+	inline bool IsBypassed() const { return !!(mPlugFlags & kPlugFlagsBypass); }
+
+	// Returns state after last IsRenderingOffline() call;
+	// to update state call IsRenderingOffline().
+	inline bool IsOffline() const { return !!(mPlugFlags & kPlugFlagsOffline); }
+
 	virtual void AttachGraphics(IGraphics* pGraphics);
   
   void SetSampleRate(double sampleRate);
@@ -274,7 +288,7 @@ private:
   EHost mHost;
   int mHostVersion;   //  Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
 
-	int mPlugFlags; // See EPlugDoes, EPlugInit.
+	int mPlugFlags; // See EPlugDoes, EPlugInit, EPlugFlags.
   double WDL_FIXALIGN mSampleRate;
   int mBlockSize, mLatency;
 
