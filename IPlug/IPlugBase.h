@@ -224,7 +224,17 @@ protected:
   void MakePresetFromNamedParams(char* name, int nParamsNamed, ...);
   void MakePresetFromChunk(char* name, ByteChunk* pChunk);
 
-  bool DoesStateChunks() { return mStateChunks; }
+	// Define IPLUG_NO_STATE_CHUNKS for compatability with original IPlug
+	// with state chunks disabled.
+	static inline bool DoesStateChunks()
+	{
+		#ifdef IPLUG_NO_STATE_CHUNKS
+		return false;
+		#else
+		return true;
+		#endif
+	}
+
   // Will append if the chunk is already started.
   virtual bool SerializeParams(ByteChunk* pChunk);
   // Returns the new chunk position (endPos).
