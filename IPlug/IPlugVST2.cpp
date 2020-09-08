@@ -319,25 +319,24 @@ void IPlugVST2::HostSpecificInit()
 	}
 }
 
-#define IPLUG_VERSION_MAGIC 'pfft'
+static const int IPLUG_VERSION_MAGIC = 'pfft';
 
-void InitializeVSTChunk(ByteChunk* pChunk)
+static void InitializeVSTChunk(ByteChunk* const pChunk)
 {
-  pChunk->Clear();
-  int magic = IPLUG_VERSION_MAGIC;
-  pChunk->Put(&magic);
-  int ver = IPLUG_VERSION;
-  pChunk->Put(&ver);
+	pChunk->Clear();
+	pChunk->PutInt32(IPLUG_VERSION_MAGIC);
+	pChunk->PutInt32(IPlugBase::kIPlugVersion);
 }
 
-int GetIPlugVerFromChunk(ByteChunk* pChunk, int* pPos)
+static int GetIPlugVerFromChunk(const ByteChunk* const pChunk, int* const pPos)
 {
-  int magic = 0, ver = 0;
-  int pos = pChunk->Get(&magic, *pPos);
-  if (pos > *pPos && magic == IPLUG_VERSION_MAGIC) {
-    *pPos = pChunk->Get(&ver, pos);
-  }
-  return ver;
+	int magic, ver = 0;
+	const int pos = pChunk->GetInt32(&magic, *pPos);
+	if (pos > *pPos && magic == IPLUG_VERSION_MAGIC)
+	{
+		*pPos = pChunk->GetInt32(&ver, pos);
+	}
+	return ver;
 }
 
 double VSTString2Parameter(IParam* pParam, char* ptr)

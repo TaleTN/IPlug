@@ -73,8 +73,8 @@ private:
   enum { VSTEXT_NONE=0, VSTEXT_COCKOS, VSTEXT_COCOA }; // list of VST extensions supported by host
   int mHasVSTExtensions;
   
-  ByteChunk mState;     // Persistent storage if the host asks for plugin state.
-  ByteChunk mBankState; // Persistent storage if the host asks for bank state.
+	ByteChunk mState;     // Persistent storage if the host asks for plugin state.
+	ByteChunk mBankState; // Persistent storage if the host asks for bank state.
 
 	AEffect mAEffect;
 
