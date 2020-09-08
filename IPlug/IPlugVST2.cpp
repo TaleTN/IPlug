@@ -705,24 +705,29 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effSetSpeakerArrangement:
+		{
+			VstSpeakerArrangement* const pInputArr = (VstSpeakerArrangement*)value;
+			VstSpeakerArrangement* const pOutputArr = (VstSpeakerArrangement*)ptr;
+			if (pInputArr)
+			{
+				const int n = pInputArr->numChannels;
+				_this->SetInputChannelConnections(0, n, true);
+				_this->SetInputChannelConnections(n, _this->NInChannels() - n, false);
+			}
+			if (pOutputArr)
+			{
+				const int n = pOutputArr->numChannels;
+				_this->SetOutputChannelConnections(0, n, true);
+				_this->SetOutputChannelConnections(n, _this->NOutChannels() - n, false);
+			}
+			ret = 1;
+			break;
+		}
+
     case effProcessVarIo: {
 	    // VstVariableIo* pIO = (VstVariableIo*) ptr;		// For offline processing (of audio files?)
 	    return 0;
-    }
-    case effSetSpeakerArrangement: {
-	    VstSpeakerArrangement* pInputArr = (VstSpeakerArrangement*) value;
-	    VstSpeakerArrangement* pOutputArr = (VstSpeakerArrangement*) ptr;
-	    if (pInputArr) {
-        int n = pInputArr->numChannels;
-        _this->SetInputChannelConnections(0, n, true);
-        _this->SetInputChannelConnections(n, _this->NInChannels() - n, false);
-      }
-	    if (pOutputArr) {
-        int n = pOutputArr->numChannels;
-        _this->SetOutputChannelConnections(0, n, true);
-        _this->SetOutputChannelConnections(n, _this->NOutChannels() - n, false);
-	    }
-	    return 1;
     }
     case effGetSpeakerArrangement: {
 	    VstSpeakerArrangement** ppInputArr = (VstSpeakerArrangement**) value;
