@@ -537,6 +537,75 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effGetChunk:
+		{
+			void** const ppData = (void**)ptr;
+			if (ppData)
+			{
+				const bool isBank = !idx;
+				ByteChunk* const pChunk = isBank ? &_this->mBankState : &_this->mState;
+				if (!pChunk->Size())
+				{
+					const bool allocOK = isBank ? _this->AllocBankChunk() : _this->AllocStateChunk();
+					if (!allocOK) break;
+				}
+				InitializeVSTChunk(pChunk);
+				bool savedOK;
+				if (isBank)
+				{
+					_this->ModifyCurrentPreset();
+					savedOK = _this->SerializeBank(pChunk);
+				}
+				else
+				{
+					savedOK = _this->SerializeState(pChunk);
+				}
+				void* const pData = pChunk->GetBytes();
+				const int size = pChunk->Size();
+				if (savedOK && size)
+				{
+					*ppData = pData;
+					ret = size;
+				}
+			}
+			break;
+		}
+
+		case effSetChunk:
+		{
+			if (ptr)
+			{
+				const bool isBank = !idx;
+				ByteChunk* const pChunk = isBank ? &_this->mBankState : &_this->mState;
+				const int size = (int)value;
+				if (pChunk->Size() != size)
+				{
+					pChunk->Resize(size);
+					if (pChunk->Size() != size) break;
+				}
+				memcpy(pChunk->GetBytes(), ptr, size);
+				int pos = 0;
+				const int iplugVer = GetIPlugVerFromChunk(pChunk, &pos);
+				if (isBank & (iplugVer >= 0x010000))
+				{
+					pos = _this->UnserializeBank(pChunk, pos);
+					_this->RestorePreset();
+				}
+				else
+				{
+					pos = _this->UnserializeState(pChunk, pos);
+					_this->OnParamReset();
+					_this->ModifyCurrentPreset();
+				}
+				if (pos >= 0)
+				{
+					_this->RedrawParamControls();
+					ret = 1;
+				}
+			}
+			break;
+		}
+
     case effString2Parameter:
     {
       if (idx >= 0 && idx < _this->NParams())
@@ -552,52 +621,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
         return 1;
       }
       return 0;
-    }
-    case effGetChunk: {
-	    BYTE** ppData = (BYTE**) ptr;
-      if (ppData) {
-        bool isBank = (!idx);
-        ByteChunk* pChunk = (isBank ? &(_this->mBankState) : &(_this->mState));
-        InitializeVSTChunk(pChunk);
-        bool savedOK = true;
-        if (isBank) {
-          _this->ModifyCurrentPreset();
-          savedOK = _this->SerializePresets(pChunk);
-          //savedOK = _this->SerializeState(pChunk);
-        }
-        else {
-          savedOK = _this->SerializeState(pChunk);
-        }
-        if (savedOK && pChunk->Size()) {
-          *ppData = pChunk->GetBytes();
-          return pChunk->Size();
-        }
-      }
-      return 0;
-    }
-    case effSetChunk: {
-      if (ptr) {
-        bool isBank = (!idx);
-        ByteChunk* pChunk = (isBank ? &(_this->mBankState) : &(_this->mState));
-        pChunk->Resize(value);
-        memcpy(pChunk->GetBytes(), ptr, value);
-        int pos = 0;
-        int iplugVer = GetIPlugVerFromChunk(pChunk, &pos);
-        isBank &= (iplugVer >= 0x010000);
-        if (isBank) {
-          pos = _this->UnserializePresets(pChunk, pos);
-          //pos = _this->UnserializeState(pChunk, pos);
-        }
-        else {
-          pos = _this->UnserializeState(pChunk, pos);
-          _this->ModifyCurrentPreset();
-        }
-        if (pos >= 0) {
-          _this->RedrawParamControls();
-		      return 1;
-	      }
-      }
-	    return 0;
     }
     case effProcessEvents: {
 	    VstEvents* pEvents = (VstEvents*) ptr;
