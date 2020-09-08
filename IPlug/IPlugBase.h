@@ -61,10 +61,14 @@ public:
 	// Mutex is already locked.
 	virtual void ProcessDoubleReplacing(const double* const* inputs, double* const* outputs, int nFrames);
 
+	// Call GetGUI()->SetScale(wantScale) to set scale, then load bitmaps
+	// that depend on GUI size. Return true to notify controls of rescale.
+	virtual bool OnGUIRescale(int wantScale); // See IGraphics::EGUIScale.
+
 	// In case the audio processing thread needs to do anything when the GUI opens
 	// (like for example, set some state dependent initial values for controls).
-	virtual void OnGUIOpen() { TRACE; }
-	virtual void OnGUIClose() { TRACE; }
+	virtual void OnGUIOpen() {}
+	virtual void OnGUIClose() {}
 
 	// This is an idle call from the audio processing thread, as opposed to
 	// IGraphics::OnGUIIdle which is called from the GUI thread.
@@ -139,14 +143,14 @@ public:
 	int GetHostVersion(bool decimal); // Decimal = VVVVRRMM, otherwise 0xVVVVRRMM.
   void GetHostVersionStr(char* str);
   
-  // Tell the host that the graphics resized.
-  // Should be called only by the graphics object when it resizes itself.
-  virtual void ResizeGraphics(int w, int h) = 0;
-  
-  // Not fully supported.  A call back from the host saying the user has resized the window.
-  // If the plugin supports different sizes, it may wish to resize.
-  virtual void UserResizedWindow(IRECT* pR) {}
-    
+	// Tell the host that the graphics resized.
+	// Should be called only by the graphics object when it resizes itself.
+	virtual void ResizeGraphics(int w, int h) = 0;
+
+	// Not fully supported. A call back from the host saying the user has resized the window.
+	// If the plugin supports different sizes, it may wish to resize.
+	// virtual void UserResizedWindow(const IRECT* pR) {}
+
   void EnsureDefaultPreset();
   
 protected:

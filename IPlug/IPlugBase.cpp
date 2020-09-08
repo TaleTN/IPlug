@@ -761,6 +761,12 @@ void IPlugBase::RedrawParamControls()
   }
 }
 
+bool IPlugBase::OnGUIRescale(int /* wantScale */)
+{
+	GetGUI()->Rescale(IGraphics::kScaleFull);
+	return true;
+}
+
 void IPlugBase::DumpPresetSrcCode(const char* filename, const char* paramEnumNames[])
 {
   static bool sDumped = false;
