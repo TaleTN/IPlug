@@ -307,7 +307,9 @@ protected:
 
 	void OnParamReset(); // Calls OnParamChange(each param).
 
-  int NPresets() { return mPresets.GetSize(); }
+	int NPresets() const { return mPresets.GetSize(); }
+	bool NPresets(const int idx) const { return (unsigned int)idx < (unsigned int)NPresets(); }
+
   int GetCurrentPresetIdx() { return mCurrentPresetIdx; }
   void PruneUninitializedPresets();
   bool RestorePreset(int idx);
