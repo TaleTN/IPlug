@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 
 template <class SRC, class DEST> 
 void CastCopy(DEST* pDest, SRC* pSrc, int n)
@@ -43,18 +42,36 @@ void GetVersionStr(int version, char* str)
   //}
 }
 
-IPlugBase::IPlugBase(int nParams, const char* channelIOStr, int nPresets,
-	const char* effectName, const char* productName, const char* mfrName,
-	int vendorVersion, int uniqueID, int mfrID, int latency, 
-  int plugDoesMidi, bool plugDoesChunks, bool plugIsInst)
-: mUniqueID(uniqueID), mMfrID(mfrID), mVersion(vendorVersion),
-  mSampleRate(DEFAULT_SAMPLE_RATE), mBlockSize(0), mLatency(latency), mHost(kHostUninit), mHostVersion(0),
-  mStateChunks(plugDoesChunks), mGraphics(0), mCurrentPresetIdx(0), mIsInst(plugIsInst), mDoesMIDI(plugDoesMidi), mParamChangeIdx(-1)
+IPlugBase::IPlugBase(
+	const int nParams,
+	const char* channelIOStr,
+	const int nPresets,
+	const char* const effectName,
+	const char* const productName,
+	const char* const mfrName,
+	const int vendorVersion,
+	const int uniqueID,
+	const int mfrID,
+	const int latency,
+	const int plugDoes
+):
+	mCurrentPresetIdx(0),
+	mParamChangeIdx(-1),
+	mEffectName(effectName),
+	mProductName(productName),
+	mMfrName(mfrName),
+	mUniqueID(uniqueID),
+	mMfrID(mfrID),
+	mVersion(vendorVersion),
+	mHost(kHostUninit),
+	mHostVersion(0),
+	mPlugFlags(plugDoes),
+	mSampleRate(kDefaultSampleRate),
+	mBlockSize(0),
+	mLatency(latency),
+	mGraphics(NULL)
 {
-  Trace(TRACELOC, "%s:%s", effectName, CurrentTime());
-  
-  // 0 = no MIDI, 1 = MIDI in & out, 2 = MIDI in only, 3 = MIDI out only
-  assert(plugDoesMidi >= 0 && plugDoesMidi <= 3);
+	assert(plugDoes == (plugDoes & (kPlugIsInst | kPlugDoesMidi)));
 
   for (int i = 0; i < nParams; ++i) {
     mParams.Add(new IParam);

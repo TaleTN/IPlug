@@ -5,6 +5,8 @@
 #include "IParam.h"
 #include "Hosts.h"
 
+#include <assert.h>
+
 #include "WDL/mutex.h"
 #include "WDL/wdltypes.h"
 
@@ -23,11 +25,29 @@ public:
 	static const int kDefaultSampleRate = 44100;
 	static const int kDefaultBlockSize = 1024;
 
-  // Use IPLUG_CTOR instead of calling directly (defined in IPlug_include_in_plug_src.h).
-	IPlugBase(int nParams, const char* channelIOStr, int nPresets,
-		const char* effectName, const char* productName, const char* mfrName,
-		int vendorVersion, int uniqueID, int mfrID, int latency, 
-    int plugDoesMidi, bool plugDoesChunks, bool plugIsInst);
+	// Use IPLUG_CTOR instead of calling directly (defined in IPlug_include_in_plug_hdr.h).
+	IPlugBase(
+		int nParams,
+		const char* channelIOStr,
+		int nPresets,
+		const char* effectName,
+		const char* productName,
+		const char* mfrName,
+		int vendorVersion,
+		int uniqueID,
+		int mfrID,
+		int latency,
+		int plugDoes
+	);
+
+	enum EPlugDoes
+	{
+		kPlugIsInst = 1,
+
+		kPlugDoesMidiIn = 2,
+		kPlugDoesMidiOut = 4,
+		kPlugDoesMidi = kPlugDoesMidiIn | kPlugDoesMidiOut
+	};
 
   // ----------------------------------------
   // Your plugin class implements these.
@@ -155,9 +175,14 @@ protected:
 	virtual bool SendMidiMsg(IMidiMsg* pMsg) = 0;
   virtual bool SendMidiMsgs(WDL_TypedBuf<IMidiMsg>* pMsgs);
   virtual bool SendSysEx(ISysEx* pSysEx) = 0;
-  bool IsInst() { return mIsInst; }
-  int DoesMIDI() { return mDoesMIDI; }
-    
+	inline bool IsInst() const { return !!(mPlugFlags & kPlugIsInst); }
+
+	inline bool DoesMIDI(const int plugDoes = kPlugDoesMidi) const
+	{
+		assert(plugDoes == (plugDoes & kPlugDoesMidi));
+		return !!(mPlugFlags & plugDoes);
+	}
+
   void MakeDefaultPreset(char* name = 0, int nPresets = 1);
   // MakePreset(name, param1, param2, ..., paramN)
   void MakePreset(char* name, ...);
@@ -235,8 +260,7 @@ private:
   EHost mHost;
   int mHostVersion;   //  Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
 
-  bool mStateChunks, mIsInst;
-  int mDoesMIDI;
+	int mPlugFlags; // See EPlugDoes.
   double WDL_FIXALIGN mSampleRate;
   int mBlockSize, mLatency;
 
