@@ -136,13 +136,22 @@ public:
 	inline IGraphics* GetGUI() const { return mGraphics; }
 
 	const char* GetEffectName() const { return mEffectName.Get(); }
-  int GetEffectVersion(bool decimal);   // Decimal = VVVVRRMM, otherwise 0xVVVVRRMM.
-  void GetEffectVersionStr(char* str);
 	const char* GetMfrName() const { return mMfrName.Get(); }
 	const char* GetProductName() const { return mProductName.Get(); }
 
-  int GetUniqueID() { return mUniqueID; }
-  int GetMfrID() { return mMfrID; }
+	// Decimal = VVVVRRMM, otherwise 0xVVVVRRMM.
+	int GetEffectVersion(const bool decimal) const
+	{
+		return decimal ? GetDecimalVersion(mVersion) : mVersion;
+	}
+
+	char* GetEffectVersionStr(char* const str) const
+	{
+		return GetVersionStr(str, mVersion);
+	}
+
+	inline int GetUniqueID() const { return mUniqueID; }
+	inline int GetMfrID() const { return mMfrID; }
 
 	void SetParameterFromGUI(int idx, double normalizedValue);
   // If a parameter change comes from the GUI, midi, or external input,
@@ -178,7 +187,7 @@ public:
   
 	virtual EHost GetHost() { return mHost; }
 	int GetHostVersion(bool decimal); // Decimal = VVVVRRMM, otherwise 0xVVVVRRMM.
-  void GetHostVersionStr(char* str);
+	char* GetHostVersionStr(char* str);
   
 	// Tell the host that the graphics resized.
 	// Should be called only by the graphics object when it resizes itself.
@@ -204,6 +213,9 @@ protected:
   bool LegalIO(int nIn, int nOut);    // -1 for either means check the other value only.
   void LimitToStereoIO();
   
+	static int GetDecimalVersion(int version);
+	static char* GetVersionStr(char* str, int version);
+
   void SetHost(const char* host, int version);   // Version = 0xVVVVRRMM.
   virtual void HostSpecificInit() = 0;
   
@@ -335,10 +347,10 @@ protected:
 	WDL_Mutex mMutex;
 
 	WDL_FastString mEffectName, mProductName, mMfrName;
-  int mUniqueID, mMfrID, mVersion;   //  Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
+	int mUniqueID, mMfrID, mVersion; // Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
   
   EHost mHost;
-  int mHostVersion;   //  Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
+	int mHostVersion; // Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
 
 	int mPlugFlags; // See EPlugDoes, EPlugInit, EPlugFlags.
   double WDL_FIXALIGN mSampleRate;

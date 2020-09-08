@@ -13,34 +13,31 @@ void CastCopy(DEST* pDest, SRC* pSrc, int n)
   }
 }
 
-void GetVersionParts(int version, int* pVer, int* pMaj, int* pMin)
+static void GetVersionParts(unsigned int version, int* const pParts)
 {
-  *pVer = (version & 0xFFFF0000) >> 16;
-  *pMaj = (version & 0x0000FF00) >> 8;
-  *pMin = version & 0x000000FF;
+	const int ver = version >> 16;
+	const int rmaj = (version >> 8) & 0xFF;
+	const int rmin = version & 0xFF;
+
+	pParts[0] = ver;
+	pParts[1] = rmaj;
+	pParts[2] = rmin;
 }
 
-int GetDecimalVersion(int version)
+int IPlugBase::GetDecimalVersion(const int version)
 {
- int ver, rmaj, rmin;
- GetVersionParts(version, &ver, &rmaj, &rmin);
- return 10000 * ver + 100 * rmaj + rmin;
+	int parts[3];
+	GetVersionParts(version, parts);
+	return ((parts[0] * 100) + parts[1]) * 100 + parts[2];
 }
 
-void GetVersionStr(int version, char* str)
+char* IPlugBase::GetVersionStr(char* const str, const int version)
 {
-  int ver, rmaj, rmin;
-  GetVersionParts(version, &ver, &rmaj, &rmin);
-  //if (rmin) {
-  //  sprintf(str, "v%d.%d.%d", ver, rmaj, rmin);
-  //}
-  //else
-  //if (rmaj) {
-    sprintf(str, "v%d.%02d", ver, rmaj);
-  //}
-  //else {
-  //  sprintf(str, "v%d", ver);
-  //}
+	int parts[3];
+	GetVersionParts(version, parts);
+
+	sprintf(str, "%d.%d.%d", parts[0], parts[1], parts[2]);
+	return str;
 }
 
 IPlugBase::IPlugBase(
@@ -136,18 +133,16 @@ IPlugBase::~IPlugBase()
   mChannelIO.Empty(true);
 }
 
-int IPlugBase::GetHostVersion(bool decimal)
+int IPlugBase::GetHostVersion(const bool decimal)
 {
-  GetHost();
-  if (decimal) {
-    return GetDecimalVersion(mHostVersion);
-  }    
-  return mHostVersion;
-} 
+	GetHost();
+	return decimal ? GetDecimalVersion(mHostVersion) : mHostVersion;
+}
 
-void IPlugBase::GetHostVersionStr(char* str)
+char* IPlugBase::GetHostVersionStr(char* const str)
 {
-  GetVersionStr(mHostVersion, str);
+	GetHost();
+	return GetVersionStr(str, mHostVersion);
 }
 
 bool IPlugBase::LegalIO(int nIn, int nOut)
@@ -194,25 +189,6 @@ void IPlugBase::AttachGraphics(IGraphics* pGraphics)
     pGraphics->PrepDraw();
 		mGraphics = pGraphics;
 	}
-}
-
-// Decimal = VVVVRRMM, otherwise 0xVVVVRRMM.
-int IPlugBase::GetEffectVersion(bool decimal)   
-{
-  if (decimal) {
-    return GetDecimalVersion(mVersion);
-  }
-  return mVersion;
-}
-
-void IPlugBase::GetEffectVersionStr(char* str)
-{
-  GetVersionStr(mVersion, str);
-  #if defined _DEBUG
-    strcat(str, "D");
-  #elif defined TRACER_BUILD
-    strcat(str, "T");
-  #endif
 }
 
 double IPlugBase::GetSamplesPerBeat()
