@@ -448,6 +448,32 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effSetSampleRate:
+		{
+			const double sampleRate = opt;
+			const int flags = _this->mPlugFlags;
+			if (sampleRate != _this->GetSampleRate() || !(flags & kPlugInitSampleRate))
+			{
+				_this->SetSampleRate(sampleRate);
+				if (flags & kPlugInitBlockSize) _this->Reset();
+				_this->mPlugFlags = flags | kPlugInitSampleRate;
+			}
+			break;
+		}
+
+		case effSetBlockSize:
+		{
+			const int blockSize = (int)value;
+			const int flags = _this->mPlugFlags;
+			if (blockSize != _this->GetBlockSize() || !(flags & kPlugInitBlockSize))
+			{
+				_this->SetBlockSize(blockSize);
+				if (flags & kPlugInitSampleRate) _this->Reset();
+				_this->mPlugFlags = flags | kPlugInitBlockSize;
+			}
+			break;
+		}
+
     case effString2Parameter:
     {
       if (idx >= 0 && idx < _this->NParams())
@@ -463,16 +489,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
         return 1;
       }
       return 0;
-    }
-    case effSetSampleRate: {
-	    _this->SetSampleRate(opt);
-	    _this->Reset();
-	    return 0;
-    }
-    case effSetBlockSize: {
-	    _this->SetBlockSize(value);
-	    _this->Reset();
-	    return 0;
     }
     case effMainsChanged: {
       if (!value) {
