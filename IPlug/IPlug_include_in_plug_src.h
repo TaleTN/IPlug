@@ -74,29 +74,36 @@ EXPORT int main(audioMasterCallback const hostCallback)
 
 } // extern "C"
 
-#elif defined AU_API
-  IPlug* MakePlug()
-  {
-    static WDL_Mutex sMutex;
-    WDL_MutexLock lock(&sMutex);
-    IPlugInstanceInfo instanceInfo;
-    instanceInfo.mOSXBundleID.Set(BUNDLE_ID);
-    instanceInfo.mCocoaViewFactoryClassName.Set(VIEW_CLASS_STR);
-    return new PLUG_CLASS_NAME(instanceInfo);
-  }
-  extern "C"
-  {
-    ComponentResult PLUG_ENTRY(ComponentParameters* params, void* pPlug)
-    {
-      return IPlugAU::IPlugAUEntry(params, pPlug);
-    }
-    ComponentResult PLUG_VIEW_ENTRY(ComponentParameters* params, void* pView)
-    {
-      return IPlugAU::IPlugAUCarbonViewEntry(params, pView);
-    }
-  };
+#elif defined(AU_API)
+
+IPlug* MakeIPlugAU()
+{
+	static WDL_Mutex sMutex;
+	sMutex.Enter();
+
+	static const char* const ID[] = { BUNDLE_ID, VIEW_CLASS_STR };
+	IPlugAU* const pPlug = new PLUG_CLASS_NAME((void*)ID);
+
+	sMutex.Leave();
+	return pPlug;
+}
+
+extern "C" {
+
+ComponentResult PLUG_ENTRY(ComponentParameters* const params, void* const pPlug)
+{
+	return IPlugAU::IPlugAUEntry(params, pPlug);
+}
+
+ComponentResult PLUG_VIEW_ENTRY(ComponentParameters* const params, void* const pView)
+{
+	return IPlugAU::IPlugAUCarbonViewEntry(params, pView);
+}
+
+} // extern "C"
+
 #else
-  #error "No API defined!"
+	#error "No API defined!"
 #endif
 
 #if defined _DEBUG
