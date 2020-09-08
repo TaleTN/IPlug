@@ -251,11 +251,12 @@ protected:
 		#endif
 	}
 
-  // Will append if the chunk is already started.
-  virtual bool SerializeParams(ByteChunk* pChunk);
-  // Returns the new chunk position (endPos).
-  virtual int UnserializeParams(ByteChunk* pChunk, int startPos);
-  void RedrawParamControls();  // Called after restoring state.
+	// Will append if the chunk is already started.
+	bool SerializeParams(int fromIdx, int toIdx /* up to but *not* including */, ByteChunk* pChunk) const;
+	// Returns the new chunk position (endPos).
+	int UnserializeParams(int fromIdx, int toIdx, const ByteChunk* pChunk, int startPos);
+
+	void RedrawParamControls(); // Called after restoring state.
 
   // ----------------------------------------
   // Internal IPlug stuff (but API classes need to get at it).

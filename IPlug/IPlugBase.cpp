@@ -787,36 +787,23 @@ int IPlugBase::UnserializePreset(const ByteChunk* const pChunk, int pos)
 	return pos;
 }
 
-bool IPlugBase::SerializeParams(ByteChunk* pChunk)
+bool IPlugBase::SerializeParams(const int fromIdx, const int toIdx, ByteChunk* const pChunk) const
 {
-  TRACE;
-  
-  WDL_MutexLock lock(&mMutex);
-  bool savedOK = true;
-  int i, n = mParams.GetSize();
-  for (i = 0; i < n && savedOK; ++i) {
-    IParam* pParam = mParams.Get(i);
-    double v = pParam->Value();
-    savedOK &= (pChunk->Put(&v) > 0);
-  }
-  return savedOK;
+	bool savedOK = true;
+	for (int i = fromIdx; i < toIdx && savedOK; ++i)
+	{
+		savedOK &= mParams.Get(i)->Serialize(pChunk);
+	}
+	return savedOK;
 }
 
-int IPlugBase::UnserializeParams(ByteChunk* pChunk, int startPos)
+int IPlugBase::UnserializeParams(const int fromIdx, const int toIdx, const ByteChunk* const pChunk, int pos)
 {
-  TRACE;
-  
-  WDL_MutexLock lock(&mMutex);
-  int i, n = mParams.GetSize(), pos = startPos;
-  for (i = 0; i < n && pos >= 0; ++i) {
-    IParam* pParam = mParams.Get(i);
-    double v = 0.0;
-    Trace(TRACELOC, "%d %s", i, pParam->GetNameForHost());
-    pos = pChunk->Get(&v, pos);
-    pParam->Set(v);
-  }
-  OnParamReset();
-  return pos;
+	for (int i = fromIdx; i < toIdx && pos >= 0; ++i)
+	{
+		pos = mParams.Get(i)->Unserialize(pChunk, pos);
+	}
+	return pos;
 }
 
 bool IPlugBase::SerializeState(ByteChunk* const pChunk)
@@ -831,13 +818,15 @@ int IPlugBase::UnserializeState(const ByteChunk* const pChunk, const int startPo
 
 void IPlugBase::RedrawParamControls()
 {
-  if (mGraphics) {
-    int i, n = mParams.GetSize();
-    for (i = 0; i < n; ++i) {
-      double v = mParams.Get(i)->Value();
-      mGraphics->SetParameterFromPlug(i, v, false);
-    }
-  }
+	if (mGraphics)
+	{
+		const int n = mParams.GetSize();
+		for (int i = 0; i < n; ++i)
+		{
+			const double v = mParams.Get(i)->GetNormalized();
+			mGraphics->SetParameterFromPlug(i, v, true);
+		}
+	}
 }
 
 bool IPlugBase::OnGUIRescale(int /* wantScale */)
