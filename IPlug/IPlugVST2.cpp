@@ -790,42 +790,49 @@ VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode,
 	}
 }
 
-template <class SAMPLETYPE> 
-void IPlugVST::VSTPrepProcess(SAMPLETYPE** inputs, SAMPLETYPE** outputs, VstInt32 nFrames)
+template <class SAMPLETYPE>
+void IPlugVST2::VSTPrepProcess(const SAMPLETYPE* const* const inputs, SAMPLETYPE* const* const outputs, const VstInt32 nFrames)
 {
-  if (DoesMIDI()) {
-    mHostCallback(&mAEffect, __audioMasterWantMidiDeprecated, 0, 0, 0, 0.0f);
-  }
-  AttachInputBuffers(0, NInChannels(), inputs, nFrames);
-  AttachOutputBuffers(0, NOutChannels(), outputs);
+	if (DoesMIDI())
+	{
+		mHostCallback(&mAEffect, DECLARE_VST_DEPRECATED(audioMasterWantMidi), 0, 0, NULL, 0.0f);
+	}
+	AttachInputBuffers(0, NInChannels(), inputs, nFrames);
+	AttachOutputBuffers(0, NOutChannels(), outputs);
 }
 
 // Deprecated.
-void VSTCALLBACK IPlugVST::VSTProcess(AEffect* pEffect, float** inputs, float** outputs, VstInt32 nFrames)
+void VSTCALLBACK IPlugVST2::VSTProcess(AEffect* const pEffect, float** const inputs, float** const outputs, const VstInt32 nFrames)
 { 
-  TRACE;
-	IPlugVST* _this = (IPlugVST*) pEffect->object;
-  IMutexLock lock(_this);
-  _this->VSTPrepProcess(inputs, outputs, nFrames);
-  _this->ProcessBuffersAccumulating((float) 0.0f, nFrames);
+	IPlugVST2* const _this = (IPlugVST2*)pEffect->object;
+	_this->mMutex.Enter();
+
+	_this->VSTPrepProcess(inputs, outputs, nFrames);
+	_this->ProcessBuffersAccumulating((float)0.0f, nFrames);
+
+	_this->mMutex.Leave();
 }
 
-void VSTCALLBACK IPlugVST::VSTProcessReplacing(AEffect* pEffect, float** inputs, float** outputs, VstInt32 nFrames)
+void VSTCALLBACK IPlugVST2::VSTProcessReplacing(AEffect* const pEffect, float** const inputs, float** const outputs, const VstInt32 nFrames)
 { 
-  TRACE;
-	IPlugVST* _this = (IPlugVST*) pEffect->object;
-  IMutexLock lock(_this);
-  _this->VSTPrepProcess(inputs, outputs, nFrames);
-  _this->ProcessBuffers((float) 0.0f, nFrames);
+	IPlugVST2* const _this = (IPlugVST2*)pEffect->object;
+	_this->mMutex.Enter();
+
+	_this->VSTPrepProcess(inputs, outputs, nFrames);
+	_this->ProcessBuffers((float)0.0f, nFrames);
+
+	_this->mMutex.Leave();
 }
 
-void VSTCALLBACK IPlugVST::VSTProcessDoubleReplacing(AEffect* pEffect, double** inputs, double** outputs, VstInt32 nFrames)
+void VSTCALLBACK IPlugVST2::VSTProcessDoubleReplacing(AEffect* const pEffect, double** const inputs, double** const outputs, const VstInt32 nFrames)
 {  
-  TRACE;
-  IPlugVST* _this = (IPlugVST*) pEffect->object;
-  IMutexLock lock(_this);
-  _this->VSTPrepProcess(inputs, outputs, nFrames);
-  _this->ProcessBuffers((double) 0.0, nFrames);
+	IPlugVST2* const _this = (IPlugVST2*)pEffect->object;
+	_this->mMutex.Enter();
+
+	_this->VSTPrepProcess(inputs, outputs, nFrames);
+	_this->ProcessBuffers((double)0.0, nFrames);
+
+	_this->mMutex.Leave();
 }  
 
 float VSTCALLBACK IPlugVST::VSTGetParameter(AEffect *pEffect, VstInt32 idx)

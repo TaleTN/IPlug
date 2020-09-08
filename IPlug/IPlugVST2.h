@@ -58,9 +58,8 @@ protected:
 	inline audioMasterCallback GetHostCallback() const { return mHostCallback; }
 
 private:
-
-  template <class SAMPLETYPE>
-  void VSTPrepProcess(SAMPLETYPE** inputs, SAMPLETYPE** outputs, VstInt32 nFrames);
+	template <class SAMPLETYPE>
+	void VSTPrepProcess(const SAMPLETYPE* const* inputs, SAMPLETYPE* const* outputs, VstInt32 nFrames);
 
 	ERect mEditRect;
 	audioMasterCallback mHostCallback;
@@ -82,9 +81,9 @@ private:
 public:
 
 	static VstIntPtr VSTCALLBACK VSTDispatcher(AEffect *pEffect, VstInt32 opCode, VstInt32 idx, VstIntPtr value, void *ptr, float opt);
-	static void VSTCALLBACK VSTProcess(AEffect *pEffect, float **inputs, float **outputs, VstInt32 nFrames);	// Deprecated.
-	static void VSTCALLBACK VSTProcessReplacing(AEffect *pEffect, float **inputs, float **outputs, VstInt32 nFrames);
-	static void VSTCALLBACK VSTProcessDoubleReplacing(AEffect *pEffect, double **inputs, double **outputs, VstInt32 nFrames);
+	static void VSTCALLBACK VSTProcess(AEffect* pEffect, float** inputs, float** outputs, VstInt32 nFrames); // Deprecated.
+	static void VSTCALLBACK VSTProcessReplacing(AEffect* pEffect, float** inputs, float** outputs, VstInt32 nFrames);
+	static void VSTCALLBACK VSTProcessDoubleReplacing(AEffect* pEffect, double** inputs, double** outputs, VstInt32 nFrames);
   static float VSTCALLBACK VSTGetParameter(AEffect *pEffect, VstInt32 idx);
 	static void VSTCALLBACK VSTSetParameter(AEffect *pEffect, VstInt32 idx, float value);
 	inline AEffect* GetAEffect() { return &mAEffect; }
