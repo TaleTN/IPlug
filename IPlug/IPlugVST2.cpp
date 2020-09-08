@@ -208,14 +208,14 @@ void IPlugVST::AttachGraphics(IGraphics* pGraphics)
 	}
 }
 
-void IPlugVST::ResizeGraphics(int w, int h)
+void IPlugVST2::ResizeGraphics(const int w, const int h)
 {
-  IGraphics* pGraphics = GetGUI();
-  if (pGraphics) {
-    mEditRect.left = mEditRect.top = 0;
-    mEditRect.right = pGraphics->Width();
-    mEditRect.bottom = pGraphics->Height();
-  }
+	if (GetGUI())
+	{
+		mEditRect.left = mEditRect.top = 0;
+		mEditRect.right = w;
+		mEditRect.bottom = h;
+	}
 }
 
 bool IPlugVST2::IsRenderingOffline()
