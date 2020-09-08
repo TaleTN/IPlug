@@ -36,8 +36,8 @@ public:
 	void EndInformHostOfParamChange(int idx);
 
 	void InformHostOfProgramChange();
-	
-	int GetSamplePos();   // Samples since start of project.
+
+	double GetSamplePos(); // Samples since start of project.
 	double GetTempo();
 	void GetTimeSig(int* pNum, int* pDenom);
 	EHost GetHost();  // GetHostVersion() is inherited.

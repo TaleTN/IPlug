@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "WDL/wdltypes.h"
+
 const int VST_VERSION = 2400;
 
 static int VSTSpkrArrType(const int nchan)
@@ -136,45 +138,40 @@ void IPlugVST2::InformHostOfProgramChange()
 	mHostCallback(&mAEffect, audioMasterUpdateDisplay, 0, 0, NULL, 0.0f);
 }
 
-inline VstTimeInfo* GetTimeInfo(audioMasterCallback hostCallback, AEffect* pAEffect, int filter = 0)
+static const VstTimeInfo* GetTimeInfo(const audioMasterCallback hostCallback, AEffect* const pAEffect, const VstIntPtr filter = 0)
 { 
-#pragma warning(disable:4312)	// Pointer size cast mismatch.
-  VstTimeInfo* pTI = (VstTimeInfo*) hostCallback(pAEffect, audioMasterGetTime, 0, filter, 0, 0);
-#pragma warning(default:4312)
-	if (pTI && (!filter || (pTI->flags & filter))) {
-		return pTI;
-	}
-	return 0;
+	return (const VstTimeInfo*)hostCallback(pAEffect, audioMasterGetTime, 0, filter, NULL, 0.0f);
 }
 
-int IPlugVST::GetSamplePos()
+double IPlugVST2::GetSamplePos()
 { 
-	VstTimeInfo* pTI = GetTimeInfo(mHostCallback, &mAEffect);
-	if (pTI && pTI->samplePos >= 0.0) {
-		return int(pTI->samplePos + 0.5);
-	}
-	return 0;
+	const VstTimeInfo* const pTI = GetTimeInfo(mHostCallback, &mAEffect);
+	return pTI ? wdl_max(pTI->samplePos, 0.0) : 0.0;
 }
 
-double IPlugVST::GetTempo()
+double IPlugVST2::GetTempo()
 {
-  if (mHostCallback) {
-	  VstTimeInfo* pTI = GetTimeInfo(mHostCallback, &mAEffect, kVstTempoValid);
-	  if (pTI && pTI->tempo >= 0.0) {
-  		return pTI->tempo;
-  	}
-  }
-	return 0.0;
+	const VstTimeInfo* const pTI = GetTimeInfo(mHostCallback, &mAEffect, kVstTempoValid);
+	return pTI && (pTI->flags & kVstTempoValid) ? wdl_max(pTI->tempo, 0.0) : 0.0;
 }
 
-void IPlugVST::GetTimeSig(int* pNum, int* pDenom)
+void IPlugVST2::GetTimeSig(int* const pNum, int* const pDenom)
 {
-	*pNum = *pDenom = 0;
-	VstTimeInfo* pTI = GetTimeInfo(mHostCallback, &mAEffect, kVstTimeSigValid);
-	if (pTI && pTI->timeSigNumerator >= 0.0 && pTI->timeSigDenominator >= 0.0) {
-		*pNum = pTI->timeSigNumerator;
-		*pDenom = pTI->timeSigDenominator;
+	const VstTimeInfo* const pTI = GetTimeInfo(mHostCallback, &mAEffect, kVstTimeSigValid);
+
+	int num, denom;
+	if (pTI && (pTI->flags & kVstTimeSigValid) && pTI->timeSigNumerator >= 0 && pTI->timeSigDenominator >= 0)
+	{
+		num = pTI->timeSigNumerator;
+		denom = pTI->timeSigDenominator;
 	}
+	else
+	{
+		denom = num = 0;
+	}
+
+	*pNum = num;
+	*pDenom = denom;
 }
 
 EHost IPlugVST::GetHost() 
