@@ -665,6 +665,14 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effGetProgramNameIndexed:
+		{
+			char* const buf = (char*)ptr;
+			vst_strncpy(buf, _this->GetPresetName(idx), kVstMaxProgNameLen);
+			ret = !!*buf;
+			break;
+		}
+
 	  case effGetInputProperties: {
       if (ptr && idx >= 0 && idx < _this->NInChannels()) {
         VstPinProperties* pp = (VstPinProperties*) ptr;
@@ -840,10 +848,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
         }
       }
       return 0;
-    }
-    case effGetProgramNameIndexed: {
-      strcpy((char*) ptr, _this->GetPresetName(idx));
-      return (CSTR_NOT_EMPTY((char*) ptr) ? 1 : 0);
     }
     case effGetMidiKeyName: {
 	    if (ptr) {
