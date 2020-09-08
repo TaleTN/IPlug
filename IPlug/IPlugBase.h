@@ -182,9 +182,18 @@ public:
 	bool NInChannels(const int idx) const { return (unsigned int)idx < (unsigned int)NInChannels(); }
 	bool NOutChannels(const int idx) const { return (unsigned int)idx < (unsigned int)NOutChannels(); }
 
-  bool IsInChannelConnected(int chIdx);
-  bool IsOutChannelConnected(int chIdx);
-      
+	bool IsInChannelConnected(const int chIdx) const
+	{
+		const InChannel* const pInChannel = mInChannels.Get(chIdx);
+		return pInChannel && pInChannel->mConnected;
+	}
+
+	bool IsOutChannelConnected(const int chIdx) const
+	{
+		const OutChannel* const pOutChannel = mOutChannels.Get(chIdx);
+		return pOutChannel && pOutChannel->mConnected;
+	}
+
 	virtual int GetSamplePos() = 0;   // Samples since start of project.
 	virtual double GetTempo() = 0;
 	double GetSamplesPerBeat();

@@ -253,16 +253,6 @@ void IPlugBase::SetOutputChannelConnections(int idx, int n, bool connected)
   }
 }
 
-bool IPlugBase::IsInChannelConnected(int chIdx) 
-{ 
-  return (chIdx < mInChannels.GetSize() && mInChannels.Get(chIdx)->mConnected);
-}
-
-bool IPlugBase:: IsOutChannelConnected(int chIdx) 
-{
-  return (chIdx < mOutChannels.GetSize() && mOutChannels.Get(chIdx)->mConnected); 
-}
-
 void IPlugBase::AttachInputBuffers(const int idx, int n, const double* const* ppData, const int nFrames)
 {
 	n += idx;
