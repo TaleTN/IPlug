@@ -1,7 +1,5 @@
 #pragma once
 
-#define IPLUG_VERSION 0x010000
-
 #include "Containers.h"
 #include "IPlugStructs.h"
 #include "IParam.h"
@@ -13,20 +11,6 @@
 // Uncomment to enable IPlug::OnIdle() and IGraphics::OnGUIIdle().
 // #define USE_IDLE_CALLS
 
-#ifndef MAX_EFFECT_NAME_LEN
-#define MAX_EFFECT_NAME_LEN 128
-#endif
-
-#ifndef MAX_PRODUCT_NAME_LEN
-#define MAX_PRODUCT_NAME_LEN 128
-#endif
-
-#ifndef MAX_MFR_NAME_LEN
-#define MAX_MFR_NAME_LEN 128
-#endif
-
-#define DEFAULT_BLOCK_SIZE 1024
-
 // All version ints are stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
 
 class IGraphics;
@@ -34,7 +18,11 @@ class IGraphics;
 class IPlugBase
 {
 public:
-      
+	static const int kIPlugVersion = 0x010000;
+
+	static const int kDefaultSampleRate = 44100;
+	static const int kDefaultBlockSize = 1024;
+
   // Use IPLUG_CTOR instead of calling directly (defined in IPlug_include_in_plug_src.h).
 	IPlugBase(int nParams, const char* channelIOStr, int nPresets,
 		const char* effectName, const char* productName, const char* mfrName,

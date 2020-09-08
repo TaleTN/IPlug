@@ -5,8 +5,6 @@
 #include <string.h>
 #include <time.h>
 
-const double DEFAULT_SAMPLE_RATE = 44100.0;
-
 template <class SRC, class DEST> 
 void CastCopy(DEST* pDest, SRC* pSrc, int n)
 {
