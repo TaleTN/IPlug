@@ -173,11 +173,15 @@ public:
 	inline int GetBlockSize() const { return mBlockSize; }
 	inline int GetLatency() const { return mLatency; }
   
-  // In ProcessDoubleReplacing you are always guaranteed to get valid pointers 
-  // to all the channels the plugin requested.  If the host hasn't connected all the pins,
-  // the unconnected channels will be full of zeros.
-  int NInChannels() { return mInChannels.GetSize(); }
-  int NOutChannels() { return mOutChannels.GetSize(); }
+	// In ProcessDoubleReplacing you are always guaranteed to get valid pointers
+	// to all the channels the plugin requested.  If the host hasn't connected all the pins,
+	// the unconnected channels will be full of zeros.
+	int NInChannels() const { return mInChannels.GetSize(); }
+	int NOutChannels() const { return mOutChannels.GetSize(); }
+
+	bool NInChannels(const int idx) const { return (unsigned int)idx < (unsigned int)NInChannels(); }
+	bool NOutChannels(const int idx) const { return (unsigned int)idx < (unsigned int)NOutChannels(); }
+
   bool IsInChannelConnected(int chIdx);
   bool IsOutChannelConnected(int chIdx);
       
