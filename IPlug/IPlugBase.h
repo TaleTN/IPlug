@@ -92,10 +92,20 @@ public:
 	virtual bool AllocStateChunk(int chunkSize = -1) = 0;
 	virtual bool AllocBankChunk(int chunkSize = -1) = 0;
 
-  // Implementations should set a mutex lock.
-	virtual bool SerializeState(ByteChunk* pChunk) { return SerializeParams(pChunk); }
-  // Return the new chunk position (endPos).
-	virtual int UnserializeState(ByteChunk* pChunk, int startPos) { return UnserializeParams(pChunk, startPos); }
+	// Serializes internal presets, by default all non-global parameters.
+	// Mutex is already locked.
+	virtual bool SerializePreset(ByteChunk* pChunk);
+	// Returns the new chunk position (endPos).
+	virtual int UnserializePreset(const ByteChunk* pChunk, int startPos);
+
+	// By default serializes all (global + preset) parameters.
+	virtual bool SerializeState(ByteChunk* pChunk);
+	virtual int UnserializeState(const ByteChunk* pChunk, int startPos);
+
+	// By default serializes global parameters, followed by each preset
+	// (in SerializePreset() format, but with extra info).
+	virtual bool SerializeBank(ByteChunk* pChunk);
+	virtual int UnserializeBank(const ByteChunk* pChunk, int startPos);
 
   // ----------------------------------------
   // Your plugin class, or a control class, can call these functions.

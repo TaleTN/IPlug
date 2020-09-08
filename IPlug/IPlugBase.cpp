@@ -741,6 +741,52 @@ int IPlugBase::UnserializePresets(ByteChunk* pChunk, int startPos)
   return pos;
 }
 
+bool IPlugBase::SerializeBank(ByteChunk* const pChunk)
+{
+	bool savedOK = true;
+	const int n = mParams.GetSize();
+	for (int i = 0; i < n && savedOK; ++i)
+	{
+		IParam* const pParam = mParams.Get(i);
+		if (pParam->IsGlobal()) savedOK &= pParam->Serialize(pChunk);
+	}
+	return savedOK ? SerializePresets(0, NPresets(), pChunk) : savedOK;
+}
+
+int IPlugBase::UnserializeBank(const ByteChunk* const pChunk, int pos)
+{
+	const int n = mParams.GetSize();
+	for (int i = 0; i < n && pos >= 0; ++i)
+	{
+		IParam* const pParam = mParams.Get(i);
+		if (pParam->IsGlobal()) pos = pParam->Unserialize(pChunk, pos);
+	}
+	return pos >= 0 ? UnserializePresets(0, NPresets(), pChunk, pos) : pos;
+}
+
+bool IPlugBase::SerializePreset(ByteChunk* const pChunk)
+{
+	bool savedOK = true;
+	const int n = mParams.GetSize();
+	for (int i = 0; i < n && savedOK; ++i)
+	{
+		IParam* const pParam = mParams.Get(i);
+		if (!pParam->IsGlobal()) savedOK &= pParam->Serialize(pChunk);
+	}
+	return savedOK;
+}
+
+int IPlugBase::UnserializePreset(const ByteChunk* const pChunk, int pos)
+{
+	const int n = mParams.GetSize();
+	for (int i = 0; i < n && pos >= 0; ++i)
+	{
+		IParam* const pParam = mParams.Get(i);
+		if (!pParam->IsGlobal()) pos = pParam->Unserialize(pChunk, pos);
+	}
+	return pos;
+}
+
 bool IPlugBase::SerializeParams(ByteChunk* pChunk)
 {
   TRACE;
@@ -771,6 +817,16 @@ int IPlugBase::UnserializeParams(ByteChunk* pChunk, int startPos)
   }
   OnParamReset();
   return pos;
+}
+
+bool IPlugBase::SerializeState(ByteChunk* const pChunk)
+{
+	return SerializeParams(0, NParams(), pChunk);
+}
+
+int IPlugBase::UnserializeState(const ByteChunk* const pChunk, const int startPos)
+{
+	return UnserializeParams(0, NParams(), pChunk, startPos);
 }
 
 void IPlugBase::RedrawParamControls()
