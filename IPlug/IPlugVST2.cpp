@@ -238,7 +238,7 @@ bool IPlugVST2::IsRenderingOffline()
 	return offline;
 }
 
-void IPlugVST::SetLatency(int samples)
+void IPlugVST2::SetLatency(const int samples)
 {
     mAEffect.initialDelay = samples;
     IPlugBase::SetLatency(samples);

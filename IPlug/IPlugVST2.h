@@ -52,7 +52,7 @@ public:
 protected:
 	void HostSpecificInit();
 	void AttachGraphics(IGraphics* pGraphics);  
-  void SetLatency(int samples);
+	void SetLatency(int samples);
 	bool SendMidiMsg(IMidiMsg* pMsg);
   bool SendSysEx(ISysEx* pSysEx);
 	inline audioMasterCallback GetHostCallback() const { return mHostCallback; }
