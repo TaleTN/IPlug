@@ -392,6 +392,19 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			return ret;
 		}
 
+		case effSetProgram:
+		{
+			_this->ModifyCurrentPreset();
+			_this->RestorePreset((int)value);
+			break;
+		}
+
+		case effGetProgram:
+		{
+			ret = _this->GetCurrentPresetIdx();
+			break;
+		}
+
     case effGetParamLabel: {
       if (idx >= 0 && idx < _this->NParams())
       {
@@ -736,16 +749,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
           break;
         }
       }
-      return 0;
-    }
-    case effGetProgram: {
-      return _this->GetCurrentPresetIdx();
-    }
-    case effSetProgram: {
-      //if (!(_this->DoesStateChunks())) {
-        _this->ModifyCurrentPreset();
-      //}
-      _this->RestorePreset((int) value);
       return 0;
     }
     case effGetProgramNameIndexed: {
