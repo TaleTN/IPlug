@@ -3,11 +3,6 @@
 #include "IPlugBase.h"
 #include "VST2_SDK/aeffectx.h"
 
-struct IPlugInstanceInfo
-{
-  audioMasterCallback mVSTHostCallback;
-};
-
 class IPlugVST : public IPlugBase
 {
 public:
@@ -48,15 +43,15 @@ protected:
   void SetLatency(int samples);
 	bool SendMidiMsg(IMidiMsg* pMsg);
   bool SendSysEx(ISysEx* pSysEx);
-  audioMasterCallback GetHostCallback();
+	inline audioMasterCallback GetHostCallback() const { return mHostCallback; }
 
 private:
 
   template <class SAMPLETYPE>
   void VSTPrepProcess(SAMPLETYPE** inputs, SAMPLETYPE** outputs, VstInt32 nFrames);
 
-  ERect mEditRect;
-  audioMasterCallback mHostCallback;
+	ERect mEditRect;
+	audioMasterCallback mHostCallback;
 
   bool SendVSTEvent(VstEvent* pEvent);
   bool SendVSTEvents(WDL_TypedBuf<VstEvent>* pEvents);
@@ -71,6 +66,8 @@ private:
   ByteChunk mState;     // Persistent storage if the host asks for plugin state.
   ByteChunk mBankState; // Persistent storage if the host asks for bank state.
 
+	AEffect mAEffect;
+
 public:
 
 	static VstIntPtr VSTCALLBACK VSTDispatcher(AEffect *pEffect, VstInt32 opCode, VstInt32 idx, VstIntPtr value, void *ptr, float opt);
@@ -79,7 +76,5 @@ public:
 	static void VSTCALLBACK VSTProcessDoubleReplacing(AEffect *pEffect, double **inputs, double **outputs, VstInt32 nFrames);
   static float VSTCALLBACK VSTGetParameter(AEffect *pEffect, VstInt32 idx);
 	static void VSTCALLBACK VSTSetParameter(AEffect *pEffect, VstInt32 idx, float value);
-	AEffect mAEffect;
+	inline AEffect* GetAEffect() { return &mAEffect; }
 };
-
-IPlugVST* MakePlug();

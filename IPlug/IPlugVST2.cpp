@@ -239,11 +239,6 @@ bool IPlugVST::SendSysEx(ISysEx* pSysEx)
 	return SendVSTEvent((VstEvent*) &sysexEvent);
 }
 
-audioMasterCallback IPlugVST::GetHostCallback()
-{
-  return mHostCallback;
-}
-
 void IPlugVST::HostSpecificInit()
 {
   if (!mHostSpecificInitDone) {
