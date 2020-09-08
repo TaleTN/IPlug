@@ -405,6 +405,22 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effSetProgramName:
+		{
+			if (ptr) _this->ModifyCurrentPreset((const char*)ptr);
+			break;
+		}
+
+		case effGetProgramName:
+		{
+			if (ptr)
+			{
+				const int i = _this->GetCurrentPresetIdx();
+				vst_strncpy((char*)ptr, _this->GetPresetName(i), kVstMaxProgNameLen);
+			}
+			break;
+		}
+
     case effGetParamLabel: {
       if (idx >= 0 && idx < _this->NParams())
       {
@@ -754,19 +770,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
     case effGetProgramNameIndexed: {
       strcpy((char*) ptr, _this->GetPresetName(idx));
       return (CSTR_NOT_EMPTY((char*) ptr) ? 1 : 0);
-    }
-    case effSetProgramName: {
-      if (ptr) {
-        _this->ModifyCurrentPreset((char*) ptr);
-      }
-      return 0;
-    }
-    case effGetProgramName: {
-      if (ptr) {
-        int idx = _this->GetCurrentPresetIdx();      
-        strcpy((char*) ptr, _this->GetPresetName(idx));
-      }
-      return 0;
     }
     case effGetMidiKeyName: {
 	    if (ptr) {
