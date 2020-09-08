@@ -382,13 +382,15 @@ bool IPlugBase::SendMidiMsgs(const IMidiMsg* const pMsgs, const int n)
 	return rc;
 }
 
-void IPlugBase::SetParameterFromGUI(int idx, double normalizedValue)
+void IPlugBase::SetParameterFromGUI(const int idx, const double normalizedValue)
 {
-  Trace(TRACELOC, "%d:%f", idx, normalizedValue);
-  WDL_MutexLock lock(&mMutex);
-  GetParam(idx)->SetNormalized(normalizedValue);
-  InformHostOfParamChange(idx, normalizedValue);
+	mMutex.Enter();
+
+	GetParam(idx)->SetNormalized(normalizedValue);
+	InformHostOfParamChange(idx, normalizedValue);
 	OnParamChange(idx);
+
+	mMutex.Leave();
 }
 
 void IPlugBase::OnParamReset()
@@ -400,35 +402,53 @@ void IPlugBase::OnParamReset()
 	}
 }
 
-void IPlugBase::DelayEndInformHostOfParamChange(int idx)
+void IPlugBase::BeginDelayedInformHostOfParamChange(const int idx)
 {
-  IMutexLock lock(this);
+	mMutex.Enter();
 
-  IGraphics* pGraphics = GetGUI();
-  if (pGraphics) {
-    mParamChangeIdx = idx;
-    int ticks = pGraphics->FPS() / 2; // 0.5 seconds
-    if (ticks < 1) ticks = 1;
-    pGraphics->SetParamChangeTimer(ticks);
-  }
-  else {
-    EndInformHostOfParamChange(idx);
-  }
+	if (idx != mParamChangeIdx)
+	{
+		EndDelayedInformHostOfParamChange();
+		BeginInformHostOfParamChange(idx);
+	}
+
+	mMutex.Leave();
+}
+
+void IPlugBase::DelayEndInformHostOfParamChange(const int idx)
+{
+	mMutex.Enter();
+
+	IGraphics* const pGraphics = GetGUI();
+	if (pGraphics)
+	{
+		mParamChangeIdx = idx;
+		int ticks = pGraphics->FPS() / 2; // 0.5 seconds
+		ticks = wdl_max(ticks, 1);
+		pGraphics->SetParamChangeTimer(ticks);
+	}
+	else
+	{
+		EndInformHostOfParamChange(idx);
+	}
+
+	mMutex.Leave();
 }
 
 void IPlugBase::EndDelayedInformHostOfParamChange()
 {
-  IMutexLock lock(this);
+	mMutex.Enter();
 
-  IGraphics* pGraphics = GetGUI();
-  if (pGraphics) {
-    pGraphics->CancelParamChangeTimer();
-  }
+	IGraphics* const pGraphics = GetGUI();
+	if (pGraphics) pGraphics->CancelParamChangeTimer();
 
-  if (mParamChangeIdx >= 0) {
-    EndInformHostOfParamChange(mParamChangeIdx);
-    mParamChangeIdx = -1;
-  }
+	if (mParamChangeIdx >= 0)
+	{
+		EndInformHostOfParamChange(mParamChangeIdx);
+		mParamChangeIdx = -1;
+	}
+
+	mMutex.Leave();
 }
 
 // Default passthrough.

@@ -153,16 +153,18 @@ public:
 	inline int GetMfrID() const { return mMfrID; }
 
 	void SetParameterFromGUI(int idx, double normalizedValue);
-  // If a parameter change comes from the GUI, midi, or external input,
-  // the host needs to be informed in case the changes are being automated.
-  virtual void BeginInformHostOfParamChange(int idx) = 0;
-  virtual void BeginDelayedInformHostOfParamChange(int idx) = 0;
-  virtual void InformHostOfParamChange(int idx, double normalizedValue) = 0;
-  virtual void EndInformHostOfParamChange(int idx) = 0;
-  void DelayEndInformHostOfParamChange(int idx);
-  void EndDelayedInformHostOfParamChange();
+
+	// If a parameter change comes from the GUI, midi, or external input,
+	// the host needs to be informed in case the changes are being automated.
+	virtual void BeginInformHostOfParamChange(int idx) = 0;
+	virtual void InformHostOfParamChange(int idx, double normalizedValue) = 0;
+	virtual void EndInformHostOfParamChange(int idx) = 0;
+	void BeginDelayedInformHostOfParamChange(int idx);
+	void DelayEndInformHostOfParamChange(int idx);
+	void EndDelayedInformHostOfParamChange();
 
 	virtual void InformHostOfProgramChange() = 0;
+
   // ----------------------------------------
   // Useful stuff for your plugin class or an outsider to call, 
   // most of which is implemented by the API class.
