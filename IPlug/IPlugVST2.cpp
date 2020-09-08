@@ -2,6 +2,10 @@
 #include "IGraphics.h"
 #include "Hosts.h"
 
+#ifdef __APPLE__
+	#include "IGraphicsMac.h"
+#endif
+
 #include <stdio.h>
 #include <string.h>
 
@@ -198,14 +202,22 @@ int IPlugVST2::GetHost()
 	return host;
 }
 
-void IPlugVST::AttachGraphics(IGraphics* pGraphics)
+void IPlugVST2::AttachGraphics(IGraphics* const pGraphics)
 {
-	if (pGraphics) {
-    IPlugBase::AttachGraphics(pGraphics);
+	if (pGraphics)
+	{
+		IPlugBase::AttachGraphics(pGraphics);
 		mAEffect.flags |= effFlagsHasEditor;
-    mEditRect.left = mEditRect.top = 0;
-    mEditRect.right = pGraphics->Width();
-    mEditRect.bottom = pGraphics->Height();
+
+		#ifdef __APPLE__
+		static const int scale = IGraphicsMac::kScaleOS;
+		#else
+		const int scale = pGraphics->Scale();
+		#endif
+
+		mEditRect.left = mEditRect.top = 0;
+		mEditRect.right = pGraphics->Width() >> scale;
+		mEditRect.bottom = pGraphics->Height() >> scale;
 	}
 }
 
