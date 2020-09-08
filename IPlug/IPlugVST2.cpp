@@ -495,6 +495,43 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effEditOpen:
+		{
+			#if defined(__APPLE__) && !defined(IPLUG_NO_CARBON_SUPPORT)
+			IGraphicsMac* pGraphics = (IGraphicsMac*)_this->GetGUI();
+			if (pGraphics)
+			{
+				// OSX, check if we are in a Cocoa VST host.
+				const bool iscocoa = !!(_this->mHasVSTExtensions & VSTEXT_COCOA);
+				if (iscocoa && !pGraphics->OpenCocoaWindow(ptr)) pGraphics = NULL;
+				if (!iscocoa && !pGraphics->OpenCarbonWindow(ptr)) pGraphics = NULL;
+				if (pGraphics)
+			#else
+			IGraphics* const pGraphics = _this->GetGUI();
+			if (pGraphics)
+			{
+				if (pGraphics->OpenWindow(ptr))
+				#endif
+				{
+					_this->OnGUIOpen();
+					ret = 1;
+				}
+			}
+			break;
+		}
+
+		case effEditClose:
+		{
+			IGraphics* const pGraphics = _this->GetGUI();
+			if (pGraphics)
+			{
+				_this->OnGUIClose();
+				pGraphics->CloseWindow();
+				ret = 1;
+			}
+			break;
+		}
+
     case effString2Parameter:
     {
       if (idx >= 0 && idx < _this->NParams())
@@ -510,34 +547,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
         return 1;
       }
       return 0;
-    }
-    case effEditOpen:
-    {
-      IGraphics* pGraphics = _this->GetGUI();
-	    if (pGraphics)
-      {
-#if defined(_WIN32) || defined(IPLUG_NO_CARBON_SUPPORT)
-        if (!pGraphics->OpenWindow(ptr)) pGraphics=0;
-#else   // OSX, check if we are in a Cocoa VST host
-        bool iscocoa = (_this->mHasVSTExtensions&VSTEXT_COCOA);
-        if (iscocoa && !pGraphics->OpenWindow(ptr)) pGraphics=0;
-        if (!iscocoa && !pGraphics->OpenWindow(ptr, 0)) pGraphics=0;
-#endif
-        if (pGraphics)
-        {
-          _this->OnGUIOpen();
-          return 1;
-        }
-	    }
-	    return 0;
-    }
-    case effEditClose: {
-	    if (_this->GetGUI()) {
-		    _this->OnGUIClose();
-        _this->GetGUI()->CloseWindow();  
-		    return 1;
-	    }
-	    return 0;
     }
     case __effIdentifyDeprecated: {
       return 'NvEf';  // Random deprecated magic.
