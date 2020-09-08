@@ -474,6 +474,17 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effMainsChanged:
+		{
+			const bool active = !!value;
+			if (_this->IsActive() != active)
+			{
+				_this->OnActivate(active);
+				_this->mPlugFlags ^= IPlugBase::kPlugFlagsActive;
+			}
+			break;
+		}
+
     case effString2Parameter:
     {
       if (idx >= 0 && idx < _this->NParams())
@@ -489,16 +500,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
         return 1;
       }
       return 0;
-    }
-    case effMainsChanged: {
-      if (!value) {
-        _this->OnActivate(false);
-		    _this->Reset();
-	    }
-      else {
-        _this->OnActivate(true);
-      }
-	    return 0;
     }
     case effEditGetRect: {
 	    if (ptr && _this->GetGUI()) {
