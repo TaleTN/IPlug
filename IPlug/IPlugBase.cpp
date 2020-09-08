@@ -285,106 +285,103 @@ bool IPlugBase:: IsOutChannelConnected(int chIdx)
   return (chIdx < mOutChannels.GetSize() && mOutChannels.Get(chIdx)->mConnected); 
 }
 
-void IPlugBase::AttachInputBuffers(int idx, int n, double** ppData, int nFrames)
+void IPlugBase::AttachInputBuffers(const int idx, int n, const double* const* ppData, const int nFrames)
 {
-  int iEnd = MIN(idx + n, mInChannels.GetSize());
-  for (int i = idx; i < iEnd; ++i) {
-    InChannel* pInChannel = mInChannels.Get(i);
-    if (pInChannel->mConnected) {
-      *(pInChannel->mSrc) = *(ppData++);
-    }
-  }
+	n += idx;
+	int iEnd = mInChannels.GetSize();
+	iEnd = wdl_min(n, iEnd);
+
+	for (int i = idx; i < iEnd; ++i)
+	{
+		mInChannels.Get(i)->AttachInputBuffer(ppData);
+	}
 }
 
-void IPlugBase::AttachInputBuffers(int idx, int n, float** ppData, int nFrames)
+void IPlugBase::AttachInputBuffers(const int idx, int n, const float* const* ppData, const int nFrames)
 {
-  int iEnd = MIN(idx + n, mInChannels.GetSize());
-  for (int i = idx; i < iEnd; ++i) {
-    InChannel* pInChannel = mInChannels.Get(i);
-    if (pInChannel->mConnected) {
-      double* pScratch = pInChannel->mScratchBuf.Get();
-      CastCopy(pScratch, *(ppData++), nFrames);
-      *(pInChannel->mSrc) = pScratch;
-    }
-  }
-}
- 
-void IPlugBase::AttachOutputBuffers(int idx, int n, double** ppData)
-{
-  int iEnd = MIN(idx + n, mOutChannels.GetSize());
-  for (int i = idx; i < iEnd; ++i) {
-    OutChannel* pOutChannel = mOutChannels.Get(i);
-    if (pOutChannel->mConnected) {
-      *(pOutChannel->mDest) = *(ppData++);
-    }
-  }
+	n += idx;
+	int iEnd = mInChannels.GetSize();
+	iEnd = wdl_min(n, iEnd);
+
+	for (int i = idx; i < iEnd; ++i)
+	{
+		InChannel* const pInChannel = mInChannels.Get(i);
+		if (pInChannel->mConnected)
+		{
+			CastCopy(pInChannel->AttachScratchBuffer(), *ppData++, nFrames);
+		}
+	}
 }
 
-void IPlugBase::AttachOutputBuffers(int idx, int n, float** ppData)
+void IPlugBase::AttachOutputBuffers(const int idx, int n, double* const* ppData)
 {
-  int iEnd = MIN(idx + n, mOutChannels.GetSize());
-  for (int i = idx; i < iEnd; ++i) {
-    OutChannel* pOutChannel = mOutChannels.Get(i);
-    if (pOutChannel->mConnected) {
-      *(pOutChannel->mDest) = pOutChannel->mScratchBuf.Get();
-      pOutChannel->mFDest = *(ppData++);
-    }
-  }
+	n += idx;
+	int iEnd = mOutChannels.GetSize();
+	iEnd = wdl_min(n, iEnd);
+
+	for (int i = idx; i < iEnd; ++i)
+	{
+		mOutChannels.Get(i)->AttachOutputBuffer(ppData);
+	}
 }
 
-#pragma REMINDER("lock mutex before calling into any IPlugBase processing functions")
-
-void IPlugBase::ProcessBuffers(double sampleType, int nFrames) 
+void IPlugBase::AttachOutputBuffers(const int idx, int n, float* const* ppData)
 {
-  ProcessDoubleReplacing(mInData.Get(), mOutData.Get(), nFrames);
+	n += idx;
+	int iEnd = mOutChannels.GetSize();
+	iEnd = wdl_min(n, iEnd);
+
+	for (int i = idx; i < iEnd; ++i)
+	{
+		mOutChannels.Get(i)->AttachScratchBuffer(ppData);
+	}
 }
 
-void IPlugBase::ProcessBuffers(float sampleType, int nFrames)
+// Reminder: Lock mutex before calling into any IPlugBase processing functions.
+
+void IPlugBase::ProcessBuffers(float /* sampleType */, const int nFrames)
 {
-  ProcessDoubleReplacing(mInData.Get(), mOutData.Get(), nFrames);
-  int i, n = NOutChannels();
-  OutChannel** ppOutChannel = mOutChannels.GetList();
-  for (i = 0; i < n; ++i, ++ppOutChannel) {
-    OutChannel* pOutChannel = *ppOutChannel;
-    if (pOutChannel->mConnected) {
-      CastCopy(pOutChannel->mFDest, *(pOutChannel->mDest), nFrames);
-    }
-  }   
+	ProcessDoubleReplacing(mInData.Get(), mOutData.Get(), nFrames);
+	const int n = NOutChannels();
+	const OutChannel* const* const ppOutChannel = mOutChannels.GetList();
+	for (int i = 0; i < n; ++i)
+	{
+		const OutChannel* const pOutChannel = ppOutChannel[i];
+		if (pOutChannel->mConnected)
+		{
+			CastCopy(pOutChannel->mFDest, *pOutChannel->mDest, nFrames);
+		}
+	}
 }
 
-void IPlugBase::ProcessBuffersAccumulating(float sampleType, int nFrames)
+void IPlugBase::ProcessBuffersAccumulating(float /* sampleType */, const int nFrames)
 {
-  ProcessDoubleReplacing(mInData.Get(), mOutData.Get(), nFrames);
-  int i, n = NOutChannels();
-  OutChannel** ppOutChannel = mOutChannels.GetList();
-  for (i = 0; i < n; ++i, ++ppOutChannel) {
-    OutChannel* pOutChannel = *ppOutChannel;  
-    if (pOutChannel->mConnected) {
-      float* pDest = pOutChannel->mFDest;
-      double* pSrc = *(pOutChannel->mDest);
-      for (int j = 0; j < nFrames; ++j, ++pDest, ++pSrc) { 
-        *pDest += (float) *pSrc;
-      }
-    }
-  }
+	ProcessDoubleReplacing(mInData.Get(), mOutData.Get(), nFrames);
+	const int n = NOutChannels();
+	const OutChannel* const* const ppOutChannel = mOutChannels.GetList();
+	for (int i = 0; i < n; ++i)
+	{
+		const OutChannel* const pOutChannel = ppOutChannel[i];
+		if (pOutChannel->mConnected)
+		{
+			CastCopyAccumulating(pOutChannel->mFDest, *pOutChannel->mDest, nFrames);
+		}
+	}
 }
 
-void IPlugBase::PassThroughBuffers(double sampleType, int nFrames) 
+void IPlugBase::PassThroughBuffers(float /* sampleType */, const int nFrames)
 {
-  IPlugBase::ProcessDoubleReplacing(mInData.Get(), mOutData.Get(), nFrames);
-}
-
-void IPlugBase::PassThroughBuffers(float sampleType, int nFrames)
-{
-  IPlugBase::ProcessDoubleReplacing(mInData.Get(), mOutData.Get(), nFrames);
-  int i, n = NOutChannels();
-  OutChannel** ppOutChannel = mOutChannels.GetList();
-  for (i = 0; i < n; ++i, ++ppOutChannel) {
-    OutChannel* pOutChannel = *ppOutChannel;
-    if (pOutChannel->mConnected) {
-      CastCopy(pOutChannel->mFDest, *(pOutChannel->mDest), nFrames);
-    }
-  }   
+	IPlugBase::ProcessDoubleReplacing(mInData.Get(), mOutData.Get(), nFrames);
+	const int n = NOutChannels();
+	const OutChannel* const* const ppOutChannel = mOutChannels.GetList();
+	for (int i = 0; i < n; ++i)
+	{
+		const OutChannel* const pOutChannel = ppOutChannel[i];
+		if (pOutChannel->mConnected)
+		{
+			CastCopy(pOutChannel->mFDest, *pOutChannel->mDest, nFrames);
+		}
+	}
 }
 
 // If latency changes after initialization (often not supported by the host).
@@ -453,16 +450,22 @@ void IPlugBase::EndDelayedInformHostOfParamChange()
 }
 
 // Default passthrough.
-void IPlugBase::ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames)
+void IPlugBase::ProcessDoubleReplacing(const double* const* const inputs, double* const* const outputs, const int nFrames)
 {
-  // Mutex is already locked.
-  int i = 0, nOut = mOutChannels.GetSize();
-  for (int n = MIN(mInChannels.GetSize(), nOut); i < n; ++i) {
-    memcpy(outputs[i], inputs[i], nFrames * sizeof(double));
-  }
-  for (/* same i */; i < nOut; ++i) {
-    memset(outputs[i], 0, nFrames * sizeof(double));
-  }
+	assert(nFrames >= 0);
+	const size_t byteSize = nFrames * sizeof(double);
+
+	// Mutex is already locked.
+	const int nIn = mInChannels.GetSize(), nOut = mOutChannels.GetSize();
+	int i = 0;
+	for (int n = wdl_min(nIn, nOut); i < n; ++i)
+	{
+		memcpy(outputs[i], inputs[i], byteSize);
+	}
+	for (/* same i */; i < nOut; ++i)
+	{
+		memset(outputs[i], 0, byteSize);
+	}
 }
 
 IPreset* GetNextUninitializedPreset(WDL_PtrList<IPreset>* pPresets)

@@ -60,9 +60,9 @@ public:
 	virtual void OnParamChange(int paramIdx) {}
 	virtual void OnPresetChange(int presetIdx) {}
 
-	// Default passthrough.  Inputs and outputs are [nChannel][nSample].
-  // Mutex is already locked.
-	virtual void ProcessDoubleReplacing(double** inputs, double** outputs, int nFrames);
+	// Default passthrough. Inputs and outputs are [nChannel][nSample].
+	// Mutex is already locked.
+	virtual void ProcessDoubleReplacing(const double* const* inputs, double* const* outputs, int nFrames);
 
 	// In case the audio processing thread needs to do anything when the GUI opens
 	// (like for example, set some state dependent initial values for controls).
@@ -252,15 +252,15 @@ protected:
   void SetInputChannelConnections(int idx, int n, bool connected);
   void SetOutputChannelConnections(int idx, int n, bool connected);
 
-  void AttachInputBuffers(int idx, int n, double** ppData, int nFrames);
-  void AttachInputBuffers(int idx, int n, float** ppData, int nFrames);
-  void AttachOutputBuffers(int idx, int n, double** ppData);
-  void AttachOutputBuffers(int idx, int n, float** ppData);
-  void ProcessBuffers(float sampleType, int nFrames);
-  void ProcessBuffers(double sampleType, int nFrames);
-  void ProcessBuffersAccumulating(float sampleType, int nFrames); 
-  void PassThroughBuffers(float sampleType, int nFrames);
-  void PassThroughBuffers(double sampleType, int nFrames);
+	void AttachInputBuffers(int idx, int n, const double* const* ppData, int nFrames);
+	void AttachOutputBuffers(int idx, int n, double* const* ppData);
+	void ProcessBuffers(double /* sampleType */, const int nFrames) { ProcessDoubleReplacing(mInData.Get(), mOutData.Get(), nFrames); }
+	void PassThroughBuffers(double /* sampleType */, const int nFrames) { ProcessDoubleReplacing(mInData.Get(), mOutData.Get(), nFrames); }
+	void AttachInputBuffers(int idx, int n, const float* const* ppData, int nFrames);
+	void AttachOutputBuffers(int idx, int n, float* const* ppData);
+	void ProcessBuffers(float /* sampleType */, int nFrames);
+	void ProcessBuffersAccumulating(float /* sampleType */, int nFrames);
+	void PassThroughBuffers(float /* sampleType */, int nFrames);
 
  	WDL_PtrList<IParam> mParams;
 
