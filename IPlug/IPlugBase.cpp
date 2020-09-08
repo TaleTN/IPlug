@@ -8,12 +8,22 @@
 #include <string.h>
 #include "WDL/wdlcstring.h"
 
-template <class SRC, class DEST> 
-void CastCopy(DEST* pDest, SRC* pSrc, int n)
+template <class SRC, class DEST>
+void IPlugBase::CastCopy(DEST* const pDest, const SRC* const pSrc, const int n)
 {
-  for (int i = 0; i < n; ++i, ++pDest, ++pSrc) {
-    *pDest = (DEST) *pSrc;
-  }
+	for (int i = 0; i < n; ++i)
+	{
+		pDest[i] = (DEST)pSrc[i];
+	}
+}
+
+template <class SRC, class DEST>
+void IPlugBase::CastCopyAccumulating(DEST* const pDest, const SRC* const pSrc, const int n)
+{
+	for (int i = 0; i < n; ++i)
+	{
+		pDest[i] += (DEST)pSrc[i];
+	}
 }
 
 static void GetVersionParts(unsigned int version, int* const pParts)

@@ -228,9 +228,11 @@ public:
 	#endif
 
 protected:
+	// ----------------------------------------
+	// Useful stuff for your plugin class to call, implemented here or in the API class, or partly in both.
 
-  // ----------------------------------------
-  // Useful stuff for your plugin class to call, implemented here or in the API class, or partly in both.
+	template <class SRC, class DEST> void CastCopy(DEST* pDest, const SRC* pSrc, int n);
+	template <class SRC, class DEST> static void CastCopyAccumulating(DEST* pDest, const SRC* pSrc, int n);
 
   struct ChannelIO 
   { 
