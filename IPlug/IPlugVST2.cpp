@@ -378,16 +378,20 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 
 	switch (opCode)
 	{
-    case effOpen: {
-      _this->HostSpecificInit();
-	    _this->OnParamReset();
-	    return 0;
-    }
-    case effClose: {
-      lock.Destroy();
-	    DELETE_NULL(_this);
-	    return 0;
-    }
+		case effOpen:
+		{
+			_this->HostSpecificInit();
+			_this->OnParamReset();
+			break;
+		}
+
+		case effClose:
+		{
+			_this->mMutex.Leave();
+			delete _this;
+			return ret;
+		}
+
     case effGetParamLabel: {
       if (idx >= 0 && idx < _this->NParams())
       {
