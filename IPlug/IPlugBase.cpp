@@ -705,40 +705,41 @@ void IPlugBase::ModifyCurrentPreset(const char* name)
   }
 }
 
-bool IPlugBase::SerializePresets(ByteChunk* pChunk)
+bool IPlugBase::SerializePresets(const int fromIdx, const int toIdx, ByteChunk* const pChunk) const
 {
-  bool savedOK = true;
-  int n = mPresets.GetSize();
-  for (int i = 0; i < n && savedOK; ++i) {
-    IPreset* pPreset = mPresets.Get(i);
-    pChunk->PutStr(pPreset->mName);
-    pChunk->PutBool(pPreset->mInitialized);
-    if (pPreset->mInitialized) {
-      savedOK &= (pChunk->PutChunk(&(pPreset->mChunk)) > 0);
-    }
-  }
-  return savedOK;
+	bool savedOK = true;
+	for (int i = fromIdx; i < toIdx && savedOK; ++i)
+	{
+		IPreset* const pPreset = mPresets.Get(i);
+		pChunk->PutStr(&pPreset->mName);
+		pChunk->PutBool(pPreset->mInitialized);
+		if (pPreset->mInitialized)
+		{
+			savedOK &= !!pChunk->PutChunk(&pPreset->mChunk);
+		}
+	}
+	return savedOK;
 }
 
-int IPlugBase::UnserializePresets(ByteChunk* pChunk, int startPos)
+int IPlugBase::UnserializePresets(const int fromIdx, const int toIdx, const ByteChunk* const pChunk, int pos)
 {
-  WDL_String name;
-  int n = mPresets.GetSize(), pos = startPos;
-  for (int i = 0; i < n && pos >= 0; ++i) {
-    IPreset* pPreset = mPresets.Get(i);
-    pos = pChunk->GetStr(&name, pos);
-    strcpy(pPreset->mName, name.Get());
-    pos = pChunk->GetBool(&(pPreset->mInitialized), pos);
-    if (pPreset->mInitialized) {
-      pos = UnserializeParams(pChunk, pos);
-      if (pos > 0) {
-        pPreset->mChunk.Clear();
-        SerializeParams(&(pPreset->mChunk));
-      }
-    }
-  }
-  RestorePreset(mCurrentPresetIdx);
-  return pos;
+	for (int i = fromIdx; i < toIdx && pos >= 0; ++i)
+	{
+		IPreset* const pPreset = mPresets.Get(i);
+		pos = pChunk->GetStr(&pPreset->mName, pos);
+		pos = pChunk->GetBool(&pPreset->mInitialized, pos);
+		if (pPreset->mInitialized)
+		{
+			pos = UnserializePreset(pChunk, pos);
+			OnParamReset();
+			if (pos >= 0)
+			{
+				pPreset->mChunk.Clear();
+				SerializePreset(&pPreset->mChunk);
+			}
+		}
+	}
+	return pos;
 }
 
 bool IPlugBase::SerializeBank(ByteChunk* const pChunk)

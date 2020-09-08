@@ -270,9 +270,10 @@ protected:
   bool RestorePreset(const char* name);
   const char* GetPresetName(int idx);
   void ModifyCurrentPreset(const char* name = 0);     // Sets the currently active preset to whatever current params are.
-  virtual bool SerializePresets(ByteChunk* pChunk);
-  // Returns the new chunk position (endPos).
-  virtual int UnserializePresets(ByteChunk* pChunk, int startPos);
+
+	bool SerializePresets(int fromIdx, int toIdx /* up to not *not* including */, ByteChunk* pChunk) const;
+	// Returns the new chunk position (endPos).
+	int UnserializePresets(int fromIdx, int toIdx, const ByteChunk* pChunk, int startPos);
 
   // Dump the current state as source code for a call to MakePresetFromNamedParams.
   void DumpPresetSrcCode(const char* filename, const char* paramEnumNames[]);
