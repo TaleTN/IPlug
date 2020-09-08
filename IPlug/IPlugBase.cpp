@@ -136,14 +136,8 @@ IPlugBase::IPlugBase(
 }
 
 IPlugBase::~IPlugBase()
-{ 
-  TRACE;
-	DELETE_NULL(mGraphics);
-  mParams.Empty(true);
-  mPresets.Empty(true);
-  mInChannels.Empty(true);
-  mOutChannels.Empty(true);
-  mChannelIO.Empty(true);
+{
+	delete mGraphics;
 }
 
 int IPlugBase::GetHostVersion(const bool decimal)

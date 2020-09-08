@@ -46,11 +46,11 @@ public:
 		kPlugDoesMidi = kPlugDoesMidiIn | kPlugDoesMidiOut
 	};
 
-  // ----------------------------------------
-  // Your plugin class implements these.
-  // There are default impls, mostly just for reference.
-  
-  virtual ~IPlugBase();
+	// ----------------------------------------
+	// Your plugin class implements these.
+	// There are default impls, mostly just for reference.
+
+	virtual ~IPlugBase();
 
 	// Mutex is already locked.
 	virtual void Reset() {} // Called (at least) once.
@@ -372,12 +372,9 @@ protected:
 	void ProcessBuffersAccumulating(float /* sampleType */, int nFrames);
 	void PassThroughBuffers(float /* sampleType */, int nFrames);
 
- 	WDL_PtrList<IParam> mParams;
-
-  WDL_PtrList<IPreset> mPresets;
-  int mCurrentPresetIdx;
-
-  int mParamChangeIdx;
+	WDL_PtrList_DeleteOnDestroy<IParam> mParams;
+	WDL_PtrList_DeleteOnDestroy<IPreset> mPresets;
+	int mCurrentPresetIdx, mParamChangeIdx;
 
 	WDL_Mutex mMutex;
 
@@ -404,8 +401,9 @@ protected:
     float* mFDest;
     WDL_TypedBuf<double> mScratchBuf;
   };
-  WDL_PtrList<InChannel> mInChannels;
-  WDL_PtrList<OutChannel> mOutChannels;
+
+	WDL_PtrList_DeleteOnDestroy<InChannel> mInChannels;
+	WDL_PtrList_DeleteOnDestroy<OutChannel> mOutChannels;
 
 	int mPresetChunkSize;
 }
