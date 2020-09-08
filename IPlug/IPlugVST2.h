@@ -50,8 +50,7 @@ public:
 	void ResizeGraphics(int w, int h);
 
 protected:
-
-  void HostSpecificInit();
+	void HostSpecificInit();
 	void AttachGraphics(IGraphics* pGraphics);  
   void SetLatency(int samples);
 	bool SendMidiMsg(IMidiMsg* pMsg);
@@ -71,8 +70,8 @@ private:
 
 	VstSpeakerArrangement mInputSpkrArr, mOutputSpkrArr;
 
-  bool mHostSpecificInitDone;
-  
+	bool mHostSpecificInitDone;
+
   enum { VSTEXT_NONE=0, VSTEXT_COCKOS, VSTEXT_COCOA }; // list of VST extensions supported by host
   int mHasVSTExtensions;
   

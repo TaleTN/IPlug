@@ -1,5 +1,6 @@
 #include "IPlugVST2.h"
 #include "IGraphics.h"
+#include "Hosts.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -272,25 +273,26 @@ bool IPlugVST::SendSysEx(ISysEx* pSysEx)
 	return SendVSTEvent((VstEvent*) &sysexEvent);
 }
 
-void IPlugVST::HostSpecificInit()
+void IPlugVST2::HostSpecificInit()
 {
-  if (!mHostSpecificInitDone) {
-    mHostSpecificInitDone = true;
-    EHost host = GetHost();
-    switch (host) {
-      case kHostAudition: 
-      case kHostOrion:
-      case kHostForte:
-      case kHostSAWStudio:
-        LimitToStereoIO();
-        break;
-    }
+	if (!mHostSpecificInitDone)
+	{
+		mHostSpecificInitDone = true;
+		switch (GetHost())
+		{
+			case kHostForte:
+			case kHostAudition:
+			case kHostOrion:
+			case kHostSAWStudio:
+				LimitToStereoIO();
+				break;
+		}
 
-    // This won't always solve a picky host problem -- for example Forte
-    // looks at mAEffect IO count before identifying itself.  
-    mAEffect.numInputs = mInputSpkrArr.numChannels = NInChannels();
-    mAEffect.numOutputs = mOutputSpkrArr.numChannels = NOutChannels();
-  }
+		// This won't always solve a picky host problem -- for example Forte
+		// looks at mAEffect IO count before identifying itself.
+		mAEffect.numInputs = mInputSpkrArr.numChannels = NInChannels();
+		mAEffect.numOutputs = mOutputSpkrArr.numChannels = NOutChannels();
+	}
 }
 
 #define IPLUG_VERSION_MAGIC 'pfft'
