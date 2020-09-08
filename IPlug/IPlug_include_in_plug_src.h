@@ -105,14 +105,3 @@ ComponentResult PLUG_VIEW_ENTRY(ComponentParameters* const params, void* const p
 #else
 	#error "No API defined!"
 #endif
-
-#if defined _DEBUG
-  #define PUBLIC_NAME APPEND_TIMESTAMP(PLUG_NAME " DEBUG")
-#elif defined TRACER_BUILD
-  #define PUBLIC_NAME APPEND_TIMESTAMP(PLUG_NAME " TRACER")
-#elif defined TIMESTAMP_PLUG_NAME
-  #pragma REMINDER("plug name is timestamped")
-  #define PUBLIC_NAME APPEND_TIMESTAMP(PLUG_NAME)
-#else
-  #define PUBLIC_NAME PLUG_NAME
-#endif
