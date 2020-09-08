@@ -421,27 +421,33 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
-    case effGetParamLabel: {
-      if (idx >= 0 && idx < _this->NParams())
-      {
-	      strcpy((char*) ptr, _this->GetParam(idx)->GetLabelForHost());
-      }
-      return 0;
-    }
-    case effGetParamDisplay: {
-      if (idx >= 0 && idx < _this->NParams())
-      {
-	      _this->GetParam(idx)->GetDisplayForHost((char*) ptr);
-      }
-	    return 0;
-    }
-    case effGetParamName: {
-      if (idx >= 0 && idx < _this->NParams())
-      {
-	      strcpy((char*) ptr, _this->GetParam(idx)->GetNameForHost());      
-      }
-	    return 0;
-    }
+		case effGetParamLabel:
+		{
+			if (_this->NParams(idx))
+			{
+				vst_strncpy((char*)ptr, _this->GetParam(idx)->GetLabelForHost(), kVstMaxParamStrLen);
+			}
+			break;
+		}
+
+		case effGetParamDisplay:
+		{
+			if (_this->NParams(idx))
+			{
+				_this->GetParam(idx)->GetDisplayForHost((char*)ptr, kVstMaxParamStrLen);
+			}
+			break;
+		}
+
+		case effGetParamName:
+		{
+			if (_this->NParams(idx))
+			{
+				vst_strncpy((char*)ptr, _this->GetParam(idx)->GetNameForHost(), kVstMaxParamStrLen);
+			}
+			break;
+		}
+
     case effString2Parameter:
     {
       if (idx >= 0 && idx < _this->NParams())
