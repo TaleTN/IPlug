@@ -531,6 +531,12 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 		}
 		#endif
 
+		case DECLARE_VST_DEPRECATED(effIdentify):
+		{
+			ret = 'NvEf'; // Random deprecated magic.
+			break;
+		}
+
     case effString2Parameter:
     {
       if (idx >= 0 && idx < _this->NParams())
@@ -546,9 +552,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
         return 1;
       }
       return 0;
-    }
-    case __effIdentifyDeprecated: {
-      return 'NvEf';  // Random deprecated magic.
     }
     case effGetChunk: {
 	    BYTE** ppData = (BYTE**) ptr;
