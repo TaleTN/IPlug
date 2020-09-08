@@ -221,6 +221,12 @@ public:
     
 	void EnsureDefaultPreset();
 
+	#ifndef NDEBUG
+	static void DebugLog(const char* format, ...);
+	#else
+	static inline void DebugLog(const char*, ...) {}
+	#endif
+
 protected:
 
   // ----------------------------------------

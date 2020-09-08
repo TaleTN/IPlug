@@ -4,7 +4,9 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+
 #include <string.h>
+#include "WDL/wdlcstring.h"
 
 template <class SRC, class DEST> 
 void CastCopy(DEST* pDest, SRC* pSrc, int n)
@@ -820,6 +822,21 @@ bool IPlugBase::OnGUIRescale(int /* wantScale */)
 	GetGUI()->Rescale(IGraphics::kScaleFull);
 	return true;
 }
+
+#ifndef NDEBUG
+void IPlugBase::DebugLog(const char* format, ...)
+{
+	va_list va;
+	va_start(va, format);
+
+	char str[128];
+	vsnprintf(str, sizeof(str), format, va);
+
+	va_end(va);
+
+	IPlugDebugLog(str);
+}
+#endif
 
 void IPlugBase::DumpPresetSrcCode(const char* filename, const char* paramEnumNames[])
 {
