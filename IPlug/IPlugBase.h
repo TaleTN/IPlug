@@ -165,13 +165,13 @@ public:
 
 	virtual void InformHostOfProgramChange() = 0;
 
-  // ----------------------------------------
-  // Useful stuff for your plugin class or an outsider to call, 
-  // most of which is implemented by the API class.
+	// ----------------------------------------
+	// Useful stuff for your plugin class or an outsider to call,
+	// most of which is implemented by the API class.
 
-  double GetSampleRate() { return mSampleRate; }
-	int GetBlockSize() { return mBlockSize; }
-  int GetLatency() { return mLatency; }
+	inline double GetSampleRate() const { return mSampleRate; }
+	inline int GetBlockSize() const { return mBlockSize; }
+	inline int GetLatency() const { return mLatency; }
   
   // In ProcessDoubleReplacing you are always guaranteed to get valid pointers 
   // to all the channels the plugin requested.  If the host hasn't connected all the pins,
@@ -250,10 +250,10 @@ protected:
 
 	virtual void AttachGraphics(IGraphics* pGraphics);
   
-  void SetSampleRate(double sampleRate);
-  virtual void SetBlockSize(int blockSize); 
-  // If latency changes after initialization (often not supported by the host).
-  virtual void SetLatency(int samples);
+	virtual void SetSampleRate(const double sampleRate) { mSampleRate = sampleRate; }
+	virtual void SetBlockSize(int blockSize);
+	// If latency changes after initialization (often not supported by the host).
+	virtual void SetLatency(const int samples) { mLatency = samples; }
 
 	virtual bool SendMidiMsg(const IMidiMsg* pMsg) = 0;
 	virtual bool SendMidiMsgs(const IMidiMsg* pMsgs, int n);
@@ -353,8 +353,8 @@ protected:
 	int mHost, mHostVersion; // Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
 
 	int mPlugFlags; // See EPlugDoes, EPlugInit, EPlugFlags.
-  double WDL_FIXALIGN mSampleRate;
-  int mBlockSize, mLatency;
+	double WDL_FIXALIGN mSampleRate;
+	int mBlockSize, mLatency;
 
 	IGraphics* mGraphics;
 

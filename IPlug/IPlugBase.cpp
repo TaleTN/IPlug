@@ -197,33 +197,36 @@ double IPlugBase::GetSamplesPerBeat()
 	return 0.0;
 }
 
-void IPlugBase::SetSampleRate(double sampleRate)
-{
-  mSampleRate = sampleRate;
-}
-
 void IPlugBase::SetBlockSize(int blockSize)
 {
-  if (blockSize != mBlockSize) {
-    int i, nIn = NInChannels(), nOut = NOutChannels();
-    for (i = 0; i < nIn; ++i) {
-      InChannel* pInChannel = mInChannels.Get(i);
-      double* pScratch = pInChannel->mScratchBuf.Resize(blockSize);
-      memset(pScratch, 0, blockSize * sizeof(double));
-      if (!pInChannel->mConnected) {
-        *(pInChannel->mSrc) = pScratch;
-      }
-    }
-    for (i = 0; i < nOut; ++i) {
-      OutChannel* pOutChannel = mOutChannels.Get(i);
-      double* pScratch = pOutChannel->mScratchBuf.Resize(blockSize);
-      memset(pScratch, 0, blockSize * sizeof(double));
-      if (!pOutChannel->mConnected) {
-        *(pOutChannel->mDest) = pScratch;
-      }
-    }
-    mBlockSize = blockSize;
-  }
+	assert(blockSize >= 0);
+	const size_t byteSize = blockSize * sizeof(double);
+
+	const int nIn = NInChannels();
+	for (int i = 0; i < nIn; ++i)
+	{
+		InChannel* pInChannel = mInChannels.Get(i);
+		double* const pScratch = pInChannel->ResizeScratchBuffer(blockSize);
+
+		if (pScratch)
+			memset(pScratch, 0, byteSize);
+		else
+			blockSize = 0;
+	}
+
+	const int nOut = NOutChannels();
+	for (int i = 0; i < nOut; ++i)
+	{
+		OutChannel* pOutChannel = mOutChannels.Get(i);
+		double* const pScratch = pOutChannel->ResizeScratchBuffer(blockSize);
+
+		if (pScratch)
+			memset(pScratch, 0, byteSize);
+		else
+			blockSize = 0;
+	}
+
+	mBlockSize = blockSize;
 }
 
 void IPlugBase::SetInputChannelConnections(int idx, int n, bool connected)
@@ -357,12 +360,6 @@ void IPlugBase::PassThroughBuffers(float /* sampleType */, const int nFrames)
 			CastCopy(pOutChannel->mFDest, *pOutChannel->mDest, nFrames);
 		}
 	}
-}
-
-// If latency changes after initialization (often not supported by the host).
-void IPlugBase::SetLatency(int samples)
-{
-  mLatency = samples;
 }
 
 bool IPlugBase::MidiNoteName(int /* noteNumber */, char* const buf, const int bufSize)
