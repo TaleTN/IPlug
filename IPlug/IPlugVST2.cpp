@@ -8,6 +8,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "WDL/wdltypes.h"
@@ -339,22 +340,17 @@ static int GetIPlugVerFromChunk(const ByteChunk* const pChunk, int* const pPos)
 	return ver;
 }
 
-double VSTString2Parameter(IParam* pParam, char* ptr)
+static double VSTString2Parameter(const IParam* const pParam, const char* const ptr)
 {
-  double v;
-  bool mapped = pParam->GetNDisplayTexts();
-  if (mapped)
-  {
-    int vi;
-    mapped = pParam->MapDisplayText(ptr, &vi);
-    if (mapped) v = (double)vi;
-  }
-  if (!mapped)
-  {
-    v = atof(ptr);
-    if (pParam->DisplayIsNegated()) v = -v;
-  }
-  return v;
+	double v;
+	const bool mapped = pParam->MapDisplayText(ptr, &v);
+	if (!mapped)
+	{
+		v = strtod(ptr, NULL);
+		if (pParam->DisplayIsNegated()) v = -v;
+		v = pParam->GetNormalized(v);
+	}
+	return v;
 }
 
 VstIntPtr VSTCALLBACK IPlugVST::VSTDispatcher(AEffect *pEffect, VstInt32 opCode, VstInt32 idx, VstIntPtr value, void *ptr, float opt)
