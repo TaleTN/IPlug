@@ -6,6 +6,7 @@
 	#include "IGraphicsMac.h"
 #endif
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -244,45 +245,56 @@ void IPlugVST2::SetLatency(const int samples)
     IPlugBase::SetLatency(samples);
 }
 
-bool IPlugVST::SendVSTEvent(VstEvent* pEvent)
+bool IPlugVST2::SendVSTEvent(VstEvent* const pEvent)
 { 
 	// It would be more efficient to bundle these and send at the end of a processed block,
 	// but that would require writing OnBlockEnd and making sure it always gets called,
-	// and who cares anyway, midi events aren't that dense.
-	VstEvents events;
-	memset(&events, 0, sizeof(VstEvents));
-  events.numEvents = 1;
-	events.events[0] = pEvent;
-	return (mHostCallback(&mAEffect, audioMasterProcessEvents, 0, 0, &events, 0.0f) == 1);
+	// and who cares anyway, MIDI events aren't that dense.
+	VstEvents events = { 1, 0, pEvent, NULL };
+	return mHostCallback(&mAEffect, audioMasterProcessEvents, 0, 0, &events, 0.0f) == 1;
 }
 
-bool IPlugVST::SendMidiMsg(IMidiMsg* pMsg)
-{ 
+bool IPlugVST2::SendMidiMsg(const IMidiMsg* const pMsg)
+{
 	VstMidiEvent midiEvent;
-	memset(&midiEvent, 0, sizeof(VstMidiEvent));
 
-	midiEvent.type = kVstMidiType;
-	midiEvent.byteSize = sizeof(VstMidiEvent);  // Should this be smaller?
-	midiEvent.deltaFrames = pMsg->mOffset;
-	midiEvent.midiData[0] = pMsg->mStatus;
-	midiEvent.midiData[1] = pMsg->mData1;
-	midiEvent.midiData[2] = pMsg->mData2;
+	#if defined(_WIN64) || (defined(__LP64__) && __LITTLE_ENDIAN__)
+	{
+		assert(pMsg->_padding == 0);
 
-	return SendVSTEvent((VstEvent*) &midiEvent);
+		*(WDL_UINT64*)&midiEvent.type = ((WDL_UINT64)sizeof(VstMidiEvent) << 32) | kVstMidiType;
+		*(WDL_UINT64*)&midiEvent.deltaFrames = (unsigned int)pMsg->mOffset;
+		*(WDL_UINT64*)&midiEvent.noteLength = 0;
+		*(WDL_UINT64*)&midiEvent.midiData = *(const unsigned int*)&pMsg->mStatus;
+	}
+	#else
+	{
+		memset(&midiEvent, 0, sizeof(VstMidiEvent));
+
+		midiEvent.type = kVstMidiType;
+		midiEvent.byteSize = (int)sizeof(VstMidiEvent);
+		midiEvent.deltaFrames = pMsg->mOffset;
+		midiEvent.midiData[0] = pMsg->mStatus;
+		midiEvent.midiData[1] = pMsg->mData1;
+		midiEvent.midiData[2] = pMsg->mData2;
+	}
+	#endif
+
+	return SendVSTEvent((VstEvent*)&midiEvent);
 }
 
-bool IPlugVST::SendSysEx(ISysEx* pSysEx)
+bool IPlugVST2::SendSysEx(const ISysEx* const pSysEx)
 { 
 	VstMidiSysexEvent sysexEvent;
 	memset(&sysexEvent, 0, sizeof(VstMidiSysexEvent));
 
 	sysexEvent.type = kVstSysExType;
-	sysexEvent.byteSize = sizeof(VstMidiSysexEvent);
+	sysexEvent.byteSize = (int)sizeof(VstMidiSysexEvent);
 	sysexEvent.deltaFrames = pSysEx->mOffset;
 	sysexEvent.dumpBytes = pSysEx->mSize;
 	sysexEvent.sysexDump = (char*)pSysEx->mData;
 
-	return SendVSTEvent((VstEvent*) &sysexEvent);
+	return SendVSTEvent((VstEvent*)&sysexEvent);
 }
 
 void IPlugVST2::HostSpecificInit()

@@ -53,8 +53,8 @@ protected:
 	void HostSpecificInit();
 	void AttachGraphics(IGraphics* pGraphics);  
 	void SetLatency(int samples);
-	bool SendMidiMsg(IMidiMsg* pMsg);
-  bool SendSysEx(ISysEx* pSysEx);
+	bool SendMidiMsg(const IMidiMsg* pMsg);
+	bool SendSysEx(const ISysEx* pSysEx);
 	inline audioMasterCallback GetHostCallback() const { return mHostCallback; }
 
 private:
@@ -65,8 +65,7 @@ private:
 	ERect mEditRect;
 	audioMasterCallback mHostCallback;
 
-  bool SendVSTEvent(VstEvent* pEvent);
-  bool SendVSTEvents(WDL_TypedBuf<VstEvent>* pEvents);
+	bool SendVSTEvent(VstEvent* pEvent);
 
 	VstSpeakerArrangement mInputSpkrArr, mOutputSpkrArr;
 
