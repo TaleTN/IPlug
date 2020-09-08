@@ -644,22 +644,27 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
-    case effString2Parameter:
-    {
-      if (idx >= 0 && idx < _this->NParams())
-      {
-        if (ptr)
-        {
-          IParam* pParam = _this->GetParam(idx);
-          double v = VSTString2Parameter(pParam, (char*)ptr);
-          if (_this->GetGUI()) _this->GetGUI()->SetParameterFromPlug(idx, v, false);
-          pParam->Set(v);
-          _this->OnParamChange(idx);
-        }
-        return 1;
-      }
-      return 0;
-    }
+		case effString2Parameter:
+		{
+			if (_this->NParams(idx))
+			{
+				if (ptr)
+				{
+					IParam* const pParam = _this->GetParam(idx);
+					const double v = VSTString2Parameter(pParam, (const char*)ptr);
+					IGraphics* const pGraphics = _this->GetGUI();
+					if (pGraphics)
+					{
+						pGraphics->SetParameterFromPlug(idx, v, true);
+					}
+					pParam->SetNormalized(v);
+					_this->OnParamChange(idx);
+				}
+				ret = 1;
+			}
+			break;
+		}
+
 	  case effGetInputProperties: {
       if (ptr && idx >= 0 && idx < _this->NInChannels()) {
         VstPinProperties* pp = (VstPinProperties*) ptr;
