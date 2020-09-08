@@ -174,25 +174,27 @@ void IPlugVST2::GetTimeSig(int* const pNum, int* const pDenom)
 	*pDenom = denom;
 }
 
-EHost IPlugVST::GetHost() 
+int IPlugVST2::GetHost()
 {
-  EHost host = IPlugBase::GetHost();
-  if (host == kHostUninit) {
-    char productStr[256];
-    productStr[0] = '\0';
-    int version = 0;
-    mHostCallback(&mAEffect, audioMasterGetProductString, 0, 0, productStr, 0.0f);
-    if (CSTR_NOT_EMPTY(productStr)) {
-      int decVer = mHostCallback(&mAEffect, audioMasterGetVendorVersion, 0, 0, 0, 0.0f);
-      int ver = decVer / 10000;
-      int rmaj = (decVer - 10000 * ver) / 100;
-      int rmin = (decVer - 10000 * ver - 100 * rmaj);
-      version = (ver << 16) + (rmaj << 8) + rmin;
-    }
-    SetHost(productStr, version);
-    host = IPlugBase::GetHost();    
-  }
-  return host;
+	int host = IPlugBase::GetHost();
+	if (host == kHostUninit)
+	{
+		char productStr[wdl_max(256, kVstMaxProductStrLen)];
+		productStr[0] = 0;
+		int version = 0;
+		mHostCallback(&mAEffect, audioMasterGetProductString, 0, 0, productStr, 0.0f);
+		if (productStr[0])
+		{
+			int decVer = (int)mHostCallback(&mAEffect, audioMasterGetVendorVersion, 0, 0, NULL, 0.0f);
+			const int ver = decVer / 10000;
+			const int rmaj = (decVer -= 10000 * ver) / 100;
+			const int rmin = decVer - 100 * rmaj;
+			version = (((ver << 8) | rmaj) << 8) | rmin;
+		}
+		SetHost(productStr, version);
+		host = IPlugBase::GetHost();
+	}
+	return host;
 }
 
 void IPlugVST::AttachGraphics(IGraphics* pGraphics)
