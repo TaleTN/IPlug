@@ -606,6 +606,38 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effProcessEvents:
+		{
+			const VstEvents* const pEvents = (VstEvents*)ptr;
+			if (!pEvents) break;
+
+			const int numEvents = pEvents->numEvents;
+			if (pEvents->events)
+			{
+				for (int i = 0; i < numEvents; ++i)
+				{
+					const VstEvent* const pEvent = pEvents->events[i];
+					if (pEvent)
+					{
+						if (pEvent->type == kVstMidiType)
+						{
+							const VstMidiEvent* const pME = (const VstMidiEvent*)pEvent;
+							const IMidiMsg msg(pME->deltaFrames, pME->midiData);
+							_this->ProcessMidiMsg(&msg);
+						}
+						else if (pEvent->type == kVstSysExType)
+						{
+							const VstMidiSysexEvent* const pSE = (const VstMidiSysexEvent*)pEvent;
+							const ISysEx sysex(pSE->deltaFrames, pSE->sysexDump, pSE->dumpBytes);
+							_this->ProcessSysEx(&sysex);
+						}
+					}
+				}
+				ret = 1;
+			}
+			break;
+		}
+
     case effString2Parameter:
     {
       if (idx >= 0 && idx < _this->NParams())
@@ -621,31 +653,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
         return 1;
       }
       return 0;
-    }
-    case effProcessEvents: {
-	    VstEvents* pEvents = (VstEvents*) ptr;
-	    if (pEvents && pEvents->events) {
-		    for (int i = 0; i < pEvents->numEvents; ++i) {
-          VstEvent* pEvent = pEvents->events[i];
-			    if (pEvent) {
-				    if (pEvent->type == kVstMidiType) {
-					    VstMidiEvent* pME = (VstMidiEvent*) pEvent;
-              IMidiMsg msg(pME->deltaFrames, pME->midiData[0], pME->midiData[1], pME->midiData[2]);
-              _this->ProcessMidiMsg(&msg);
-              //#ifdef TRACER_BUILD
-              //  msg.LogMsg();
-              //#endif
-				    }
-				    else if (pEvent->type == kVstSysExType) {
-				        VstMidiSysexEvent* pSE = (VstMidiSysexEvent*) pEvent;
-				        ISysEx sysex(pSE->deltaFrames, (const BYTE*)pSE->sysexDump, pSE->dumpBytes);
-				        _this->ProcessSysEx(&sysex);
-				    }
-			    }
-		    }
-		    return 1;
-	    }
-	    return 0;
     }
 	  case effCanBeAutomated: {
 	  	return 1;
