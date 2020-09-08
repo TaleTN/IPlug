@@ -8,6 +8,7 @@
 #include <assert.h>
 
 #include "WDL/mutex.h"
+#include "WDL/wdlstring.h"
 #include "WDL/wdltypes.h"
 
 // All version ints are stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
@@ -132,14 +133,14 @@ public:
 		return (T*)mParams.Add(pParam);
 	}
 
-	IGraphics* GetGUI() { return mGraphics; }
-  
-  const char* GetEffectName() { return mEffectName; }
+	inline IGraphics* GetGUI() const { return mGraphics; }
+
+	const char* GetEffectName() const { return mEffectName.Get(); }
   int GetEffectVersion(bool decimal);   // Decimal = VVVVRRMM, otherwise 0xVVVVRRMM.
   void GetEffectVersionStr(char* str);
-  const char* GetMfrName() { return mMfrName; }
-  const char* GetProductName() { return mProductName; }
-  
+	const char* GetMfrName() const { return mMfrName.Get(); }
+	const char* GetProductName() const { return mProductName.Get(); }
+
   int GetUniqueID() { return mUniqueID; }
   int GetMfrID() { return mMfrID; }
 
@@ -333,9 +334,7 @@ protected:
 
 	WDL_Mutex mMutex;
 
-private:
-
-  char mEffectName[MAX_EFFECT_NAME_LEN], mProductName[MAX_PRODUCT_NAME_LEN], mMfrName[MAX_MFR_NAME_LEN];
+	WDL_FastString mEffectName, mProductName, mMfrName;
   int mUniqueID, mMfrID, mVersion;   //  Version stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision.
   
   EHost mHost;
