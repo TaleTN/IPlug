@@ -44,6 +44,9 @@ public:
 	// ----------------------------------------
 	// See IPlugBase for the full list of methods that your plugin class can implement.
 
+	// Default implementation to mimic original IPlug AU behavior.
+	void OnBypass(bool /* bypassed */) { Reset(); }
+
   void BeginInformHostOfParamChange(int idx);
   void BeginDelayedInformHostOfParamChange(int idx);
   void InformHostOfParamChange(int idx, double normalizedValue);
