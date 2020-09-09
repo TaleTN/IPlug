@@ -1562,25 +1562,29 @@ void IPlugAU::GetTimeSig(int* const pNum, int* const pDenom)
 	*pDenom = tsDenom;
 }
 
-EHost IPlugAU::GetHost()
+int IPlugAU::GetHost()
 {
-  EHost host = IPlugBase::GetHost();
-  if (host == kHostUninit) {
-    CFBundleRef mainBundle = CFBundleGetMainBundle();
-    if (mainBundle) {
-      CFStringRef id = CFBundleGetIdentifier(mainBundle);
-      if (id) {
-        CStrLocal str(id);
-        SetHost(str.mCStr, 0);
-        host = IPlugBase::GetHost();
-      }
-    }
-    if (host == kHostUninit) {
-      SetHost("", 0);
-      host = IPlugBase::GetHost();
-    }
-  }
-  return host;
+	int host = IPlugBase::GetHost();
+	if (host == kHostUninit)
+	{
+		CFBundleRef const mainBundle = CFBundleGetMainBundle();
+		if (mainBundle)
+		{
+			CFStringRef const id = CFBundleGetIdentifier(mainBundle);
+			if (id)
+			{
+				const CStrLocal str(id);
+				SetHost(str.mCStr, 0);
+				host = IPlugBase::GetHost();
+			}
+		}
+		if (host == kHostUninit)
+		{
+			SetHost(NULL, 0);
+			host = IPlugBase::GetHost();
+		}
+	}
+	return host;
 }
 
 void IPlugAU::HostSpecificInit()

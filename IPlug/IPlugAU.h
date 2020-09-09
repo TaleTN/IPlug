@@ -60,8 +60,8 @@ public:
 	double GetSamplePos(); // Samples since start of project.
 	double GetTempo();
 	void GetTimeSig(int* pNum, int* pDenom);
-	EHost GetHost();  // GetHostVersion() is inherited.
-  
+	int GetHost(); // GetHostVersion() is inherited.
+
   // Tell the host that the graphics resized.
   // Should be called only by the graphics object when it resizes itself.
   void ResizeGraphics(int w, int h) {}
