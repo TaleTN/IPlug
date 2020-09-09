@@ -1,13 +1,15 @@
 #include "IPlugAU.h"
 #include "IGraphicsMac.h"
-#include "Log.h"
 #include "Hosts.h"
 
-#include "../dfx-library/dfx-au-utilities.h"
+#include "dfx/dfx-au-utilities.h"
 
-//#include "/Developer/Examples/CoreAudio/PublicUtility/CAStreamBasicDescription.h"
+#include <AudioUnit/AudioUnit.h>
+#include <AudioUnit/AudioUnitCarbonView.h>
 
 #define kAudioUnitRemovePropertyListenerWithUserDataSelect 0x0012
+
+#include <string.h>
 
 typedef AudioStreamBasicDescription STREAM_DESC;
 

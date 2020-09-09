@@ -1,13 +1,9 @@
-#ifndef _IPLUGAPI_
-#define _IPLUGAPI_
-// Only load one API class!
+#pragma once
 
 #include "IPlugBase.h"
+
+#include <AudioToolbox/AudioToolbox.h>
 #include <CoreServices/CoreServices.h>
-#include <AudioUnit/AUComponent.h>
-#include <AudioUnit/AudioUnitProperties.h>
-#include <AudioToolbox/AudioUnitUtilities.h>
-#include <AudioUnit/AudioUnitCarbonView.h>
 
 // Argh!
 #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
@@ -17,6 +13,11 @@
   struct AUMIDIOutputCallbackStruct { AUMIDIOutputCallback midiOutputCallback; void* userData; };
   #define kAudioFormatFlagsCanonical (kAudioFormatFlagIsFloat|kAudioFormatFlagsNativeEndian|kAudioFormatFlagIsPacked)
 #endif
+
+#include "WDL/heapbuf.h"
+#include "WDL/ptrlist.h"
+#include "WDL/wdlstring.h"
+#include "WDL/wdltypes.h"
 
 #define MAX_IO_CHANNELS 128
 
@@ -147,7 +148,3 @@ public:
 } WDL_FIXALIGN;
 
 IPlugAU* MakePlug();
-
-#endif
-
-
