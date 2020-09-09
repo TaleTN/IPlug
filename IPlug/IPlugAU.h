@@ -6,12 +6,13 @@
 #include <CoreServices/CoreServices.h>
 
 // Argh!
+#define AudioSampleType Float32
+#define kAudioFormatFlagsCanonical (kAudioFormatFlagIsFloat | kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked)
+
 #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
-  typedef Float32 AudioSampleType;
-  typedef	Float32	AudioUnitParameterValue;
-  typedef OSStatus (*AUMIDIOutputCallback)(void*, const AudioTimeStamp*, UInt32, const struct MIDIPacketList*);
-  struct AUMIDIOutputCallbackStruct { AUMIDIOutputCallback midiOutputCallback; void* userData; };
-  #define kAudioFormatFlagsCanonical (kAudioFormatFlagIsFloat|kAudioFormatFlagsNativeEndian|kAudioFormatFlagIsPacked)
+	typedef Float32 AudioUnitParameterValue;
+	typedef OSStatus (*AUMIDIOutputCallback)(void*, const AudioTimeStamp*, UInt32, const struct MIDIPacketList*);
+	struct AUMIDIOutputCallbackStruct { AUMIDIOutputCallback midiOutputCallback; void* userData; };
 #endif
 
 #include "WDL/heapbuf.h"
