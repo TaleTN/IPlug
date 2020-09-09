@@ -43,23 +43,25 @@ struct CStrLocal
 
 typedef AudioStreamBasicDescription STREAM_DESC;
 
-/* inline */ void MakeDefaultASBD(STREAM_DESC* pASBD, double sampleRate, int nChannels, bool interleaved)
+static void MakeDefaultASBD(STREAM_DESC* const pASBD, const double sampleRate, const int nChannels, const bool interleaved)
 {
-  memset(pASBD, 0, sizeof(STREAM_DESC));
-  pASBD->mSampleRate = sampleRate;
-  pASBD->mFormatID = kAudioFormatLinearPCM;
-  pASBD->mFormatFlags = kAudioFormatFlagsCanonical;
-  pASBD->mBitsPerChannel = 8 * sizeof(AudioSampleType);
-  pASBD->mChannelsPerFrame = nChannels;
-  pASBD->mFramesPerPacket = 1;
-  int nBytes = sizeof(AudioSampleType);
-  if (interleaved) {
-    nBytes *= nChannels;
-  }
-  else {
-    pASBD->mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
-  }
-  pASBD->mBytesPerPacket = pASBD->mBytesPerFrame = nBytes;
+	memset(pASBD, 0, sizeof(STREAM_DESC));
+	pASBD->mSampleRate = sampleRate;
+	pASBD->mFormatID = kAudioFormatLinearPCM;
+	pASBD->mFormatFlags = kAudioFormatFlagsCanonical;
+	pASBD->mBitsPerChannel = 8 * sizeof(AudioSampleType);
+	pASBD->mChannelsPerFrame = nChannels;
+	pASBD->mFramesPerPacket = 1;
+	int nBytes = (int)sizeof(AudioSampleType);
+	if (interleaved)
+	{
+		nBytes *= nChannels;
+	}
+	else
+	{
+		pASBD->mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
+	}
+	pASBD->mBytesPerPacket = pASBD->mBytesPerFrame = nBytes;
 }
 
 template <class C>
