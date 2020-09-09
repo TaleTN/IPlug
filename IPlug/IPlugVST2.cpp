@@ -16,8 +16,6 @@
 
 #define vst_strncpy(y, x, n) lstrcpyn_safe(y, x, (n) + 1)
 
-const int VST_VERSION = 2400;
-
 struct CanDoTbl
 {
 	unsigned char mIdx;
@@ -818,6 +816,12 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effGetVstVersion:
+		{
+			ret = kVstVersion;
+			break;
+		}
+
     case effProcessVarIo: {
 	    // VstVariableIo* pIO = (VstVariableIo*) ptr;		// For offline processing (of audio files?)
 	    return 0;
@@ -842,9 +846,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 		    }
 	    }
 	    return 0;
-    }
-    case effGetVstVersion: {
-	    return VST_VERSION;
     }
     case effBeginSetProgram:
     case effEndSetProgram:
