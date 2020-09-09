@@ -140,8 +140,6 @@ private:
 	};
 	WDL_PtrList_DeleteOnDestroy<PropertyListener> mPropertyListeners;
 
-  ComponentResult GetPropertyInfo(AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
-    UInt32* pDataSize, Boolean* pWriteable);
 	ComponentResult GetProperty(AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
 		UInt32* pDataSize, Boolean* pWriteable, void* pData);
 	ComponentResult SetProperty(AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
