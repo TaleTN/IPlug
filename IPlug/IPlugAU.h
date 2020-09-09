@@ -77,8 +77,7 @@ public:
   };      
   
 protected:
-
-  void HostSpecificInit();
+	void HostSpecificInit() { GetHost(); }
   void SetBlockSize(int blockSize);
   void SetLatency(int samples);
 	bool SendMidiMsg(IMidiMsg* pMsg);

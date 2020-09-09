@@ -1582,11 +1582,6 @@ int IPlugAU::GetHost()
 	return host;
 }
 
-void IPlugAU::HostSpecificInit()
-{
-  EHost host = GetHost();
-}
-
 void IPlugAU::SetBlockSize(int blockSize)
 {
   TRACE;
