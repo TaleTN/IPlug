@@ -1095,37 +1095,31 @@ ComponentResult IPlugAU::SetProperty(const AudioUnitPropertyID propID, const Aud
 		NO_OP(kAudioUnitProperty_FastDispatch);                 // 5,
 		NO_OP(kAudioUnitProperty_CPULoad);                      // 6,
 
-    case kAudioUnitProperty_StreamFormat: {              // 8,
-      AudioStreamBasicDescription* pASBD = (AudioStreamBasicDescription*) pData;
-      int nHostChannels = pASBD->mChannelsPerFrame;
-      BusChannels* pBus = GetBus(scope, element);
-      if (!pBus) {
-        return kAudioUnitErr_InvalidProperty;
-      }
-      pBus->mNHostChannels = 0;
-      // The connection is OK if the plugin expects the same number of channels as the host is attempting to connect,
-      // or if the plugin supports mono channels (meaning it's flexible about how many inputs to expect)
-      // and the plugin supports at least as many channels as the host is attempting to connect.
-      bool connectionOK = (nHostChannels > 0);
-      connectionOK &= CheckLegalIO(scope, element, nHostChannels);
-      connectionOK &= (pASBD->mFormatID == kAudioFormatLinearPCM && pASBD->mFormatFlags & kAudioFormatFlagsCanonical);
+		case kAudioUnitProperty_StreamFormat:                   // 8,
+		{
+			AudioStreamBasicDescription* pASBD = (AudioStreamBasicDescription*)pData;
+			const int nHostChannels = pASBD->mChannelsPerFrame;
+			BusChannels* const pBus = GetBus(scope, element);
+			if (!pBus) return kAudioUnitErr_InvalidProperty;
+			// The connection is OK if the plugin expects the same number of channels as the host is attempting to connect,
+			// or if the plugin supports mono channels (meaning it's flexible about how many inputs to expect)
+			// and the plugin supports at least as many channels as the host is attempting to connect.
+			bool connectionOK = nHostChannels > 0 && nHostChannels <= pBus->mNPlugChannels;
+			connectionOK &= pASBD->mFormatID == kAudioFormatLinearPCM && (pASBD->mFormatFlags & kAudioFormatFlagsCanonical);
 
-      Trace(TRACELOC, "%d:%d:%s:%s:%s",
-            nHostChannels, pBus->mNPlugChannels,
-            (pASBD->mFormatID == kAudioFormatLinearPCM ? "linearPCM" : "notLinearPCM"),
-            (pASBD->mFormatFlags & kAudioFormatFlagsCanonical ? "canonicalFormat" : "notCanonicalFormat"),
-            (connectionOK ? "connectionOK" : "connectionNotOK"));
-
-      // bool interleaved = !(pASBD->mFormatFlags & kAudioFormatFlagIsNonInterleaved);
-      if (connectionOK) {
-        pBus->mNHostChannels = nHostChannels;
-        if (pASBD->mSampleRate > 0.0) {
-          SetSampleRate(pASBD->mSampleRate);
-        }
-      }
-      AssessInputConnections();
-      return (connectionOK ? noErr : kAudioUnitErr_InvalidProperty);
-    }
+			// const bool interleaved = !(pASBD->mFormatFlags & kAudioFormatFlagIsNonInterleaved);
+			if (connectionOK)
+			{
+				pBus->mNHostChannels = nHostChannels;
+				if (pASBD->mSampleRate > 0.0)
+				{
+					UpdateSampleRate(pASBD->mSampleRate);
+				}
+				AssessInputConnections();
+				return noErr;
+			}
+			return (ComponentResult)kAudioUnitErr_InvalidProperty;
+		}
 
 		NO_OP(kAudioUnitProperty_ElementCount);                 // 11,
 		NO_OP(kAudioUnitProperty_Latency);                      // 12,
