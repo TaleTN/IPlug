@@ -148,7 +148,7 @@ private:
 		UInt32* pDataSize, const void* pData);
   ComponentResult GetProc(AudioUnitElement element, UInt32* pDataSize, void* pData);
 	ComponentResult GetState(CFPropertyListRef* ppPropList);
-  ComponentResult SetState(CFPropertyListRef pPropList);
+	ComponentResult SetState(CFPropertyListRef pPropList);
   void InformListeners(AudioUnitPropertyID propID, AudioUnitScope scope);
 	
 public:

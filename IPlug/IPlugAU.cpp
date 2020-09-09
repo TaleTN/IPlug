@@ -1445,48 +1445,46 @@ ComponentResult IPlugAU::GetState(CFPropertyListRef* const ppPropList)
 	return noErr;
 }
 
-ComponentResult IPlugAU::SetState(CFPropertyListRef pPropList)
+ComponentResult IPlugAU::SetState(CFPropertyListRef const pPropList)
 {
-  ComponentDescription cd;
-  ComponentResult r = GetComponentInfo((Component) mCI, &cd, 0, 0, 0);
-  if (r != noErr) {
-    return r;
-  }
+	ComponentDescription cd;
+	const ComponentResult r = GetComponentInfo((Component)mCI, &cd, NULL, NULL, NULL);
+	if (r != noErr) return r;
 
-  CFDictionaryRef pDict = (CFDictionaryRef) pPropList;
-  int version, type, subtype, mfr;
-  char presetName[64];
-  if (!GetNumberFromDict(pDict, kAUPresetVersionKey, &version, kCFNumberSInt32Type) ||
-    !GetNumberFromDict(pDict, kAUPresetTypeKey, &type, kCFNumberSInt32Type) ||
-    !GetNumberFromDict(pDict, kAUPresetSubtypeKey, &subtype, kCFNumberSInt32Type) ||
-    !GetNumberFromDict(pDict, kAUPresetManufacturerKey, &mfr, kCFNumberSInt32Type) ||
-    !GetStrFromDict(pDict, kAUPresetNameKey, presetName) ||
-    //version != GetEffectVersion(false) ||
-    type != cd.componentType ||
-    subtype != cd.componentSubType ||
-    mfr != cd.componentManufacturer) {
-    return kAudioUnitErr_InvalidPropertyValue;
-  }
-  RestorePreset(presetName);
+	CFDictionaryRef const pDict = (CFDictionaryRef)pPropList;
+	int version, type, subtype, mfr;
+	char presetName[64];
+	if (!GetNumberFromDict(pDict, kAUPresetVersionKey, &version, kCFNumberSInt32Type) ||
+		!GetNumberFromDict(pDict, kAUPresetTypeKey, &type, kCFNumberSInt32Type) ||
+		!GetNumberFromDict(pDict, kAUPresetSubtypeKey, &subtype, kCFNumberSInt32Type) ||
+		!GetNumberFromDict(pDict, kAUPresetManufacturerKey, &mfr, kCFNumberSInt32Type) ||
+		!GetStrFromDict(pDict, kAUPresetNameKey, presetName) ||
+		// version != GetEffectVersion(false) ||
+		type != cd.componentType ||
+		subtype != cd.componentSubType ||
+		mfr != cd.componentManufacturer)
+	{
+		return kAudioUnitErr_InvalidPropertyValue;
+	}
+	RestorePreset(presetName);
 
-  ByteChunk chunk;
-  if (!GetDataFromDict(pDict, kAUPresetDataKey, &chunk)) {
-    return kAudioUnitErr_InvalidPropertyValue;
-  }
+	if (!GetDataFromDict(pDict, kAUPresetDataKey, &mState))
+	{
+		return kAudioUnitErr_InvalidPropertyValue;
+	}
 
-  if (DoesStateChunks()) {
-    if (!UnserializeState(&chunk, 0)) {
-      return kAudioUnitErr_InvalidPropertyValue;
-    }
-  }
-  else {
-    if (!UnserializeParams(&chunk, 0)) {
-      return kAudioUnitErr_InvalidPropertyValue;
-    }
-  }
+	const int pos =
+	#ifdef IPLUG_NO_STATE_CHUNKS
+	UnserializeParams(0, NParams(), &mState, 0);
+	#else
+	UnserializeState(&mState, 0);
+	#endif
 
-  RedrawParamControls();
-  return noErr;
+	OnParamReset();
+	if (pos < 0) return kAudioUnitErr_InvalidPropertyValue;
+
+	RedrawParamControls();
+	return noErr;
 }
 
 // pData == 0 means return property info only.
