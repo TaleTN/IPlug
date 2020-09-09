@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "WDL/wdlcstring.h"
 #include "WDL/wdltypes.h"
 
 static CFStringRef MakeCFString(const char* const cStr)
@@ -504,58 +505,67 @@ ComponentResult IPlugAU::IPlugAUCarbonViewEntry(ComponentParameters* const param
 	return badComponentSelector;
 }
 
-#define ASSERT_SCOPE(reqScope) if (scope != reqScope) { return kAudioUnitErr_InvalidProperty; }
-#define ASSERT_ELEMENT(numElements) if (element >= numElements) { return kAudioUnitErr_InvalidElement; }
+#define ASSERT_SCOPE(reqScope) if (scope != reqScope) return kAudioUnitErr_InvalidProperty;
+#define ASSERT_ELEMENT_NPARAMS if (!NParams(element)) return kAudioUnitErr_InvalidElement;
 #define ASSERT_INPUT_OR_GLOBAL_SCOPE \
-  if (scope != kAudioUnitScope_Input && scope != kAudioUnitScope_Global) { \
-    return kAudioUnitErr_InvalidProperty; \
-  }
+	if (scope != kAudioUnitScope_Input && scope != kAudioUnitScope_Global) \
+	{ \
+		return kAudioUnitErr_InvalidProperty; \
+	}
 #undef NO_OP
 #define NO_OP(propID) case propID: return kAudioUnitErr_InvalidProperty;
 
-// pData == 0 means return property info only.
-ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
-    UInt32* pDataSize, Boolean* pWriteable, void* pData)
+// pData == NULL means return property info only.
+ComponentResult IPlugAU::GetProperty(const AudioUnitPropertyID propID, const AudioUnitScope scope, const AudioUnitElement element,
+	UInt32* const pDataSize, Boolean* const pWriteable, void* const pData)
 {
-  Trace(TRACELOC, "%s(%d:%s):(%d:%s):%d", (pData ? "" : "info:"), propID, AUPropertyStr(propID), scope, AUScopeStr(scope), element);
+	// Writeable defaults to false, we only need to set it if true.
 
-  // Writeable defaults to false, we only need to set it if true.
+	switch (propID)
+	{
+		case kAudioUnitProperty_ClassInfo:                      // 0,
+		{
+			*pDataSize = sizeof(CFPropertyListRef);
+			*pWriteable = true;
+			if (pData)
+			{
+				CFPropertyListRef* const pList = (CFPropertyListRef*)pData;
+				return GetState(pList);
+			}
+			return noErr;
+		}
 
-  switch (propID) {
-    case kAudioUnitProperty_ClassInfo: {                  // 0,
-      *pDataSize = sizeof(CFPropertyListRef);
-      *pWriteable = true;
-      if (pData) {
-        CFPropertyListRef* pList = (CFPropertyListRef*) pData;
-        return GetState(pList);
-      }
-      return noErr;
-    }
-    case kAudioUnitProperty_MakeConnection: {             // 1,
-      ASSERT_INPUT_OR_GLOBAL_SCOPE;
-      *pDataSize = sizeof(AudioUnitConnection);
-      *pWriteable = true;
-      return noErr;
-    }
-    case kAudioUnitProperty_SampleRate: {                // 2,
-      *pDataSize = sizeof(Float64);
-      *pWriteable = true;
-      if (pData) {
-        *((Float64*) pData) = GetSampleRate();
-      }
-      return noErr;
-    }
-    case kAudioUnitProperty_ParameterList: {             // 3,  listenable
-      int n = (scope == kAudioUnitScope_Global ? NParams() : 0);
-      *pDataSize = n * sizeof(AudioUnitParameterID);
-      if (pData && n) {
-        AudioUnitParameterID* pParamID = (AudioUnitParameterID*) pData;
-        for (int i = 0; i < n; ++i, ++pParamID) {
-          *pParamID = (AudioUnitParameterID) i;
-        }
-      }
-      return noErr;
-    }
+		case kAudioUnitProperty_MakeConnection:                 // 1,
+		{
+			ASSERT_INPUT_OR_GLOBAL_SCOPE;
+			*pDataSize = sizeof(AudioUnitConnection);
+			*pWriteable = true;
+			return noErr;
+		}
+
+		case kAudioUnitProperty_SampleRate:                     // 2,
+		{
+			*pDataSize = sizeof(Float64);
+			*pWriteable = true;
+			if (pData) *(Float64*)pData = GetSampleRate();
+			return noErr;
+		}
+
+		case kAudioUnitProperty_ParameterList:                  // 3, listenable
+		{
+			const int n = scope == kAudioUnitScope_Global ? NParams() : 0;
+			*pDataSize = n * sizeof(AudioUnitParameterID);
+			if (pData && n)
+			{
+				AudioUnitParameterID* const pParamID = (AudioUnitParameterID*)pData;
+				for (int i = 0; i < n; ++i)
+				{
+					pParamID[i] = (AudioUnitParameterID)i;
+				}
+			}
+			return noErr;
+		}
+
     case kAudioUnitProperty_ParameterInfo: {             // 4,  listenable
       ASSERT_SCOPE(kAudioUnitScope_Global);
       ASSERT_ELEMENT(NParams());
@@ -598,279 +608,329 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
       }
       return noErr;
     }
-    case kAudioUnitProperty_FastDispatch: {              // 5,
-      return GetProc(element, pDataSize, pData);
-    }
-    NO_OP(kAudioUnitProperty_CPULoad);                   // 6,
-    case kAudioUnitProperty_StreamFormat: {              // 8,
-      BusChannels* pBus = GetBus(scope, element);
-      if (!pBus) {
-        return kAudioUnitErr_InvalidProperty;
-      }
-      *pDataSize = sizeof(STREAM_DESC);
-      *pWriteable = true;
-      if (pData) {
-        int nChannels = pBus->mNHostChannels;  // Report how many channels the host has connected.
-        if (nChannels < 0) {  // Unless the host hasn't connected any yet, in which case report the default.
-          nChannels = pBus->mNPlugChannels;
-        }
-        STREAM_DESC* pASBD = (STREAM_DESC*) pData;
-        MakeDefaultASBD(pASBD, GetSampleRate(), nChannels, false);
-      }
-      return noErr;
-    }
-    case kAudioUnitProperty_ElementCount: {              // 11,
-      *pDataSize = sizeof(UInt32);
-      if (pData) {
-        int n = 0;
-        if (scope == kAudioUnitScope_Input) {
-          n = mInBuses.GetSize();
-        }
-        else
-        if (scope == kAudioUnitScope_Output) {
-          n = mOutBuses.GetSize();
-        }
-        else
-        if (scope == kAudioUnitScope_Global) {
-          n = 1;
-        }
-        *((UInt32*) pData) = n;
-      }
-      return noErr;
-    }
-    case kAudioUnitProperty_Latency: {                    // 12,  // listenable
-      ASSERT_SCOPE(kAudioUnitScope_Global);
-      *pDataSize = sizeof(Float64);
-      if (pData) {
-        *((Float64*) pData) = (double) GetLatency() / GetSampleRate();
-      }
-      return noErr;
-    }
-    case kAudioUnitProperty_SupportedNumChannels: {      // 13,
-      ASSERT_SCOPE(kAudioUnitScope_Global);
-      int n = mChannelIO.GetSize();
-      *pDataSize = n * sizeof(AUChannelInfo);
-      if (pData) {
-        AUChannelInfo* pChInfo = (AUChannelInfo*) pData;
-        for (int i = 0; i < n; ++i, ++pChInfo) {
-          ChannelIO* pIO = mChannelIO.Get(i);
-          pChInfo->inChannels = pIO->mIn;
-          pChInfo->outChannels = pIO->mOut;
-          Trace(TRACELOC, "IO:%d:%d", pIO->mIn, pIO->mOut);
-        }
-      }
-      return noErr;
-    }
-    case kAudioUnitProperty_MaximumFramesPerSlice: {     // 14,
-      ASSERT_SCOPE(kAudioUnitScope_Global);
-      *pDataSize = sizeof(UInt32);
-      *pWriteable = true;
-      if (pData) {
-        *((UInt32*) pData) = GetBlockSize();
-      }
-      return noErr;
-    }
-    NO_OP(kAudioUnitProperty_SetExternalBuffer);         // 15,
-    case kAudioUnitProperty_ParameterValueStrings: {     // 16,
-      ASSERT_SCOPE(kAudioUnitScope_Global);
-      ASSERT_ELEMENT(NParams());
-      IParam* pParam = GetParam(element);
-      int n = pParam->GetNDisplayTexts();
-      if (!(n && (pParam->Type() == IParam::kTypeEnum || pParam->Type() == IParam::kTypeBool))) {
-        *pDataSize = 0;
-        return kAudioUnitErr_InvalidProperty;
-      }
-      *pDataSize = sizeof(CFArrayRef);
-      if (pData) {
-        CFMutableArrayRef nameArray = CFArrayCreateMutable(kCFAllocatorDefault, n, &kCFTypeArrayCallBacks);
-        for (int i = 0; i < n; ++i) {
-          CFStrLocal cfStr = CFStrLocal(pParam->GetDisplayText(i));
-          CFArrayAppendValue(nameArray, cfStr.mCFStr);
-        }
-        *((CFArrayRef*) pData) = nameArray;
-      }
-      return noErr;
-    }
-    case kAudioUnitProperty_GetUIComponentList: {        // 18,
-      if (GetGUI()) {
-        *pDataSize = sizeof(ComponentDescription);
-        if (pData) {
-          ComponentDescription* pDesc = (ComponentDescription*) pData;
-          pDesc->componentType = kAudioUnitCarbonViewComponentType;
-          pDesc->componentSubType = GetUniqueID();
-          pDesc->componentManufacturer = GetMfrID();
-          pDesc->componentFlags = 0;
-          pDesc->componentFlagsMask = 0;
-        }
-        return noErr;
-      }
-      return kAudioUnitErr_InvalidProperty;
-    }
-    NO_OP(kAudioUnitProperty_AudioChannelLayout);        // 19,
-    case kAudioUnitProperty_TailTime: {                  // 20,   // listenable
-      return GetProperty(kAudioUnitProperty_Latency, scope, element, pDataSize, pWriteable, pData);
-    }
-    case kAudioUnitProperty_BypassEffect: {              // 21,
-      ASSERT_SCOPE(kAudioUnitScope_Global);
-      *pWriteable = true;
-      *pDataSize = sizeof(UInt32);
-      if (pData) {
-        *((UInt32*) pData) = (mBypassed ? 1 : 0);
-      }
-      return noErr;
-    }
-    case kAudioUnitProperty_LastRenderError: {           // 22,
-      ASSERT_SCOPE(kAudioUnitScope_Global);
-      *pDataSize = sizeof(OSStatus);
-      if (pData) {
-        *((OSStatus*) pData) = noErr;
-      }
-      return noErr;
-    }
-    case kAudioUnitProperty_SetRenderCallback: {         // 23,
-      ASSERT_INPUT_OR_GLOBAL_SCOPE;
-      if (element >= mInBuses.GetSize()) {
-        return kAudioUnitErr_InvalidProperty;
-      }
-      *pDataSize = sizeof(AURenderCallbackStruct);
-      *pWriteable = true;
-      return noErr;
-    }
-    case kAudioUnitProperty_FactoryPresets: {            // 24,   // listenable
-      *pDataSize = sizeof(CFArrayRef);
-      if (pData) {
-        int i, n = NPresets();
-        CFMutableArrayRef presetArray = CFArrayCreateMutable(kCFAllocatorDefault, n, &kCFAUPresetArrayCallBacks);
-        for (i = 0; i < n; ++i) {
-          CFStrLocal presetName = CFStrLocal(GetPresetName(i));
-          CFAUPresetRef newPreset = CFAUPresetCreate(kCFAllocatorDefault, i, presetName.mCFStr);
-          CFArrayAppendValue(presetArray, newPreset);
-          CFAUPresetRelease(newPreset);
-        }
-        *((CFMutableArrayRef*) pData) = presetArray;
-      }
-      return noErr;
-    }
-    NO_OP(kAudioUnitProperty_ContextName);                // 25,
-    NO_OP(kAudioUnitProperty_RenderQuality);              // 26,
-    case kAudioUnitProperty_HostCallbacks: {              // 27,
-      ASSERT_SCOPE(kAudioUnitScope_Global);
-      *pDataSize = sizeof(HostCallbackInfo);
-      *pWriteable = true;
-      return noErr;
-    }
-    NO_OP(kAudioUnitProperty_InPlaceProcessing);          // 29,
-    NO_OP(kAudioUnitProperty_ElementName);                // 30,
-    case kAudioUnitProperty_CocoaUI: {                    // 31,
-      if (GetGUI() && IGraphicsMac::GetUserFoundationVersion() >= 677.00) { // OS X v10.5
-        *pDataSize = sizeof(AudioUnitCocoaViewInfo);  // Just one view.
-        if (pData) {
-          AudioUnitCocoaViewInfo* pViewInfo = (AudioUnitCocoaViewInfo*) pData;
-          CFStrLocal bundleID(mOSXBundleID.Get());
-          CFBundleRef pBundle = CFBundleGetBundleWithIdentifier(bundleID.mCFStr);
-          CFURLRef url = CFBundleCopyBundleURL(pBundle);
-          pViewInfo->mCocoaAUViewBundleLocation = url;
-          pViewInfo->mCocoaAUViewClass[0] = MakeCFString(mCocoaViewFactoryClassName.Get());
-        }
-        return noErr;
-      }
-      return kAudioUnitErr_InvalidProperty;
-    }
-    NO_OP(kAudioUnitProperty_SupportedChannelLayoutTags);// 32,
-    case kAudioUnitProperty_ParameterIDName: {           // 34,
-      *pDataSize = sizeof(AudioUnitParameterIDName);
-      if (pData && scope == kAudioUnitScope_Global) {
-        AudioUnitParameterIDName* pIDName = (AudioUnitParameterIDName*) pData;
-        IParam* pParam = GetParam(pIDName->inID);
-        char cStr[MAX_PARAM_NAME_LEN];
-        strcpy(cStr, pParam->GetNameForHost());
-        if (pIDName->inDesiredLength != kAudioUnitParameterName_Full) {
-          int n = MIN(MAX_PARAM_NAME_LEN - 1, pIDName->inDesiredLength);
-          cStr[n] = '\0';
-        }
-        pIDName->outName = MakeCFString(cStr);
-      }
-      return noErr;
-    }
-    NO_OP(kAudioUnitProperty_ParameterClumpName);        // 35,
-    case kAudioUnitProperty_CurrentPreset:               // 28,
-    case kAudioUnitProperty_PresentPreset: {             // 36,       // listenable
-      *pDataSize = sizeof(AUPreset);
-      *pWriteable = true;
-      if (pData) {
-        AUPreset* pAUPreset = (AUPreset*) pData;
-        pAUPreset->presetNumber = GetCurrentPresetIdx();
-        const char* name = GetPresetName(pAUPreset->presetNumber);
-        pAUPreset->presetName = MakeCFString(name);
-      }
-      return noErr;
-    }
-    NO_OP(kAudioUnitProperty_OfflineRender);              // 37,
-    case kAudioUnitProperty_ParameterStringFromValue: {   // 33,
-      *pDataSize = sizeof(AudioUnitParameterStringFromValue);
-      if (pData && scope == kAudioUnitScope_Global) {
-        AudioUnitParameterStringFromValue* pSFV = (AudioUnitParameterStringFromValue*) pData;
-        IParam* pParam = GetParam(pSFV->inParamID);
-        int v = (pSFV->inValue ? *(pSFV->inValue) : pParam->Int());
-        const char* str = pParam->GetDisplayText(v);
-        pSFV->outString = MakeCFString(str);
-      }
-      return noErr;
-    }
-    case kAudioUnitProperty_ParameterValueFromString: {   // 38,
-      *pDataSize = sizeof(AudioUnitParameterValueFromString);
-      if (pData) {
-        AudioUnitParameterValueFromString* pVFS = (AudioUnitParameterValueFromString*) pData;
-        if (scope == kAudioUnitScope_Global) {
-          CStrLocal cStr(pVFS->inString);
-          IParam* pParam = GetParam(pVFS->inParamID);
-          bool mapped = pParam->GetNDisplayTexts();
-          if (mapped)
-          {
-            int v;
-            mapped = pParam->MapDisplayText(cStr.mCStr, &v);
-            if (mapped)
-              pVFS->outValue = (AudioUnitParameterValue) v;
-          }
-          if (!mapped)
-          {
-            double v = atof(cStr.mCStr);
-            if (pParam->DisplayIsNegated()) v = -v;
-            pVFS->outValue = (AudioUnitParameterValue) v;
-          }
-        }
-      }
-      return noErr;
-    }
-    NO_OP(kAudioUnitProperty_IconLocation);               // 39,
-    NO_OP(kAudioUnitProperty_PresentationLatency);        // 40,
-    NO_OP(kAudioUnitProperty_DependentParameters);        // 45,
-    case kMusicDeviceProperty_InstrumentCount: {
-      ASSERT_SCOPE(kAudioUnitScope_Global);
-      if (IsInst()) {
-        *pDataSize = sizeof(UInt32);
-        if (pData) {
-          *((UInt32*) pData) = 1; //(mBypassed ? 1 : 0);
-        }
-        return noErr;
-      }
-      else {
-        return kAudioUnitErr_InvalidProperty;
-      }
-    }
 
-    #if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
-      NO_OP(kAudioUnitProperty_AUHostIdentifier);           // 46,
-      NO_OP(kAudioUnitProperty_MIDIOutputCallbackInfo);     // 47,
-      NO_OP(kAudioUnitProperty_MIDIOutputCallback);         // 48,
-      NO_OP(kAudioUnitProperty_InputSamplesInOutput);       // 49,
-      NO_OP(kAudioUnitProperty_ClassInfoFromDocument);      // 50
-    #endif
+		case kAudioUnitProperty_FastDispatch:                   // 5,
+		{
+			return GetProc(element, pDataSize, pData);
+		}
 
-    default:  {
-      return kAudioUnitErr_InvalidProperty;
-    }
-  }
+		NO_OP(kAudioUnitProperty_CPULoad);                      // 6,
+
+		case kAudioUnitProperty_StreamFormat:                   // 8,
+		{
+			const BusChannels* const pBus = GetBus(scope, element);
+			if (!pBus) return kAudioUnitErr_InvalidProperty;
+			*pDataSize = sizeof(STREAM_DESC);
+			*pWriteable = true;
+			if (pData)
+			{
+				int nChannels = pBus->mNHostChannels; // Report how many channels the host has connected.
+				if (nChannels < 0) // Unless the host hasn't connected any yet, in which case report the default.
+				{
+					nChannels = pBus->mNPlugChannels;
+				}
+				STREAM_DESC* const pASBD = (STREAM_DESC*)pData;
+				MakeDefaultASBD(pASBD, GetSampleRate(), nChannels, false);
+			}
+			return noErr;
+		}
+
+		case kAudioUnitProperty_ElementCount:                   // 11,
+		{
+			*pDataSize = sizeof(UInt32);
+			if (pData)
+			{
+				int n = 0;
+				switch (scope)
+				{
+					case kAudioUnitScope_Global: n = 1; break;
+					case kAudioUnitScope_Input: n = mInBuses.GetSize(); break;
+					case kAudioUnitScope_Output: n = mOutBuses.GetSize(); break;
+				}
+				*(UInt32*)pData = n;
+			}
+			return noErr;
+		}
+
+		case kAudioUnitProperty_Latency:                        // 12, listenable
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			*pDataSize = sizeof(Float64);
+			if (pData)
+			{
+				*(Float64*)pData = (double)GetLatency() / GetSampleRate();
+			}
+			return noErr;
+		}
+
+		case kAudioUnitProperty_SupportedNumChannels:           // 13,
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			const int n = mChannelIO.GetSize();
+			*pDataSize = n * sizeof(AUChannelInfo);
+			if (pData)
+			{
+				AUChannelInfo* const pChInfo = (AUChannelInfo*)pData;
+				const ChannelIO* const pIO = mChannelIO.Get();
+				for (int i = 0; i < n; ++i)
+				{
+					pChInfo[i].inChannels = pIO[i].mIn;
+					pChInfo[i].outChannels = pIO[i].mOut;
+				}
+			}
+			return noErr;
+		}
+
+		case kAudioUnitProperty_MaximumFramesPerSlice:          // 14,
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			*pDataSize = sizeof(UInt32);
+			*pWriteable = true;
+			if (pData) *(UInt32*)pData = GetBlockSize();
+			return noErr;
+		}
+
+		NO_OP(kAudioUnitProperty_SetExternalBuffer);            // 15,
+
+		case kAudioUnitProperty_ParameterValueStrings:          // 16,
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			ASSERT_ELEMENT_NPARAMS;
+			IParam* const pParam = GetParam(element);
+			const int type = pParam->Type(), n = pParam->GetNDisplayTexts();
+			if (!(n && (type == IParam::kTypeEnum || type == IParam::kTypeBool)))
+			{
+				*pDataSize = 0;
+				return kAudioUnitErr_InvalidProperty;
+			}
+			*pDataSize = sizeof(CFArrayRef);
+			if (pData)
+			{
+				CFMutableArrayRef nameArray = CFArrayCreateMutable(kCFAllocatorDefault, n, &kCFTypeArrayCallBacks);
+				for (int i = 0; i < n; ++i)
+				{
+					const CFStrLocal cfStr(type == IParam::kTypeEnum ?
+						((IEnumParam*)pParam)->GetDisplayText(i) :
+						((IBoolParam*)pParam)->GetDisplayText(i));
+					CFArrayAppendValue(nameArray, cfStr.mCFStr);
+				}
+				*(CFArrayRef*)pData = nameArray;
+			}
+			return noErr;
+		}
+
+		case kAudioUnitProperty_GetUIComponentList:             // 18,
+		{
+			if (GetGUI())
+			{
+				*pDataSize = sizeof(ComponentDescription);
+				if (pData)
+				{
+					ComponentDescription* const pDesc = (ComponentDescription*)pData;
+					pDesc->componentType = kAudioUnitCarbonViewComponentType;
+					pDesc->componentSubType = GetUniqueID();
+					pDesc->componentManufacturer = GetMfrID();
+					pDesc->componentFlags = 0;
+					pDesc->componentFlagsMask = 0;
+				}
+				return noErr;
+			}
+			return kAudioUnitErr_InvalidProperty;
+		}
+
+		NO_OP(kAudioUnitProperty_AudioChannelLayout);           // 19,
+
+		case kAudioUnitProperty_TailTime:                       // 20, listenable
+		{
+			return GetProperty(kAudioUnitProperty_Latency, scope, element, pDataSize, pWriteable, pData);
+		}
+
+		case kAudioUnitProperty_BypassEffect:                   // 21,
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			*pWriteable = true;
+			*pDataSize = sizeof(UInt32);
+			if (pData) *(UInt32*)pData = IsBypassed();
+			return noErr;
+		}
+
+		case kAudioUnitProperty_LastRenderError:                // 22,
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			*pDataSize = sizeof(OSStatus);
+			if (pData) *(OSStatus*)pData = noErr;
+			return noErr;
+		}
+
+		case kAudioUnitProperty_SetRenderCallback:              // 23,
+		{
+			ASSERT_INPUT_OR_GLOBAL_SCOPE;
+			if (element >= mInBuses.GetSize())
+			{
+				return kAudioUnitErr_InvalidProperty;
+			}
+			*pDataSize = sizeof(AURenderCallbackStruct);
+			*pWriteable = true;
+			return noErr;
+		}
+
+		case kAudioUnitProperty_FactoryPresets:                 // 24, listenable
+		{
+			*pDataSize = sizeof(CFArrayRef);
+			if (pData)
+			{
+				const int n = NPresets();
+				CFMutableArrayRef const presetArray = CFArrayCreateMutable(kCFAllocatorDefault, n, &kCFAUPresetArrayCallBacks);
+				for (int i = 0; i < n; ++i)
+				{
+					const CFStrLocal presetName(GetPresetName(i));
+					CFAUPresetRef const newPreset = CFAUPresetCreate(kCFAllocatorDefault, i, presetName.mCFStr);
+					CFArrayAppendValue(presetArray, newPreset);
+					CFAUPresetRelease(newPreset);
+				}
+				*(CFMutableArrayRef*)pData = presetArray;
+			}
+			return noErr;
+		}
+
+		NO_OP(kAudioUnitProperty_ContextName);                  // 25,
+		NO_OP(kAudioUnitProperty_RenderQuality);                // 26,
+
+		case kAudioUnitProperty_HostCallbacks:                  // 27,
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			*pDataSize = sizeof(HostCallbackInfo);
+			*pWriteable = true;
+			return noErr;
+		}
+
+		NO_OP(kAudioUnitProperty_InPlaceProcessing);            // 29,
+		NO_OP(kAudioUnitProperty_ElementName);                  // 30,
+
+		case kAudioUnitProperty_CocoaUI:                        // 31,
+		{
+			if (GetGUI() && IGraphicsMac::GetUserFoundationVersion() >= 677.00) // OS X v10.5
+			{
+				*pDataSize = sizeof(AudioUnitCocoaViewInfo); // Just one view.
+				if (pData)
+				{
+					AudioUnitCocoaViewInfo* const pViewInfo = (AudioUnitCocoaViewInfo*)pData;
+					const CFStrLocal bundleID(mOSXBundleID.Get());
+					CFBundleRef const pBundle = CFBundleGetBundleWithIdentifier(bundleID.mCFStr);
+					CFURLRef const url = CFBundleCopyBundleURL(pBundle);
+					pViewInfo->mCocoaAUViewBundleLocation = url;
+					pViewInfo->mCocoaAUViewClass[0] = MakeCFString(mCocoaViewFactoryClassName.Get());
+				}
+				return noErr;
+			}
+			return kAudioUnitErr_InvalidProperty;
+		}
+
+		NO_OP(kAudioUnitProperty_SupportedChannelLayoutTags);   // 32,
+
+		case kAudioUnitProperty_ParameterIDName:                // 34,
+		{
+			*pDataSize = sizeof(AudioUnitParameterIDName);
+			if (pData && scope == kAudioUnitScope_Global)
+			{
+				AudioUnitParameterIDName* const pIDName = (AudioUnitParameterIDName*)pData;
+				const IParam* const pParam = GetParam(pIDName->inID);
+				char cStr[128];
+				lstrcpyn_safe(cStr, pParam->GetNameForHost(), sizeof(cStr));
+				if (pIDName->inDesiredLength != kAudioUnitParameterName_Full)
+				{
+					const int n = wdl_min(sizeof(cStr) - 1, pIDName->inDesiredLength);
+					cStr[n] = '\0';
+				}
+				pIDName->outName = MakeCFString(cStr);
+			}
+			return noErr;
+		}
+
+		NO_OP(kAudioUnitProperty_ParameterClumpName);           // 35,
+
+		case kAudioUnitProperty_CurrentPreset:                  // 28,
+		case kAudioUnitProperty_PresentPreset:                  // 36, listenable
+		{
+			*pDataSize = sizeof(AUPreset);
+			*pWriteable = true;
+			if (pData)
+			{
+				AUPreset* const pAUPreset = (AUPreset*)pData;
+				pAUPreset->presetNumber = GetCurrentPresetIdx();
+				const char* name = GetPresetName(pAUPreset->presetNumber);
+				pAUPreset->presetName = MakeCFString(name);
+			}
+			return noErr;
+		}
+
+		NO_OP(kAudioUnitProperty_OfflineRender);                // 37,
+
+		case kAudioUnitProperty_ParameterStringFromValue:       // 33,
+		{
+			*pDataSize = sizeof(AudioUnitParameterStringFromValue);
+			if (pData && scope == kAudioUnitScope_Global)
+			{
+				AudioUnitParameterStringFromValue* const pSFV = (AudioUnitParameterStringFromValue*)pData;
+				IParam* const pParam = GetParam(pSFV->inParamID);
+				const double v = pSFV->inValue ? pParam->GetNormalized(*pSFV->inValue) : pParam->GetNormalized();
+				char str[128];
+				pParam->GetDisplayForHost(v, str, sizeof(str));
+				pSFV->outString = MakeCFString(str);
+			}
+			return noErr;
+		}
+
+		case kAudioUnitProperty_ParameterValueFromString:       // 38,
+		{
+			*pDataSize = sizeof(AudioUnitParameterValueFromString);
+			if (pData)
+			{
+				AudioUnitParameterValueFromString* const pVFS = (AudioUnitParameterValueFromString*)pData;
+				if (scope == kAudioUnitScope_Global)
+				{
+					const CStrLocal cStr(pVFS->inString);
+					const IParam* const pParam = GetParam(pVFS->inParamID);
+					double v;
+					const bool mapped = pParam->MapDisplayText(cStr.mCStr, &v);
+					if (!mapped)
+					{
+						v = strtod(cStr.mCStr, NULL);
+						if (pParam->DisplayIsNegated()) v = -v;
+						v = pParam->GetNormalized(v);
+					}
+					pVFS->outValue = (AudioUnitParameterValue)v;
+				}
+			}
+			return noErr;
+		}
+
+		NO_OP(kAudioUnitProperty_IconLocation);                 // 39,
+		NO_OP(kAudioUnitProperty_PresentationLatency);          // 40,
+		NO_OP(kAudioUnitProperty_DependentParameters);          // 45,
+
+		#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
+		NO_OP(kAudioUnitProperty_AUHostIdentifier);             // 46,
+		NO_OP(kAudioUnitProperty_MIDIOutputCallbackInfo);       // 47,
+		NO_OP(kAudioUnitProperty_MIDIOutputCallback);           // 48,
+		NO_OP(kAudioUnitProperty_InputSamplesInOutput);         // 49,
+		NO_OP(kAudioUnitProperty_ClassInfoFromDocument);        // 50,
+		#endif
+
+		case kMusicDeviceProperty_InstrumentCount:              // 1000
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			if (IsInst())
+			{
+				*pDataSize = sizeof(UInt32);
+				if (pData) *(UInt32*)pData = /* IsBypassed() */ 1;
+				return noErr;
+			}
+			return kAudioUnitErr_InvalidProperty;
+		}
+	}
+
+	return kAudioUnitErr_InvalidProperty;
 }
 
 ComponentResult IPlugAU::SetProperty(AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
