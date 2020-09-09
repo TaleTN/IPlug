@@ -1527,16 +1527,41 @@ ComponentResult IPlugAU::GetProc(const AudioUnitElement element, UInt32* const p
 }
 
 // static
-ComponentResult IPlugAU::GetParamProc(void* pPlug, AudioUnitParameterID paramID, AudioUnitScope scope, AudioUnitElement element,
-  AudioUnitParameterValue* pValue)
+ComponentResult IPlugAU::GetParamProc(void* const pPlug, const AudioUnitParameterID paramID, const AudioUnitScope scope, const AudioUnitElement element,
+	AudioUnitParameterValue* const pValue)
 {
-  Trace(TRACELOC, "%d:(%d:%s):%d", paramID, scope, AUScopeStr(scope), element);
+	ASSERT_SCOPE(kAudioUnitScope_Global);
+	IPlugAU* const _this = (IPlugAU*)pPlug;
+	_this->mMutex.Enter();
 
-  ASSERT_SCOPE(kAudioUnitScope_Global);
-  IPlugAU* _this = (IPlugAU*) pPlug;
-  IMutexLock lock(_this);
-  *pValue = _this->GetParam(paramID)->Value();
-  return noErr;
+	const IParam* const pParam = _this->GetParam(paramID);
+	AudioUnitParameterValue v;
+
+	switch (pParam->Type())
+	{
+		case IParam::kTypeBool:
+			v = (AudioUnitParameterValue)((IBoolParam*)pParam)->Bool();
+			break;
+		case IParam::kTypeInt:
+			v = (AudioUnitParameterValue)((IIntParam*)pParam)->Int();
+			break;
+		case IParam::kTypeEnum:
+			v = (AudioUnitParameterValue)((IEnumParam*)pParam)->Int();
+			break;
+		case IParam::kTypeDouble:
+			v = (AudioUnitParameterValue)((IDoubleParam*)pParam)->Value();
+			break;
+		case IParam::kTypeNormalized:
+			v = (AudioUnitParameterValue)((INormalizedParam*)pParam)->Value();
+			break;
+		default:
+			v = (AudioUnitParameterValue)pParam->GetNormalized();
+			break;
+	}
+	*pValue = v;
+
+	_this->mMutex.Leave();
+	return noErr;
 }
 
 // static

@@ -154,8 +154,8 @@ private:
 public:
 	static ComponentResult IPlugAUEntry(ComponentParameters *params, void* pVPlug);
 	static ComponentResult IPlugAUCarbonViewEntry(ComponentParameters *params, void* pView);
-  static ComponentResult GetParamProc(void* pPlug, AudioUnitParameterID paramID, AudioUnitScope scope, AudioUnitElement element, 
-    AudioUnitParameterValue* pValue);
+	static ComponentResult GetParamProc(void* pPlug, AudioUnitParameterID paramID, AudioUnitScope scope, AudioUnitElement element,
+		AudioUnitParameterValue* pValue);
   static ComponentResult SetParamProc(void* pPlug, AudioUnitParameterID paramID, AudioUnitScope scope, AudioUnitElement element, 
     AudioUnitParameterValue value, UInt32 offsetFrames);
   static ComponentResult RenderProc(void* pPlug, AudioUnitRenderActionFlags* pFlags, const AudioTimeStamp* pTimestamp,
