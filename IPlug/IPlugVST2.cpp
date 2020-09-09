@@ -1007,27 +1007,35 @@ void VSTCALLBACK IPlugVST2::VSTProcessDoubleReplacing(AEffect* const pEffect, do
 	_this->mMutex.Leave();
 }  
 
-float VSTCALLBACK IPlugVST::VSTGetParameter(AEffect *pEffect, VstInt32 idx)
-{ 
-  Trace(TRACELOC, "%d", idx);
-	IPlugVST* _this = (IPlugVST*) pEffect->object;
-  IMutexLock lock(_this);
-  if (idx >= 0 && idx < _this->NParams()) {
-	  return (float) _this->GetParam(idx)->GetNormalized();
-  }
-  return 0.0f;
+float VSTCALLBACK IPlugVST2::VSTGetParameter(AEffect* const pEffect, const VstInt32 idx)
+{
+	double v = 0.0;
+
+	IPlugVST2* const _this = (IPlugVST2*)pEffect->object;
+	_this->mMutex.Enter();
+
+	if (_this->NParams(idx)) v = _this->GetParam(idx)->GetNormalized();
+
+	_this->mMutex.Leave();
+	return (float)v;
 }
 
-void VSTCALLBACK IPlugVST::VSTSetParameter(AEffect *pEffect, VstInt32 idx, float value)
-{  
-  Trace(TRACELOC, "%d:%f", idx, value);
-	IPlugVST* _this = (IPlugVST*) pEffect->object;
-  IMutexLock lock(_this);
-  if (idx >= 0 && idx < _this->NParams()) {
-    if (_this->GetGUI()) {
-      _this->GetGUI()->SetParameterFromPlug(idx, value, true);
-  	}
-    _this->GetParam(idx)->SetNormalized(value);
-  	_this->OnParamChange(idx);
-  }
+void VSTCALLBACK IPlugVST2::VSTSetParameter(AEffect* const pEffect, const VstInt32 idx, const float value)
+{
+	const double v = (double)value;
+
+	IPlugVST2* const _this = (IPlugVST2*)pEffect->object;
+	_this->mMutex.Enter();
+
+	// TN: Why is order in IPlugAU::SetParamProc() different?
+	if (_this->NParams(idx))
+	{
+		IGraphics* const pGraphics = _this->GetGUI();
+		if (pGraphics) pGraphics->SetParameterFromPlug(idx, v, true);
+
+		_this->GetParam(idx)->SetNormalized(v);
+		_this->OnParamChange(idx);
+	}
+
+	_this->mMutex.Leave();
 }

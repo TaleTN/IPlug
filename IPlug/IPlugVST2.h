@@ -86,7 +86,7 @@ public:
 	static void VSTCALLBACK VSTProcess(AEffect* pEffect, float** inputs, float** outputs, VstInt32 nFrames); // Deprecated.
 	static void VSTCALLBACK VSTProcessReplacing(AEffect* pEffect, float** inputs, float** outputs, VstInt32 nFrames);
 	static void VSTCALLBACK VSTProcessDoubleReplacing(AEffect* pEffect, double** inputs, double** outputs, VstInt32 nFrames);
-  static float VSTCALLBACK VSTGetParameter(AEffect *pEffect, VstInt32 idx);
-	static void VSTCALLBACK VSTSetParameter(AEffect *pEffect, VstInt32 idx, float value);
+	static float VSTCALLBACK VSTGetParameter(AEffect* pEffect, VstInt32 idx);
+	static void VSTCALLBACK VSTSetParameter(AEffect* pEffect, VstInt32 idx, float value);
 	inline AEffect* GetAEffect() { return &mAEffect; }
 };
