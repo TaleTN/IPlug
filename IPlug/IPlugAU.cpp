@@ -566,48 +566,112 @@ ComponentResult IPlugAU::GetProperty(const AudioUnitPropertyID propID, const Aud
 			return noErr;
 		}
 
-    case kAudioUnitProperty_ParameterInfo: {             // 4,  listenable
-      ASSERT_SCOPE(kAudioUnitScope_Global);
-      ASSERT_ELEMENT(NParams());
-      *pDataSize = sizeof(AudioUnitParameterInfo);
-      if (pData) {
-        AudioUnitParameterInfo* pInfo = (AudioUnitParameterInfo*) pData;
-        memset(pInfo, 0, sizeof(AudioUnitParameterInfo));
-        pInfo->flags = kAudioUnitParameterFlag_CFNameRelease |
-          kAudioUnitParameterFlag_HasCFNameString |
-          kAudioUnitParameterFlag_IsReadable |
-        kAudioUnitParameterFlag_IsWritable;
-        IParam* pParam = GetParam(element);
-        const char* paramName = pParam->GetNameForHost();
-        pInfo->cfNameString = MakeCFString(pParam->GetNameForHost());
-        assert(strlen(paramName) < 52);
-        strcpy(pInfo->name, paramName);   // Max 52.
-        switch (pParam->Type()) {
-          case IParam::kTypeBool:
-            pInfo->unit = kAudioUnitParameterUnit_Boolean;
-            break;
-          case IParam::kTypeEnum:
-            pInfo->unit = kAudioUnitParameterUnit_Indexed;
-            break;
-          default: {
-            const char* label = pParam->GetLabelForHost();
-            if (CSTR_NOT_EMPTY(label)) {
-              pInfo->unit = kAudioUnitParameterUnit_CustomUnit;
-              pInfo->unitName = MakeCFString(label);
-            }
-            else {
-              pInfo->unit = kAudioUnitParameterUnit_Generic;
-            }
-          }
-        }
-        double vMin, vMax;
-        pParam->GetBounds(&vMin, &vMax);
-        pInfo->minValue = vMin;
-        pInfo->maxValue = vMax;
-        pInfo->defaultValue = pParam->Value();
-      }
-      return noErr;
-    }
+		case kAudioUnitProperty_ParameterInfo:                  // 4, listenable
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			ASSERT_ELEMENT_NPARAMS;
+			*pDataSize = sizeof(AudioUnitParameterInfo);
+			if (pData)
+			{
+				AudioUnitParameterInfo* const pInfo = (AudioUnitParameterInfo*)pData;
+				memset(pInfo, 0, sizeof(AudioUnitParameterInfo));
+
+				const IParam* const pParam = GetParam(element);
+				const int type = pParam->Type();
+
+				pInfo->flags = kAudioUnitParameterFlag_CFNameRelease |
+					kAudioUnitParameterFlag_HasCFNameString |
+					kAudioUnitParameterFlag_IsReadable |
+					kAudioUnitParameterFlag_IsWritable;
+
+				// Define IPLUG_NO_HIRES_PARAM for legacy plugin that needs
+				// high resolution flag disabled.
+				#ifndef IPLUG_NO_HIRES_PARAM
+				if (type != IParam::kTypeBool)
+				{
+					// TN: Reportedly without this flag Logic will quantize
+					// automation to 1/128 step, but with this flag any
+					// automation previously recorded without flag will
+					// break.
+					pInfo->flags |= kAudioUnitParameterFlag_IsHighResolution;
+				}
+				#endif
+
+				const char* const paramName = pParam->GetNameForHost();
+				pInfo->cfNameString = MakeCFString(pParam->GetNameForHost());
+				lstrcpyn_safe(pInfo->name, paramName, sizeof(pInfo->name)); // Max 52.
+
+				switch (type)
+				{
+					case IParam::kTypeBool:
+					{
+						const IBoolParam* const pBool = (const IBoolParam*)pParam;
+						pInfo->defaultValue = (AudioUnitParameterValue)pBool->Bool();
+						// pInfo->minValue = 0.0f;
+						pInfo->maxValue = 1.0f;
+						pInfo->unit = kAudioUnitParameterUnit_Indexed;
+						break;
+					}
+					case IParam::kTypeInt:
+					{
+						const IIntParam* const pInt = (const IIntParam*)pParam;
+						pInfo->defaultValue = (AudioUnitParameterValue)pInt->Int();
+						pInfo->minValue = (AudioUnitParameterValue)pInt->Min();
+						pInfo->maxValue = (AudioUnitParameterValue)pInt->Max();
+						break;
+					}
+					case IParam::kTypeEnum:
+					{
+						const IEnumParam* const pEnum = (const IEnumParam*)pParam;
+						pInfo->defaultValue = (AudioUnitParameterValue)pEnum->Int();
+						// pInfo->minValue = 0.0f;
+						pInfo->maxValue = (AudioUnitParameterValue)(pEnum->NEnums() - 1);
+						pInfo->unit = kAudioUnitParameterUnit_Indexed;
+						break;
+					}
+					case IParam::kTypeDouble:
+					{
+						const IDoubleParam* const pDouble = (const IDoubleParam*)pParam;
+						pInfo->defaultValue = (AudioUnitParameterValue)pDouble->Value();
+						pInfo->minValue = (AudioUnitParameterValue)pDouble->Min();
+						pInfo->maxValue = (AudioUnitParameterValue)pDouble->Max();
+						break;
+					}
+					case IParam::kTypeNormalized:
+					{
+						const INormalizedParam* const pNormalized = (INormalizedParam*)pParam;
+						pInfo->defaultValue = (AudioUnitParameterValue)pNormalized->Value();
+						// pInfo->minValue = 0.0f;
+						pInfo->maxValue = 1.0f;
+						// pInfo->unit = kAudioUnitParameterUnit_Generic;
+						break;
+					}
+					default:
+					{
+						pInfo->defaultValue = (AudioUnitParameterValue)pParam->GetNormalized();
+						// pInfo->minValue = 0.0f;
+						pInfo->maxValue = 1.0f;
+						// pInfo->unit = kAudioUnitParameterUnit_Generic;
+						break;
+					}
+				}
+
+				if (!pInfo->unit)
+				{
+					const char* const label = pParam->GetLabelForHost();
+					if (label && *label)
+					{
+						pInfo->unit = kAudioUnitParameterUnit_CustomUnit;
+						pInfo->unitName = MakeCFString(label);
+					}
+					// else
+					// {
+						// pInfo->unit = kAudioUnitParameterUnit_Generic;
+					// }
+				}
+			}
+			return noErr;
+		}
 
 		case kAudioUnitProperty_FastDispatch:                   // 5,
 		{
