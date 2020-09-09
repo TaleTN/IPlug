@@ -1470,15 +1470,6 @@ IPlugBase(
 	SetBlockSize(kDefaultBlockSize);
 }
 
-IPlugAU::~IPlugAU()
-{
-  mRenderNotify.Empty(true);
-  mInBuses.Empty(true);
-  mOutBuses.Empty(true);
-  mInBusConnections.Empty(true);
-  mPropertyListeners.Empty(true);
-}
-
 void SendAUEvent(AudioUnitEventType type, ComponentInstance ci, int idx)
 {
   AudioUnitEvent auEvent;

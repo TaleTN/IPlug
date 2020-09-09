@@ -41,10 +41,8 @@ public:
 		int plugDoes
 	);
 
-  virtual ~IPlugAU();
-  
-  // ----------------------------------------
-  // See IPlugBase for the full list of methods that your plugin class can implement.
+	// ----------------------------------------
+	// See IPlugBase for the full list of methods that your plugin class can implement.
 
   void BeginInformHostOfParamChange(int idx);
   void BeginDelayedInformHostOfParamChange(int idx);
@@ -90,7 +88,7 @@ private:
  // InScratchBuf is only needed if the upstream connection is a callback.
  // OutScratchBuf is only needed if the downstream connection fails to give us a buffer.  
   WDL_TypedBuf<AudioSampleType> mInScratchBuf, mOutScratchBuf; 
-  WDL_PtrList<AURenderCallbackStruct> mRenderNotify;
+	WDL_PtrList_DeleteOnDestroy<AURenderCallbackStruct> mRenderNotify;
   AUMIDIOutputCallbackStruct mMidiCallback;
   
   // Every stereo pair of plugin input or output is a bus.
@@ -101,7 +99,7 @@ private:
     bool mConnected;
     int mNHostChannels, mNPlugChannels, mPlugChannelStartIdx;
   };
-  WDL_PtrList<BusChannels> mInBuses, mOutBuses;
+	WDL_PtrList_DeleteOnDestroy<BusChannels> mInBuses, mOutBuses;
   BusChannels* GetBus(AudioUnitScope scope, AudioUnitElement busIdx);
   int NHostChannelsConnected(WDL_PtrList<BusChannels>* pBuses, int excludeIdx = -1);
   void ClearConnections();
@@ -114,7 +112,7 @@ private:
     AURenderCallbackStruct mUpstreamRenderCallback;
     EAUInputType mInputType;
   };
-  WDL_PtrList<InputBusConnection> mInBusConnections;
+	WDL_PtrList_DeleteOnDestroy<InputBusConnection> mInBusConnections;
   
   bool CheckLegalIO(AudioUnitScope scope, int busIdx, int nChannels); 
   bool CheckLegalIO(); 
@@ -125,7 +123,7 @@ private:
     AudioUnitPropertyListenerProc mListenerProc;
     void* mProcArgs;
   };
-  WDL_PtrList<PropertyListener> mPropertyListeners;
+	WDL_PtrList_DeleteOnDestroy<PropertyListener> mPropertyListeners;
   
   ComponentResult GetPropertyInfo(AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
     UInt32* pDataSize, Boolean* pWriteable);
