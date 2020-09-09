@@ -65,23 +65,24 @@ static void MakeDefaultASBD(STREAM_DESC* const pASBD, const double sampleRate, c
 }
 
 template <class C>
-int PtrListAddFromStack(WDL_PtrList<C>* pList, C* pStackInstance)
+static int PtrListAddFromStack(WDL_PtrList<C>* const pList, const C* const pStackInstance)
 {
-  C* pNew = new C;
-  memcpy(pNew, pStackInstance, sizeof(C));
-  pList->Add(pNew);
-  return pList->GetSize() - 1;
+	C* const pNew = new C;
+	memcpy(pNew, pStackInstance, sizeof(C));
+	pList->Add(pNew);
+	return pList->GetSize() - 1;
 }
 
 template <class C>
-int PtrListInitialize(WDL_PtrList<C>* pList, int size)
+static int PtrListInitialize(WDL_PtrList<C>* const pList, int const size)
 {
-  for (int i = 0; i < size; ++i) {
-    C* pNew = new C;
-    memset(pNew, 0, sizeof(C));
-    pList->Add(pNew);
-  }
-  return size;
+	for (int i = 0; i < size; ++i)
+	{
+		C* const pNew = new C;
+		memset(pNew, 0, sizeof(C));
+		pList->Add(pNew);
+	}
+	return size;
 }
 
 #if defined(__APPLE__) && defined(__LP64__)
