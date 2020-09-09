@@ -841,17 +841,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			ret = 1;
 			break;
 		}
-
-    case effProcessVarIo: {
-	    // VstVariableIo* pIO = (VstVariableIo*) ptr;		// For offline processing (of audio files?)
-	    return 0;
-    }
-    case effBeginSetProgram:
-    case effEndSetProgram:
-    case effGetMidiProgramName: 
-    case effHasMidiProgramsChanged:
-    case effGetMidiProgramCategory: 
-    case effGetCurrentMidiProgram:
 	}
 
 	_this->mMutex.Leave();
