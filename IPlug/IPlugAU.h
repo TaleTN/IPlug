@@ -11,8 +11,8 @@
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
 	typedef Float32 AudioUnitParameterValue;
-	typedef OSStatus (*AUMIDIOutputCallback)(void*, const AudioTimeStamp*, UInt32, const struct MIDIPacketList*);
-	struct AUMIDIOutputCallbackStruct { AUMIDIOutputCallback midiOutputCallback; void* userData; };
+	// typedef OSStatus (*AUMIDIOutputCallback)(void*, const AudioTimeStamp*, UInt32, const struct MIDIPacketList*);
+	// struct AUMIDIOutputCallbackStruct { AUMIDIOutputCallback midiOutputCallback; void* userData; };
 #endif
 
 #include "WDL/heapbuf.h"
@@ -98,8 +98,8 @@ private:
 	// OutScratchBuf is only needed if the downstream connection fails to give us a buffer.
 	WDL_TypedBuf<AudioSampleType> mInScratchBuf, mOutScratchBuf;
 	WDL_PtrList_DeleteOnDestroy<AURenderCallbackStruct> mRenderNotify;
-  AUMIDIOutputCallbackStruct mMidiCallback;
-  
+	// AUMIDIOutputCallbackStruct mMidiCallback;
+
 	// Every stereo pair of plugin input or output is a bus.
 	// Buses can have zero host channels if the host hasn't connected the bus at all,
 	// one host channel if the plugin supports mono and the host has supplied a mono stream,

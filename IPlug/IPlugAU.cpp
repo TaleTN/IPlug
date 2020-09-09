@@ -1222,6 +1222,14 @@ ComponentResult IPlugAU::SetProperty(const AudioUnitPropertyID propID, const Aud
 
 		NO_OP(kAudioUnitProperty_MIDIOutputCallbackInfo);       // 47,
 		NO_OP(kAudioUnitProperty_MIDIOutputCallback);           // 48,
+
+/*		case kAudioUnitProperty_MIDIOutputCallback:             // 48
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			memcpy(&mMidiCallback, pData, sizeof(AUMIDIOutputCallbackStruct));
+			return noErr;
+		}
+*/
 		NO_OP(kAudioUnitProperty_InputSamplesInOutput);         // 49,
 		NO_OP(kAudioUnitProperty_ClassInfoFromDocument)         // 50
 
@@ -1757,7 +1765,7 @@ IPlugBase(
 	mTempo(DEFAULT_TEMPO)
 {
 	memset(&mHostCallbacks, 0, sizeof(HostCallbackInfo));
-	memset(&mMidiCallback, 0, sizeof(AUMIDIOutputCallbackStruct));
+	// memset(&mMidiCallback, 0, sizeof(AUMIDIOutputCallbackStruct));
 
 	const char* const* const pID = (const char* const*)instanceInfo;
 	mOSXBundleID.Set(pID[0]);
