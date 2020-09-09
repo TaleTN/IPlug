@@ -65,15 +65,17 @@ private:
 	audioMasterCallback mHostCallback;
 
 	bool SendVSTEvent(VstEvent* pEvent);
+
 	VstIntPtr VSTVendorSpecific(VstInt32 idx, VstIntPtr value, void* ptr, float opt);
+	VstIntPtr VSTPlugCanDo(const char* ptr);
 
 	VstSpeakerArrangement mInputSpkrArr, mOutputSpkrArr;
 
 	bool mHostSpecificInitDone;
 
-  enum { VSTEXT_NONE=0, VSTEXT_COCKOS, VSTEXT_COCOA }; // list of VST extensions supported by host
-  int mHasVSTExtensions;
-  
+	enum { VSTEXT_NONE = 0, VSTEXT_COCKOS, VSTEXT_COCOA }; // List of VST extensions supported by host.
+	int mHasVSTExtensions;
+
 	ByteChunk mState;     // Persistent storage if the host asks for plugin state.
 	ByteChunk mBankState; // Persistent storage if the host asks for bank state.
 

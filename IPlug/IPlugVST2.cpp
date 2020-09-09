@@ -18,6 +18,40 @@
 
 const int VST_VERSION = 2400;
 
+struct CanDoTbl
+{
+	unsigned char mIdx;
+	char mStr[23];
+};
+
+enum EPlugCanDos
+{
+	kReceiveVstTimeInfo = 0,
+	kSendVstEvents,
+	kSendVstMidiEvent,
+	kReceiveVstEvents,
+	kReceiveVstMidiEvent,
+	// kMidiProgramNames,
+	kCanDoBypass,
+
+	kHasCockosExtensions,
+	kHasCockosViewAsConfig
+};
+
+static const CanDoTbl sPlugCanDos[] =
+{
+	{ kReceiveVstTimeInfo, "receiveVstTimeInfo" },
+	{ kSendVstEvents, "sendVstEvents" },
+	{ kSendVstMidiEvent, "sendVstMidiEvent" },
+	{ kReceiveVstEvents, "receiveVstEvents" },
+	{ kReceiveVstMidiEvent, "receiveVstMidiEvent" },
+	// { kMidiProgramNames, "midiProgramNames" },
+	{ kCanDoBypass, "bypass" },
+
+	{ kHasCockosExtensions, "hasCockosExtensions" },
+	{ kHasCockosViewAsConfig, "hasCockosViewAsConfig" }
+};
+
 static int VSTSpkrArrType(const int nchan)
 {
 	const int type = nchan - 1;
@@ -778,6 +812,12 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effCanDo:
+		{
+			if (ptr) ret = _this->VSTPlugCanDo((const char*)ptr);
+			break;
+		}
+
     case effProcessVarIo: {
 	    // VstVariableIo* pIO = (VstVariableIo*) ptr;		// For offline processing (of audio files?)
 	    return 0;
@@ -792,43 +832,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
         *ppOutputArr = &(_this->mOutputSpkrArr);
       }
       return 1;
-    }
-    case effCanDo: {
-	    if (ptr) {
-        Trace(TRACELOC, "VSTCanDo(%s)", (char*) ptr);
-        if (!strcmp((char*) ptr, "receiveVstTimeInfo")) {
-          return 1;
-        }
-        if (_this->DoesMIDI()) {
-          if (_this->DoesMIDI() & 1) {
-            if (!strcmp((char*) ptr, "sendVstEvents") ||
-                !strcmp((char*) ptr, "sendVstMidiEvent")) {
-              return 1;
-            }
-          }
-          if (_this->DoesMIDI() <= 2) {
-            if (!strcmp((char*) ptr, "receiveVstEvents") ||
-                !strcmp((char*) ptr, "receiveVstMidiEvent")) {
-              return 1;
-            }
-          }
-          //if (!strcmp((char*) ptr, "midiProgramNames")) {
-          //  return 1;
-          //}
-        }
-        // Support Reaper VST extensions: http://www.reaper.fm/sdk/vst/
-        if (!strcmp((char*) ptr, "hasCockosExtensions"))
-        {
-          _this->mHasVSTExtensions |= VSTEXT_COCKOS;
-          return 0xbeef0000;
-        }
-        else if (!strcmp((char*) ptr, "hasCockosViewAsConfig")) 
-        {
-          _this->mHasVSTExtensions |= VSTEXT_COCOA;
-          return 0xbeef0000; 
-        }
-      }
-	    return 0;
     }
     case effGetMidiKeyName: {
 	    if (ptr) {
@@ -915,6 +918,56 @@ VstIntPtr IPlugVST2::VSTVendorSpecific(const VstInt32 idx, const VstIntPtr value
 			}
 			break;
 		}
+	}
+
+	return 0;
+}
+
+VstIntPtr IPlugVST2::VSTPlugCanDo(const char* const ptr)
+{
+	int canDo = -1;
+
+	const int n = sizeof(sPlugCanDos) / sizeof(sPlugCanDos[0]);
+	for (int i = 0; i < n; ++i)
+	{
+		const int idx = sPlugCanDos[i].mIdx;
+		const char* const str = sPlugCanDos[i].mStr;
+
+		if (!strcmp(ptr, str))
+		{
+			canDo = idx;
+			break;
+		}
+	}
+
+	switch (canDo)
+	{
+		case kReceiveVstTimeInfo:
+			return 1;
+
+		case kSendVstEvents:
+		case kSendVstMidiEvent:
+			return DoesMIDI(kPlugDoesMidiOut);
+
+		case kReceiveVstEvents:
+		case kReceiveVstMidiEvent:
+			return DoesMIDI(kPlugDoesMidiIn);
+
+		// case kMidiProgramNames:
+			// return 1;
+
+		case kCanDoBypass:
+			return 1;
+
+		// Support Cockos Extensions to VST SDK: https://www.reaper.fm/sdk/vst/
+
+		case kHasCockosExtensions:
+			mHasVSTExtensions |= VSTEXT_COCKOS;
+			return 0xbeef0000;
+
+		case kHasCockosViewAsConfig:
+			mHasVSTExtensions |= VSTEXT_COCOA;
+			return 0xbeef0000;
 	}
 
 	return 0;
