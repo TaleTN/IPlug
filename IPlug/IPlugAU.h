@@ -80,9 +80,12 @@ protected:
 	void HostSpecificInit() { GetHost(); }
 	void SetBlockSize(int blockSize);
 	void SetLatency(int samples);
-	bool SendMidiMsg(IMidiMsg* pMsg);
-  bool SendSysEx(ISysEx* pSysEx);
-  
+
+	// TN: Implemented in IPlugAU.cpp, but reportedly there are no AU hosts
+	// that support MIDI out.
+	bool SendMidiMsg(const IMidiMsg* /* pMsg */) { return false; }
+	bool SendSysEx(const ISysEx* /* pSysEx */) { return false; }
+
 private:
 	WDL_FastString mOSXBundleID, mCocoaViewFactoryClassName;
   ComponentInstance mCI;

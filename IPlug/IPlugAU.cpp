@@ -1632,18 +1632,51 @@ void IPlugAU::SetLatency(const int samples)
 	IPlugBase::SetLatency(samples);
 }
 
-bool IPlugAU::SendMidiMsg(IMidiMsg* pMsg)
+/* bool IPlugAU::SendMidiMsg(const IMidiMsg* const pMsg)
 {
-  // I believe AU passes midi messages through automatically.
-  // For the case where we're generating midi messages, we'll use AUMIDIOutputCallback.
-  // See AudioUnitProperties.h.
-  if ((DoesMIDI() & 1) && mMidiCallback.midiOutputCallback) {
-      // Todo.
-  }
-  return false;
+	// I believe AU passes MIDI messages through automatically.
+	// For the case where we're generating midi messages, we'll use AUMIDIOutputCallback.
+	// See AudioUnitProperties.h.
+	if (mMidiCallback.midiOutputCallback)
+	{
+		AudioTimeStamp timeStamp;
+		memset(&timeStamp, 0, sizeof(AudioTimeStamp));
+		timeStamp.mFlags = kAudioTimeStampSampleTimeValid;
+		timeStamp.mSampleTime = wdl_max(mRenderTimestamp, 0.0);
+
+		MIDIPacketList packetList;
+		packetList.numPackets = 1;
+		packetList.packet[0].data[0] = pMsg->mStatus;
+		packetList.packet[0].data[1] = pMsg->mData1;
+		packetList.packet[0].data[2] = pMsg->mData2;
+		packetList.packet[0].length = pMsg->Size();
+		packetList.packet[0].timeStamp = pMsg->mOffset;
+
+		return mMidiCallback.midiOutputCallback(NULL, &timeStamp, 1, &packetList) == noErr;
+	}
+	return false;
 }
 
-bool IPlugAU::SendSysEx(ISysEx* pSysEx)
+bool IPlugAU::SendSysEx(const ISysEx* const pSysEx)
 {
-  return false;
-}
+	if (mMidiCallback.midiOutputCallback)
+	{
+		AudioTimeStamp timeStamp;
+		memset(&timeStamp, 0, sizeof(AudioTimeStamp));
+		timeStamp.mFlags = kAudioTimeStampSampleTimeValid;
+		timeStamp.mSampleTime = wdl_max(mRenderTimestamp, 0.0);
+
+		MIDIPacketList packetList;
+		packetList.numPackets = 1;
+		packetList.packet[0].timeStamp = pSysEx->mOffset;
+
+		int size = pSysEx->mSize;
+		while (size > 0)
+		{
+			size -= packetList.packet[0].length = wdl_min(size, sizeof(packetList.packet[0].data));
+			size = mMidiCallback.midiOutputCallback(NULL, &timeStamp, 1, &packetList) == noErr ? size : -1;
+		}
+		return size >= 0;
+	}
+	return false;
+} */
