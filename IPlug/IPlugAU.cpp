@@ -1027,66 +1027,74 @@ ComponentResult IPlugAU::GetProperty(const AudioUnitPropertyID propID, const Aud
 	return kAudioUnitErr_InvalidProperty;
 }
 
-ComponentResult IPlugAU::SetProperty(AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
-  UInt32* pDataSize, const void* pData)
+ComponentResult IPlugAU::SetProperty(const AudioUnitPropertyID propID, const AudioUnitScope scope, const AudioUnitElement element,
+	UInt32* /* pDataSize */, const void* const pData)
 {
-  Trace(TRACELOC, "(%d:%s):(%d:%s):%d", propID, AUPropertyStr(propID), scope, AUScopeStr(scope), element);
-
 	InformListeners(propID, scope);
 
-	switch (propID) {
+	switch (propID)
+	{
+		case kAudioUnitProperty_ClassInfo:                      // 0,
+		{
+			return SetState(*(CFPropertyListRef*)pData);
+		}
 
-    case kAudioUnitProperty_ClassInfo: {                // 0,
-      return SetState(*((CFPropertyListRef*) pData));
-    }
-    case kAudioUnitProperty_MakeConnection: {            // 1,
-      ASSERT_INPUT_OR_GLOBAL_SCOPE;
-      AudioUnitConnection* pAUC = (AudioUnitConnection*) pData;
-      if (pAUC->destInputNumber >= mInBusConnections.GetSize()) {
-        return kAudioUnitErr_InvalidProperty;
-      }
-      InputBusConnection* pInBusConn = mInBusConnections.Get(pAUC->destInputNumber);
-      memset(pInBusConn, 0, sizeof(InputBusConnection));
-      bool negotiatedOK = true;
-      if (pAUC->sourceAudioUnit) {    // Opening connection.
-        AudioStreamBasicDescription srcASBD;
-        UInt32 size = sizeof(AudioStreamBasicDescription);
-        negotiatedOK =   // Ask whoever is sending us audio what the format is.
-          (AudioUnitGetProperty(pAUC->sourceAudioUnit, kAudioUnitProperty_StreamFormat,
-            kAudioUnitScope_Output, pAUC->sourceOutputNumber, &srcASBD, &size) == noErr);
-        negotiatedOK &= // Try to set our own format to match.
-          (SetProperty(kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input,
-                       pAUC->destInputNumber, &size, &srcASBD) == noErr);
-        if (negotiatedOK) {   // Connection terms successfully negotiated.
-          pInBusConn->mUpstreamUnit = pAUC->sourceAudioUnit;
-          pInBusConn->mUpstreamBusIdx = pAUC->sourceOutputNumber;
-          // Will the upstream unit give us a fast render proc for input?
-          AudioUnitRenderProc srcRenderProc;
-          size = sizeof(AudioUnitRenderProc);
-          if (AudioUnitGetProperty(pAUC->sourceAudioUnit, kAudioUnitProperty_FastDispatch, kAudioUnitScope_Global, kAudioUnitRenderSelect,
-                                   &srcRenderProc, &size) == noErr) {
-            // Yes, we got a fast render proc, and we also need to store the pointer to the upstream audio unit object.
-            pInBusConn->mUpstreamRenderProc = srcRenderProc;
-            pInBusConn->mUpstreamObj = GetComponentInstanceStorage(pAUC->sourceAudioUnit);
-          }
-          // Else no fast render proc, so leave the input bus connection struct's upstream render proc and upstream object empty,
-          // and we will need to make a component call through the component manager to get input data.
-        }
-        // Else this is a call to close the connection, which we effectively did by clearing the InputBusConnection struct,
-        // which counts as a successful negotiation.
-      }
-      AssessInputConnections();
-      return (negotiatedOK ? noErr : kAudioUnitErr_InvalidProperty);
-    }
+		case kAudioUnitProperty_MakeConnection:                 // 1,
+		{
+			ASSERT_INPUT_OR_GLOBAL_SCOPE;
+			const AudioUnitConnection* const pAUC = (AudioUnitConnection*)pData;
+			if (pAUC->destInputNumber >= mInBusConnections.GetSize())
+			{
+				return kAudioUnitErr_InvalidProperty;
+			}
+			InputBusConnection* const pInBusConn = mInBusConnections.Get(pAUC->destInputNumber);
+			memset(pInBusConn, 0, sizeof(InputBusConnection));
+			bool negotiatedOK = true;
+			if (pAUC->sourceAudioUnit) // Opening connection.
+			{
+				AudioStreamBasicDescription srcASBD;
+				UInt32 size = sizeof(AudioStreamBasicDescription);
+				negotiatedOK = // Ask whoever is sending us audio what the format is.
+					AudioUnitGetProperty(pAUC->sourceAudioUnit, kAudioUnitProperty_StreamFormat,
+						kAudioUnitScope_Output, pAUC->sourceOutputNumber, &srcASBD, &size) == noErr;
+				negotiatedOK &= // Try to set our own format to match.
+					SetProperty(kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input,
+						pAUC->destInputNumber, &size, &srcASBD) == noErr;
+				if (negotiatedOK) // Connection terms successfully negotiated.
+				{
+					pInBusConn->mUpstreamUnit = pAUC->sourceAudioUnit;
+					pInBusConn->mUpstreamBusIdx = pAUC->sourceOutputNumber;
+					// Will the upstream unit give us a fast render proc for input?
+					AudioUnitRenderProc srcRenderProc;
+					size = sizeof(AudioUnitRenderProc);
+					if (AudioUnitGetProperty(pAUC->sourceAudioUnit, kAudioUnitProperty_FastDispatch, kAudioUnitScope_Global, kAudioUnitRenderSelect,
+						&srcRenderProc, &size) == noErr)
+					{
+						// Yes, we got a fast render proc, and we also need to store the pointer to the upstream audio unit object.
+						pInBusConn->mUpstreamRenderProc = srcRenderProc;
+						pInBusConn->mUpstreamObj = GetComponentInstanceStorage(pAUC->sourceAudioUnit);
+					}
+					// Else no fast render proc, so leave the input bus connection struct's upstream render proc and upstream object empty,
+					// and we will need to make a component call through the component manager to get input data.
+				}
+				// Else this is a call to close the connection, which we effectively did by clearing the InputBusConnection struct,
+				// which counts as a successful negotiation.
+			}
+			AssessInputConnections();
+			return negotiatedOK ? noErr : (ComponentResult)kAudioUnitErr_InvalidProperty;
+		}
+
     case kAudioUnitProperty_SampleRate: {                // 2,
       SetSampleRate(*((Float64*) pData));
       Reset();
       return noErr;
     }
-    NO_OP(kAudioUnitProperty_ParameterList);             // 3,
-    NO_OP(kAudioUnitProperty_ParameterInfo);             // 4,
-    NO_OP(kAudioUnitProperty_FastDispatch);              // 5,
-    NO_OP(kAudioUnitProperty_CPULoad);                   // 6,
+
+		NO_OP(kAudioUnitProperty_ParameterList);                // 3,
+		NO_OP(kAudioUnitProperty_ParameterInfo);                // 4,
+		NO_OP(kAudioUnitProperty_FastDispatch);                 // 5,
+		NO_OP(kAudioUnitProperty_CPULoad);                      // 6,
+
     case kAudioUnitProperty_StreamFormat: {              // 8,
       AudioStreamBasicDescription* pASBD = (AudioStreamBasicDescription*) pData;
       int nHostChannels = pASBD->mChannelsPerFrame;
@@ -1118,87 +1126,108 @@ ComponentResult IPlugAU::SetProperty(AudioUnitPropertyID propID, AudioUnitScope 
       AssessInputConnections();
       return (connectionOK ? noErr : kAudioUnitErr_InvalidProperty);
     }
-    NO_OP(kAudioUnitProperty_ElementCount);              // 11,
-    NO_OP(kAudioUnitProperty_Latency);                   // 12,
-    NO_OP(kAudioUnitProperty_SupportedNumChannels);      // 13,
+
+		NO_OP(kAudioUnitProperty_ElementCount);                 // 11,
+		NO_OP(kAudioUnitProperty_Latency);                      // 12,
+		NO_OP(kAudioUnitProperty_SupportedNumChannels);         // 13,
+
     case kAudioUnitProperty_MaximumFramesPerSlice: {     // 14,
       SetBlockSize(*((UInt32*) pData));
       Reset();
       return noErr;
     }
-    NO_OP(kAudioUnitProperty_SetExternalBuffer);         // 15,
-    NO_OP(kAudioUnitProperty_ParameterValueStrings);     // 16,
-    NO_OP(kAudioUnitProperty_GetUIComponentList);        // 18,
-    NO_OP(kAudioUnitProperty_AudioChannelLayout);        // 19,
-    NO_OP(kAudioUnitProperty_TailTime);                  // 20,
+
+		NO_OP(kAudioUnitProperty_SetExternalBuffer);            // 15,
+		NO_OP(kAudioUnitProperty_ParameterValueStrings);        // 16,
+		NO_OP(kAudioUnitProperty_GetUIComponentList);           // 18,
+		NO_OP(kAudioUnitProperty_AudioChannelLayout);           // 19,
+		NO_OP(kAudioUnitProperty_TailTime);                     // 20,
+
     case kAudioUnitProperty_BypassEffect: {              // 21,
       mBypassed = (*((UInt32*) pData) != 0);
       Reset();
       return noErr;
     }
-    NO_OP(kAudioUnitProperty_LastRenderError);           // 22,
-    case kAudioUnitProperty_SetRenderCallback: {         // 23,
-      ASSERT_SCOPE(kAudioUnitScope_Input);    // if global scope, set all
-      if (element >= mInBusConnections.GetSize()) {
-        return kAudioUnitErr_InvalidProperty;
-      }
-      InputBusConnection* pInBusConn = mInBusConnections.Get(element);
-      memset(pInBusConn, 0, sizeof(InputBusConnection));
-      AURenderCallbackStruct* pCS = (AURenderCallbackStruct*) pData;
-      if (pCS->inputProc != 0) {
-        pInBusConn->mUpstreamRenderCallback = *pCS;
-      }
-      AssessInputConnections();
-      return noErr;
-    }
-    NO_OP(kAudioUnitProperty_FactoryPresets);            // 24,
-    NO_OP(kAudioUnitProperty_ContextName);               // 25,
-    NO_OP(kAudioUnitProperty_RenderQuality);             // 26,
-    case kAudioUnitProperty_HostCallbacks: {            // 27,
-      ASSERT_SCOPE(kAudioUnitScope_Global);
-      memcpy(&mHostCallbacks, pData, sizeof(HostCallbackInfo));
-      return noErr;
-    }
-    NO_OP(kAudioUnitProperty_InPlaceProcessing);         // 29,
-    NO_OP(kAudioUnitProperty_ElementName);               // 30,
-    NO_OP(kAudioUnitProperty_CocoaUI);                   // 31,
-    NO_OP(kAudioUnitProperty_SupportedChannelLayoutTags); // 32,
-    NO_OP(kAudioUnitProperty_ParameterIDName);           // 34,
-    NO_OP(kAudioUnitProperty_ParameterClumpName);        // 35,
-    case kAudioUnitProperty_CurrentPreset:               // 28,
-    case kAudioUnitProperty_PresentPreset: {             // 36,
-      int presetIdx = ((AUPreset*) pData)->presetNumber;
-      RestorePreset(presetIdx);
-      return noErr;
-    }
-    case kAudioUnitProperty_OfflineRender: {              // 37,
-      mIsOffline = (*((UInt32*) pData) != 0);
-      return noErr; 
-    } 
-    NO_OP(kAudioUnitProperty_ParameterStringFromValue);  // 33,
-    NO_OP(kAudioUnitProperty_ParameterValueFromString);  // 38,
-    NO_OP(kAudioUnitProperty_IconLocation);              // 39,
-    NO_OP(kAudioUnitProperty_PresentationLatency);       // 40,
-    NO_OP(kAudioUnitProperty_DependentParameters);       // 45,
 
-    #if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
-      case kAudioUnitProperty_AUHostIdentifier: {          // 46,
-        AUHostIdentifier* pHostID = (AUHostIdentifier*) pData;
-        CStrLocal hostStr(pHostID->hostName);
-        int hostVer = (pHostID->hostVersion.majorRev << 16) + (pHostID->hostVersion.minorAndBugRev << 8);
-        SetHost(hostStr.mCStr, hostVer);
-        return noErr;
-      }
-      NO_OP(kAudioUnitProperty_MIDIOutputCallbackInfo);   // 47,
-      NO_OP(kAudioUnitProperty_MIDIOutputCallback);       // 48,
-      NO_OP(kAudioUnitProperty_InputSamplesInOutput);       // 49,
-      NO_OP(kAudioUnitProperty_ClassInfoFromDocument)       // 50
-    #endif
+		NO_OP(kAudioUnitProperty_LastRenderError);             // 22,
 
-    default:  {
-      return kAudioUnitErr_InvalidProperty;
-    }
-  }
+		case kAudioUnitProperty_SetRenderCallback:             // 23,
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Input); // If global scope, set all.
+			if (element >= mInBusConnections.GetSize())
+			{
+				return kAudioUnitErr_InvalidProperty;
+			}
+			InputBusConnection* const pInBusConn = mInBusConnections.Get(element);
+			memset(pInBusConn, 0, sizeof(InputBusConnection));
+			const AURenderCallbackStruct* const pCS = (AURenderCallbackStruct*)pData;
+			if (pCS->inputProc != NULL)
+			{
+				pInBusConn->mUpstreamRenderCallback = *pCS;
+			}
+			AssessInputConnections();
+			return noErr;
+		}
+
+		NO_OP(kAudioUnitProperty_FactoryPresets);               // 24,
+		NO_OP(kAudioUnitProperty_ContextName);                  // 25,
+		NO_OP(kAudioUnitProperty_RenderQuality);                // 26,
+
+		case kAudioUnitProperty_HostCallbacks:                  // 27,
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			memcpy(&mHostCallbacks, pData, sizeof(HostCallbackInfo));
+			return noErr;
+		}
+
+		NO_OP(kAudioUnitProperty_InPlaceProcessing);            // 29,
+		NO_OP(kAudioUnitProperty_ElementName);                  // 30,
+		NO_OP(kAudioUnitProperty_CocoaUI);                      // 31,
+		NO_OP(kAudioUnitProperty_SupportedChannelLayoutTags);   // 32,
+		NO_OP(kAudioUnitProperty_ParameterIDName);              // 34,
+		NO_OP(kAudioUnitProperty_ParameterClumpName);           // 35,
+
+		case kAudioUnitProperty_CurrentPreset:                  // 28,
+		case kAudioUnitProperty_PresentPreset:                  // 36,
+		{
+			const int presetIdx = ((AUPreset*)pData)->presetNumber;
+			RestorePreset(presetIdx);
+			return noErr;
+		}
+
+		case kAudioUnitProperty_OfflineRender:                  // 37,
+		{
+			const bool offline = !!*(UInt32*)pData;
+			if (IsOffline() != offline) mPlugFlags ^= kPlugFlagsOffline;
+			return noErr;
+		}
+
+		NO_OP(kAudioUnitProperty_ParameterStringFromValue);     // 33,
+		NO_OP(kAudioUnitProperty_ParameterValueFromString);     // 38,
+		NO_OP(kAudioUnitProperty_IconLocation);                 // 39,
+		NO_OP(kAudioUnitProperty_PresentationLatency);          // 40,
+		NO_OP(kAudioUnitProperty_DependentParameters);          // 45,
+
+		#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
+
+		case kAudioUnitProperty_AUHostIdentifier:               // 46,
+		{
+			const AUHostIdentifier* const pHostID = (AUHostIdentifier*)pData;
+			CStrLocal hostStr(pHostID->hostName);
+			const int hostVer = (pHostID->hostVersion.majorRev << 16) | (pHostID->hostVersion.minorAndBugRev << 8);
+			SetHost(hostStr.mCStr, hostVer);
+			return noErr;
+		}
+
+		NO_OP(kAudioUnitProperty_MIDIOutputCallbackInfo);       // 47,
+		NO_OP(kAudioUnitProperty_MIDIOutputCallback);           // 48,
+		NO_OP(kAudioUnitProperty_InputSamplesInOutput);         // 49,
+		NO_OP(kAudioUnitProperty_ClassInfoFromDocument)         // 50
+
+		#endif
+	}
+
+	return kAudioUnitErr_InvalidProperty;
 }
 
 /* static const char* AUInputTypeStr(int type)

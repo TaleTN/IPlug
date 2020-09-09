@@ -139,8 +139,8 @@ private:
     UInt32* pDataSize, Boolean* pWriteable);
 	ComponentResult GetProperty(AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
 		UInt32* pDataSize, Boolean* pWriteable, void* pData);
-  ComponentResult SetProperty(AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
-    UInt32* pDataSize, const void* pData);
+	ComponentResult SetProperty(AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
+		UInt32* pDataSize, const void* pData);
   ComponentResult GetProc(AudioUnitElement element, UInt32* pDataSize, void* pData);
   ComponentResult GetState(CFPropertyListRef* ppPropList);
   ComponentResult SetState(CFPropertyListRef pPropList);
