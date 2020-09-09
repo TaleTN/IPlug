@@ -736,6 +736,36 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effGetEffectName:
+		{
+			if (ptr)
+			{
+				vst_strncpy((char*)ptr, _this->GetEffectName(), kVstMaxEffectNameLen);
+				ret = 1;
+			}
+			break;
+		}
+
+		case effGetVendorString:
+		{
+			if (ptr)
+			{
+				vst_strncpy((char*)ptr, _this->GetMfrName(), kVstMaxVendorStrLen);
+				ret = 1;
+			}
+			break;
+		}
+
+		case effGetProductString:
+		{
+			if (ptr)
+			{
+				vst_strncpy((char*)ptr, _this->GetProductName(), kVstMaxProductStrLen);
+				ret = 1;
+			}
+			break;
+		}
+
     case effProcessVarIo: {
 	    // VstVariableIo* pIO = (VstVariableIo*) ptr;		// For offline processing (of audio files?)
 	    return 0;
@@ -750,27 +780,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
         *ppOutputArr = &(_this->mOutputSpkrArr);
       }
       return 1;
-    }
-    case effGetEffectName: {
-	    if (ptr) {
-		    strcpy((char*) ptr, _this->GetEffectName());
- 		    return 1;
-	    }
-	    return 0;
-    }
-    case effGetProductString: {
-	    if (ptr) {
-		    strcpy((char*) ptr, _this->GetProductName());
-		    return 1;
-	    }
-	    return 0;
-    }
-    case effGetVendorString: {
-	    if (ptr) {
-		    strcpy((char*) ptr, _this->GetMfrName());
-		    return 1;
-	    }
-	    return 0;
     }
     case effGetVendorVersion: {
       return _this->GetEffectVersion(true);
