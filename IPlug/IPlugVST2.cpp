@@ -772,6 +772,12 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effVendorSpecific:
+		{
+			ret = _this->VSTVendorSpecific(idx, value, ptr, opt);
+			break;
+		}
+
     case effProcessVarIo: {
 	    // VstVariableIo* pIO = (VstVariableIo*) ptr;		// For offline processing (of audio files?)
 	    return 0;
@@ -824,61 +830,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
       }
 	    return 0;
     }
-    case effVendorSpecific: {
-      switch (idx) {
-        // Mouse wheel
-        case 0x73744341: {
-          if (value == 0x57686565) {
-            IGraphics* pGraphics = _this->GetGUI();
-            if (pGraphics) {
-              return pGraphics->ProcessMouseWheel(opt);
-            }
-          }
-          break;
-        }
-        // Support Reaper VST extensions: http://www.reaper.fm/sdk/vst/
-        case effGetParamDisplay: {
-          if (ptr) {
-            if (value >= 0 && value < _this->NParams()) {
-              _this->GetParam(value)->GetDisplayForHost((double) opt, true, (char*) ptr);
-            }
-            return 0xbeef;
-          }
-          break;
-        }
-        case effString2Parameter: {
-          if (ptr && value >= 0 && value < _this->NParams()) {
-            if (*(char*) ptr != '\0') {
-              IParam* pParam = _this->GetParam(value);
-              sprintf((char*) ptr, "%.17f", pParam->GetNormalized(VSTString2Parameter(pParam, (char*) ptr)));
-            }
-            return 0xbeef;
-          }
-          break;
-        }
-        case kVstParameterUsesIntStep: {
-          if (value >= 0 && value < _this->NParams()) {
-            IParam* pParam = _this->GetParam(value);
-            switch (pParam->Type()) {
-              case IParam::kTypeBool: {
-                return 0xbeef;
-              }
-              case IParam::kTypeInt:
-              case IParam::kTypeEnum: {
-                double min, max;
-                pParam->GetBounds(&min, &max);
-                if (fabs(max - min) < 1.5) {
-                  return 0xbeef;
-                }
-                break;
-              }
-            }
-          }
-          break;
-        }
-      }
-      return 0;
-    }
     case effGetMidiKeyName: {
 	    if (ptr) {
 		    MidiKeyName* pMKN = (MidiKeyName*) ptr;
@@ -902,6 +853,71 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 
 	_this->mMutex.Leave();
 	return ret;
+}
+
+VstIntPtr IPlugVST2::VSTVendorSpecific(const VstInt32 idx, const VstIntPtr value, void* const ptr, const float opt)
+{
+	switch (idx)
+	{
+		// Support Cockos Extensions to VST SDK: https://www.reaper.fm/sdk/vst/
+
+		case effGetParamDisplay:
+		{
+			const int paramIdx = (int)value;
+			if (NParams(paramIdx) && ptr)
+			{
+				GetParam(paramIdx)->GetDisplayForHost(opt, (char*)ptr/*, 256 */);
+				return 0xbeef;
+			}
+			break;
+		}
+
+		case kVstParameterUsesIntStep:
+		{
+			const int paramIdx = (int)value;
+			if (NParams(paramIdx))
+			{
+				static const unsigned int typeEnum = IParam::kTypeEnum - IParam::kTypeBool;
+				const unsigned int type = GetParam(paramIdx)->Type() - IParam::kTypeBool;
+				return type <= typeEnum ? 0xbeef : 0;
+			}
+			break;
+		}
+
+		case effString2Parameter:
+		{
+			const int paramIdx = (int)value;
+			if (NParams(paramIdx) && ptr)
+			{
+				char* const buf = (char*)ptr;
+				if (*buf)
+				{
+					sprintf(buf, "%.17f", VSTString2Parameter(GetParam(paramIdx), buf));
+				}
+				return 0xbeef;
+			}
+			break;
+		}
+
+		// Mouse wheel, original source:
+		// http://asseca.com/vst-24-specs/efVendorSpecific.html
+
+		case 0x73744341: // 'stCA'
+		{
+			if (value == 0x57686565) // 'Whee'
+			{
+				IGraphics* const pGraphics = GetGUI();
+				if (pGraphics)
+				{
+					// 1.0 = wheel-up, -1.0 = wheel-down
+					return pGraphics->ProcessMouseWheel(opt);
+				}
+			}
+			break;
+		}
+	}
+
+	return 0;
 }
 
 template <class SAMPLETYPE>

@@ -65,6 +65,7 @@ private:
 	audioMasterCallback mHostCallback;
 
 	bool SendVSTEvent(VstEvent* pEvent);
+	VstIntPtr VSTVendorSpecific(VstInt32 idx, VstIntPtr value, void* ptr, float opt);
 
 	VstSpeakerArrangement mInputSpkrArr, mOutputSpkrArr;
 
