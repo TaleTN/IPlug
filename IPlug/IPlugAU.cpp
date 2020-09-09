@@ -11,6 +11,8 @@
 
 #include <string.h>
 
+#include "WDL/wdltypes.h"
+
 typedef AudioStreamBasicDescription STREAM_DESC;
 
 /* inline */ void MakeDefaultASBD(STREAM_DESC* pASBD, double sampleRate, int nChannels, bool interleaved)
@@ -1392,49 +1394,80 @@ void IPlugAU::ClearConnections()
   }
 }
 
-IPlugAU::IPlugAU(IPlugInstanceInfo instanceInfo,
-  int nParams, const char* channelIOStr, int nPresets,
-  const char* effectName, const char* productName, const char* mfrName,
-	int vendorVersion, int uniqueID, int mfrID, int latency,
-  int plugDoesMidi, bool plugDoesChunks,  bool plugIsInst)
-: IPlugBase(nParams, channelIOStr, nPresets,
-  effectName, productName, mfrName, vendorVersion, uniqueID, mfrID, latency,
-  plugDoesMidi, plugDoesChunks, plugIsInst),
-  mCI(0), mBypassed(false), mIsOffline(false), mRenderTimestamp(-1.0), mTempo(DEFAULT_TEMPO), mActive(false)
+IPlugAU::IPlugAU(
+	void* const instanceInfo,
+	const int nParams,
+	const char* const channelIOStr,
+	const int nPresets,
+	const char* const effectName,
+	const char* const productName,
+	const char* const mfrName,
+	const int vendorVersion,
+	const int uniqueID,
+	const int mfrID,
+	const int latency,
+	const int plugDoes
+):
+IPlugBase(
+	nParams,
+	channelIOStr,
+	nPresets,
+	effectName,
+	productName,
+	mfrName,
+	vendorVersion,
+	uniqueID,
+	mfrID,
+	latency,
+	plugDoes),
+
+	mCI(NULL),
+	mRenderTimestamp(-1.0),
+	mTempo(DEFAULT_TEMPO)
 {
-  Trace(TRACELOC, "%s", effectName);
+	memset(&mHostCallbacks, 0, sizeof(HostCallbackInfo));
+	memset(&mMidiCallback, 0, sizeof(AUMIDIOutputCallbackStruct));
 
-  memset(&mHostCallbacks, 0, sizeof(HostCallbackInfo));
-  memset(&mMidiCallback, 0, sizeof(AUMIDIOutputCallbackStruct));
+	const char* const* const pID = (const char* const*)instanceInfo;
+	mOSXBundleID.Set(pID[0]);
+	mCocoaViewFactoryClassName.Set(pID[1]);
 
-  mOSXBundleID.Set(instanceInfo.mOSXBundleID.Get());
-  mCocoaViewFactoryClassName.Set(instanceInfo.mCocoaViewFactoryClassName.Get());
+	// Every channel pair requested on input or output is a separate bus.
+	const int nInputs = NInChannels(), nOutputs = NOutChannels();
+	const int nInBuses = (int)ceil(nInputs / 2);
+	const int nOutBuses = (int)ceil(nOutputs / 2);
 
-  // Every channel pair requested on input or output is a separate bus.
-  int nInputs = NInChannels(), nOutputs = NOutChannels();
-  int nInBuses = (int) ceil(nInputs / 2);
-  int nOutBuses = (int) ceil(nOutputs / 2);
+	if (nInBuses > 0)
+	{
+		mBufList.Resize(sizeof(AudioBufferList) + (nInBuses - 1) * sizeof(AudioBuffer));
+	}
 
-  PtrListInitialize(&mInBusConnections, nInBuses);
-  PtrListInitialize(&mInBuses, nInBuses);
-  PtrListInitialize(&mOutBuses, nOutBuses);
+	PtrListInitialize(&mInBusConnections, nInBuses);
+	PtrListInitialize(&mInBuses, nInBuses);
+	PtrListInitialize(&mOutBuses, nOutBuses);
 
-  for (int i = 0, startCh = 0; i < nInBuses; ++i, startCh += 2) {
-    BusChannels* pInBus = mInBuses.Get(i);
-    pInBus->mNHostChannels = -1;
-    pInBus->mPlugChannelStartIdx = startCh;
-    pInBus->mNPlugChannels = MIN(nInputs - startCh, 2);
-  }
-  for (int i = 0, startCh = 0; i < nOutBuses; ++i, startCh += 2) {
-    BusChannels* pOutBus = mOutBuses.Get(i);
-    pOutBus->mNHostChannels = -1;
-    pOutBus->mPlugChannelStartIdx = startCh;
-    pOutBus->mNPlugChannels = MIN(nOutputs - startCh, 2);
-  }
+	for (int i = 0; i < nInBuses; ++i)
+	{
+		const int startCh = i * 2;
+		BusChannels* const pInBus = mInBuses.Get(i);
+		pInBus->mNHostChannels = -1;
+		pInBus->mPlugChannelStartIdx = startCh;
+		const int n = nInputs - startCh;
+		pInBus->mNPlugChannels = wdl_min(n, 2);
+	}
+	for (int i = 0; i < nOutBuses; ++i)
+	{
+		const int startCh = i * 2;
+		BusChannels* const pOutBus = mOutBuses.Get(i);
+		pOutBus->mNHostChannels = -1;
+		pOutBus->mPlugChannelStartIdx = startCh;
+		const int n = nOutputs - startCh;
+		pOutBus->mNPlugChannels = wdl_min(n, 2);
+	}
 
-  AssessInputConnections();
+	AssessInputConnections();
 
-  SetBlockSize(DEFAULT_BLOCK_SIZE);
+	SetBlockSize(kDefaultBlockSize);
 }
 
 IPlugAU::~IPlugAU()

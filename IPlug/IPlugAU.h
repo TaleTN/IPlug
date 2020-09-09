@@ -22,20 +22,24 @@
 
 #define MAX_IO_CHANNELS 128
 
-struct IPlugInstanceInfo
-{
-  WDL_String mOSXBundleID, mCocoaViewFactoryClassName;
-};
-
-class IPlugAU : public IPlugBase
+class IPlugAU: public IPlugBase
 {
 public:
-
-  // Use IPLUG_CTOR instead of calling directly (defined in IPlug_include_in_plug_src.h).
-	IPlugAU(IPlugInstanceInfo instanceInfo, int nParams, const char* channelIOStr, int nPresets, 
-		const char* effectName, const char* productName, const char* mfrName,
-		int vendorVersion, int uniqueID, int mfrID, int latency, 
-    int plugDoesMidi, bool plugDoesChunks,  bool plugIsInst);
+	// Use IPLUG_CTOR instead of calling directly (defined in IPlug_include_in_plug_hdr.h).
+	IPlugAU(
+		void* instanceInfo,
+		int nParams,
+		const char* channelIOStr,
+		int nPresets,
+		const char* effectName,
+		const char* productName,
+		const char* mfrName,
+		int vendorVersion,
+		int uniqueID,
+		int mfrID,
+		int latency,
+		int plugDoes
+	);
 
   virtual ~IPlugAU();
   
@@ -77,8 +81,7 @@ protected:
   bool SendSysEx(ISysEx* pSysEx);
   
 private:
-
-  WDL_String mOSXBundleID, mCocoaViewFactoryClassName;
+	WDL_FastString mOSXBundleID, mCocoaViewFactoryClassName;
   ComponentInstance mCI;
   bool mActive, mBypassed, mIsOffline;
   double WDL_FIXALIGN mRenderTimestamp, mTempo;
@@ -146,6 +149,7 @@ public:
     AudioUnitParameterValue value, UInt32 offsetFrames);
   static ComponentResult RenderProc(void* pPlug, AudioUnitRenderActionFlags* pFlags, const AudioTimeStamp* pTimestamp,
     UInt32 outputBusIdx, UInt32 nFrames, AudioBufferList* pBufferList);
-} WDL_FIXALIGN;
+}
+WDL_FIXALIGN;
 
 IPlugAU* MakePlug();
