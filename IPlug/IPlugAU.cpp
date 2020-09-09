@@ -974,11 +974,41 @@ ComponentResult IPlugAU::GetProperty(const AudioUnitPropertyID propID, const Aud
 		NO_OP(kAudioUnitProperty_DependentParameters);          // 45,
 
 		#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_4
+
 		NO_OP(kAudioUnitProperty_AUHostIdentifier);             // 46,
+
+/*		case kAudioUnitProperty_MIDIOutputCallbackInfo:         // 47,
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			if (!DoesMIDI(kPlugDoesMidiOut))
+			{
+				return kAudioUnitErr_InvalidProperty;
+			}
+			*pDataSize = sizeof(CFArrayRef);
+			if (pData)
+			{
+				CFMutableArrayRef nameArray = CFArrayCreateMutable(kCFAllocatorDefault, 1, &kCFTypeArrayCallBacks);
+				const CFStrLocal cfStr("MIDI Out");
+				CFArrayAppendValue(nameArray, cfStr.mCFStr);
+				*(CFArrayRef*)pData = nameArray;
+			}
+			return noErr;
+		}
+
+		case kAudioUnitProperty_MIDIOutputCallback:             // 48
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			*pDataSize = sizeof(AUMIDIOutputCallbackStruct);
+			*pWriteable = true;
+			return noErr;
+		}
+*/
 		NO_OP(kAudioUnitProperty_MIDIOutputCallbackInfo);       // 47,
 		NO_OP(kAudioUnitProperty_MIDIOutputCallback);           // 48,
+
 		NO_OP(kAudioUnitProperty_InputSamplesInOutput);         // 49,
 		NO_OP(kAudioUnitProperty_ClassInfoFromDocument);        // 50,
+
 		#endif
 
 		case kMusicDeviceProperty_InstrumentCount:              // 1000
