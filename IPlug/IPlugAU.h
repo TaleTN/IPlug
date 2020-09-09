@@ -79,7 +79,7 @@ public:
 protected:
 	void HostSpecificInit() { GetHost(); }
 	void SetBlockSize(int blockSize);
-  void SetLatency(int samples);
+	void SetLatency(int samples);
 	bool SendMidiMsg(IMidiMsg* pMsg);
   bool SendSysEx(ISysEx* pSysEx);
   

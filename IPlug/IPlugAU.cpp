@@ -1618,17 +1618,18 @@ void IPlugAU::InformListeners(AudioUnitPropertyID propID, AudioUnitScope scope)
 	}	
 }
 
-void IPlugAU::SetLatency(int samples)
+void IPlugAU::SetLatency(const int samples)
 {
-  TRACE;
-  int i, n = mPropertyListeners.GetSize();
-  for (i = 0; i < n; ++i) {
-    PropertyListener* pListener = mPropertyListeners.Get(i);
-    if (pListener->mPropID == kAudioUnitProperty_Latency) {
-      pListener->mListenerProc(pListener->mProcArgs, mCI, kAudioUnitProperty_Latency, kAudioUnitScope_Global, 0);
-    }
-  }
-  IPlugBase::SetLatency(samples);
+	const int n = mPropertyListeners.GetSize();
+	for (int i = 0; i < n; ++i)
+	{
+		PropertyListener* const pListener = mPropertyListeners.Get(i);
+		if (pListener->mPropID == kAudioUnitProperty_Latency)
+		{
+			pListener->mListenerProc(pListener->mProcArgs, mCI, kAudioUnitProperty_Latency, kAudioUnitScope_Global, 0);
+		}
+	}
+	IPlugBase::SetLatency(samples);
 }
 
 bool IPlugAU::SendMidiMsg(IMidiMsg* pMsg)
