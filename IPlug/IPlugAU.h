@@ -20,8 +20,6 @@
 #include "WDL/wdlstring.h"
 #include "WDL/wdltypes.h"
 
-#define MAX_IO_CHANNELS 128
-
 class IPlugAU: public IPlugBase
 {
 public:
@@ -99,6 +97,7 @@ private:
 	WDL_TypedBuf<AudioSampleType> mInScratchBuf, mOutScratchBuf;
 	WDL_PtrList_DeleteOnDestroy<AURenderCallbackStruct> mRenderNotify;
 	// AUMIDIOutputCallbackStruct mMidiCallback;
+	WDL_HeapBuf mBufList;
 
 	// Every stereo pair of plugin input or output is a bus.
 	// Buses can have zero host channels if the host hasn't connected the bus at all,
@@ -158,8 +157,8 @@ public:
 		AudioUnitParameterValue* pValue);
 	static ComponentResult SetParamProc(void* pPlug, AudioUnitParameterID paramID, AudioUnitScope scope, AudioUnitElement element,
 		AudioUnitParameterValue value, UInt32 offsetFrames);
-  static ComponentResult RenderProc(void* pPlug, AudioUnitRenderActionFlags* pFlags, const AudioTimeStamp* pTimestamp,
-    UInt32 outputBusIdx, UInt32 nFrames, AudioBufferList* pBufferList);
+	static ComponentResult RenderProc(void* pPlug, AudioUnitRenderActionFlags* pFlags, const AudioTimeStamp* pTimestamp,
+		UInt32 outputBusIdx, UInt32 nFrames, AudioBufferList* pBufferList);
 }
 WDL_FIXALIGN;
 

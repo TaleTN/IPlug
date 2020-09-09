@@ -1586,130 +1586,135 @@ ComponentResult IPlugAU::SetParamProc(void* const pPlug, const AudioUnitParamete
 	return noErr;
 }
 
-struct BufferList {
-  int mNumberBuffers;
-  AudioBuffer mBuffers[MAX_IO_CHANNELS];
-};
-
-inline ComponentResult RenderCallback(AURenderCallbackStruct* pCB, AudioUnitRenderActionFlags* pFlags, const AudioTimeStamp* pTimestamp,
-  UInt32 inputBusIdx, UInt32 nFrames, AudioBufferList* pOutBufList)
+static ComponentResult RenderCallback(const AURenderCallbackStruct* const pCB, AudioUnitRenderActionFlags* const pFlags, const AudioTimeStamp* const pTimestamp,
+	const UInt32 inputBusIdx, const UInt32 nFrames, AudioBufferList* const pOutBufList)
 {
-  TRACE;
-  return pCB->inputProc(pCB->inputProcRefCon, pFlags, pTimestamp, inputBusIdx, nFrames, pOutBufList);
+	return pCB->inputProc(pCB->inputProcRefCon, pFlags, pTimestamp, inputBusIdx, nFrames, pOutBufList);
 }
 
 // static
-ComponentResult IPlugAU::RenderProc(void* pPlug, AudioUnitRenderActionFlags* pFlags, const AudioTimeStamp* pTimestamp,
-  UInt32 outputBusIdx, UInt32 nFrames, AudioBufferList* pOutBufList)
+ComponentResult IPlugAU::RenderProc(void* const pPlug, AudioUnitRenderActionFlags* /* pFlags */, const AudioTimeStamp* const pTimestamp,
+	const UInt32 outputBusIdx, const UInt32 nFrames, AudioBufferList* const pOutBufList)
 {
-  Trace(TRACELOC, "%d:%d:%d", outputBusIdx, pOutBufList->mNumberBuffers, nFrames);
+	IPlugAU* const _this = (IPlugAU*)pPlug;
 
-  IPlugAU* _this = (IPlugAU*) pPlug;
+	if (!(pTimestamp->mFlags & kAudioTimeStampSampleTimeValid) ||
+		outputBusIdx >= _this->mOutBuses.GetSize() ||
+		nFrames > _this->GetBlockSize())
+	{
+		return kAudioUnitErr_InvalidPropertyValue;
+	}
 
-  if (!(pTimestamp->mFlags & kAudioTimeStampSampleTimeValid) ||
-      outputBusIdx >= _this->mOutBuses.GetSize() ||
-      nFrames > _this->GetBlockSize()) {
-    return kAudioUnitErr_InvalidPropertyValue;
+	const int nRenderNotify = _this->mRenderNotify.GetSize();
+	for (int i = 0; i < nRenderNotify; ++i)
+	{
+		const AURenderCallbackStruct* const pRN = _this->mRenderNotify.Get(i);
+		AudioUnitRenderActionFlags flags = kAudioUnitRenderAction_PreRender;
+		RenderCallback(pRN, &flags, pTimestamp, outputBusIdx, nFrames, pOutBufList);
+	}
+
+	const double renderTimestamp = pTimestamp->mSampleTime;
+	if (renderTimestamp != _this->mRenderTimestamp) // Pull input buffers.
+	{
+		AudioBufferList* const pInBufList = (AudioBufferList*)_this->mBufList.Get();
+
+		const int nIn = _this->mInBuses.GetSize();
+		for (int i = 0; i < nIn; ++i)
+		{
+			const BusChannels* const pInBus = _this->mInBuses.Get(i);
+			const InputBusConnection* const pInBusConn = _this->mInBusConnections.Get(i);
+
+			if (pInBus->mConnected)
+			{
+				pInBufList->mNumberBuffers = pInBus->mNHostChannels;
+				for (int b = 0; b < pInBufList->mNumberBuffers; ++b)
+				{
+					AudioBuffer* const pBuffer = &pInBufList->mBuffers[b];
+					pBuffer->mNumberChannels = 1;
+					pBuffer->mDataByteSize = nFrames * sizeof(AudioSampleType);
+					pBuffer->mData = NULL;
+				}
+
+				AudioUnitRenderActionFlags flags = 0;
+				ComponentResult r;
+				switch (pInBusConn->mInputType)
+				{
+					case eDirectFastProc:
+					{
+						r = pInBusConn->mUpstreamRenderProc(pInBusConn->mUpstreamObj, &flags, pTimestamp, pInBusConn->mUpstreamBusIdx, nFrames, pInBufList);
+						break;
+					}
+					case eDirectNoFastProc:
+					{
+						r = AudioUnitRender(pInBusConn->mUpstreamUnit, &flags, pTimestamp, pInBusConn->mUpstreamBusIdx, nFrames, pInBufList);
+						break;
+					}
+					case eRenderCallback:
+					{
+						AudioSampleType* pScratchInput = _this->mInScratchBuf.Get() + pInBus->mPlugChannelStartIdx * nFrames;
+						for (int b = 0; b < pInBufList->mNumberBuffers; ++b, pScratchInput += nFrames)
+						{
+							pInBufList->mBuffers[b].mData = pScratchInput;
+						}
+						r = RenderCallback(&pInBusConn->mUpstreamRenderCallback, &flags, pTimestamp, i /* 0 */, nFrames, pInBufList);
+						break;
+					}
+					default:
+					{
+						static const bool inputBusAssessed = false;
+						assert(inputBusAssessed); // InputBus.mConnected should be false, we didn't correctly assess the input connections.
+						r = kAudioUnitErr_NoConnection;
+					}
+				}
+				if (r != noErr) return r; // Something went wrong upstream.
+
+				for (int j = 0, chIdx = pInBus->mPlugChannelStartIdx; j < pInBus->mNHostChannels; ++j)
+				{
+					_this->AttachInputBuffers(chIdx + j, 1, (AudioSampleType**)&pInBufList->mBuffers[j].mData, nFrames);
+				}
+			}
+		}
+		_this->mRenderTimestamp = renderTimestamp;
+	}
+
+	BusChannels* const pOutBus = _this->mOutBuses.Get(outputBusIdx);
+	if (!pOutBus->mConnected || pOutBus->mNHostChannels != pOutBufList->mNumberBuffers)
+	{
+		const int startChannelIdx = pOutBus->mPlugChannelStartIdx;
+		const int nConnected = wdl_min(pOutBus->mNHostChannels, pOutBufList->mNumberBuffers);
+		int nUnconnected = pOutBus->mNPlugChannels - nConnected;
+		nUnconnected = wdl_max(nUnconnected, 0);
+		_this->SetOutputChannelConnections(startChannelIdx, nConnected, true);
+		_this->SetOutputChannelConnections(startChannelIdx + nConnected, nUnconnected, false);
+		pOutBus->mConnected = true;
   }
 
-  int nRenderNotify = _this->mRenderNotify.GetSize();
-  if (nRenderNotify) {
-    for (int i = 0; i < nRenderNotify; ++i) {
-      AURenderCallbackStruct* pRN = _this->mRenderNotify.Get(i);
-      AudioUnitRenderActionFlags flags = kAudioUnitRenderAction_PreRender;      
-      RenderCallback(pRN, &flags, pTimestamp, outputBusIdx, nFrames, pOutBufList);
-    }
-  }
+	for (int i = 0, chIdx = pOutBus->mPlugChannelStartIdx; i < pOutBufList->mNumberBuffers; ++i)
+	{
+		if (!(pOutBufList->mBuffers[i].mData)) // Grr. Downstream unit didn't give us buffers.
+		{
+			pOutBufList->mBuffers[i].mData = _this->mOutScratchBuf.Get() + (chIdx + i) * nFrames;
+		}
+		_this->AttachOutputBuffers(chIdx + i, 1, (AudioSampleType**)&pOutBufList->mBuffers[i].mData);
+	}
 
-  double renderTimestamp = pTimestamp->mSampleTime;
-  if (renderTimestamp != _this->mRenderTimestamp) {    // Pull input buffers.
+	if (_this->IsBypassed())
+	{
+		_this->PassThroughBuffers((AudioSampleType)0, nFrames);
+	}
+	else
+	{
+		_this->ProcessBuffers((AudioSampleType)0, nFrames);
+	}
 
-    BufferList bufList;
-    AudioBufferList* pInBufList = (AudioBufferList*) &bufList;
+	for (int i = 0; i < nRenderNotify; ++i)
+	{
+		const AURenderCallbackStruct* const pRN = _this->mRenderNotify.Get(i);
+		AudioUnitRenderActionFlags flags = kAudioUnitRenderAction_PostRender;
+		RenderCallback(pRN, &flags, pTimestamp, outputBusIdx, nFrames, pOutBufList);
+	}
 
-    int nIn = _this->mInBuses.GetSize();
-    for (int i = 0; i < nIn; ++i) {
-      BusChannels* pInBus = _this->mInBuses.Get(i);
-      InputBusConnection* pInBusConn = _this->mInBusConnections.Get(i);
-
-      if (pInBus->mConnected) {
-        pInBufList->mNumberBuffers = pInBus->mNHostChannels;
-        for (int b = 0; b < pInBufList->mNumberBuffers; ++b) {
-          AudioBuffer* pBuffer = &(pInBufList->mBuffers[b]);
-          pBuffer->mNumberChannels = 1;
-          pBuffer->mDataByteSize = nFrames * sizeof(AudioSampleType);
-          pBuffer->mData = 0;
-        }
-
-        AudioUnitRenderActionFlags flags = 0;
-        ComponentResult r = noErr;
-        switch (pInBusConn->mInputType) {
-          case eDirectFastProc: {
-            r = pInBusConn->mUpstreamRenderProc(pInBusConn->mUpstreamObj, &flags, pTimestamp, pInBusConn->mUpstreamBusIdx, nFrames, pInBufList);
-            break;
-          }
-          case eDirectNoFastProc: {
-            r = AudioUnitRender(pInBusConn->mUpstreamUnit, &flags, pTimestamp, pInBusConn->mUpstreamBusIdx, nFrames, pInBufList);
-            break;
-          }
-          case eRenderCallback: {
-            AudioSampleType* pScratchInput = _this->mInScratchBuf.Get() + pInBus->mPlugChannelStartIdx * nFrames;
-            for (int b = 0; b < pInBufList->mNumberBuffers; ++b, pScratchInput += nFrames) {
-              pInBufList->mBuffers[b].mData = pScratchInput;
-            }
-            r = RenderCallback(&(pInBusConn->mUpstreamRenderCallback), &flags, pTimestamp, i /* 0 */, nFrames, pInBufList);
-            break;
-          }
-          default: {
-            bool inputBusAssessed = false;
-            assert(inputBusAssessed);   // InputBus.mConnected should be false, we didn't correctly assess the input connections.
-          }
-        }
-        if (r != noErr) {
-          return r;   // Something went wrong upstream.
-        }
-
-        for (int i = 0, chIdx = pInBus->mPlugChannelStartIdx; i < pInBus->mNHostChannels; ++i, ++chIdx) {
-          _this->AttachInputBuffers(chIdx, 1, (AudioSampleType**) &(pInBufList->mBuffers[i].mData), nFrames);
-        }
-      }
-    }
-    _this->mRenderTimestamp = renderTimestamp;
-  }
-
-  BusChannels* pOutBus = _this->mOutBuses.Get(outputBusIdx);
-  if (!(pOutBus->mConnected) || pOutBus->mNHostChannels != pOutBufList->mNumberBuffers) {
-    int startChannelIdx = pOutBus->mPlugChannelStartIdx;
-    int nConnected = MIN(pOutBus->mNHostChannels, pOutBufList->mNumberBuffers);
-    int nUnconnected = MAX(pOutBus->mNPlugChannels - nConnected, 0);
-    _this->SetOutputChannelConnections(startChannelIdx, nConnected, true);
-    _this->SetOutputChannelConnections(startChannelIdx + nConnected, nUnconnected, false);
-    pOutBus->mConnected = true;
-  }
-
-  for (int i = 0, chIdx = pOutBus->mPlugChannelStartIdx; i < pOutBufList->mNumberBuffers; ++i, ++chIdx) {
-    if (!(pOutBufList->mBuffers[i].mData)) {  // Grr.  Downstream unit didn't give us buffers.
-      pOutBufList->mBuffers[i].mData = _this->mOutScratchBuf.Get() + chIdx * nFrames;
-    }
-    _this->AttachOutputBuffers(chIdx, 1, (AudioSampleType**) &(pOutBufList->mBuffers[i].mData));
-  }
-
-  if (_this->mBypassed) {
-    _this->PassThroughBuffers((AudioSampleType) 0, nFrames);
-  }
-  else {
-    _this->ProcessBuffers((AudioSampleType) 0, nFrames);
-  }
-
-  if (nRenderNotify) {
-    for (int i = 0; i < nRenderNotify; ++i) {
-      AURenderCallbackStruct* pRN = _this->mRenderNotify.Get(i);
-      AudioUnitRenderActionFlags flags = kAudioUnitRenderAction_PostRender;      
-      RenderCallback(pRN, &flags, pTimestamp, outputBusIdx, nFrames, pOutBufList);
-    }
-  }
-
-  return noErr;
+	return noErr;
 }
 
 IPlugAU::BusChannels* IPlugAU::GetBus(const AudioUnitScope scope, const AudioUnitElement busIdx) const
