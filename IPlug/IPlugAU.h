@@ -128,6 +128,9 @@ private:
 	bool CheckLegalIO() const;
 	void AssessInputConnections();
 
+	void UpdateSampleRate(double sampleRate);
+	void UpdateBlockSize(int blockSize);
+
   struct PropertyListener {
     AudioUnitPropertyID mPropID;
     AudioUnitPropertyListenerProc mListenerProc;

@@ -1084,11 +1084,11 @@ ComponentResult IPlugAU::SetProperty(const AudioUnitPropertyID propID, const Aud
 			return negotiatedOK ? noErr : (ComponentResult)kAudioUnitErr_InvalidProperty;
 		}
 
-    case kAudioUnitProperty_SampleRate: {                // 2,
-      SetSampleRate(*((Float64*) pData));
-      Reset();
-      return noErr;
-    }
+		case kAudioUnitProperty_SampleRate:                     // 2,
+		{
+			UpdateSampleRate(*(Float64*)pData);
+			return noErr;
+		}
 
 		NO_OP(kAudioUnitProperty_ParameterList);                // 3,
 		NO_OP(kAudioUnitProperty_ParameterInfo);                // 4,
@@ -1131,11 +1131,11 @@ ComponentResult IPlugAU::SetProperty(const AudioUnitPropertyID propID, const Aud
 		NO_OP(kAudioUnitProperty_Latency);                      // 12,
 		NO_OP(kAudioUnitProperty_SupportedNumChannels);         // 13,
 
-    case kAudioUnitProperty_MaximumFramesPerSlice: {     // 14,
-      SetBlockSize(*((UInt32*) pData));
-      Reset();
-      return noErr;
-    }
+		case kAudioUnitProperty_MaximumFramesPerSlice:          // 14,
+		{
+			UpdateBlockSize(*(UInt32*)pData);
+			return noErr;
+		}
 
 		NO_OP(kAudioUnitProperty_SetExternalBuffer);            // 15,
 		NO_OP(kAudioUnitProperty_ParameterValueStrings);        // 16,
@@ -1315,6 +1315,28 @@ void IPlugAU::AssessInputConnections()
 	}
 
 	mMutex.Leave();
+}
+
+void IPlugAU::UpdateSampleRate(const double sampleRate)
+{
+	const int flags = mPlugFlags;
+	if (sampleRate != GetSampleRate() || !(flags & kPlugInitSampleRate))
+	{
+		SetSampleRate(sampleRate);
+		if (flags & kPlugInitBlockSize) Reset();
+		mPlugFlags = flags | kPlugInitSampleRate;
+	}
+}
+
+void IPlugAU::UpdateBlockSize(const int blockSize)
+{
+	const int flags = mPlugFlags;
+	if (blockSize != GetBlockSize() || !(flags & kPlugInitBlockSize))
+	{
+		SetBlockSize(blockSize);
+		if (flags & kPlugInitSampleRate) Reset();
+		mPlugFlags = flags | kPlugInitBlockSize;
+	}
 }
 
 inline void PutNumberInDict(CFMutableDictionaryRef pDict, const char* key, void* pNumber, CFNumberType type)
