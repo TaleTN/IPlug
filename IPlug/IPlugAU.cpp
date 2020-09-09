@@ -1434,8 +1434,8 @@ IPlugBase(
 
 	// Every channel pair requested on input or output is a separate bus.
 	const int nInputs = NInChannels(), nOutputs = NOutChannels();
-	const int nInBuses = (int)ceil(nInputs / 2);
-	const int nOutBuses = (int)ceil(nOutputs / 2);
+	const int nInBuses = nInputs / 2 + (nInputs & 1);
+	const int nOutBuses = nOutputs / 2 + (nOutputs & 1);
 
 	if (nInBuses > 0)
 	{
