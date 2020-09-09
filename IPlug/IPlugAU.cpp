@@ -1487,36 +1487,43 @@ ComponentResult IPlugAU::SetState(CFPropertyListRef const pPropList)
 	return noErr;
 }
 
-// pData == 0 means return property info only.
-ComponentResult IPlugAU::GetProc(AudioUnitElement element, UInt32* pDataSize, void* pData)
+// pData == NULL means return property info only.
+ComponentResult IPlugAU::GetProc(const AudioUnitElement element, UInt32* const pDataSize, void* const pData) const
 {
-  Trace(TRACELOC, "%s:(%d:%s)", (pData ? "" : "Info"), element, AUSelectStr(element));
+	switch (element)
+	{
+		case kAudioUnitGetParameterSelect:
+		{
+			*pDataSize = sizeof(AudioUnitGetParameterProc);
+			if (pData)
+			{
+				*(AudioUnitGetParameterProc*)pData = (AudioUnitGetParameterProc)IPlugAU::GetParamProc;
+			}
+			return noErr;
+		}
 
-  switch (element) {
-    case kAudioUnitGetParameterSelect: {
-      *pDataSize = sizeof(AudioUnitGetParameterProc);
-      if (pData) {
-        *((AudioUnitGetParameterProc*) pData) = (AudioUnitGetParameterProc) IPlugAU::GetParamProc;
-      }
-      return noErr;
-    }
-    case kAudioUnitSetParameterSelect: {
-      *pDataSize = sizeof(AudioUnitSetParameterProc);
-      if (pData) {
-        *((AudioUnitSetParameterProc*) pData) = (AudioUnitSetParameterProc) IPlugAU::SetParamProc;
-      }
-      return noErr;
-    }
-    case kAudioUnitRenderSelect: {
-      *pDataSize = sizeof(AudioUnitRenderProc);
-      if (pData) {
-        *((AudioUnitRenderProc*) pData) = (AudioUnitRenderProc) IPlugAU::RenderProc;
-      }
-      return noErr;
-    }
-    default:
-      return kAudioUnitErr_InvalidElement;
-  }
+		case kAudioUnitSetParameterSelect:
+		{
+			*pDataSize = sizeof(AudioUnitSetParameterProc);
+			if (pData)
+			{
+				*(AudioUnitSetParameterProc*)pData = (AudioUnitSetParameterProc)IPlugAU::SetParamProc;
+			}
+			return noErr;
+		}
+
+		case kAudioUnitRenderSelect:
+		{
+			*pDataSize = sizeof(AudioUnitRenderProc);
+			if (pData)
+			{
+				*(AudioUnitRenderProc*)pData = (AudioUnitRenderProc)IPlugAU::RenderProc;
+			}
+			return noErr;
+		}
+	}
+
+	return kAudioUnitErr_InvalidElement;
 }
 
 // static
