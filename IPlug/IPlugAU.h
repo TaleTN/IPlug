@@ -47,6 +47,9 @@ public:
 	// Default implementation to mimic original IPlug AU behavior.
 	void OnBypass(bool /* bypassed */) { Reset(); }
 
+	bool AllocStateChunk(int chunkSize = -1);
+	bool AllocBankChunk(int chunkSize = -1);
+
   void BeginInformHostOfParamChange(int idx);
   void BeginDelayedInformHostOfParamChange(int idx);
   void InformHostOfParamChange(int idx, double normalizedValue);

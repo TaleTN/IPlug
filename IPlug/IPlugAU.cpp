@@ -1470,6 +1470,19 @@ IPlugBase(
 	SetBlockSize(kDefaultBlockSize);
 }
 
+bool IPlugAU::AllocStateChunk(int chunkSize)
+{
+	if (chunkSize < 0) chunkSize = GetParamsChunkSize(0, NParams());
+	mState.Alloc(chunkSize);
+	return mState.Size() == chunkSize;
+}
+
+bool IPlugAU::AllocBankChunk(const int chunkSize)
+{
+	if (chunkSize < 0 && mPresetChunkSize < 0) AllocPresetChunk();
+	return true;
+}
+
 void SendAUEvent(AudioUnitEventType type, ComponentInstance ci, int idx)
 {
   AudioUnitEvent auEvent;
