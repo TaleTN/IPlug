@@ -128,20 +128,31 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters* const params, void* c
 			break;
 		}
 
-    case kAudioUnitInitializeSelect: {
-      if (!(_this->CheckLegalIO())) {
-        return badComponentSelector;
-      }
-      _this->mActive = true;
-      _this->OnParamReset();
-      _this->OnActivate(true);
-      return noErr;
-    }
-    case kAudioUnitUninitializeSelect: {
-      _this->mActive = false;
-      _this->OnActivate(false);
-      return noErr;
-    }
+		case kAudioUnitInitializeSelect:
+		{
+			if (!(_this->CheckLegalIO()))
+			{
+				ret = badComponentSelector;
+				break;
+			}
+			if (!_this->IsActive())
+			{
+				_this->OnParamReset();
+				_this->OnActivate(true);
+				_this->mPlugFlags |= kPlugFlagsActive;
+			}
+			break;
+		}
+
+		case kAudioUnitUninitializeSelect:
+		{
+			if (_this->IsActive())
+			{
+				_this->OnActivate(false);
+				_this->mPlugFlags &= ~kPlugFlagsActive;
+			}
+			break;
+		}
 
 		case kAudioUnitGetPropertyInfoSelect:
 		{
