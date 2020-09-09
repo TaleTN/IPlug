@@ -1137,11 +1137,18 @@ ComponentResult IPlugAU::SetProperty(const AudioUnitPropertyID propID, const Aud
 		NO_OP(kAudioUnitProperty_AudioChannelLayout);           // 19,
 		NO_OP(kAudioUnitProperty_TailTime);                     // 20,
 
-    case kAudioUnitProperty_BypassEffect: {              // 21,
-      mBypassed = (*((UInt32*) pData) != 0);
-      Reset();
-      return noErr;
-    }
+		case kAudioUnitProperty_BypassEffect:                   // 21,
+		{
+			// TN: GarageBand doesn't seem to set this propery, but instead
+			// seems to call IPlugAUEntry(kAudioUnitResetSelect).
+			const bool bypassed = !!*(UInt32*)pData;
+			if (IsBypassed() != bypassed)
+			{
+				OnBypass(bypassed);
+				mPlugFlags ^= kPlugFlagsBypass;
+			}
+			return noErr;
+		}
 
 		NO_OP(kAudioUnitProperty_LastRenderError);             // 22,
 
