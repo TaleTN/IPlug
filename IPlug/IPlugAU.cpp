@@ -434,8 +434,9 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters* const params, void* c
 	return ret;
 }
 
-struct AudioUnitCarbonViewCreateGluePB {
-  unsigned char componentFlags;
+struct AudioUnitCarbonViewCreateGluePB
+{
+	unsigned char componentFlags;
 	unsigned char componentParamSize;
 	short componentWhat;
 	ControlRef* outControl;
@@ -447,49 +448,60 @@ struct AudioUnitCarbonViewCreateGluePB {
 	AudioUnitCarbonView inView;
 };
 
-struct CarbonViewInstance {
-  ComponentInstance mCI;
-  IPlugAU* mPlug;
+struct CarbonViewInstance
+{
+	ComponentInstance mCI;
+	IPlugAU* mPlug;
 };
 
 // static
-ComponentResult IPlugAU::IPlugAUCarbonViewEntry(ComponentParameters *params, void* pView)
+ComponentResult IPlugAU::IPlugAUCarbonViewEntry(ComponentParameters* const params, void* const pView)
 {
-  int select = params->what;
+	const int select = params->what;
 
-  Trace(TRACELOC, "%d:%s", select, AUSelectStr(select));
+	if (select == kComponentOpenSelect)
+	{
+		CarbonViewInstance* const pCVI = new CarbonViewInstance;
+		pCVI->mCI = GET_COMP_PARAM(ComponentInstance, 0, 1);
+		pCVI->mPlug = NULL;
+		SetComponentInstanceStorage(pCVI->mCI, (Handle)pCVI);
+		return noErr;
+	}
 
-  if (select == kComponentOpenSelect) {
-      CarbonViewInstance* pCVI = new CarbonViewInstance;
-      pCVI->mCI = GET_COMP_PARAM(ComponentInstance, 0, 1);
-      pCVI->mPlug = 0;
-      SetComponentInstanceStorage(pCVI->mCI, (Handle) pCVI);
-      return noErr;
-    }
+    CarbonViewInstance* const pCVI = (CarbonViewInstance*)pView;
 
-    CarbonViewInstance* pCVI = (CarbonViewInstance*) pView;
+	switch (select)
+	{
+		case kComponentCloseSelect:
+		{
+			IPlugAU* const _this = pCVI->mPlug;
+			IGraphics* pGraphics;
+			if (_this && (pGraphics = _this->GetGUI()))
+			{
+				pGraphics->CloseWindow();
+			}
+			delete pCVI;
+			return noErr;
+		}
 
-    switch (select) {
-      case kComponentCloseSelect: {
-        IPlugAU* _this = pCVI->mPlug;
-        if (_this && _this->GetGUI()) {
-          _this->GetGUI()->CloseWindow();
-        }
-        DELETE_NULL(pCVI);
-        return noErr;
-      }
-      case kAudioUnitCarbonViewCreateSelect: {
-        AudioUnitCarbonViewCreateGluePB* pb = (AudioUnitCarbonViewCreateGluePB*) params;
-        IPlugAU* _this = (IPlugAU*) GetComponentInstanceStorage(pb->inAudioUnit);
-        pCVI->mPlug = _this;
-        if (_this && _this->GetGUI()) {
-          *(pb->outControl) = (ControlRef) (_this->GetGUI()->OpenWindow(pb->inWindow, pb->inParentControl));
-          return noErr;
-        }
-        return badComponentSelector;
-      }
-      default:  return badComponentSelector;
-  }
+		case kAudioUnitCarbonViewCreateSelect:
+		{
+			AudioUnitCarbonViewCreateGluePB* const pb = (AudioUnitCarbonViewCreateGluePB*)params;
+			IPlugAU* const _this = (IPlugAU*)GetComponentInstanceStorage(pb->inAudioUnit);
+			pCVI->mPlug = _this;
+			#ifndef IPLUG_NO_CARBON_SUPPORT
+			IGraphicsMac* pGraphics;
+			if (_this && (pGraphics = (IGraphicsMac*)_this->GetGUI()))
+			{
+				*pb->outControl = (ControlRef)pGraphics->OpenCarbonWindow(pb->inWindow, pb->inParentControl);
+				return noErr;
+			}
+			#endif
+			return badComponentSelector;
+		}
+	}
+
+	return badComponentSelector;
 }
 
 #define ASSERT_SCOPE(reqScope) if (scope != reqScope) { return kAudioUnitErr_InvalidProperty; }

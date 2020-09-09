@@ -88,7 +88,7 @@ protected:
 
 private:
 	WDL_FastString mOSXBundleID, mCocoaViewFactoryClassName;
-  ComponentInstance mCI;
+	ComponentInstance mCI;
   bool mActive, mBypassed, mIsOffline;
 	double WDL_FIXALIGN mRenderTimestamp, mTempo;
 	HostCallbackInfo mHostCallbacks;
@@ -146,7 +146,7 @@ private:
 	
 public:
 	static ComponentResult IPlugAUEntry(ComponentParameters *params, void* pVPlug);
-  static ComponentResult IPlugAUCarbonViewEntry(ComponentParameters *params, void* pView);
+	static ComponentResult IPlugAUCarbonViewEntry(ComponentParameters *params, void* pView);
   static ComponentResult GetParamProc(void* pPlug, AudioUnitParameterID paramID, AudioUnitScope scope, AudioUnitElement element, 
     AudioUnitParameterValue* pValue);
   static ComponentResult SetParamProc(void* pPlug, AudioUnitParameterID paramID, AudioUnitScope scope, AudioUnitElement element, 
