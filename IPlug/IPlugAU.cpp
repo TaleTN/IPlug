@@ -1517,11 +1517,6 @@ void IPlugAU::EndInformHostOfParamChange(const int idx)
 	// InformListeners(kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global);
 // }
 
-bool IPlugAU::IsRenderingOffline()
-{
-  return mIsOffline;
-}
-
 // Samples since start of project.
 double IPlugAU::GetSamplePos()
 {

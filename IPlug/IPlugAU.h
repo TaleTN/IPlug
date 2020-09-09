@@ -62,12 +62,12 @@ public:
 	void GetTimeSig(int* pNum, int* pDenom);
 	int GetHost(); // GetHostVersion() is inherited.
 
-  // Tell the host that the graphics resized.
-  // Should be called only by the graphics object when it resizes itself.
-  void ResizeGraphics(int w, int h) {}
+	// Whether the plugin is being used for offline rendering.
+	bool IsRenderingOffline() { return IsOffline(); }
 
-  // Whether the plugin is being used for offline rendering
-  bool IsRenderingOffline();
+	// Tell the host that the graphics resized.
+	// Should be called only by the graphics object when it resizes itself.
+	void ResizeGraphics(int w, int h) {}
 
   enum EAUInputType {
     eNotConnected = 0,
