@@ -160,4 +160,4 @@ public:
 }
 WDL_FIXALIGN;
 
-IPlugAU* MakePlug();
+IPlugAU* MakeIPlugAU();
