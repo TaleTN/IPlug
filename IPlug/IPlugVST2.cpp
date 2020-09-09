@@ -822,6 +822,16 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effGetMidiKeyName:
+		{
+			MidiKeyName* const pMKN = (MidiKeyName*)ptr;
+			if (pMKN && _this->MidiNoteName(pMKN->thisKeyNumber, pMKN->keyName, kVstMaxNameLen + 1))
+			{
+				ret = 1;
+			}
+			break;
+		}
+
     case effProcessVarIo: {
 	    // VstVariableIo* pIO = (VstVariableIo*) ptr;		// For offline processing (of audio files?)
 	    return 0;
@@ -836,16 +846,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
         *ppOutputArr = &(_this->mOutputSpkrArr);
       }
       return 1;
-    }
-    case effGetMidiKeyName: {
-	    if (ptr) {
-		    MidiKeyName* pMKN = (MidiKeyName*) ptr;
-		    pMKN->keyName[0] = '\0';
-		    if (_this->MidiNoteName(pMKN->thisKeyNumber, pMKN->keyName)) {
-			    return 1;
-		    }
-	    }
-	    return 0;
     }
     case effBeginSetProgram:
     case effEndSetProgram:
