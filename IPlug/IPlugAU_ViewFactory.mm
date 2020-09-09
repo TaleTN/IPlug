@@ -1,14 +1,21 @@
 #import <Cocoa/Cocoa.h>
-#include "../IPlug/IGraphicsCocoa.h"
-#include "resource.h"   // This is your plugin's resource.h.
+#import <AudioUnit/AUCocoaUIView.h>
 
-@interface VIEW_CLASS : NSObject <AUCocoaUIBase>
+#include "IGraphicsCocoa.h"
+#include "resource.h" // This is your plugin's resource.h.
+
+static NSString* ToNSString(const char* const cStr)
 {
-  IPlugBase* mPlug;
+	return [NSString stringWithCString: cStr encoding: NSUTF8StringEncoding];
+}
+
+@interface VIEW_CLASS: NSObject <AUCocoaUIBase>
+{
+	IPlugBase* mPlug;
 }
 - (id) init;
-- (NSView*) uiViewForAudioUnit: (AudioUnit) audioUnit withSize: (NSSize) preferredSize;
-- (unsigned) interfaceVersion;
+- (NSView*) uiViewForAudioUnit: (AudioUnit)audioUnit withSize: (NSSize)preferredSize;
+- (unsigned int) interfaceVersion;
 - (NSString*) description;
 @end
 
@@ -16,35 +23,33 @@
 
 - (id) init
 {
-  TRACE;  
-  mPlug = 0;
-  return [super init];
+	mPlug = NULL;
+	return [super init];
 }
 
-- (NSView*) uiViewForAudioUnit: (AudioUnit) audioUnit withSize: (NSSize) preferredSize
+- (NSView*) uiViewForAudioUnit: (AudioUnit)audioUnit withSize: (NSSize)preferredSize
 {
-  TRACE;
-  mPlug = (IPlugBase*) GetComponentInstanceStorage(audioUnit);
-  if (mPlug) {
-    IGraphics* pGraphics = mPlug->GetGUI();   
-    if (pGraphics) {
-      IGRAPHICS_COCOA* pView = (IGRAPHICS_COCOA*) pGraphics->OpenWindow(0);
-      return pView;
-    }
-  }
-  return 0; 
+	mPlug = (IPlugBase*)GetComponentInstanceStorage(audioUnit);
+	if (mPlug)
+	{
+		IGraphics* const pGraphics = mPlug->GetGUI();
+		if (pGraphics)
+		{
+			IGRAPHICS_COCOA* const pView = (IGRAPHICS_COCOA*)pGraphics->OpenWindow(NULL);
+			return pView;
+		}
+	}
+	return nil;
 }
 
-- (unsigned) interfaceVersion
+- (unsigned int) interfaceVersion
 {
-  return 0;
+	return 0;
 }
 
-- (NSString *) description
+- (NSString*) description
 {
-  return ToNSString(PLUG_NAME " View");
+	return ToNSString(PLUG_NAME " View");
 }
 
 @end
-
-
