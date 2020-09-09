@@ -50,13 +50,13 @@ public:
 	bool AllocStateChunk(int chunkSize = -1);
 	bool AllocBankChunk(int chunkSize = -1);
 
-  void BeginInformHostOfParamChange(int idx);
-  void BeginDelayedInformHostOfParamChange(int idx);
-  void InformHostOfParamChange(int idx, double normalizedValue);
-  void EndInformHostOfParamChange(int idx);
-  
-	void InformHostOfProgramChange();
-	
+	void BeginInformHostOfParamChange(int idx);
+	void InformHostOfParamChange(int idx, double normalizedValue);
+	void EndInformHostOfParamChange(int idx);
+
+	// TN: Implemented in IPlugAU.cpp, but commented out for reasons unknown.
+	void InformHostOfProgramChange() {}
+
 	int GetSamplePos();   // Samples since start of project.
 	double GetTempo();
 	void GetTimeSig(int* pNum, int* pDenom);

@@ -1483,53 +1483,39 @@ bool IPlugAU::AllocBankChunk(const int chunkSize)
 	return true;
 }
 
-void SendAUEvent(AudioUnitEventType type, ComponentInstance ci, int idx)
+static void SendAUEvent(const AudioUnitEventType type, ComponentInstance const ci, const int idx)
 {
-  AudioUnitEvent auEvent;
-  memset(&auEvent, 0, sizeof(AudioUnitEvent));
-  auEvent.mEventType = type;
-  auEvent.mArgument.mParameter.mAudioUnit = ci;
-  auEvent.mArgument.mParameter.mParameterID = idx;
-  auEvent.mArgument.mParameter.mScope = kAudioUnitScope_Global;
-  auEvent.mArgument.mParameter.mElement = 0;
-  AUEventListenerNotify(0, 0, &auEvent);
+	AudioUnitEvent auEvent;
+	memset(&auEvent, 0, sizeof(AudioUnitEvent));
+	auEvent.mEventType = type;
+	auEvent.mArgument.mParameter.mAudioUnit = ci;
+	auEvent.mArgument.mParameter.mParameterID = idx;
+	auEvent.mArgument.mParameter.mScope = kAudioUnitScope_Global;
+	auEvent.mArgument.mParameter.mElement = 0;
+	AUEventListenerNotify(NULL, NULL, &auEvent);
 }
 
-void IPlugAU::BeginInformHostOfParamChange(int idx)
+void IPlugAU::BeginInformHostOfParamChange(const int idx)
 {
-  Trace(TRACELOC, "%d", idx);
-  EndDelayedInformHostOfParamChange();
-  SendAUEvent(kAudioUnitEvent_BeginParameterChangeGesture, mCI, idx);
+	EndDelayedInformHostOfParamChange();
+	SendAUEvent(kAudioUnitEvent_BeginParameterChangeGesture, mCI, idx);
 }
 
-void IPlugAU::BeginDelayedInformHostOfParamChange(int idx)
+void IPlugAU::InformHostOfParamChange(const int idx, double /* normalizedValue */)
 {
-  Trace(TRACELOC, "%d", idx);
-  IMutexLock lock(this);
-
-  if (idx != mParamChangeIdx) {
-    EndDelayedInformHostOfParamChange();
-    SendAUEvent(kAudioUnitEvent_BeginParameterChangeGesture, mCI, idx);
-  }
+	SendAUEvent(kAudioUnitEvent_ParameterValueChange, mCI, idx);
 }
 
-void IPlugAU::InformHostOfParamChange(int idx, double normalizedValue)
+void IPlugAU::EndInformHostOfParamChange(const int idx)
 {
-  Trace(TRACELOC, "%d:%f", idx, normalizedValue);
-  SendAUEvent(kAudioUnitEvent_ParameterValueChange, mCI, idx);
+	SendAUEvent(kAudioUnitEvent_EndParameterChangeGesture, mCI, idx);
 }
 
-void IPlugAU::EndInformHostOfParamChange(int idx)
-{
-  Trace(TRACELOC, "%d", idx);
-  SendAUEvent(kAudioUnitEvent_EndParameterChangeGesture, mCI, idx);
-}
-
-void IPlugAU::InformHostOfProgramChange()
-{
-	//InformListeners(kAudioUnitProperty_CurrentPreset, kAudioUnitScope_Global);
-	//InformListeners(kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global);
-}
+// void IPlugAU::InformHostOfProgramChange()
+// {
+	// InformListeners(kAudioUnitProperty_CurrentPreset, kAudioUnitScope_Global);
+	// InformListeners(kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global);
+// }
 
 bool IPlugAU::IsRenderingOffline()
 {
