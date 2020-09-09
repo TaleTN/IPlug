@@ -1415,36 +1415,34 @@ static bool GetDataFromDict(CFDictionaryRef const pDict, const char* const key, 
 	return false;
 }
 
-ComponentResult IPlugAU::GetState(CFPropertyListRef* ppPropList)
+ComponentResult IPlugAU::GetState(CFPropertyListRef* const ppPropList)
 {
-  ComponentDescription cd;
-  ComponentResult r = GetComponentInfo((Component) mCI, &cd, 0, 0, 0);
-  if (r != noErr) {
-    return r;
-  }
+	ComponentDescription cd;
+	const ComponentResult r = GetComponentInfo((Component)mCI, &cd, NULL, NULL, NULL);
+	if (r != noErr) return r;
 
-  CFMutableDictionaryRef pDict = CFDictionaryCreateMutable(0, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-  int version = GetEffectVersion(false);
-  PutNumberInDict(pDict, kAUPresetVersionKey, &version, kCFNumberSInt32Type);
-  PutNumberInDict(pDict, kAUPresetTypeKey, &(cd.componentType), kCFNumberSInt32Type);
-  PutNumberInDict(pDict, kAUPresetSubtypeKey, &(cd.componentSubType), kCFNumberSInt32Type);
-  PutNumberInDict(pDict, kAUPresetManufacturerKey, &(cd.componentManufacturer), kCFNumberSInt32Type);
-  PutStrInDict(pDict, kAUPresetNameKey, GetPresetName(GetCurrentPresetIdx()));
+	CFMutableDictionaryRef const pDict = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+	int version = GetEffectVersion(false);
+	PutNumberInDict(pDict, kAUPresetVersionKey, &version, kCFNumberSInt32Type);
+	PutNumberInDict(pDict, kAUPresetTypeKey, &cd.componentType, kCFNumberSInt32Type);
+	PutNumberInDict(pDict, kAUPresetSubtypeKey, &cd.componentSubType, kCFNumberSInt32Type);
+	PutNumberInDict(pDict, kAUPresetManufacturerKey, &cd.componentManufacturer, kCFNumberSInt32Type);
+	PutStrInDict(pDict, kAUPresetNameKey, GetPresetName(GetCurrentPresetIdx()));
 
-  ByteChunk chunk;
-  if (DoesStateChunks()) {
-    if (SerializeState(&chunk)) {
-      PutDataInDict(pDict, kAUPresetDataKey, &chunk);
-    }
-  }
-  else {
-    SerializeParams(&chunk);
-    PutDataInDict(pDict, kAUPresetDataKey, &chunk);
-  }
+	if (!mState.Size()) AllocStateChunk();
+	mState.Clear();
 
-  *ppPropList = pDict;
-TRACE;
-  return noErr;
+	#ifdef IPLUG_NO_STATE_CHUNKS
+	if (SerializeParams(0, NParams(), &mState))
+	#else
+	if (SerializeState(&mState))
+	#endif
+	{
+		PutDataInDict(pDict, kAUPresetDataKey, &mState);
+	}
+
+	*ppPropList = pDict;
+	return noErr;
 }
 
 ComponentResult IPlugAU::SetState(CFPropertyListRef pPropList)
