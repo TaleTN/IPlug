@@ -766,6 +766,12 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effGetVendorVersion:
+		{
+			ret = _this->GetEffectVersion(true);
+			break;
+		}
+
     case effProcessVarIo: {
 	    // VstVariableIo* pIO = (VstVariableIo*) ptr;		// For offline processing (of audio files?)
 	    return 0;
@@ -780,9 +786,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
         *ppOutputArr = &(_this->mOutputSpkrArr);
       }
       return 1;
-    }
-    case effGetVendorVersion: {
-      return _this->GetEffectVersion(true);
     }
     case effCanDo: {
 	    if (ptr) {
