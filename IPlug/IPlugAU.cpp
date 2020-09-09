@@ -94,35 +94,40 @@ static int PtrListInitialize(WDL_PtrList<C>* const pList, int const size)
 #define NO_OP(select) case select: return badComponentSelector;
 
 // static
-ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
+ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters* const params, void* const pPlug)
 {
-  int select = params->what;
+	const int select = params->what;
+	ComponentResult ret = noErr;
 
-  Trace(TRACELOC, "(%d:%s)", select, AUSelectStr(select));
+	if (select == kComponentOpenSelect)
+	{
+		IPlugAU* const _this = MakeIPlugAU();
+		_this->HostSpecificInit();
+		_this->PruneUninitializedPresets();
+		_this->mCI = GET_COMP_PARAM(ComponentInstance, 0, 1);
+		SetComponentInstanceStorage(_this->mCI, (Handle)_this);
+		return ret;
+	}
 
-  if (select == kComponentOpenSelect) {
-    IPlugAU* _this = MakePlug();
-    _this->HostSpecificInit();
-    _this->PruneUninitializedPresets();
-    _this->mCI = GET_COMP_PARAM(ComponentInstance, 0, 1);
-    SetComponentInstanceStorage(_this->mCI, (Handle) _this);
-    return noErr;
-  }
+	IPlugAU* const _this = (IPlugAU*)pPlug;
 
-  IPlugAU* _this = (IPlugAU*) pPlug;
+	if (select == kComponentCloseSelect)
+	{
+		_this->ClearConnections();
+		delete _this;
+		return ret;
+	}
 
-  if (select == kComponentCloseSelect) {
-    _this->ClearConnections();
-    DELETE_NULL(_this);
-    return noErr;
-  }
+	_this->mMutex.Enter();
 
-  IPlugBase::IMutexLock lock(_this);
+	switch (select)
+	{
+		case kComponentVersionSelect:
+		{
+			ret = _this->GetEffectVersion(false);
+			break;
+		}
 
-  switch (select) {
-    case kComponentVersionSelect: {
-      return _this->GetEffectVersion(false);
-    }
     case kAudioUnitInitializeSelect: {
       if (!(_this->CheckLegalIO())) {
         return badComponentSelector;
@@ -137,226 +142,285 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       _this->OnActivate(false);
       return noErr;
     }
-    case kAudioUnitGetPropertyInfoSelect: {
-      AudioUnitPropertyID propID = GET_COMP_PARAM(AudioUnitPropertyID, 4, 5);
-      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3, 5);
-      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2, 5);
-      UInt32* pDataSize = GET_COMP_PARAM(UInt32*, 1, 5);
-      Boolean* pWriteable = GET_COMP_PARAM(Boolean*, 0, 5);
 
-      UInt32 dataSize = 0;
-      if (!pDataSize) {
-        pDataSize = &dataSize;
-      }
-      Boolean writeable;
-      if (!pWriteable) {
-        pWriteable = &writeable;
-      }
-      *pWriteable = false;
-      return _this->GetProperty(propID, scope, element, pDataSize, pWriteable, 0);
-    }
-    case kAudioUnitGetPropertySelect: {
-      AudioUnitPropertyID propID = GET_COMP_PARAM(AudioUnitPropertyID, 4, 5);
-      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3, 5);
-      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2, 5);
-      void* pData = GET_COMP_PARAM(void*, 1, 5);
-      UInt32* pDataSize = GET_COMP_PARAM(UInt32*, 0, 5);
+		case kAudioUnitGetPropertyInfoSelect:
+		{
+			const AudioUnitPropertyID propID = GET_COMP_PARAM(AudioUnitPropertyID, 4, 5);
+			const AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3, 5);
+			const AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2, 5);
+			UInt32* pDataSize = GET_COMP_PARAM(UInt32*, 1, 5);
+			Boolean* pWriteable = GET_COMP_PARAM(Boolean*, 0, 5);
 
-      UInt32 dataSize = 0;
-      if (!pDataSize) {
-        pDataSize = &dataSize;
-      }
-      Boolean writeable = false;
-      return _this->GetProperty(propID, scope, element, pDataSize, &writeable, pData);
-    }
-    case kAudioUnitSetPropertySelect: {
-      AudioUnitPropertyID propID = GET_COMP_PARAM(AudioUnitPropertyID, 4, 5);
-      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3, 5);
-      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2, 5);
-      const void* pData = GET_COMP_PARAM(const void*, 1, 5);
-      UInt32* pDataSize = GET_COMP_PARAM(UInt32*, 0, 5);
-      return _this->SetProperty(propID, scope, element, pDataSize, pData);
-    }
-    case kAudioUnitAddPropertyListenerSelect: {
-      PropertyListener listener;
-      listener.mPropID = GET_COMP_PARAM(AudioUnitPropertyID, 2, 3);
-      listener.mListenerProc = GET_COMP_PARAM(AudioUnitPropertyListenerProc, 1, 3);
-      listener.mProcArgs = GET_COMP_PARAM(void*, 0, 3);
-      int i, n = _this->mPropertyListeners.GetSize();
-      for (i = 0; i < n; ++i) {
-        PropertyListener* pListener = _this->mPropertyListeners.Get(i);
-        if (listener.mPropID == pListener->mPropID && listener.mListenerProc == pListener->mListenerProc) {
-          return noErr;
-        }
-      }
-      PtrListAddFromStack(&(_this->mPropertyListeners), &listener);
-      return noErr;
-    }
-    case kAudioUnitRemovePropertyListenerSelect: {
-      PropertyListener listener;
-      listener.mPropID = GET_COMP_PARAM(AudioUnitPropertyID, 1, 2);
-      listener.mListenerProc = GET_COMP_PARAM(AudioUnitPropertyListenerProc, 0, 2);
-      int i, n = _this->mPropertyListeners.GetSize();
-      for (i = 0; i < n; ++i) {
-        PropertyListener* pListener = _this->mPropertyListeners.Get(i);
-        if (listener.mPropID == pListener->mPropID && listener.mListenerProc == pListener->mListenerProc) {
-          _this->mPropertyListeners.Delete(i, true);
-          break;
-        }
-      }
-      return noErr;
-    }
-  	case kAudioUnitRemovePropertyListenerWithUserDataSelect: {
-      PropertyListener listener;
-      listener.mPropID = GET_COMP_PARAM(AudioUnitPropertyID, 2, 3);
-      listener.mListenerProc = GET_COMP_PARAM(AudioUnitPropertyListenerProc, 1, 3);
-      listener.mProcArgs = GET_COMP_PARAM(void*, 0, 3);
-      int i, n = _this->mPropertyListeners.GetSize();
-      for (i = 0; i < n; ++i) {
-        PropertyListener* pListener = _this->mPropertyListeners.Get(i);
-        if (listener.mPropID == pListener->mPropID &&
-          listener.mListenerProc == pListener->mListenerProc && listener.mProcArgs == pListener->mProcArgs) {
-          _this->mPropertyListeners.Delete(i, true);
-          break;
-        }
-      }
-      return noErr;
-    }
-    case kAudioUnitAddRenderNotifySelect: {
-      AURenderCallbackStruct acs;
-      acs.inputProc = GET_COMP_PARAM(AURenderCallback, 1, 2);
-      acs.inputProcRefCon = GET_COMP_PARAM(void*, 0, 2);
-      PtrListAddFromStack(&(_this->mRenderNotify), &acs);
-      return noErr;
-    }
-    case kAudioUnitRemoveRenderNotifySelect: {
-      AURenderCallbackStruct acs;
-      acs.inputProc = GET_COMP_PARAM(AURenderCallback, 1, 2);
-      acs.inputProcRefCon = GET_COMP_PARAM(void*, 0, 2);
-      int i, n = _this->mRenderNotify.GetSize();
-      for (i = 0; i < n; ++i) {
-        AURenderCallbackStruct* pACS = _this->mRenderNotify.Get(i);
-        if (acs.inputProc == pACS->inputProc) {
-          _this->mRenderNotify.Delete(i, true);
-          break;
-        }
-      }
-      return noErr;
-    }
-    case kAudioUnitGetParameterSelect: {
-      AudioUnitParameterID paramID = GET_COMP_PARAM(AudioUnitParameterID, 3, 4);
-      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 2, 4);
-      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 1, 4);
-      AudioUnitParameterValue* pValue = GET_COMP_PARAM(AudioUnitParameterValue*, 0, 4);
-      return GetParamProc(pPlug, paramID, scope, element, pValue);
-    }
-    case kAudioUnitSetParameterSelect: {
-      AudioUnitParameterID paramID = GET_COMP_PARAM(AudioUnitParameterID, 4, 5);
-      AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3, 5);
-      AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2, 5);
-      AudioUnitParameterValue value = GET_COMP_PARAM(AudioUnitParameterValue, 1, 5);
-      UInt32 offset = GET_COMP_PARAM(UInt32, 0, 5);
-      return SetParamProc(pPlug, paramID, scope, element, value, offset);
-    }
-    case kAudioUnitScheduleParametersSelect: {
-      AudioUnitParameterEvent* pEvent = GET_COMP_PARAM(AudioUnitParameterEvent*, 1, 2);
-      UInt32 nEvents = GET_COMP_PARAM(UInt32, 0, 2);
-      for (int i = 0; i < nEvents; ++i, ++pEvent) {
-        if (pEvent->eventType == kParameterEvent_Immediate) {
-          ComponentResult r = SetParamProc(pPlug, pEvent->parameter, pEvent->scope, pEvent->element,
-            pEvent->eventValues.immediate.value, pEvent->eventValues.immediate.bufferOffset);
-          if (r != noErr) {
-            return r;
-          }
-        }
-      }
-      return noErr;
-    }
-    case kAudioUnitRenderSelect: {
-      AudioUnitRenderActionFlags* pFlags = GET_COMP_PARAM(AudioUnitRenderActionFlags*, 4, 5);
-      const AudioTimeStamp* pTimestamp = GET_COMP_PARAM(AudioTimeStamp*, 3, 5);
-      UInt32 outputBusIdx = GET_COMP_PARAM(UInt32, 2, 5);
-      UInt32 nFrames = GET_COMP_PARAM(UInt32, 1, 5);
-      AudioBufferList* pBufferList = GET_COMP_PARAM(AudioBufferList*, 0, 5);
-      return RenderProc(_this, pFlags, pTimestamp, outputBusIdx, nFrames, pBufferList);
-    }
-    case kAudioUnitResetSelect: {
-      _this->Reset();
-      return noErr;
-    }
-    case kMusicDeviceMIDIEventSelect: {
-      if (!_this->DoesMIDI() || _this->DoesMIDI() > 2) {
-        return badComponentSelector;
-      }
-      IMidiMsg msg;
-      msg.mStatus = GET_COMP_PARAM(UInt32, 3, 4);
-      msg.mData1 = GET_COMP_PARAM(UInt32, 2, 4);
-      msg.mData2 = GET_COMP_PARAM(UInt32, 1, 4);
-      msg.mOffset = GET_COMP_PARAM(UInt32, 0, 4);
-      _this->ProcessMidiMsg(&msg);
-      return noErr;
-    }
-    case kMusicDeviceSysExSelect: {
-      if (!_this->DoesMIDI() || _this->DoesMIDI() > 2) {
-        return badComponentSelector;
-      }
-      ISysEx sysex;
-      sysex.mData = GET_COMP_PARAM(UInt8*, 1, 2);
-      sysex.mSize = GET_COMP_PARAM(UInt32, 0, 2);
-      sysex.mOffset = 0;
-      _this->ProcessSysEx(&sysex);
-      return noErr;
-    }
-    case kMusicDevicePrepareInstrumentSelect: {
-      return noErr;
-    }
-    case kMusicDeviceReleaseInstrumentSelect: {
-      return noErr;
-    }
-    case kMusicDeviceStartNoteSelect: {
-      MusicDeviceInstrumentID deviceID = GET_COMP_PARAM(MusicDeviceInstrumentID, 4, 5);
-      MusicDeviceGroupID groupID = GET_COMP_PARAM(MusicDeviceGroupID, 3, 5);
-      NoteInstanceID* pNoteID = GET_COMP_PARAM(NoteInstanceID*, 2, 5);
-      UInt32 offset = GET_COMP_PARAM(UInt32, 1, 5);
-      MusicDeviceNoteParams* pNoteParams = GET_COMP_PARAM(MusicDeviceNoteParams*, 0, 5);
-      int note = (int) pNoteParams->mPitch;
-      *pNoteID = note;
-      IMidiMsg msg;
-      msg.MakeNoteOnMsg(note, (int) pNoteParams->mVelocity, offset);
-      return noErr;
-    }
-    case kMusicDeviceStopNoteSelect: {
-      MusicDeviceGroupID groupID = GET_COMP_PARAM(MusicDeviceGroupID, 2, 3);
-      NoteInstanceID noteID = GET_COMP_PARAM(NoteInstanceID, 1, 3);
-      UInt32 offset = GET_COMP_PARAM(UInt32, 0, 3);
-      // noteID is supposed to be some incremented unique ID, but we're just storing note number in it.
-      IMidiMsg msg;
-      msg.MakeNoteOffMsg(noteID, offset);
-      return noErr;
-    }
-    case kComponentCanDoSelect: {
-      switch (params->params[0]) {
-        case kAudioUnitInitializeSelect:
-        case kAudioUnitUninitializeSelect:
-        case kAudioUnitGetPropertyInfoSelect:
-        case kAudioUnitGetPropertySelect:
-        case kAudioUnitSetPropertySelect:
-        case kAudioUnitAddPropertyListenerSelect:
-        case kAudioUnitRemovePropertyListenerSelect:
-        case kAudioUnitGetParameterSelect:
-        case kAudioUnitSetParameterSelect:
-        case kAudioUnitResetSelect:
-        case kAudioUnitRenderSelect:
-        case kAudioUnitAddRenderNotifySelect:
-        case kAudioUnitRemoveRenderNotifySelect:
-        case kAudioUnitScheduleParametersSelect:
-          return 1;
-        default:
-          return 0;
-      }
-    }
-    default: return badComponentSelector;
-  }
+			UInt32 dataSize = 0;
+			if (!pDataSize) pDataSize = &dataSize;
+			Boolean writeable;
+			if (!pWriteable) pWriteable = &writeable;
+			*pWriteable = false;
+			ret = _this->GetProperty(propID, scope, element, pDataSize, pWriteable, NULL);
+			break;
+		}
+
+		case kAudioUnitGetPropertySelect:
+		{
+			const AudioUnitPropertyID propID = GET_COMP_PARAM(AudioUnitPropertyID, 4, 5);
+			const AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3, 5);
+			const AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2, 5);
+			void* const pData = GET_COMP_PARAM(void*, 1, 5);
+			UInt32* pDataSize = GET_COMP_PARAM(UInt32*, 0, 5);
+
+			UInt32 dataSize = 0;
+			if (!pDataSize) pDataSize = &dataSize;
+			Boolean writeable = false;
+			ret = _this->GetProperty(propID, scope, element, pDataSize, &writeable, pData);
+			break;
+		}
+
+		case kAudioUnitSetPropertySelect:
+		{
+			const AudioUnitPropertyID propID = GET_COMP_PARAM(AudioUnitPropertyID, 4, 5);
+			const AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3, 5);
+			const AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2, 5);
+			const void* const pData = GET_COMP_PARAM(const void*, 1, 5);
+			UInt32* const pDataSize = GET_COMP_PARAM(UInt32*, 0, 5);
+			ret = _this->SetProperty(propID, scope, element, pDataSize, pData);
+			break;
+		}
+
+		case kAudioUnitAddPropertyListenerSelect:
+		{
+			PropertyListener listener;
+			listener.mPropID = GET_COMP_PARAM(AudioUnitPropertyID, 2, 3);
+			listener.mListenerProc = GET_COMP_PARAM(AudioUnitPropertyListenerProc, 1, 3);
+			listener.mProcArgs = GET_COMP_PARAM(void*, 0, 3);
+			bool found = false;
+			const int n = _this->mPropertyListeners.GetSize();
+			for (int i = 0; i < n; ++i)
+			{
+				const PropertyListener* const pListener = _this->mPropertyListeners.Get(i);
+				if (listener.mPropID == pListener->mPropID && listener.mListenerProc == pListener->mListenerProc)
+				{
+					found = true;
+					break;
+				}
+			}
+			if (!found) PtrListAddFromStack(&_this->mPropertyListeners, &listener);
+			break;
+		}
+
+		case kAudioUnitRemovePropertyListenerSelect:
+		{
+			PropertyListener listener;
+			listener.mPropID = GET_COMP_PARAM(AudioUnitPropertyID, 1, 2);
+			listener.mListenerProc = GET_COMP_PARAM(AudioUnitPropertyListenerProc, 0, 2);
+			const int n = _this->mPropertyListeners.GetSize();
+			for (int i = 0; i < n; ++i)
+			{
+				const PropertyListener* const pListener = _this->mPropertyListeners.Get(i);
+				if (listener.mPropID == pListener->mPropID && listener.mListenerProc == pListener->mListenerProc)
+				{
+					_this->mPropertyListeners.Delete(i, true);
+					break;
+				}
+			}
+			break;
+		}
+
+		case kAudioUnitRemovePropertyListenerWithUserDataSelect:
+		{
+			PropertyListener listener;
+			listener.mPropID = GET_COMP_PARAM(AudioUnitPropertyID, 2, 3);
+			listener.mListenerProc = GET_COMP_PARAM(AudioUnitPropertyListenerProc, 1, 3);
+			listener.mProcArgs = GET_COMP_PARAM(void*, 0, 3);
+			const int n = _this->mPropertyListeners.GetSize();
+			for (int i = 0; i < n; ++i)
+			{
+				PropertyListener* pListener = _this->mPropertyListeners.Get(i);
+				if (listener.mPropID == pListener->mPropID &&
+					listener.mListenerProc == pListener->mListenerProc && listener.mProcArgs == pListener->mProcArgs)
+				{
+					_this->mPropertyListeners.Delete(i, true);
+					break;
+				}
+			}
+			break;
+		}
+
+		case kAudioUnitAddRenderNotifySelect:
+		{
+			AURenderCallbackStruct acs;
+			acs.inputProc = GET_COMP_PARAM(AURenderCallback, 1, 2);
+			acs.inputProcRefCon = GET_COMP_PARAM(void*, 0, 2);
+			PtrListAddFromStack(&_this->mRenderNotify, &acs);
+			break;
+		}
+
+		case kAudioUnitRemoveRenderNotifySelect:
+		{
+			AURenderCallbackStruct acs;
+			acs.inputProc = GET_COMP_PARAM(AURenderCallback, 1, 2);
+			acs.inputProcRefCon = GET_COMP_PARAM(void*, 0, 2);
+			const int n = _this->mRenderNotify.GetSize();
+			for (int i = 0; i < n; ++i)
+			{
+				const AURenderCallbackStruct* const pACS = _this->mRenderNotify.Get(i);
+				if (acs.inputProc == pACS->inputProc)
+				{
+					_this->mRenderNotify.Delete(i, true);
+					break;
+				}
+			}
+			break;
+		}
+
+		case kAudioUnitGetParameterSelect:
+		{
+			const AudioUnitParameterID paramID = GET_COMP_PARAM(AudioUnitParameterID, 3, 4);
+			const AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 2, 4);
+			const AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 1, 4);
+			AudioUnitParameterValue* const pValue = GET_COMP_PARAM(AudioUnitParameterValue*, 0, 4);
+			ret = GetParamProc(pPlug, paramID, scope, element, pValue);
+			break;
+		}
+
+		case kAudioUnitSetParameterSelect:
+		{
+			const AudioUnitParameterID paramID = GET_COMP_PARAM(AudioUnitParameterID, 4, 5);
+			const AudioUnitScope scope = GET_COMP_PARAM(AudioUnitScope, 3, 5);
+			const AudioUnitElement element = GET_COMP_PARAM(AudioUnitElement, 2, 5);
+			const AudioUnitParameterValue value = GET_COMP_PARAM(AudioUnitParameterValue, 1, 5);
+			const UInt32 offset = GET_COMP_PARAM(UInt32, 0, 5);
+			ret = SetParamProc(pPlug, paramID, scope, element, value, offset);
+			break;
+		}
+
+		case kAudioUnitScheduleParametersSelect:
+		{
+			AudioUnitParameterEvent* pEvent = GET_COMP_PARAM(AudioUnitParameterEvent*, 1, 2);
+			const UInt32 nEvents = GET_COMP_PARAM(UInt32, 0, 2);
+			for (UInt32 i = 0; i < nEvents; ++i, ++pEvent)
+			{
+				if (pEvent->eventType == kParameterEvent_Immediate)
+				{
+					const ComponentResult r = SetParamProc(pPlug, pEvent->parameter, pEvent->scope, pEvent->element,
+						pEvent->eventValues.immediate.value, pEvent->eventValues.immediate.bufferOffset);
+					if (r != noErr)
+					{
+						ret = r;
+						break;
+					}
+				}
+			}
+			break;
+		}
+
+		case kAudioUnitRenderSelect:
+		{
+			AudioUnitRenderActionFlags* const pFlags = GET_COMP_PARAM(AudioUnitRenderActionFlags*, 4, 5);
+			const AudioTimeStamp* const pTimestamp = GET_COMP_PARAM(AudioTimeStamp*, 3, 5);
+			const UInt32 outputBusIdx = GET_COMP_PARAM(UInt32, 2, 5);
+			const UInt32 nFrames = GET_COMP_PARAM(UInt32, 1, 5);
+			AudioBufferList* const pBufferList = GET_COMP_PARAM(AudioBufferList*, 0, 5);
+			ret = RenderProc(_this, pFlags, pTimestamp, outputBusIdx, nFrames, pBufferList);
+			break;
+		}
+
+		case kAudioUnitResetSelect:
+		{
+			// TN: GarageBand seems to call this when toggling bypass, both
+			// on and off, without letting plug-in know which.
+			_this->Reset();
+			break;
+		}
+
+		case kMusicDeviceMIDIEventSelect:
+		{
+			if (!_this->DoesMIDI(kPlugDoesMidiIn))
+			{
+				ret = badComponentSelector;
+				break;
+			}
+			const UInt32 status = GET_COMP_PARAM(UInt32, 3, 4);
+			const UInt32 data1 = GET_COMP_PARAM(UInt32, 2, 4);
+			const UInt32 data2 = GET_COMP_PARAM(UInt32, 1, 4);
+			const UInt32 offset = GET_COMP_PARAM(UInt32, 0, 4);
+			const IMidiMsg msg(offset, status, data1, data2);
+			_this->ProcessMidiMsg(&msg);
+			break;
+		}
+
+		case kMusicDeviceSysExSelect:
+		{
+			if (!_this->DoesMIDI(kPlugDoesMidiIn))
+			{
+				ret = badComponentSelector;
+				break;
+			}
+			const UInt8* const pData = GET_COMP_PARAM(UInt8*, 1, 2);
+			const UInt32 size = GET_COMP_PARAM(UInt32, 0, 2);
+			const ISysEx sysex(0, pData, size);
+			_this->ProcessSysEx(&sysex);
+			break;
+		}
+
+		case kMusicDevicePrepareInstrumentSelect:
+		case kMusicDeviceReleaseInstrumentSelect:
+		{
+			break;
+		}
+
+		case kMusicDeviceStartNoteSelect:
+		{
+			// const MusicDeviceInstrumentID deviceID = GET_COMP_PARAM(MusicDeviceInstrumentID, 4, 5);
+			// const MusicDeviceGroupID groupID = GET_COMP_PARAM(MusicDeviceGroupID, 3, 5);
+			NoteInstanceID* const pNoteID = GET_COMP_PARAM(NoteInstanceID*, 2, 5);
+			// const UInt32 offset = GET_COMP_PARAM(UInt32, 1, 5);
+			MusicDeviceNoteParams* const pNoteParams = GET_COMP_PARAM(MusicDeviceNoteParams*, 0, 5);
+			const int note = (int)pNoteParams->mPitch;
+			*pNoteID = note;
+			// const IMidiMsg msg(offset, IMidiMsg::kNoteOn << 4, note, (int)pNoteParams->mVelocity);
+			break;
+		}
+
+		case kMusicDeviceStopNoteSelect:
+		{
+			// const MusicDeviceGroupID groupID = GET_COMP_PARAM(MusicDeviceGroupID, 2, 3);
+			// const NoteInstanceID noteID = GET_COMP_PARAM(NoteInstanceID, 1, 3);
+			// const UInt32 offset = GET_COMP_PARAM(UInt32, 0, 3);
+			// noteID is supposed to be some incremented unique ID, but we're just storing note number in it.
+			// const IMidiMsg msg(offset, IMidiMsg::kNoteOff << 4, noteID, 64);
+			break;
+		}
+
+		case kComponentCanDoSelect:
+		{
+			switch (params->params[0])
+			{
+				case kAudioUnitInitializeSelect:
+				case kAudioUnitUninitializeSelect:
+				case kAudioUnitGetPropertyInfoSelect:
+				case kAudioUnitGetPropertySelect:
+				case kAudioUnitSetPropertySelect:
+				case kAudioUnitAddPropertyListenerSelect:
+				case kAudioUnitRemovePropertyListenerSelect:
+				case kAudioUnitGetParameterSelect:
+				case kAudioUnitSetParameterSelect:
+				case kAudioUnitResetSelect:
+				case kAudioUnitRenderSelect:
+				case kAudioUnitAddRenderNotifySelect:
+				case kAudioUnitRemoveRenderNotifySelect:
+				case kAudioUnitScheduleParametersSelect:
+					ret = 1; break;
+				default:
+					ret = 0; break;
+			}
+			break;
+		}
+
+		default: ret = badComponentSelector;
+	}
+
+	_this->mMutex.Leave();
+	return ret;
 }
 
 struct AudioUnitCarbonViewCreateGluePB {

@@ -144,10 +144,8 @@ private:
   ComponentResult SetState(CFPropertyListRef pPropList);
   void InformListeners(AudioUnitPropertyID propID, AudioUnitScope scope);
 	
-
 public:
-
-  static ComponentResult IPlugAUEntry(ComponentParameters *params, void* pVPlug);
+	static ComponentResult IPlugAUEntry(ComponentParameters *params, void* pVPlug);
   static ComponentResult IPlugAUCarbonViewEntry(ComponentParameters *params, void* pView);
   static ComponentResult GetParamProc(void* pPlug, AudioUnitParameterID paramID, AudioUnitScope scope, AudioUnitElement element, 
     AudioUnitParameterValue* pValue);
