@@ -1373,9 +1373,6 @@ IPlugAU::BusChannels* IPlugAU::GetBus(AudioUnitScope scope, AudioUnitElement bus
   return 0;
 }
 
-// Garageband doesn't always report tempo when the transport is stopped, so we need it to persist in the class.
-#define DEFAULT_TEMPO 120.0
-
 void IPlugAU::ClearConnections()
 {
   int nInBuses = mInBuses.GetSize();
@@ -1393,6 +1390,9 @@ void IPlugAU::ClearConnections()
     pOutBus->mNHostChannels = -1;
   }
 }
+
+// GarageBand doesn't always report tempo when the transport is stopped, so we need it to persist in the class.
+static const double DEFAULT_TEMPO = 120.0;
 
 IPlugAU::IPlugAU(
 	void* const instanceInfo,
@@ -1523,41 +1523,43 @@ bool IPlugAU::IsRenderingOffline()
 }
 
 // Samples since start of project.
-int IPlugAU::GetSamplePos()
+double IPlugAU::GetSamplePos()
 {
-  if (mHostCallbacks.transportStateProc) {
-    double samplePos = 0.0, loopStartBeat, loopEndBeat;
-    Boolean playing, changed, looping;
-    mHostCallbacks.transportStateProc(mHostCallbacks.hostUserData, &playing, &changed, &samplePos,
-      &looping, &loopStartBeat, &loopEndBeat);
-    return (int) (samplePos + 0.5);
-  }
-  return 0;
+	if (mHostCallbacks.transportStateProc)
+	{
+		Float64 samplePos = 0.0, loopStartBeat, loopEndBeat;
+		Boolean playing, changed, looping;
+		mHostCallbacks.transportStateProc(mHostCallbacks.hostUserData, &playing, &changed, &samplePos,
+			&looping, &loopStartBeat, &loopEndBeat);
+		return samplePos;
+	}
+	return 0.0;
 }
 
 double IPlugAU::GetTempo()
 {
-  if (mHostCallbacks.beatAndTempoProc) {
-    double currentBeat = 0.0, tempo = 0.0;
-    mHostCallbacks.beatAndTempoProc(mHostCallbacks.hostUserData, &currentBeat, &tempo);
-    if (tempo > 0.0) {
-      mTempo = tempo;
+	if (mHostCallbacks.beatAndTempoProc)
+	{
+		Float64 currentBeat = 0.0, tempo = 0.0;
+		mHostCallbacks.beatAndTempoProc(mHostCallbacks.hostUserData, &currentBeat, &tempo);
+		if (tempo > 0.0) mTempo = tempo;
     }
-  }
-  return mTempo;
+	return mTempo;
 }
 
-void IPlugAU::GetTimeSig(int* pNum, int* pDenom)
+void IPlugAU::GetTimeSig(int* const pNum, int* const pDenom)
 {
-  UInt32 sampleOffsetToNextBeat = 0, tsDenom = 0;
-  float tsNum = 0.0f;
-  double currentMeasureDownBeat = 0.0;
-  if (mHostCallbacks.musicalTimeLocationProc) {
-    mHostCallbacks.musicalTimeLocationProc(mHostCallbacks.hostUserData, &sampleOffsetToNextBeat,
-      &tsNum, &tsDenom, &currentMeasureDownBeat);
-    *pNum = (int) tsNum;
-    *pDenom = (int) tsDenom;
-  }
+	Float32 tsNum = 0.0f;
+	UInt32 tsDenom = 0;
+	if (mHostCallbacks.musicalTimeLocationProc)
+	{
+		Float64 currentMeasureDownBeat = 0.0;
+		UInt32 sampleOffsetToNextBeat = 0;
+		mHostCallbacks.musicalTimeLocationProc(mHostCallbacks.hostUserData, &sampleOffsetToNextBeat,
+			&tsNum, &tsDenom, &currentMeasureDownBeat);
+	}
+	*pNum = (int)tsNum;
+	*pDenom = tsDenom;
 }
 
 EHost IPlugAU::GetHost()

@@ -57,7 +57,7 @@ public:
 	// TN: Implemented in IPlugAU.cpp, but commented out for reasons unknown.
 	void InformHostOfProgramChange() {}
 
-	int GetSamplePos();   // Samples since start of project.
+	double GetSamplePos(); // Samples since start of project.
 	double GetTempo();
 	void GetTimeSig(int* pNum, int* pDenom);
 	EHost GetHost();  // GetHostVersion() is inherited.
@@ -88,8 +88,8 @@ private:
 	WDL_FastString mOSXBundleID, mCocoaViewFactoryClassName;
   ComponentInstance mCI;
   bool mActive, mBypassed, mIsOffline;
-  double WDL_FIXALIGN mRenderTimestamp, mTempo;
-  HostCallbackInfo mHostCallbacks;
+	double WDL_FIXALIGN mRenderTimestamp, mTempo;
+	HostCallbackInfo mHostCallbacks;
 
  // InScratchBuf is only needed if the upstream connection is a callback.
  // OutScratchBuf is only needed if the downstream connection fails to give us a buffer.  
