@@ -78,7 +78,7 @@ public:
   
 protected:
 	void HostSpecificInit() { GetHost(); }
-  void SetBlockSize(int blockSize);
+	void SetBlockSize(int blockSize);
   void SetLatency(int samples);
 	bool SendMidiMsg(IMidiMsg* pMsg);
   bool SendSysEx(ISysEx* pSysEx);
@@ -90,9 +90,9 @@ private:
 	double WDL_FIXALIGN mRenderTimestamp, mTempo;
 	HostCallbackInfo mHostCallbacks;
 
- // InScratchBuf is only needed if the upstream connection is a callback.
- // OutScratchBuf is only needed if the downstream connection fails to give us a buffer.  
-  WDL_TypedBuf<AudioSampleType> mInScratchBuf, mOutScratchBuf; 
+	// InScratchBuf is only needed if the upstream connection is a callback.
+	// OutScratchBuf is only needed if the downstream connection fails to give us a buffer.
+	WDL_TypedBuf<AudioSampleType> mInScratchBuf, mOutScratchBuf;
 	WDL_PtrList_DeleteOnDestroy<AURenderCallbackStruct> mRenderNotify;
   AUMIDIOutputCallbackStruct mMidiCallback;
   

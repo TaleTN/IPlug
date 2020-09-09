@@ -1584,14 +1584,26 @@ int IPlugAU::GetHost()
 
 void IPlugAU::SetBlockSize(int blockSize)
 {
-  TRACE;
-  int nIn = NInChannels() * blockSize;
-  int nOut = NOutChannels() * blockSize;
-  mInScratchBuf.Resize(nIn);
-  mOutScratchBuf.Resize(nOut);
-  memset(mInScratchBuf.Get(), 0, nIn * sizeof(AudioSampleType));
-  memset(mOutScratchBuf.Get(), 0, nOut * sizeof(AudioSampleType));
-  IPlugBase::SetBlockSize(blockSize);
+	IPlugBase::SetBlockSize(blockSize);
+	blockSize = mBlockSize;
+
+	const int nIn = NInChannels() * blockSize;
+	AudioSampleType* const pScratchInput = mInScratchBuf.ResizeOK(nIn);
+
+	if (pScratchInput)
+		memset(pScratchInput, 0, nIn * sizeof(AudioSampleType));
+	else
+		blockSize = 0;
+
+	const int nOut = NOutChannels() * blockSize;
+	AudioSampleType* const pScratchOutput = mOutScratchBuf.ResizeOK(nOut);
+
+	if (pScratchOutput)
+		memset(pScratchOutput, 0, nOut * sizeof(AudioSampleType));
+	else
+		blockSize = 0;
+
+	mBlockSize = blockSize;
 }
 
 void IPlugAU::InformListeners(AudioUnitPropertyID propID, AudioUnitScope scope)
