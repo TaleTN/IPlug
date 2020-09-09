@@ -88,7 +88,6 @@ protected:
 private:
 	WDL_FastString mOSXBundleID, mCocoaViewFactoryClassName;
 	ComponentInstance mCI;
-  bool mActive, mBypassed, mIsOffline;
 	double WDL_FIXALIGN mRenderTimestamp, mTempo;
 	HostCallbackInfo mHostCallbacks;
 
