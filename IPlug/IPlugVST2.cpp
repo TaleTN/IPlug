@@ -725,6 +725,17 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effSetBypass:
+		{
+			const bool bypassed = !!value;
+			if (_this->IsBypassed() != bypassed)
+			{
+				_this->OnBypass(bypassed);
+				_this->mPlugFlags ^= IPlugBase::kPlugFlagsBypass;
+			}
+			break;
+		}
+
     case effProcessVarIo: {
 	    // VstVariableIo* pIO = (VstVariableIo*) ptr;		// For offline processing (of audio files?)
 	    return 0;
@@ -875,7 +886,6 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
     case effHasMidiProgramsChanged:
     case effGetMidiProgramCategory: 
     case effGetCurrentMidiProgram:
-    case effSetBypass:
 	}
 
 	_this->mMutex.Leave();
