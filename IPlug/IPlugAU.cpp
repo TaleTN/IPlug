@@ -1348,64 +1348,71 @@ void IPlugAU::UpdateBlockSize(const int blockSize)
 	}
 }
 
-inline void PutNumberInDict(CFMutableDictionaryRef pDict, const char* key, void* pNumber, CFNumberType type)
+static void PutNumberInDict(CFMutableDictionaryRef const pDict, const char* const key, void* const pNumber, const CFNumberType type)
 {
-  CFStrLocal cfKey(key);
-	CFNumberRef pValue = CFNumberCreate(0, type, pNumber);
+	const CFStrLocal cfKey(key);
+	CFNumberRef const pValue = CFNumberCreate(NULL, type, pNumber);
 	CFDictionarySetValue(pDict, cfKey.mCFStr, pValue);
-  CFRelease(pValue);
+	CFRelease(pValue);
 }
 
-inline void PutStrInDict(CFMutableDictionaryRef pDict, const char* key, const char* value)
+static void PutStrInDict(CFMutableDictionaryRef const pDict, const char* const key, const char* const value)
 {
-  CFStrLocal cfKey(key);
-  CFStrLocal cfValue(value);
-  CFDictionarySetValue(pDict, cfKey.mCFStr, cfValue.mCFStr);
+	const CFStrLocal cfKey(key);
+	const CFStrLocal cfValue(value);
+	CFDictionarySetValue(pDict, cfKey.mCFStr, cfValue.mCFStr);
 }
 
-inline void PutDataInDict(CFMutableDictionaryRef pDict, const char* key, ByteChunk* pChunk)
+static void PutDataInDict(CFMutableDictionaryRef const pDict, const char* const key, const ByteChunk* const pChunk)
 {
-  CFStrLocal cfKey(key);
-  CFDataRef pData = CFDataCreate(0, pChunk->GetBytes(), pChunk->Size());
-  CFDictionarySetValue(pDict, cfKey.mCFStr, pData);
-  CFRelease(pData);
+	const CFStrLocal cfKey(key);
+	CFDataRef const pData = CFDataCreate(NULL, (const UInt8*)pChunk->GetBytes(), pChunk->Size());
+	CFDictionarySetValue(pDict, cfKey.mCFStr, pData);
+	CFRelease(pData);
 }
 
-inline bool GetNumberFromDict(CFDictionaryRef pDict, const char* key, void* pNumber, CFNumberType type)
+static bool GetNumberFromDict(CFDictionaryRef const pDict, const char* const key, void* const pNumber, const CFNumberType type)
 {
-  CFStrLocal cfKey(key);
-  CFNumberRef pValue = (CFNumberRef) CFDictionaryGetValue(pDict, cfKey.mCFStr);
-  if (pValue) {
-    CFNumberGetValue(pValue, type, pNumber);
-    return true;
-  }
-  return false;
+	const CFStrLocal cfKey(key);
+	CFNumberRef const pValue = (CFNumberRef)CFDictionaryGetValue(pDict, cfKey.mCFStr);
+	if (pValue)
+	{
+		CFNumberGetValue(pValue, type, pNumber);
+		return true;
+	}
+	return false;
 }
 
-inline bool GetStrFromDict(CFDictionaryRef pDict, const char* key, char* value)
+static bool GetStrFromDict(CFDictionaryRef const pDict, const char* const key, char* const value)
 {
-  CFStrLocal cfKey(key);
-  CFStringRef pValue = (CFStringRef) CFDictionaryGetValue(pDict, cfKey.mCFStr);
-  if (pValue) {
-    CStrLocal cStr(pValue);
-    strcpy(value, cStr.mCStr);
-    return true;
-  }
-  value[0] = '\0';
-  return false;
+	const CFStrLocal cfKey(key);
+	CFStringRef const pValue = (CFStringRef)CFDictionaryGetValue(pDict, cfKey.mCFStr);
+	if (pValue)
+	{
+		const CStrLocal cStr(pValue);
+		strcpy(value, cStr.mCStr);
+		return true;
+	}
+	*value = 0;
+	return false;
 }
 
-inline bool GetDataFromDict(CFDictionaryRef pDict, const char* key, ByteChunk* pChunk)
+static bool GetDataFromDict(CFDictionaryRef const pDict, const char* const key, ByteChunk* const pChunk)
 {
-  CFStrLocal cfKey(key);
-  CFDataRef pData = (CFDataRef) CFDictionaryGetValue(pDict, cfKey.mCFStr);
-  if (pData) {
-    int n = CFDataGetLength(pData);
-    pChunk->Resize(n);
-    memcpy(pChunk->GetBytes(), CFDataGetBytePtr(pData), n);
-    return true;
-  }
-  return false;
+	const CFStrLocal cfKey(key);
+	CFDataRef const pData = (CFDataRef)CFDictionaryGetValue(pDict, cfKey.mCFStr);
+	if (pData)
+	{
+		const int n = CFDataGetLength(pData);
+		if (pChunk->Size() != n)
+		{
+			pChunk->Resize(n);
+			if (pChunk->Size() != n) return false;
+		}
+		memcpy(pChunk->GetBytes(), CFDataGetBytePtr(pData), n);
+		return true;
+	}
+	return false;
 }
 
 ComponentResult IPlugAU::GetState(CFPropertyListRef* ppPropList)
