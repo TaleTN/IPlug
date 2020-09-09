@@ -132,13 +132,14 @@ private:
 
 	ByteChunk mState; // Persistent storage if the host asks for plugin state.
 
-  struct PropertyListener {
-    AudioUnitPropertyID mPropID;
-    AudioUnitPropertyListenerProc mListenerProc;
-    void* mProcArgs;
-  };
+	struct PropertyListener
+	{
+		AudioUnitPropertyID mPropID;
+		AudioUnitPropertyListenerProc mListenerProc;
+		void* mProcArgs;
+	};
 	WDL_PtrList_DeleteOnDestroy<PropertyListener> mPropertyListeners;
-  
+
   ComponentResult GetPropertyInfo(AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
     UInt32* pDataSize, Boolean* pWriteable);
 	ComponentResult GetProperty(AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
@@ -148,8 +149,8 @@ private:
 	ComponentResult GetProc(AudioUnitElement element, UInt32* pDataSize, void* pData) const;
 	ComponentResult GetState(CFPropertyListRef* ppPropList);
 	ComponentResult SetState(CFPropertyListRef pPropList);
-  void InformListeners(AudioUnitPropertyID propID, AudioUnitScope scope);
-	
+	void InformListeners(AudioUnitPropertyID propID, AudioUnitScope scope);
+
 public:
 	static ComponentResult IPlugAUEntry(ComponentParameters *params, void* pVPlug);
 	static ComponentResult IPlugAUCarbonViewEntry(ComponentParameters *params, void* pView);

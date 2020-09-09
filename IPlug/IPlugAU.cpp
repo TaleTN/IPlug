@@ -1988,16 +1988,17 @@ void IPlugAU::SetBlockSize(int blockSize)
 	mBlockSize = blockSize;
 }
 
-void IPlugAU::InformListeners(AudioUnitPropertyID propID, AudioUnitScope scope)
+void IPlugAU::InformListeners(const AudioUnitPropertyID propID, const AudioUnitScope scope)
 {
-	TRACE;
-	int i, n = mPropertyListeners.GetSize();
-	for (i = 0; i < n; ++i) {
-		PropertyListener* pListener = mPropertyListeners.Get(i);
-		if (pListener->mPropID == propID) {
+	const int n = mPropertyListeners.GetSize();
+	for (int i = 0; i < n; ++i)
+	{
+		PropertyListener* const pListener = mPropertyListeners.Get(i);
+		if (pListener->mPropID == propID)
+		{
 			pListener->mListenerProc(pListener->mProcArgs, mCI, propID, scope, 0);
 		}
-	}	
+	}
 }
 
 void IPlugAU::SetLatency(const int samples)
