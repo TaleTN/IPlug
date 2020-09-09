@@ -69,13 +69,14 @@ public:
 	// Should be called only by the graphics object when it resizes itself.
 	void ResizeGraphics(int w, int h) {}
 
-  enum EAUInputType {
-    eNotConnected = 0,
-    eDirectFastProc,
-    eDirectNoFastProc,
-    eRenderCallback
-  };      
-  
+	enum EAUInputType
+	{
+		eNotConnected = 0,
+		eDirectFastProc,
+		eDirectNoFastProc,
+		eRenderCallback
+	};
+
 protected:
 	void HostSpecificInit() { GetHost(); }
 	void SetBlockSize(int blockSize);
@@ -99,33 +100,34 @@ private:
 	WDL_PtrList_DeleteOnDestroy<AURenderCallbackStruct> mRenderNotify;
   AUMIDIOutputCallbackStruct mMidiCallback;
   
-  // Every stereo pair of plugin input or output is a bus.
-  // Buses can have zero host channels if the host hasn't connected the bus at all,
-  // one host channel if the plugin supports mono and the host has supplied a mono stream,
-  // or two host channels if the host has supplied a stereo stream.  
-  struct BusChannels {
-    bool mConnected;
-    int mNHostChannels, mNPlugChannels, mPlugChannelStartIdx;
-  };
+	// Every stereo pair of plugin input or output is a bus.
+	// Buses can have zero host channels if the host hasn't connected the bus at all,
+	// one host channel if the plugin supports mono and the host has supplied a mono stream,
+	// or two host channels if the host has supplied a stereo stream.
+	struct BusChannels
+	{
+		bool mConnected;
+		int mNHostChannels, mNPlugChannels, mPlugChannelStartIdx;
+	};
 	WDL_PtrList_DeleteOnDestroy<BusChannels> mInBuses, mOutBuses;
-  BusChannels* GetBus(AudioUnitScope scope, AudioUnitElement busIdx);
-  int NHostChannelsConnected(WDL_PtrList<BusChannels>* pBuses, int excludeIdx = -1);
-  void ClearConnections();
-  
-  struct InputBusConnection {
-    void* mUpstreamObj;
-    AudioUnit mUpstreamUnit;
-    int mUpstreamBusIdx;    
-    AudioUnitRenderProc mUpstreamRenderProc; 
-    AURenderCallbackStruct mUpstreamRenderCallback;
-    EAUInputType mInputType;
-  };
+	BusChannels* GetBus(AudioUnitScope scope, AudioUnitElement busIdx) const;
+	static int NHostChannelsConnected(const WDL_PtrList<BusChannels>* pBuses);
+	void ClearConnections();
+
+	struct InputBusConnection
+	{
+		void* mUpstreamObj;
+		AudioUnit mUpstreamUnit;
+		int mUpstreamBusIdx;
+		AudioUnitRenderProc mUpstreamRenderProc;
+		AURenderCallbackStruct mUpstreamRenderCallback;
+		int mInputType;
+	};
 	WDL_PtrList_DeleteOnDestroy<InputBusConnection> mInBusConnections;
-  
-  bool CheckLegalIO(AudioUnitScope scope, int busIdx, int nChannels); 
-  bool CheckLegalIO(); 
-  void AssessInputConnections();
-  
+
+	bool CheckLegalIO() const;
+	void AssessInputConnections();
+
   struct PropertyListener {
     AudioUnitPropertyID mPropID;
     AudioUnitPropertyListenerProc mListenerProc;

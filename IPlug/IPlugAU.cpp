@@ -1047,107 +1047,91 @@ ComponentResult IPlugAU::SetProperty(AudioUnitPropertyID propID, AudioUnitScope 
   }
 }
 
-const char* AUInputTypeStr(IPlugAU::EAUInputType type)
+/* static const char* AUInputTypeStr(int type)
 {
-  switch (type) {
-    case IPlugAU::eDirectFastProc:     return "DirectFastProc";
-    case IPlugAU::eDirectNoFastProc:   return "DirectNoFastProc";
-    case IPlugAU::eRenderCallback:     return "RenderCallback";
-    case IPlugAU::eNotConnected:
-    default:                           return "NotConnected";
-  }
+	static const char* const tbl[] =
+	{
+		"NotConnected",
+		"DirectFastProc",
+		"DirectNoFastProc",
+		"RenderCallback"
+	};
+	return tbl[(unsigned int)type >= sizeof(tbl) / sizeof(tbl[0]) ? 0 : type] ;
+} */
+
+int IPlugAU::NHostChannelsConnected(const WDL_PtrList<BusChannels>* const pBuses)
+{
+	int nCh = -1;
+	const int n = pBuses->GetSize();
+	for (int i = 0; i < n; ++i)
+	{
+		const int nHostChannels = pBuses->Get(i)->mNHostChannels;
+		if (nHostChannels >= 0) nCh = wdl_max(nCh, 0) + nHostChannels;
+	}
+	return nCh;
 }
 
-int IPlugAU::NHostChannelsConnected(WDL_PtrList<BusChannels>* pBuses, int excludeIdx)
+bool IPlugAU::CheckLegalIO() const
 {
-  bool init = false;
-  int nCh = 0, n = pBuses->GetSize();
-  for (int i = 0; i < n; ++i) {
-    if (i != excludeIdx) {
-      int nHostChannels = pBuses->Get(i)->mNHostChannels;
-      if (nHostChannels >= 0) {
-        nCh += nHostChannels;
-        init = true;
-      }
-    }
-  }
-  if (init) {
-    return nCh;
-  }
-  return -1;
-}
-
-bool IPlugAU::CheckLegalIO(AudioUnitScope scope, int busIdx, int nChannels)
-{
-  if (scope == kAudioUnitScope_Input) {
-    int nIn = MAX(NHostChannelsConnected(&mInBuses, busIdx), 0);
-    int nOut = (mActive ? NHostChannelsConnected(&mOutBuses) : -1);
-    return LegalIO(nIn + nChannels, nOut);
-  }
-  else {
-    int nIn = (mActive ? NHostChannelsConnected(&mInBuses) : -1);
-    int nOut = MAX(NHostChannelsConnected(&mOutBuses, busIdx), 0);
-    return LegalIO(nIn, nOut + nChannels);
-  }
-}
-
-bool IPlugAU::CheckLegalIO()
-{
-  int nIn = NHostChannelsConnected(&mInBuses);
-  int nOut = NHostChannelsConnected(&mOutBuses);
-  return ((!nIn && !nOut) || LegalIO(nIn, nOut));
+	const int nIn = NHostChannelsConnected(&mInBuses);
+	const int nOut = NHostChannelsConnected(&mOutBuses);
+	return (!nIn && !nOut) || LegalIO(nIn, nOut);
 }
 
 void IPlugAU::AssessInputConnections()
 {
-  TRACE;
-  IMutexLock lock(this);
+	mMutex.Enter();
 
-  SetInputChannelConnections(0, NInChannels(), false);
+	SetInputChannelConnections(0, NInChannels(), false);
 
-  int nIn = mInBuses.GetSize();
-  for (int i = 0; i < nIn; ++i) {
-    BusChannels* pInBus = mInBuses.Get(i);
-    InputBusConnection* pInBusConn = mInBusConnections.Get(i);
+	const int nIn = mInBuses.GetSize();
+	for (int i = 0; i < nIn; ++i)
+	{
+		BusChannels* const pInBus = mInBuses.Get(i);
+		InputBusConnection* const pInBusConn = mInBusConnections.Get(i);
 
-    // AU supports 3 ways to get input from the host (or whoever is upstream).
-    if (pInBusConn->mUpstreamRenderProc && pInBusConn->mUpstreamObj) {
-      // 1: direct input connection with fast render proc (and buffers) supplied by the upstream unit.
-      pInBusConn->mInputType = eDirectFastProc;
-    }
-    else
-    if (pInBusConn->mUpstreamUnit) {
-      // 2: direct input connection with no render proc, buffers supplied by the upstream unit.
-      pInBusConn->mInputType = eDirectNoFastProc;
-    }
-    else
-    if (pInBusConn->mUpstreamRenderCallback.inputProc) {
-      // 3: no direct connection, render callback, buffers supplied by us.
-      pInBusConn->mInputType = eRenderCallback;
-    }
-    else {
-      pInBusConn->mInputType = eNotConnected;
-    }
-    pInBus->mConnected = (pInBusConn->mInputType != eNotConnected);
+		// AU supports 3 ways to get input from the host (or whoever is upstream).
+		if (pInBusConn->mUpstreamRenderProc && pInBusConn->mUpstreamObj)
+		{
+			// 1: Direct input connection with fast render proc (and buffers) supplied by the upstream unit.
+			pInBusConn->mInputType = eDirectFastProc;
+		}
+		else if (pInBusConn->mUpstreamUnit)
+		{
+			// 2: Direct input connection with no render proc, buffers supplied by the upstream unit.
+			pInBusConn->mInputType = eDirectNoFastProc;
+		}
+		else if (pInBusConn->mUpstreamRenderCallback.inputProc)
+		{
+			// 3: No direct connection, render callback, buffers supplied by us.
+			pInBusConn->mInputType = eRenderCallback;
+		}
+		else
+		{
+			pInBusConn->mInputType = eNotConnected;
+		}
+		pInBus->mConnected = pInBusConn->mInputType != eNotConnected;
 
-    int startChannelIdx = pInBus->mPlugChannelStartIdx;
-    if (pInBus->mConnected) {
-      // There's an input connection, so we need to tell the plug to expect however many channels
-      // are in the negotiated host stream format.
-      if (pInBus->mNHostChannels < 0) {
-        // The host set up a connection without specifying how many channels in the stream.
-        // Assume the host will send all the channels the plugin asks for, and hope for the best.
-        Trace(TRACELOC, "AssumeChannels:%d", pInBus->mNPlugChannels);
-        pInBus->mNHostChannels = pInBus->mNPlugChannels;
-      }
-      int nConnected = pInBus->mNHostChannels;
-      int nUnconnected = MAX(pInBus->mNPlugChannels - nConnected, 0);
-      SetInputChannelConnections(startChannelIdx, nConnected, true);
-      SetInputChannelConnections(startChannelIdx + nConnected, nUnconnected, false);
-    }
+		const int startChannelIdx = pInBus->mPlugChannelStartIdx;
+		if (pInBus->mConnected)
+		{
+			// There's an input connection, so we need to tell the plug to expect however many channels
+			// are in the negotiated host stream format.
+			if (pInBus->mNHostChannels < 0)
+			{
+				// The host set up a connection without specifying how many channels in the stream.
+				// Assume the host will send all the channels the plugin asks for, and hope for the best.
+				pInBus->mNHostChannels = pInBus->mNPlugChannels;
+			}
+			const int nConnected = pInBus->mNHostChannels;
+			int nUnconnected = pInBus->mNPlugChannels - nConnected;
+			nUnconnected = wdl_max(nUnconnected, 0);
+			SetInputChannelConnections(startChannelIdx, nConnected, true);
+			SetInputChannelConnections(startChannelIdx + nConnected, nUnconnected, false);
+		}
+	}
 
-    Trace(TRACELOC, "%d:%s:%d:%d:%d", i, AUInputTypeStr(pInBusConn->mInputType), startChannelIdx, pInBus->mNPlugChannels, pInBus->mNHostChannels);
-  }
+	mMutex.Leave();
 }
 
 inline void PutNumberInDict(CFMutableDictionaryRef pDict, const char* key, void* pNumber, CFNumberType type)
@@ -1476,37 +1460,60 @@ ComponentResult IPlugAU::RenderProc(void* pPlug, AudioUnitRenderActionFlags* pFl
   return noErr;
 }
 
-IPlugAU::BusChannels* IPlugAU::GetBus(AudioUnitScope scope, AudioUnitElement busIdx)
+IPlugAU::BusChannels* IPlugAU::GetBus(const AudioUnitScope scope, const AudioUnitElement busIdx) const
 {
-  if (scope == kAudioUnitScope_Input && busIdx >= 0 && busIdx < mInBuses.GetSize()) {
-    return mInBuses.Get(busIdx);
-  }
-  if (scope == kAudioUnitScope_Output && busIdx >= 0 && busIdx < mOutBuses.GetSize()) {
-    return mOutBuses.Get(busIdx);
-  }
-  // Global bus is an alias for output bus zero.
-  if (scope == kAudioUnitScope_Global && mOutBuses.GetSize()) {
-    return mOutBuses.Get(busIdx);
-  }
-  return 0;
+	switch (scope)
+	{
+		// Global bus is an alias for output bus zero.
+		case kAudioUnitScope_Global:
+		{
+			if (mOutBuses.GetSize())
+			{
+				return mOutBuses.Get(busIdx);
+			}
+			break;
+		}
+
+		case kAudioUnitScope_Input:
+		{
+			if (busIdx < (unsigned int)mInBuses.GetSize())
+			{
+				return mInBuses.Get(busIdx);
+			}
+			break;
+		}
+
+		case kAudioUnitScope_Output:
+		{
+			if (busIdx < (unsigned int)mOutBuses.GetSize())
+			{
+				return mOutBuses.Get(busIdx);
+			}
+			break;
+		}
+	}
+
+	return NULL;
 }
 
 void IPlugAU::ClearConnections()
 {
-  int nInBuses = mInBuses.GetSize();
-  for (int i = 0; i < nInBuses; ++i) {
-    BusChannels* pInBus = mInBuses.Get(i);
-    pInBus->mConnected = false;
-    pInBus->mNHostChannels = -1;
-    InputBusConnection* pInBusConn = mInBusConnections.Get(i);
-    memset(pInBusConn, 0, sizeof(InputBusConnection));
-  }
-  int nOutBuses = mOutBuses.GetSize();
-  for (int i = 0; i < nOutBuses; ++i) {
-    BusChannels* pOutBus = mOutBuses.Get(i);
-    pOutBus->mConnected = false;
-    pOutBus->mNHostChannels = -1;
-  }
+	const int nInBuses = mInBuses.GetSize();
+	for (int i = 0; i < nInBuses; ++i)
+	{
+		BusChannels* const pInBus = mInBuses.Get(i);
+		pInBus->mConnected = false;
+		pInBus->mNHostChannels = -1;
+		InputBusConnection* const pInBusConn = mInBusConnections.Get(i);
+		memset(pInBusConn, 0, sizeof(InputBusConnection));
+	}
+	const int nOutBuses = mOutBuses.GetSize();
+	for (int i = 0; i < nOutBuses; ++i)
+	{
+		BusChannels* const pOutBus = mOutBuses.Get(i);
+		pOutBus->mConnected = false;
+		pOutBus->mNHostChannels = -1;
+	}
 }
 
 // GarageBand doesn't always report tempo when the transport is stopped, so we need it to persist in the class.
