@@ -80,39 +80,6 @@ private:
 #endif
 };
 
-inline CFStringRef MakeCFString(const char* cStr)
-{
-  return CFStringCreateWithCString(0, cStr, kCFStringEncodingUTF8); 
-}
-
-struct CFStrLocal 
-{
-  CFStringRef mCFStr;
-  CFStrLocal(const char* cStr) 
-  {
-    mCFStr = MakeCFString(cStr); 
-  }
-  ~CFStrLocal() 
-  {
-    CFRelease(mCFStr); 
-  }
-};
-
-struct CStrLocal
-{
-  char* mCStr;
-  CStrLocal(CFStringRef cfStr) 
-  {
-    int n = CFStringGetLength(cfStr) + 1;
-    mCStr = (char*) malloc(n);
-    CFStringGetCString(cfStr, mCStr, n, kCFStringEncodingUTF8);
-  }
-  ~CStrLocal() 
-  {
-    FREE_NULL(mCStr); 
-  }
-};
-
 inline int AdjustFontSize(int size)
 {
 	return int(0.75 * (double)size);

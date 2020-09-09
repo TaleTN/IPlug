@@ -9,9 +9,37 @@
 
 #define kAudioUnitRemovePropertyListenerWithUserDataSelect 0x0012
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "WDL/wdltypes.h"
+
+static CFStringRef MakeCFString(const char* const cStr)
+{
+	return CFStringCreateWithCString(NULL, cStr, kCFStringEncodingUTF8);
+}
+
+struct CFStrLocal
+{
+	CFStringRef const mCFStr;
+	CFStrLocal(const char* const cStr): mCFStr(MakeCFString(cStr)) {}
+	~CFStrLocal() { CFRelease(mCFStr); }
+};
+
+struct CStrLocal
+{
+	char* mCStr;
+	CStrLocal(CFStringRef const cfStr)
+	{
+		const int n = CFStringGetLength(cfStr) + 1;
+		mCStr = (char*)malloc(n);
+		CFStringGetCString(cfStr, mCStr, n, kCFStringEncodingUTF8);
+	}
+	~CStrLocal()
+	{
+		free(mCStr);
+	}
+};
 
 typedef AudioStreamBasicDescription STREAM_DESC;
 
