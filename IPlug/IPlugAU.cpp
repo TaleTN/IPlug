@@ -1565,22 +1565,25 @@ ComponentResult IPlugAU::GetParamProc(void* const pPlug, const AudioUnitParamete
 }
 
 // static
-ComponentResult IPlugAU::SetParamProc(void* pPlug, AudioUnitParameterID paramID, AudioUnitScope scope, AudioUnitElement element,
-  AudioUnitParameterValue value, UInt32 offsetFrames)
+ComponentResult IPlugAU::SetParamProc(void* const pPlug, const AudioUnitParameterID paramID, const AudioUnitScope scope, const AudioUnitElement element,
+	const AudioUnitParameterValue value, UInt32 /* offsetFrames */)
 {
-  Trace(TRACELOC, "%d:(%d:%s):%d", paramID, scope, AUScopeStr(scope), element);
+	// In the SDK, offset frames is only looked at in group scope.
+	ASSERT_SCOPE(kAudioUnitScope_Global);
+	IPlugAU* const _this = (IPlugAU*)pPlug;
+	_this->mMutex.Enter();
 
-  // In the SDK, offset frames is only looked at in group scope.
-  ASSERT_SCOPE(kAudioUnitScope_Global);
-  IPlugAU* _this = (IPlugAU*) pPlug;
-  IMutexLock lock(_this);
-  IParam* pParam = _this->GetParam(paramID);
-  pParam->Set(value);
-  if (_this->GetGUI()) {
-    _this->GetGUI()->SetParameterFromPlug(paramID, value, false);
-  }
-  _this->OnParamChange(paramID);
-  return noErr;
+	// TN: Why is order in IPlugVST2::VSTSetParameter() different?
+	IParam* const pParam = _this->GetParam(paramID);
+	const double v = pParam->GetNormalized(value);
+	pParam->SetNormalized(v);
+
+	IGraphics* const pGraphics = _this->GetGUI();
+	if (pGraphics) pGraphics->SetParameterFromPlug(paramID, v, true);
+	_this->OnParamChange(paramID);
+
+	_this->mMutex.Leave();
+	return noErr;
 }
 
 struct BufferList {
