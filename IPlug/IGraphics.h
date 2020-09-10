@@ -42,7 +42,7 @@ public:
 	void DrawLine(IColor color, int x1, int y1, int x2, int y2, float weight = 1.0f, bool antiAlias = false);
 	void DrawArc(IColor color, float cx, float cy, float r, float minAngle, float maxAngle, float weight = 1.0f, bool antiAlias = false);
 	void DrawCircle(IColor color, float cx, float cy, float r, float weight = 1.0f, bool antiAlias = false);
-  bool RoundRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend, int cornerradius, bool aa);
+	void RoundRect(IColor color, const IRECT* pR, float weight, int cornerradius, bool aa);
   bool FillRoundRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend, int cornerradius, bool aa);
 
   bool FillIRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend = 0);

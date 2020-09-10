@@ -435,11 +435,15 @@ void IGraphics::DrawCircle(const IColor color, float cx, float cy, float r, cons
 	LICE_Circle(&mDrawBitmap, cx, cy, r, color.Get(), weight, IChannelBlend::kBlendNone, antiAlias);
 }
 
-bool IGraphics::RoundRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend, int cornerradius, bool aa)
+void IGraphics::RoundRect(const IColor color, const IRECT* const pR, const float weight, int cornerradius,
+	const bool aa)
 {
-	_LICE::LICE_RoundRect(mDrawBitmap, (float) pR->L, (float) pR->T, (float) pR->W(), (float) pR->H(), cornerradius,
-                        LiceColor(pColor), LiceWeight(pBlend), LiceBlendMode(pBlend), aa);
-	return true;
+	IRECT r = *pR;
+	const int scale = Scale();
+	if (scale) { r.Downscale(scale); cornerradius >>= scale; }
+
+	LICE_RoundRect(&mDrawBitmap, (float)r.L, (float)r.T, (float)r.W(), (float)r.H(), cornerradius,
+		color.Get(), weight, IChannelBlend::kBlendNone, aa);
 }
 
 bool IGraphics::FillRoundRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend, int cornerradius, bool aa)
