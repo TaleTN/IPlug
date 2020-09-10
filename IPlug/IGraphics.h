@@ -177,7 +177,7 @@ public:
 
 	// Convenience wrappers.
 	void DrawBitmap(const IBitmap* pBitmap, const IRECT* pR, int bmpState = 1, float weight = 1.0f);
-  bool DrawRect(const IColor* pColor, IRECT* pR);
+	void DrawRect(IColor color, const IRECT* pR);
   bool DrawVerticalLine(const IColor* pColor, IRECT* pR, float x);
   bool DrawHorizontalLine(const IColor* pColor, IRECT* pR, float y);
   bool DrawVerticalLine(const IColor* pColor, int xi, int yLo, int yHi);

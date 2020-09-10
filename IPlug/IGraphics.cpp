@@ -742,13 +742,12 @@ void IGraphics::DrawBitmap(const IBitmap* const pBitmap, const IRECT* const pR, 
 	LICE_Blit(&mDrawBitmap, pLB, r.L, r.T, 0, srcY, r.W(), r.H(), weight, IChannelBlend::kBlendNone);
 }
 
-bool IGraphics::DrawRect(const IColor* pColor, IRECT* pR)
+void IGraphics::DrawRect(const IColor color, const IRECT* const pR)
 {
-  bool rc = DrawHorizontalLine(pColor, pR->T, pR->L, pR->R);
-  rc &= DrawHorizontalLine(pColor, pR->B, pR->L, pR->R);
-  rc &= DrawVerticalLine(pColor, pR->L, pR->T, pR->B);
-  rc &= DrawVerticalLine(pColor, pR->R, pR->T, pR->B);
-  return rc;
+	DrawHorizontalLine(color, pR->T, pR->L, pR->R);
+	DrawHorizontalLine(color, pR->B, pR->L, pR->R);
+	DrawVerticalLine(color, pR->L, pR->T, pR->B);
+	DrawVerticalLine(color, pR->R, pR->T, pR->B);
 }
 
 bool IGraphics::DrawVerticalLine(const IColor* pColor, IRECT* pR, float x)
