@@ -27,7 +27,7 @@ public:
 	static const int kMaxEditLen = kMaxParamLen;
 
 	bool PrepDraw(int wantScale); // Recale the draw bitmap.
-	bool IsDirty(IRECT* pR);        // Ask the plugin what needs to be redrawn.
+	bool IsDirty(IRECT* pR); // Ask the plugin what needs to be redrawn.
   bool Draw(IRECT* pR);           // The system announces what needs to be redrawn.  Ordering and drawing logic.
   virtual bool DrawScreen(IRECT* pR) = 0;  // Tells the OS class to put the final bitmap on the screen.
 

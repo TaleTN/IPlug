@@ -698,31 +698,51 @@ bool IGraphics::DrawRadialLine(const IColor* pColor, float cx, float cy, float a
   return DrawLine(pColor, xLo, yLo, xHi, yHi, pBlend, antiAlias);
 }
 
-bool IGraphics::IsDirty(IRECT* pR)
+bool IGraphics::IsDirty(IRECT* const pR)
 {
-  bool dirty = false;
-  int i, n = mControls.GetSize();
-  IControl** ppControl = mControls.GetList();
-	for (i = 0; i < n; ++i, ++ppControl) {
-    IControl* pControl = *ppControl;
-    if (pControl->IsDirty()) {
-      *pR = pR->Union(pControl->GetRECT());
-      dirty = true;
-    }
-  }
-  
-#ifdef USE_IDLE_CALLS
-  if (dirty) {
-    mIdleTicks = 0;
-  }
-  else
-  if (++mIdleTicks > IDLE_TICKS) {
-    OnGUIIdle();
-    mIdleTicks = 0;
-  }
-#endif
-    
-  return dirty;
+	bool dirty = false;
+	const int n = mControls.GetSize();
+	IControl* const* const ppControl = mControls.GetList();
+	for (int i = 0; i < n; ++i)
+	{
+		IControl* const pControl = ppControl[i];
+		if (pControl->IsDirty())
+		{
+			*pR = pR->Union(pControl->GetRECT());
+			dirty = true;
+		}
+	}
+
+	const int scale = Scale();
+	if (scale)
+	{
+		// const int mask = ~((1 << scale) - 1);
+		// pR->L &= mask;
+		// pR->T &= mask;
+		// pr->R = (((pr->R - 1) >> scale) + 1) << scale;
+		// pr->B = (((pr->B - 1) >> scale) + 1) << scale;
+
+		assert(scale == 1);
+		static const int mask = ~1;
+		pR->L &= mask;
+		pR->T &= mask;
+		pR->R += pR->R & 1;
+		pR->B += pR->B & 1;
+	}
+
+	#ifdef IPLUG_USE_IDLE_CALLS
+	if (dirty)
+	{
+		mIdleTicks = 0;
+	}
+	else if (++mIdleTicks > kIdleTicks)
+	{
+		OnGUIIdle();
+		mIdleTicks = 0;
+	}
+	#endif
+
+	return dirty;
 }
 
 void IGraphics::DisplayControlValue(IControl* pControl)
