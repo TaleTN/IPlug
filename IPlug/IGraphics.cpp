@@ -945,30 +945,34 @@ void IGraphics::OnMouseDrag(const int x, const int y, const IMouseMod mod)
 	}
 }
 
-bool IGraphics::OnMouseDblClick(int x, int y, IMouseMod* pMod)
+bool IGraphics::OnMouseDblClick(const int x, const int y, const IMouseMod mod)
 {
 	ReleaseMouseCapture();
-  bool newCapture = false;
-	int c = GetMouseControlIdx(x, y);
-	if (c >= 0) {
-    IControl* pControl = mControls.Get(c);
-    int paramIdx = pControl->ParamIdx();
-    if (paramIdx >= 0) {
-      mPlug->BeginInformHostOfParamChange(paramIdx);
-    }
-    if (pControl->MouseDblAsSingleClick()) {
-      mMouseCapture = c;
-      mMouseX = x;
-      mMouseY = y;
-      pControl->OnMouseDown(x, y, pMod);
-      newCapture = true;
-    }
-    else {
-		  pControl->OnMouseDblClick(x, y, pMod);
-    }
-    // OnMouseUp() will call EndInformHostOfParamChange().
+	bool newCapture = false;
+	const int c = GetMouseControlIdx(x, y);
+	if (c >= 0)
+	{
+		IControl* const pControl = mControls.Get(c);
+		const int paramIdx = pControl->ParamIdx();
+		if (paramIdx >= 0)
+		{
+			mPlug->BeginInformHostOfParamChange(paramIdx);
+		}
+		if (pControl->MouseDblAsSingleClick() || mod.R)
+		{
+			mMouseCapture = c;
+			mMouseX = x;
+			mMouseY = y;
+			pControl->OnMouseDown(x, y, mod);
+			newCapture = true;
+		}
+		else
+		{
+			pControl->OnMouseDblClick(x, y, mod);
+		}
+		// OnMouseUp() will call EndInformHostOfParamChange().
 	}
-  return newCapture;
+	return newCapture;
 }
 
 void IGraphics::OnMouseWheel(int x, int y, IMouseMod* pMod, int d)
