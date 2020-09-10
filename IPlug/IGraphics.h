@@ -157,6 +157,9 @@ public:
 	IControl* GetControl(const int idx) const { return mControls.Get(idx); }
 	IControl** GetControls() const { return mControls.GetList(); }
 
+	int NControls() const { return mControls.GetSize(); }
+	bool NControls(const int idx) const { return (unsigned int)idx < (unsigned int)NControls(); }
+
   void HideControl(int paramIdx, bool hide);
   void GrayOutControl(int paramIdx, bool gray);
   
