@@ -75,8 +75,8 @@ public:
 
 	virtual bool OpenURL(const char* url, const char* windowTitle = NULL, const char* confirmMsg = NULL, const char* errMsg = NULL) = 0;
 
-  // Return 1 if mouse wheel is processed
-  virtual int ProcessMouseWheel(float delta) { return 0; }
+	// Return 1 if mouse wheel is possessed... er, I mean processed.
+	virtual int ProcessMouseWheel(float /* delta */) { return 0; }
 
 	// Delays mPlug->EndInformHostOfParamChange().
 	virtual void SetParamChangeTimer(int ticks) = 0;
@@ -190,7 +190,7 @@ public:
 	// Returns true if the control receiving the double click will treat it as a single click
 	// (meaning the OS should capture the mouse).
 	bool OnMouseDblClick(int x, int y, IMouseMod mod);
-	void OnMouseWheel(int x, int y, IMouseMod* pMod, int d);
+	void OnMouseWheel(int x, int y, IMouseMod mod, float d);
 	void OnKeyDown(int x, int y, int key);
 
   void DisplayControlValue(IControl* pControl);

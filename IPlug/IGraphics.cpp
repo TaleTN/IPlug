@@ -975,17 +975,20 @@ bool IGraphics::OnMouseDblClick(const int x, const int y, const IMouseMod mod)
 	return newCapture;
 }
 
-void IGraphics::OnMouseWheel(int x, int y, IMouseMod* pMod, int d)
-{	
-	int c = GetMouseControlIdx(x, y);
-	if (c >= 0) {
-		IControl* pControl = mControls.Get(c);
-		int paramIdx = pControl->ParamIdx();
-		if (paramIdx >= 0) {
+void IGraphics::OnMouseWheel(const int x, const int y, const IMouseMod mod, const float d)
+{
+	const int c = GetMouseControlIdx(x, y);
+	if (c >= 0)
+	{
+		IControl* const pControl = mControls.Get(c);
+		const int paramIdx = pControl->ParamIdx();
+		if (paramIdx >= 0)
+		{
 			mPlug->BeginDelayedInformHostOfParamChange(paramIdx);
 		}
-		pControl->OnMouseWheel(x, y, pMod, d);
-		if (paramIdx >= 0) {
+		pControl->OnMouseWheel(x, y, mod, d);
+		if (paramIdx >= 0)
+		{
 			mPlug->DelayEndInformHostOfParamChange(paramIdx);
 		}
 	}
