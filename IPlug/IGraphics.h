@@ -214,15 +214,15 @@ public:
 
 	void OnKeyDown(int x, int y, int key);
 
-  // Enables/disables tooltips; also enables mouseovers/mouseouts if necessary.
-  inline void EnableTooltips(bool enable)
-  {
-    mEnableTooltips = enable;
-    if (enable) mHandleMouseOver = enable;
-  }
+	// Enables/disables tooltips; also enables mouseovers/mouseouts if necessary.
+	void EnableTooltips(const bool enable)
+	{
+		if (enable) mHandleMouseOver = enable;
+		mEnableTooltips = enable;
+	}
 
-  // Updates tooltips after (un)hiding controls.
-  virtual void UpdateTooltips() = 0;
+	// Updates tooltips after (un)hiding controls.
+	virtual void UpdateTooltips() = 0;
 
 	// This is an idle call from the GUI thread, as opposed to 
 	// IPlug::OnIdle which is called from the audio processing thread.
