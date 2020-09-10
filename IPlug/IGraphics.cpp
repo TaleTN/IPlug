@@ -203,12 +203,6 @@ void IGraphics::AttachBackground(const int ID, const char* const name)
 	mControls.Insert(0, pBG);
 }
 
-int IGraphics::AttachControl(IControl* pControl)
-{
-	mControls.Add(pControl);
-  return mControls.GetSize() - 1;
-}
-
 void IGraphics::HideControl(int paramIdx, bool hide)
 {
   int i, n = mControls.GetSize();

@@ -136,8 +136,12 @@ public:
 	void AttachBackground(int ID, const char* name);
 	void AttachBackground(IControl* const pControl) { mControls.Insert(0, pControl); }
 
-  // Returns the control index of this control (not the number of controls).
-	int AttachControl(IControl* pControl);
+	// Returns the control index of this control (not the number of controls).
+	int AttachControl(IControl* const pControl)
+	{
+		const int idx = NControls();
+		return mControls.Add(pControl) ? idx : -1;
+	}
 
   IControl* GetControl(int idx) { return mControls.Get(idx); }
   void HideControl(int paramIdx, bool hide);
