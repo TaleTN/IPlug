@@ -997,11 +997,6 @@ void IGraphics::OnMouseWheel(const int x, const int y, const IMouseMod mod, cons
 	}
 }
 
-void IGraphics::ReleaseMouseCapture()
-{
-	mMouseCapture = mMouseX = mMouseY = -1;
-}
-
 void IGraphics::OnKeyDown(int x, int y, int key)
 {
 	int c = GetMouseControlIdx(x, y);

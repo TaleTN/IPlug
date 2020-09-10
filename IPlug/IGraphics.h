@@ -201,15 +201,15 @@ public:
 	void OnMouseOver(int x, int y, IMouseMod mod);
 	void OnMouseOut();
 
+	// Some controls may not need to capture the mouse for dragging, they can call ReleaseCapture when the mouse leaves.
+	void ReleaseMouseCapture() { mMouseY = mMouseX = mMouseCapture = -1; }
+
 	inline int CanHandleMouseWheel() const { return mHandleMouseWheel; }
 
 	void OnKeyDown(int x, int y, int key);
 
   void DisplayControlValue(IControl* pControl);
   
-  // Some controls may not need to capture the mouse for dragging, they can call ReleaseCapture when the mouse leaves.
-  void ReleaseMouseCapture();
-
   // Enables/disables tooltips; also enables mouseovers/mouseouts if necessary.
   inline void EnableTooltips(bool enable)
   {
