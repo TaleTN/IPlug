@@ -147,18 +147,32 @@ public:
 
 static FontStorage s_fontCache;
 
-IGraphics::IGraphics(IPlugBase* pPlug, int w, int h, int refreshFPS)
-:	mPlug(pPlug), mWidth(w), mHeight(h), mIdleTicks(0), 
-  mMouseCapture(-1), mMouseOver(-1), mMouseX(0), mMouseY(0), mHandleMouseOver(false), mEnableTooltips(false), mStrict(true), mDisplayControlValue(false), mDrawBitmap(0), mTmpBitmap(0)
+IGraphics::IGraphics(
+	IPlugBase* const pPlug,
+	const int w,
+	const int h,
+	const int refreshFPS
+):
+	mPlug(pPlug),
+	// mTmpBitmap(NULL),
+	mWidth(w),
+	mHeight(h),
+	mScale(-1),
+	mFPS(refreshFPS > 0 ? refreshFPS : kDefaultFPS),
+	mIdleTicks(0),
+	mMouseCapture(-1),
+	mMouseOver(-1),
+	mMouseX(0),
+	mMouseY(0),
+	mHandleMouseOver(false),
+	mEnableTooltips(false)
 {
-	mFPS = (refreshFPS > 0 ? refreshFPS : DEFAULT_FPS);
 }
 
 IGraphics::~IGraphics()
 {
-    mControls.Empty(true);
-	DELETE_NULL(mDrawBitmap);
-	DELETE_NULL(mTmpBitmap);
+	mControls.Empty(true);
+	// delete mTmpBitmap;
 }
 
 /* void IGraphics::Resize(const int w, const int h)
