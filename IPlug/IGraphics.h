@@ -46,7 +46,7 @@ public:
 	// Warning: Might not work as expected if color.A < 255 or weight < 1.0f.
 	void FillRoundRect(IColor color, const IRECT* pR, float weight, int cornerradius, bool aa);
 
-  bool FillIRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend = 0);
+	void FillIRect(IColor color, const IRECT* pR, float weight = 1.0f);
   bool FillCircle(const IColor* pColor, float cx, float cy, float r, const IChannelBlend* pBlend = 0, bool antiAlias = false);
 
 	static inline void PrepDrawIText(IText* pTxt) { if (!pTxt->mCached) CacheFont(pTxt); }
