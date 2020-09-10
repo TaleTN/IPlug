@@ -410,12 +410,17 @@ void IGraphics::DrawLine(const IColor color, const int x1, const int y1, const i
 		IChannelBlend::kBlendNone, antiAlias);
 }
 
-bool IGraphics::DrawArc(const IColor* pColor, float cx, float cy, float r, float minAngle, float maxAngle, 
-	const IChannelBlend* pBlend, bool antiAlias)
+void IGraphics::DrawArc(const IColor color, float cx, float cy, float r, const float minAngle, const float maxAngle,
+	const float weight, const bool antiAlias)
 {
- _LICE::LICE_Arc(mDrawBitmap, cx, cy, r, minAngle, maxAngle, LiceColor(pColor), 
-        LiceWeight(pBlend), LiceBlendMode(pBlend), antiAlias);
-	return true;
+	const int scale = Scale();
+	if (scale)
+	{
+		// const float mul = 1.0f / (float)(1 << scale);
+		assert(scale == 1); static const float mul = 0.5f;
+		cx *= mul; cy *= mul; r *= mul;
+	}
+	LICE_Arc(&mDrawBitmap, cx, cy, r, minAngle, maxAngle, color.Get(), weight, IChannelBlend::kBlendNone, antiAlias);
 }
 
 bool IGraphics::DrawCircle(const IColor* pColor, float cx, float cy, float r,
