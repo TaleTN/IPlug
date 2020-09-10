@@ -134,6 +134,8 @@ public:
 	bool UpdateIBitmap(IBitmap* pBitmap);
 
 	void AttachBackground(int ID, const char* name);
+	void AttachBackground(IControl* const pControl) { mControls.Insert(0, pControl); }
+
   // Returns the control index of this control (not the number of controls).
 	int AttachControl(IControl* pControl);
 
