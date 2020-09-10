@@ -203,30 +203,34 @@ void IGraphics::AttachBackground(const int ID, const char* const name)
 	mControls.Insert(0, pBG);
 }
 
-void IGraphics::HideControl(int paramIdx, bool hide)
+void IGraphics::HideControl(const int paramIdx, const bool hide)
 {
-  int i, n = mControls.GetSize();
-  IControl** ppControl = mControls.GetList();
-	for (i = 0; i < n; ++i, ++ppControl) {
-		IControl* pControl = *ppControl;
-		if (pControl->ParamIdx() == paramIdx) {
-      pControl->Hide(hide);
-    }
-    // Could be more than one, don't break until we check them all.
-  }
+	const int n = mControls.GetSize();
+	IControl* const* const ppControl = mControls.GetList();
+	for (int i = 0; i < n; ++i)
+	{
+		IControl* const pControl = ppControl[i];
+		if (pControl->ParamIdx() == paramIdx)
+		{
+			pControl->Hide(hide);
+		}
+		// Could be more than one, don't break until we check them all.
+	}
 }
 
-void IGraphics::GrayOutControl(int paramIdx, bool gray)
+void IGraphics::GrayOutControl(const int paramIdx, const bool gray)
 {
-  int i, n = mControls.GetSize();
-  IControl** ppControl = mControls.GetList();
-	for (i = 0; i < n; ++i, ++ppControl) {
-    IControl* pControl = *ppControl;
-    if (pControl->ParamIdx() == paramIdx) {
-      pControl->GrayOut(gray);
-    }
-    // Could be more than one, don't break until we check them all.
-  }
+	const int n = mControls.GetSize();
+	IControl* const* const ppControl = mControls.GetList();
+	for (int i = 0; i < n; ++i)
+	{
+		IControl* const pControl = ppControl[i];
+		if (pControl->ParamIdx() == paramIdx)
+		{
+			pControl->GrayOut(gray);
+		}
+		// Could be more than one, don't break until we check them all.
+	}
 }
 
 void IGraphics::ClampControl(int paramIdx, double lo, double hi, bool normalized)

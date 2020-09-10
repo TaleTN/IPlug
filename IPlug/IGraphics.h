@@ -160,9 +160,9 @@ public:
 	int NControls() const { return mControls.GetSize(); }
 	bool NControls(const int idx) const { return (unsigned int)idx < (unsigned int)NControls(); }
 
-  void HideControl(int paramIdx, bool hide);
-  void GrayOutControl(int paramIdx, bool gray);
-  
+	void HideControl(int paramIdx, bool hide);
+	void GrayOutControl(int paramIdx, bool gray);
+
   // Normalized means the value is in [0, 1].
   void ClampControl(int paramIdx, double lo, double hi, bool normalized);
   void SetParameterFromPlug(int paramIdx, double value, bool normalized);
