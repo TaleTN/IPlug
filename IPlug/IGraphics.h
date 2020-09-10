@@ -50,7 +50,7 @@ public:
 	void FillCircle(IColor color, float cx, float cy, float r, float weight = 1.0f, bool antiAlias = false);
 
 	bool LoadFont(int ID, const char* name);
-	static inline void PrepDrawIText(IText* pTxt) { if (!pTxt->mCached) CacheFont(pTxt); }
+	static void PrepDrawIText(IText* const pTxt, const int scale = 0) { CacheFont(pTxt, scale); }
 	bool DrawIText(IText* pTxt, char* str, IRECT* pR);
 	bool MeasureIText(IText* pTxt, char* str, IRECT* pR);
   IColor GetPoint(int x, int y);
@@ -193,7 +193,7 @@ protected:
 
 	LICE_SysBitmap* mDrawBitmap;
 
-  static LICE_IFont* CacheFont(IText* pTxt);
+	static LICE_CachedFont* CacheFont(IText* pTxt, int scale = 0);
 
 private:
 	// LICE_MemBitmap* mTmpBitmap;

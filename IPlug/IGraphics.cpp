@@ -589,55 +589,58 @@ bool IGraphics::LoadFont(const int ID, const char* const name)
 	return ret;
 }
 
-LICE_IFont* IGraphics::CacheFont(IText* pTxt)
+LICE_CachedFont* IGraphics::CacheFont(IText* const pTxt, const int scale)
 {
-  LICE_CachedFont* font = (LICE_CachedFont*)s_fontCache.Find(pTxt);
-  if (!font)
-  {
-    font = new LICE_CachedFont;
-    int h = pTxt->mSize;
-    int esc = 10 * pTxt->mOrientation;
-    int wt = (pTxt->mStyle & IText::kStyleBold ? FW_BOLD : FW_NORMAL);
-    int it = (pTxt->mStyle & IText::kStyleItalic ? TRUE : FALSE);
+	LICE_CachedFont* font = (LICE_CachedFont*)s_fontCache.Find(pTxt, scale);
+	if (!font)
+	{
+		font = new LICE_CachedFont;
+		int h = pTxt->mSize >> scale;
+		const int esc = 10 * pTxt->mOrientation;
+		const int wt = pTxt->mStyle & IText::kStyleBold ? FW_BOLD : FW_NORMAL;
+		const int it = pTxt->mStyle & IText::kStyleItalic ? TRUE : FALSE;
 
-    int q;
-    if (pTxt->mQuality == IText::kQualityDefault)
-      q = DEFAULT_QUALITY;
-  #ifdef CLEARTYPE_QUALITY
-    else if (pTxt->mQuality == IText::kQualityClearType)
-      q = CLEARTYPE_QUALITY;
-    else if (pTxt->mQuality == IText::kQualityAntiAliased)
-  #else
-    else if (pTxt->mQuality != IText::kQualityNonAntiAliased)
-  #endif
-      q = ANTIALIASED_QUALITY;
-    else // if (pTxt->mQuality == IText::kQualityNonAntiAliased)
-      q = NONANTIALIASED_QUALITY;
+		static const int quality[4] =
+		{
+			DEFAULT_QUALITY,
+			NONANTIALIASED_QUALITY,
+			ANTIALIASED_QUALITY,
 
-  #ifdef __APPLE__
-    bool resized = false;
-Resize:
-    if (h < 2) h = 2;
-  #endif
-    HFONT hFont = CreateFont(h, 0, esc, esc, wt, it, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, q, DEFAULT_PITCH, pTxt->mFont);
-    if (!hFont)
-    {
-      delete(font);
-      return 0;
-    }
-    font->SetFromHFont(hFont, LICE_FONT_FLAG_OWNS_HFONT | LICE_FONT_FLAG_FORCE_NATIVE);
-  #ifdef __APPLE__
-    if (!resized && font->GetLineHeight() != h)
-    {
-      h = int((double)(h * h) / (double)font->GetLineHeight() + 0.5);
-      resized = true;
-      goto Resize;
-    }
-  #endif
-    s_fontCache.Add(font, pTxt);
-  }
-  pTxt->mCached = font;
-  return font;
+			#ifdef CLEARTYPE_QUALITY
+			CLEARTYPE_QUALITY
+			#else
+			ANTIALIASED_QUALITY
+			#endif
+		};
+
+		assert(pTxt->mQuality >= 0 && pTxt->mQuality < 4);
+		const int q = quality[pTxt->mQuality];
+
+		#ifdef __APPLE__
+		bool resized = false;
+		for (;;)
+		{
+			if (h < 2) h = 2;
+			#endif
+			HFONT hFont = CreateFont(h, 0, esc, esc, wt, it, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, q, DEFAULT_PITCH, pTxt->mFont);
+			if (!hFont)
+			{
+				delete font;
+				return NULL;
+			}
+			font->SetFromHFont(hFont, LICE_FONT_FLAG_OWNS_HFONT | LICE_FONT_FLAG_FORCE_NATIVE);
+			#ifdef __APPLE__
+			int l;
+			if (resized || (l = font->GetLineHeight()) == h) break;
+
+			h = (int)((double)(h * h) / (double)l + 0.5);
+			resized = true;
+		}
+		#endif
+		s_fontCache.Add(font, pTxt, scale);
+	}
+	pTxt->mCached = font;
+	return font;
 }
 
 IColor IGraphics::GetPoint(int x, int y)
