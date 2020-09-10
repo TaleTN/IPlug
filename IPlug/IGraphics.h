@@ -26,6 +26,8 @@ public:
 	static const int kMaxParamLen = 32;
 	static const int kMaxEditLen = kMaxParamLen;
 
+	enum EGUIScale { kScaleFull = 0, kScaleHalf = 1 };
+
 	bool PrepDraw(int wantScale); // Recale the draw bitmap.
 	bool IsDirty(IRECT* pR); // Ask the plugin what needs to be redrawn.
 	void Draw(const IRECT* pR); // The system announces what needs to be redrawn. Ordering and drawing logic.
@@ -90,7 +92,11 @@ public:
 
 	inline int Width() const { return mWidth; }
 	inline int Height() const { return mHeight; }
+	inline int Scale() const { return mScale < 0 ? kScaleFull : mScale; }
 	inline int FPS() const { return mFPS; }
+
+	bool PreloadScale(const int scale) { return mScale < 0 ? PrepDraw(scale) : true; }
+	void Rescale(int scale);
 
   IPlugBase* GetPlug() { return mPlug; }
   
@@ -195,7 +201,7 @@ protected:
 private:
 	// LICE_MemBitmap* mTmpBitmap;
 
-	int mWidth, mHeight, mFPS, mIdleTicks;
+	int mWidth, mHeight, mScale, mFPS, mIdleTicks;
 	int GetMouseControlIdx(int x, int y);
 	int mMouseCapture, mMouseOver, mMouseX, mMouseY;
 	bool mHandleMouseOver, mEnableTooltips, mDisplayControlValue;

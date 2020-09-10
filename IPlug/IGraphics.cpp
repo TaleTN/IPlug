@@ -339,6 +339,17 @@ void IGraphics::ReleaseBitmap(IBitmap* pBitmap)
   s_bitmapCache.Remove((LICE_IBitmap*)pBitmap->mData);
 }
 
+void IGraphics::Rescale(const int scale)
+{
+	assert(scale == kScaleFull || scale == kScaleHalf);
+
+	const int w = mWidth >> scale;
+	const int h = mHeight >> scale;
+	mScale = scale;
+
+	mDrawBitmap.resize(w, h);
+}
+
 bool IGraphics::PrepDraw(const int wantScale)
 {
 	if (wantScale != mScale && mPlug->OnGUIRescale(wantScale))
