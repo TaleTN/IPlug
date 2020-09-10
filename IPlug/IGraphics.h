@@ -12,14 +12,6 @@
 	#define IPLUG_NO_CARBON_SUPPORT
 #endif
 
-// Specialty stuff for calling in to Reaper for Lice functionality.
-#ifdef REAPER_SPECIAL
-  #include "../IPlugExt/ReaperExt.h"
-  #define _LICE ReaperExt
-#else
-  #define _LICE
-#endif
-
 #define MAX_PARAM_LEN 32
 #define MAX_EDIT_LEN  1000
 
