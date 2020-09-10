@@ -54,7 +54,7 @@ public:
 	int DrawIText(IText* pTxt, const char* str, const IRECT* pR);
 	int MeasureIText(IText* pTxt, const char* str, IRECT* pR);
 
-  IColor GetPoint(int x, int y);
+	IColor GetPoint(int x, int y);
   void* GetData() { return GetBits(); }
 
 	// Methods for the OS implementation class.  

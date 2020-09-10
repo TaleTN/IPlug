@@ -670,10 +670,11 @@ LICE_CachedFont* IGraphics::CacheFont(IText* const pTxt, const int scale)
 	return font;
 }
 
-IColor IGraphics::GetPoint(int x, int y)
+IColor IGraphics::GetPoint(const int x, const int y)
 {
-  LICE_pixel pix = _LICE::LICE_GetPixel(mDrawBitmap, x, y);
-  return IColor(LICE_GETA(pix), LICE_GETR(pix), LICE_GETG(pix), LICE_GETB(pix));
+	const int scale = Scale();
+	const LICE_pixel pix = LICE_GetPixel(&mDrawBitmap, x >> scale, y >> scale);
+	return IColor(LICE_GETA(pix), LICE_GETR(pix), LICE_GETG(pix), LICE_GETB(pix));
 }
 
 bool IGraphics::DrawVerticalLine(const IColor* pColor, int xi, int yLo, int yHi)
