@@ -59,7 +59,7 @@ public:
 
 	// Methods for the OS implementation class.
 	// virtual void Resize(int w, int h);
-	virtual bool WindowIsOpen() { return (GetWindow()); }
+	virtual bool WindowIsOpen() const { return !!GetWindow(); }
 	virtual void PromptUserInput(IControl* pControl, IParam* pParam) = 0;
 	virtual void PromptUserInput(IEditableTextControl* pControl) = 0;
 	void SetFromStringAfterPrompt(IControl* pControl, IParam* pParam, char *txt);
