@@ -87,11 +87,11 @@ public:
 
 	IGraphics(IPlugBase* pPlug, int w, int h, int refreshFPS = 0);
 	virtual ~IGraphics();
-  
-  int Width() { return mWidth; }
-  int Height() { return mHeight; }
-  int FPS() { return mFPS; }
-  
+
+	inline int Width() const { return mWidth; }
+	inline int Height() const { return mHeight; }
+	inline int FPS() const { return mFPS; }
+
   IPlugBase* GetPlug() { return mPlug; }
   
 	IBitmap LoadIBitmap(int ID, const char* name, int nStates = 1);
