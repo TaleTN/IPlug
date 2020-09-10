@@ -155,6 +155,8 @@ public:
 	}
 
 	IControl* GetControl(const int idx) const { return mControls.Get(idx); }
+	IControl** GetControls() const { return mControls.GetList(); }
+
   void HideControl(int paramIdx, bool hide);
   void GrayOutControl(int paramIdx, bool gray);
   
