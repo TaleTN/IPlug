@@ -997,10 +997,11 @@ void IGraphics::OnMouseWheel(const int x, const int y, const IMouseMod mod, cons
 	}
 }
 
-void IGraphics::OnKeyDown(int x, int y, int key)
+void IGraphics::OnKeyDown(const int x, const int y, const int key)
 {
-	int c = GetMouseControlIdx(x, y);
-	if (c >= 0) {
+	const int c = GetMouseControlIdx(x, y);
+	if (c >= 0)
+	{
 		mControls.Get(c)->OnKeyDown(x, y, key);
 	}
 }
