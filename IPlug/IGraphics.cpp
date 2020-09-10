@@ -637,7 +637,12 @@ LICE_CachedFont* IGraphics::CacheFont(IText* const pTxt, const int scale)
 			resized = true;
 		}
 		#endif
-		s_fontCache.Add(font, pTxt, scale);
+		LICE_CachedFont* const cached = (LICE_CachedFont*)s_fontCache.Add(font, pTxt, scale);
+		if (cached != font)
+		{
+			delete font;
+			font = cached;
+		}
 	}
 	pTxt->mCached = font;
 	return font;
