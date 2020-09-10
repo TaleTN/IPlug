@@ -21,8 +21,10 @@ class IGraphics
 public:
 	static const int kDefaultFPS = 24;
 
+	#ifdef IPLUG_USE_IDLE_CALLS
 	// If not dirty for this many timer ticks, we call OnGUIIDle.
 	static const int kIdleTicks = 20;
+	#endif
 
 	static const int kMaxParamLen = 32;
 	static const int kMaxEditLen = kMaxParamLen;
@@ -224,9 +226,11 @@ public:
 	// Updates tooltips after (un)hiding controls.
 	virtual void UpdateTooltips() = 0;
 
-	// This is an idle call from the GUI thread, as opposed to 
+	// This is an idle call from the GUI thread, as opposed to
 	// IPlug::OnIdle which is called from the audio processing thread.
+	#ifdef IPLUG_USE_IDLE_CALLS
 	void OnGUIIdle();
+	#endif
 
       LICE_pixel* GetBits();
 
@@ -257,9 +261,13 @@ protected:
 private:
 	// LICE_MemBitmap* mTmpBitmap;
 
-	int mWidth, mHeight, mScale, mFPS, mIdleTicks;
+	int mWidth, mHeight, mScale, mFPS;
 	int GetMouseControlIdx(int x, int y);
 	int mMouseCapture, mMouseOver, mMouseX, mMouseY;
 	bool mHandleMouseOver, mEnableTooltips;
 	char mHandleMouseWheel;
+
+	#ifdef IPLUG_USE_IDLE_CALLS
+	int mIdleTicks;
+	#endif
 };

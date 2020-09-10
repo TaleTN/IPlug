@@ -145,7 +145,6 @@ IGraphics::IGraphics(
 	mHeight(h),
 	mScale(-1),
 	mFPS(refreshFPS > 0 ? refreshFPS : kDefaultFPS),
-	mIdleTicks(0),
 	mMouseCapture(-1),
 	mMouseOver(-1),
 	mMouseX(0),
@@ -153,6 +152,10 @@ IGraphics::IGraphics(
 	mHandleMouseOver(false),
 	mEnableTooltips(false),
 	mHandleMouseWheel(kMouseWheelEnable)
+
+	#ifdef IPLUG_USE_IDLE_CALLS
+	, mIdleTicks(0)
+	#endif
 {
 }
 
@@ -1008,12 +1011,15 @@ int IGraphics::GetMouseControlIdx(const int x, const int y)
 	return -1;
 }
 
+#ifdef IPLUG_USE_IDLE_CALLS
 void IGraphics::OnGUIIdle()
 {
-  int i, n = mControls.GetSize();
-  IControl** ppControl = mControls.GetList();
-	for (i = 0; i < n; ++i, ++ppControl) {
-		IControl* pControl = *ppControl;
+	const int n = mControls.GetSize();
+	IControl* const* const ppControl = mControls.GetList();
+	for (int i = 0; i < n; ++i)
+	{
+		IControl* const pControl = ppControl[i];
 		pControl->OnGUIIdle();
 	}
 }
+#endif
