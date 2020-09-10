@@ -214,8 +214,6 @@ public:
 
 	void OnKeyDown(int x, int y, int key);
 
-  void DisplayControlValue(IControl* pControl);
-  
   // Enables/disables tooltips; also enables mouseovers/mouseouts if necessary.
   inline void EnableTooltips(bool enable)
   {
@@ -262,6 +260,6 @@ private:
 	int mWidth, mHeight, mScale, mFPS, mIdleTicks;
 	int GetMouseControlIdx(int x, int y);
 	int mMouseCapture, mMouseOver, mMouseX, mMouseY;
-	bool mHandleMouseOver, mEnableTooltips, mDisplayControlValue;
+	bool mHandleMouseOver, mEnableTooltips;
 	char mHandleMouseWheel;
 };
