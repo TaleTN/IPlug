@@ -316,6 +316,14 @@ void IGraphics::SetParameterFromGUI(int paramIdx, double normalizedValue)
 	}
 }
 
+void IGraphics::LoadBitmapResources(const BitmapResource* const pResources)
+{
+	for (int i = 0; pResources[i].mID; ++i)
+	{
+		LoadIBitmap(pResources[i].mID, pResources[i].Name());
+	}
+}
+
 IBitmap IGraphics::LoadIBitmap(int ID, const char* name, int nStates)
 {
   LICE_IBitmap* lb = s_bitmapCache.Find(ID); 

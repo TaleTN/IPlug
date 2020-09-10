@@ -98,6 +98,35 @@ public:
 	bool PreloadScale(const int scale) { return mScale < 0 ? PrepDraw(scale) : true; }
 	void Rescale(int scale);
 
+	// Resource wrapper for constructing tables with bitmap resources at
+	// different GUI scales. See also IPLUG_RESOURCE macro in IGraphicsWin.h
+	// and IGraphicsMac.h.
+	struct BitmapResource
+	{
+		int mID;
+		#ifndef _WIN32
+		const char* mName;
+		#endif
+
+		inline BitmapResource(const int id = 0, const char* const name = NULL)
+		: mID(id)
+		#ifndef _WIN32
+		, mName(name)
+		#endif
+		{}
+
+		inline int ID() const { return mID & ~1; }
+		inline int Scale() const { return mID & 1; }
+
+		#ifndef _WIN32
+		inline const char* Name() const { return mName; }
+		#else
+		static inline const char* Name() { return NULL; }
+		#endif
+	};
+
+	void LoadBitmapResources(const BitmapResource* pResources);
+
   IPlugBase* GetPlug() { return mPlug; }
   
 	IBitmap LoadIBitmap(int ID, const char* name, int nStates = 1);
