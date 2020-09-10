@@ -1006,20 +1006,20 @@ void IGraphics::OnKeyDown(const int x, const int y, const int key)
 	}
 }
 
-int IGraphics::GetMouseControlIdx(int x, int y)
+int IGraphics::GetMouseControlIdx(const int x, const int y)
 {
-	if (mMouseCapture >= 0) {
-		return mMouseCapture;
-	}
+	if (mMouseCapture >= 0) return mMouseCapture;
+
 	// The BG is a control and will catch everything, so assume the programmer
 	// attached the controls from back to front, and return the frontmost match.
-  int i = mControls.GetSize() - 1;
-  IControl** ppControl = mControls.GetList() + i;
-	for (/* */; i >= 0; --i, --ppControl) {
-    IControl* pControl = *ppControl;
-    if (!pControl->IsHidden() && !pControl->IsGrayed() && pControl->IsHit(x, y)) {
-      return i;
-    }
+	IControl* const* const ppControl = mControls.GetList();
+	for (int i = mControls.GetSize() - 1; i >= 0; --i)
+	{
+		IControl* const pControl = ppControl[i];
+		if (!pControl->IsHidden() && !pControl->IsGrayed() && pControl->IsHit(x, y))
+		{
+			return i;
+		}
 	}
 	return -1;
 }
