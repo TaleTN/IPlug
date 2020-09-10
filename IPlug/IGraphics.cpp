@@ -394,12 +394,12 @@ void IGraphics::DrawPoint(const IColor color, float x, float y, const float weig
 	LICE_PutPixel(&mDrawBitmap, (int)(x + 0.5f), (int)(y + 0.5f), color.Get(), weight, IChannelBlend::kBlendNone);
 }
 
-bool IGraphics::ForcePixel(const IColor* pColor, int x, int y)
+void IGraphics::ForcePixel(const IColor color, const int x, const int y)
 {
-  LICE_pixel* px = mDrawBitmap->getBits();
-  px += x + y * mDrawBitmap->getRowSpan();
-  *px = LiceColor(pColor);
-  return true;
+	const int scale = Scale();
+	LICE_pixel* px = mDrawBitmap.getBits();
+	px += (x >> scale) + (y >> scale) * mDrawBitmap.getRowSpan();
+	*px = color.Get();
 }
 
 bool IGraphics::DrawLine(const IColor* pColor, float x1, float y1, float x2, float y2,

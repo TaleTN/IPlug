@@ -37,8 +37,8 @@ public:
 	void DrawRotatedBitmap(const IBitmap* pBitmap, int destCtrX, int destCtrY, double angle, int yOffsetZeroDeg = 0, float weight = 1.0f);
 	// void DrawRotatedMask(const IBitmap* pBase, const IBitmap* pMask, const IBitmap* pTop, int x, int y, double angle, float weight = 1.0f);
 	void DrawPoint(IColor color, float x, float y, float weight = 1.0f);
-  // Live ammo!  Will crash if out of bounds!  etc.
-  bool ForcePixel(const IColor* pColor, int x, int y);
+	// Live ammo! Will crash if out of bounds! etc.
+	void ForcePixel(IColor color, int x, int y);
 	bool DrawLine(const IColor* pColor, float x1, float y1, float x2, float y2,
 		const IChannelBlend* pBlend = 0, bool antiAlias = false);
 	bool DrawArc(const IColor* pColor, float cx, float cy, float r, float minAngle, float maxAngle, 
