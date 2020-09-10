@@ -193,8 +193,6 @@ public:
 	// IPlug::OnIdle which is called from the audio processing thread.
 	void OnGUIIdle();
 
-  void RetainBitmap(IBitmap* pBitmap);
-  void ReleaseBitmap(IBitmap* pBitmap);
       LICE_pixel* GetBits();
 
   // For controls that need to interface directly with LICE.

@@ -332,16 +332,6 @@ IBitmap IGraphics::LoadIBitmap(const int ID, const char* const name, const int n
 	return IBitmap(lb, lb->getWidth(), lb->getHeight() / nStates, nStates);
 }
 
-void IGraphics::RetainBitmap(IBitmap* pBitmap)
-{
-  s_bitmapCache.Add((LICE_IBitmap*)pBitmap->mData);
-}
-
-void IGraphics::ReleaseBitmap(IBitmap* pBitmap)
-{
-  s_bitmapCache.Remove((LICE_IBitmap*)pBitmap->mData);
-}
-
 void IGraphics::Rescale(const int scale)
 {
 	assert(scale == kScaleFull || scale == kScaleHalf);
