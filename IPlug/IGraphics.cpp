@@ -121,38 +121,6 @@ public:
 
 static FontStorage s_fontCache;
 
-inline LICE_pixel LiceColor(const IColor* pColor) 
-{
-	return LICE_RGBA(pColor->R, pColor->G, pColor->B, pColor->A);
-}
-
-inline float LiceWeight(const IChannelBlend* pBlend)
-{
-    return (pBlend ? pBlend->mWeight : 1.0f);
-}
-
-inline int LiceBlendMode(const IChannelBlend* pBlend)
-{
-  if (!pBlend) {
-      return LICE_BLIT_MODE_COPY | LICE_BLIT_USE_ALPHA;
-  }
-  switch (pBlend->mMethod) {
-    case IChannelBlend::kBlendClobber: {
-		  return LICE_BLIT_MODE_COPY;
-    }
-    case IChannelBlend::kBlendAdd: {
-		  return LICE_BLIT_MODE_ADD | LICE_BLIT_USE_ALPHA;
-    }
-    case IChannelBlend::kBlendColorDodge: {
-      return LICE_BLIT_MODE_DODGE | LICE_BLIT_USE_ALPHA;
-    }
-	  case IChannelBlend::kBlendNone:
-    default: {
-		  return LICE_BLIT_MODE_COPY | LICE_BLIT_USE_ALPHA;
-    }
-	}
-}
-
 IGraphics::IGraphics(IPlugBase* pPlug, int w, int h, int refreshFPS)
 :	mPlug(pPlug), mWidth(w), mHeight(h), mIdleTicks(0), 
   mMouseCapture(-1), mMouseOver(-1), mMouseX(0), mMouseY(0), mHandleMouseOver(false), mEnableTooltips(false), mStrict(true), mDisplayControlValue(false), mDrawBitmap(0), mTmpBitmap(0)
