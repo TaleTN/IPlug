@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "WDL/mutex.h"
+#include "WDL/wdltypes.h"
 
 const int IGraphics::kDefaultFPS;
 
@@ -73,50 +74,72 @@ static BitmapStorage s_bitmapCache;
 class FontStorage
 {
 public:
+	struct FontKey
+	{
+		WDL_UINT64 style;
+		const char* face;
+		LICE_IFont* font;
+	};
 
-  struct FontKey
-  {
-    int size, orientation;
-    IText::EStyle style;
-    char face[FONT_LEN];
-    LICE_IFont* font;
-  };
+	WDL_PtrList<FontKey> m_fonts;
+	WDL_Mutex m_mutex;
 
-  WDL_PtrList<FontKey> m_fonts;
-  WDL_Mutex m_mutex;
+	static WDL_UINT64 PackStyle(const int size, const int style, const int orientation)
+	{
+		assert(style >= 0 && style < 8);
+		assert(orientation >= -268435456 && orientation < 268435456);
 
-  LICE_IFont* Find(IText* pTxt)
-  {
-    WDL_MutexLock lock(&m_mutex);
-    int i = 0, n = m_fonts.GetSize();
-    for (i = 0; i < n; ++i)
-    {
-      FontKey* key = m_fonts.Get(i);
-      if (key->size == pTxt->mSize && key->orientation == pTxt->mOrientation && key->style == pTxt->mStyle && !strcmp(key->face, pTxt->mFont)) return key->font;
-    }
-    return 0;
-  }
+		return ((WDL_UINT64)((orientation << 3) | style) << 32) | size;
+	}
 
-  void Add(LICE_IFont* font, IText* pTxt)
-  {
-    WDL_MutexLock lock(&m_mutex);
-    FontKey* key = m_fonts.Add(new FontKey);
-    key->size = pTxt->mSize;
-    key->orientation = pTxt->mOrientation;
-    key->style = pTxt->mStyle;
-    strcpy(key->face, pTxt->mFont);
-    key->font = font;
-  }
+	LICE_IFont* Find(const WDL_UINT64 style, const char* const face)
+	{
+		const int n = m_fonts.GetSize();
+		for (int i = 0; i < n; ++i)
+		{
+			const FontKey* const key = m_fonts.Get(i);
+			if (key->style == style && (key->face == face || !strcmp(key->face, face)))
+			{
+				return key->font;
+			}
+		}
+		return NULL;
+	}
 
-  ~FontStorage()
-  {
-    int i, n = m_fonts.GetSize();
-    for (i = 0; i < n; ++i)
-    {
-      delete(m_fonts.Get(i)->font);
-    }
-    m_fonts.Empty(true);
-  }
+	LICE_IFont* Find(const IText* const pTxt, const int scale = 0)
+	{
+		m_mutex.Enter();
+		const WDL_UINT64 style = PackStyle(pTxt->mSize >> scale, pTxt->mStyle, pTxt->mOrientation);
+		LICE_IFont* const font = Find(style, pTxt->mFont);
+		m_mutex.Leave();
+		return font;
+	}
+
+	LICE_IFont* Add(LICE_IFont* const font, const IText* const pTxt, const int scale = 0)
+	{
+		m_mutex.Enter();
+		const WDL_UINT64 style = PackStyle(pTxt->mSize >> scale, pTxt->mStyle, pTxt->mOrientation);
+		LICE_IFont* ret = Find(style, pTxt->mFont);
+		if (!ret)
+		{
+			FontKey* const key = m_fonts.Add(new FontKey);
+			key->style = style;
+			key->face = pTxt->mFont;
+			key->font = ret = font;
+		}
+		m_mutex.Leave();
+		return ret;
+	}
+
+	~FontStorage()
+	{
+		const int n = m_fonts.GetSize();
+		for (int i = 0; i < n; ++i)
+		{
+			delete m_fonts.Get(i)->font;
+		}
+		m_fonts.Empty(true);
+	}
 };
 
 static FontStorage s_fontCache;
