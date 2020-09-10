@@ -866,36 +866,38 @@ void IGraphics::Draw(const IRECT* const pR)
 	DrawScreen(pR);
 }
 
-void IGraphics::OnMouseDown(int x, int y, IMouseMod* pMod)
+void IGraphics::OnMouseDown(const int x, const int y, const IMouseMod mod)
 {
 	ReleaseMouseCapture();
-  int c = GetMouseControlIdx(x, y);
-	if (c >= 0) {
+	const int c = GetMouseControlIdx(x, y);
+	if (c >= 0)
+	{
 		mMouseCapture = c;
 		mMouseX = x;
 		mMouseY = y;
-    mDisplayControlValue = (pMod->R);
-    IControl* pControl = mControls.Get(c);
-    int paramIdx = pControl->ParamIdx();
-    if (paramIdx >= 0) {
-      mPlug->BeginInformHostOfParamChange(paramIdx);
-    }    
-    pControl->OnMouseDown(x, y, pMod);
-  }
+		IControl* const pControl = mControls.Get(c);
+		const int paramIdx = pControl->ParamIdx();
+		if (paramIdx >= 0)
+		{
+			mPlug->BeginInformHostOfParamChange(paramIdx);
+		}
+		pControl->OnMouseDown(x, y, mod);
+	}
 }
 
-void IGraphics::OnMouseUp(int x, int y, IMouseMod* pMod)
+void IGraphics::OnMouseUp(const int x, const int y, const IMouseMod mod)
 {
-	int c = GetMouseControlIdx(x, y);
-	mMouseCapture = mMouseX = mMouseY = -1;
-  mDisplayControlValue = false;
-	if (c >= 0) {
-    IControl* pControl = mControls.Get(c);
-		pControl->OnMouseUp(x, y, pMod);
-    int paramIdx = pControl->ParamIdx();
-    if (paramIdx >= 0) {
-      mPlug->EndInformHostOfParamChange(paramIdx);
-    }    
+	const int c = GetMouseControlIdx(x, y);
+	mMouseY = mMouseX = mMouseCapture = -1;
+	if (c >= 0)
+	{
+		IControl* const pControl = mControls.Get(c);
+		pControl->OnMouseUp(x, y, mod);
+		const int paramIdx = pControl->ParamIdx();
+		if (paramIdx >= 0)
+		{
+			mPlug->EndInformHostOfParamChange(paramIdx);
+		}
 	}
 }
 
