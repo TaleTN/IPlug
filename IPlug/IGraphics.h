@@ -143,6 +143,17 @@ public:
 		return mControls.Add(pControl) ? idx : -1;
 	}
 
+	int AttachControl(IControl* const pControl, const int ID)
+	{
+		mControlIDs.Insert(ID, pControl);
+		return AttachControl(pControl);
+	}
+
+	IControl* LookupControl(const int ID) const
+	{
+		return mControlIDs.Get(ID, NULL);
+	}
+
   IControl* GetControl(int idx) { return mControls.Get(idx); }
   void HideControl(int paramIdx, bool hide);
   void GrayOutControl(int paramIdx, bool gray);
@@ -216,6 +227,7 @@ public:
   };
   
 protected:
+	WDL_IntKeyedArray<IControl*> mControlIDs;
 	WDL_PtrList<IControl> mControls;
 	IPlugBase* mPlug;
 
