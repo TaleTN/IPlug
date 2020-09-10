@@ -382,12 +382,16 @@ void IGraphics::DrawRotatedBitmap(const IBitmap* const pIBitmap, const int destC
 	LICE_Blit(&mDrawBitmap, mTmpBitmap, x >> scale, y >> scale, 0, 0, W, H, weight, IChannelBlend::kBlendNone);
 } */
 
-bool IGraphics::DrawPoint(const IColor* pColor, float x, float y, 
-		const IChannelBlend* pBlend, bool antiAlias)
+void IGraphics::DrawPoint(const IColor color, float x, float y, const float weight)
 {
-  float weight = (pBlend ? pBlend->mWeight : 1.0f);
-  _LICE::LICE_PutPixel(mDrawBitmap, int(x + 0.5f), int(y + 0.5f), LiceColor(pColor), weight, LiceBlendMode(pBlend));
-	return true;
+	const int scale = Scale();
+	if (scale)
+	{
+		// const float mul = 1.0f / (float)(1 << scale);
+		assert(scale == 1); static const float mul = 0.5f;
+		x *= mul; y *= mul;
+	}
+	LICE_PutPixel(&mDrawBitmap, (int)(x + 0.5f), (int)(y + 0.5f), color.Get(), weight, IChannelBlend::kBlendNone);
 }
 
 bool IGraphics::ForcePixel(const IColor* pColor, int x, int y)
