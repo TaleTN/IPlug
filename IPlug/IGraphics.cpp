@@ -233,22 +233,26 @@ void IGraphics::GrayOutControl(const int paramIdx, const bool gray)
 	}
 }
 
-void IGraphics::ClampControl(int paramIdx, double lo, double hi, bool normalized)
+void IGraphics::ClampControl(const int paramIdx, double lo, double hi, const bool normalized)
 {
-  if (!normalized) {
-    IParam* pParam = mPlug->GetParam(paramIdx);
-    lo = pParam->GetNormalized(lo);
-    hi = pParam->GetNormalized(hi);
-  }  
-  int i, n = mControls.GetSize();
-  IControl** ppControl = mControls.GetList();
-	for (i = 0; i < n; ++i, ++ppControl) {
-    IControl* pControl = *ppControl;
-    if (pControl->ParamIdx() == paramIdx) {
-      pControl->Clamp(lo, hi);
-    }
-    // Could be more than one, don't break until we check them all.
-  }
+	if (!normalized)
+	{
+		const IParam* const pParam = mPlug->GetParam(paramIdx);
+		lo = pParam->GetNormalized(lo);
+		hi = pParam->GetNormalized(hi);
+	}
+	const int n = mControls.GetSize();
+	IControl* const* const ppControl = mControls.GetList();
+	for (int i = 0; i < n; ++i)
+	{
+		IControl* const pControl = ppControl[i];
+		if (pControl->ParamIdx() == paramIdx)
+		{
+			pControl->Clamp(lo, hi);
+			pControl->SetDirty();
+		}
+		// Could be more than one, don't break until we check them all.
+	}
 }
 
 void IGraphics::SetParameterFromPlug(int paramIdx, double value, bool normalized)

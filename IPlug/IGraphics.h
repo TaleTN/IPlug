@@ -163,8 +163,8 @@ public:
 	void HideControl(int paramIdx, bool hide);
 	void GrayOutControl(int paramIdx, bool gray);
 
-  // Normalized means the value is in [0, 1].
-  void ClampControl(int paramIdx, double lo, double hi, bool normalized);
+	// Normalized means the value is in [0, 1].
+	void ClampControl(int paramIdx, double lo, double hi, bool normalized);
   void SetParameterFromPlug(int paramIdx, double value, bool normalized);
   // For setting a control that does not have a parameter associated with it.
   void SetControlFromPlug(int controlIdx, double normalizedValue);
