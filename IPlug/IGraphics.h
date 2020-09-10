@@ -43,7 +43,8 @@ public:
 	void DrawArc(IColor color, float cx, float cy, float r, float minAngle, float maxAngle, float weight = 1.0f, bool antiAlias = false);
 	void DrawCircle(IColor color, float cx, float cy, float r, float weight = 1.0f, bool antiAlias = false);
 	void RoundRect(IColor color, const IRECT* pR, float weight, int cornerradius, bool aa);
-  bool FillRoundRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend, int cornerradius, bool aa);
+	// Warning: Might not work as expected if color.A < 255 or weight < 1.0f.
+	void FillRoundRect(IColor color, const IRECT* pR, float weight, int cornerradius, bool aa);
 
   bool FillIRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend = 0);
   bool FillCircle(const IColor* pColor, float cx, float cy, float r, const IChannelBlend* pBlend = 0, bool antiAlias = false);
