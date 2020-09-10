@@ -196,11 +196,11 @@ void IGraphics::SetFromStringAfterPrompt(IControl* const pControl, const IParam*
 	}
 }
 
-void IGraphics::AttachBackground(int ID, const char* name)
+void IGraphics::AttachBackground(const int ID, const char* const name)
 {
-  IBitmap bg = LoadIBitmap(ID, name);
-  IControl* pBG = new IBitmapControl(mPlug, 0, 0, -1, &bg, IChannelBlend::kBlendClobber);
-  mControls.Insert(0, pBG);
+	const IBitmap bg = LoadIBitmap(ID, name);
+	IControl* const pBG = new IBackgroundControl(mPlug, &bg);
+	mControls.Insert(0, pBG);
 }
 
 int IGraphics::AttachControl(IControl* pControl)

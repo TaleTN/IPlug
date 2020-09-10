@@ -133,7 +133,7 @@ public:
 	IBitmap LoadIBitmap(int ID, const char* name, int nStates = 1);
 	bool UpdateIBitmap(IBitmap* pBitmap);
 
-  void AttachBackground(int ID, const char* name);
+	void AttachBackground(int ID, const char* name);
   // Returns the control index of this control (not the number of controls).
 	int AttachControl(IControl* pControl);
 
