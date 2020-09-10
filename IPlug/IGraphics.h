@@ -178,10 +178,10 @@ public:
 	// Convenience wrappers.
 	void DrawBitmap(const IBitmap* pBitmap, const IRECT* pR, int bmpState = 1, float weight = 1.0f);
 	void DrawRect(IColor color, const IRECT* pR);
-  bool DrawVerticalLine(const IColor* pColor, IRECT* pR, float x);
-  bool DrawHorizontalLine(const IColor* pColor, IRECT* pR, float y);
-  bool DrawVerticalLine(const IColor* pColor, int xi, int yLo, int yHi);
-  bool DrawHorizontalLine(const IColor* pColor, int yi, int xLo, int xHi);
+	void DrawVerticalLine(IColor color, const IRECT* pR, float x);
+	void DrawHorizontalLine(IColor color, const IRECT* pR, float y);
+	void DrawVerticalLine(IColor color, int xi, int yLo, int yHi);
+	void DrawHorizontalLine(IColor color, int yi, int xLo, int xHi);
   bool DrawRadialLine(const IColor* pColor, float cx, float cy, float angle, float rMin, float rMax, 
     const IChannelBlend* pBlend = 0, bool antiAlias = false);
 

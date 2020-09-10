@@ -713,16 +713,20 @@ IColor IGraphics::GetPoint(const int x, const int y)
 	return IColor(LICE_GETA(pix), LICE_GETR(pix), LICE_GETG(pix), LICE_GETB(pix));
 }
 
-bool IGraphics::DrawVerticalLine(const IColor* pColor, int xi, int yLo, int yHi)
+void IGraphics::DrawVerticalLine(const IColor color, int xi, int yLo, int yHi)
 {
-  _LICE::LICE_Line(mDrawBitmap, (float)xi, (float)yLo, (float)xi, (float)yHi, LiceColor(pColor), 1.0f, LICE_BLIT_MODE_COPY, false);
-  return true;
+	const int scale = Scale();
+	if (scale) { xi >>= scale; yLo >>= scale; yHi >>= scale; }
+
+	LICE_Line(&mDrawBitmap, xi, yLo, xi, yHi, color.Get(), 1.0f, LICE_BLIT_MODE_COPY, false);
 }
 
-bool IGraphics::DrawHorizontalLine(const IColor* pColor, int yi, int xLo, int xHi)
+void IGraphics::DrawHorizontalLine(const IColor color, int yi, int xLo, int xHi)
 {
-  _LICE::LICE_Line(mDrawBitmap, (float)xLo, (float)yi, (float)xHi, (float)yi, LiceColor(pColor), 1.0f, LICE_BLIT_MODE_COPY, false);
-  return true;
+	const int scale = Scale();
+	if (scale) { yi >>= scale; xLo >>= scale; xHi >>= scale; }
+
+	LICE_Line(&mDrawBitmap, xLo, yi, xHi, yi, color.Get(), 1.0f, LICE_BLIT_MODE_COPY, false);
 }
 
 LICE_pixel* IGraphics::GetBits()
@@ -750,18 +754,22 @@ void IGraphics::DrawRect(const IColor color, const IRECT* const pR)
 	DrawVerticalLine(color, pR->R, pR->T, pR->B);
 }
 
-bool IGraphics::DrawVerticalLine(const IColor* pColor, IRECT* pR, float x)
+void IGraphics::DrawVerticalLine(const IColor color, const IRECT* const pR, float x)
 {
-  x = BOUNDED(x, 0.0f, 1.0f);
-  int xi = pR->L + int(x * (float) (pR->R - pR->L));
-  return DrawVerticalLine(pColor, xi, pR->T, pR->B);
+	x = wdl_max(x, 0.0f);
+	x = wdl_min(x, 1.0f);
+
+	const int xi = pR->L + (int)(x * (float)pR->W());
+	DrawVerticalLine(color, xi, pR->T, pR->B);
 }
 
-bool IGraphics::DrawHorizontalLine(const IColor* pColor, IRECT* pR, float y)
+void IGraphics::DrawHorizontalLine(const IColor color, const IRECT* const pR, float y)
 {
-  y = BOUNDED(y, 0.0f, 1.0f);
-  int yi = pR->B - int(y * (float) (pR->B - pR->T));
-  return DrawHorizontalLine(pColor, yi, pR->L, pR->R);
+	y = wdl_max(y, 0.0f);
+	y = wdl_min(y, 1.0f);
+
+	const int yi = pR->B - (int)(y * (float)pR->H());
+	DrawHorizontalLine(color, yi, pR->L, pR->R);
 }
 
 bool IGraphics::DrawRadialLine(const IColor* pColor, float cx, float cy, float angle, float rMin, float rMax, 
