@@ -255,30 +255,30 @@ void IGraphics::ClampControl(const int paramIdx, double lo, double hi, const boo
 	}
 }
 
-void IGraphics::SetParameterFromPlug(int paramIdx, double value, bool normalized)
+void IGraphics::SetParameterFromPlug(const int paramIdx, double value, const bool normalized)
 {
-  if (!normalized) {
-    IParam* pParam = mPlug->GetParam(paramIdx);
-    value = pParam->GetNormalized(value);
-  }  
-  int i, n = mControls.GetSize();
-  IControl** ppControl = mControls.GetList();
-	for (i = 0; i < n; ++i, ++ppControl) {
-    IControl* pControl = *ppControl;
-    if (pControl->ParamIdx() == paramIdx) {
-      //WDL_MutexLock lock(&mMutex);
-      pControl->SetValueFromPlug(value);
-      // Could be more than one, don't break until we check them all.
-    }
-  }
+	if (!normalized)
+	{
+		const IParam* const pParam = mPlug->GetParam(paramIdx);
+		value = pParam->GetNormalized(value);
+	}
+	const int n = mControls.GetSize();
+	IControl* const* const ppControl = mControls.GetList();
+	for (int i = 0; i < n; ++i)
+	{
+		IControl* const pControl = ppControl[i];
+		if (pControl->ParamIdx() == paramIdx)
+		{
+			pControl->SetValueFromPlug(value);
+			// Could be more than one, don't break until we check them all.
+		}
+	}
 }
 
-void IGraphics::SetControlFromPlug(int controlIdx, double normalizedValue)
+void IGraphics::SetControlFromPlug(const int controlIdx, const double normalizedValue)
 {
-  if (controlIdx >= 0 && controlIdx < mControls.GetSize()) {
-    //WDL_MutexLock lock(&mMutex);
-    mControls.Get(controlIdx)->SetValueFromPlug(normalizedValue);
-  }
+	IControl* const pControl = mControls.Get(controlIdx);
+	if (pControl) pControl->SetValueFromPlug(normalizedValue);
 }
 
 void IGraphics::SetAllControlsDirty()
