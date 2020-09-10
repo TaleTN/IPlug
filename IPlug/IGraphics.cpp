@@ -324,17 +324,26 @@ void IGraphics::LoadBitmapResources(const BitmapResource* const pResources)
 	}
 }
 
-IBitmap IGraphics::LoadIBitmap(int ID, const char* name, int nStates)
+IBitmap IGraphics::LoadIBitmap(const int ID, const char* const name, const int nStates)
 {
-  LICE_IBitmap* lb = s_bitmapCache.Find(ID); 
-  if (!lb)
-  {
-    lb = OSLoadBitmap(ID, name);
-    bool imgResourceFound = (lb);
-    assert(imgResourceFound); // Protect against typos in resource.h and .rc files.
-    s_bitmapCache.Add(lb, ID);
-  }
-  return IBitmap(lb, lb->getWidth(), lb->getHeight(), nStates);
+	LICE_IBitmap* lb = s_bitmapCache.Find(ID);
+	if (!lb)
+	{
+		lb = OSLoadBitmap(ID, name);
+
+		#ifndef NDEBUG
+		{
+			// Protect against typos in resource.h and .rc files.
+			// Also, don't forget to add image files to Xcode project,
+			// and beware that on macOS filenames are case-sensitive.
+			const bool imgResourceNotFound = !!lb;
+			assert(imgResourceNotFound);
+		}
+		#endif
+
+		s_bitmapCache.Add(lb, ID);
+	}
+	return IBitmap(lb, lb->getWidth(), lb->getHeight() / nStates, nStates);
 }
 
 void IGraphics::RetainBitmap(IBitmap* pBitmap)
