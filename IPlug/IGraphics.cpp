@@ -14,61 +14,47 @@ const int IGraphics::kDefaultFPS;
 class BitmapStorage
 {
 public:
+	WDL_IntKeyedArray<LICE_IBitmap*> m_bitmaps;
+	WDL_Mutex m_mutex;
 
-  struct BitmapKey
-  {
-    int id;
-    LICE_IBitmap* bitmap;
-  };
-  
-  WDL_PtrList<BitmapKey> m_bitmaps;
-  WDL_Mutex m_mutex;
+	BitmapStorage(): m_bitmaps(Dispose) {}
 
-  LICE_IBitmap* Find(int id)
-  {
-    WDL_MutexLock lock(&m_mutex);
-    int i, n = m_bitmaps.GetSize();
-    for (i = 0; i < n; ++i)
-    {
-      BitmapKey* key = m_bitmaps.Get(i);
-      if (key->id == id) return key->bitmap;
-    }
-    return 0;
-  }
+	LICE_IBitmap* Find(const int id)
+	{
+		m_mutex.Enter();
+		LICE_IBitmap* const bitmap = m_bitmaps.Get(id, NULL);
+		m_mutex.Leave();
+		return bitmap;
+	}
 
-  void Add(LICE_IBitmap* bitmap, int id = -1)
-  {
-    WDL_MutexLock lock(&m_mutex);
-    BitmapKey* key = m_bitmaps.Add(new BitmapKey);
-    key->id = id;
-    key->bitmap = bitmap;
-  }
+	void Add(LICE_IBitmap* const bitmap, const int id)
+	{
+		m_mutex.Enter();
+		m_bitmaps.Insert(id, bitmap);
+		m_mutex.Leave();
+	}
 
-  void Remove(LICE_IBitmap* bitmap)
-  {
-    WDL_MutexLock lock(&m_mutex);
-    int i, n = m_bitmaps.GetSize();
-    for (i = 0; i < n; ++i)
-    {
-      if (m_bitmaps.Get(i)->bitmap == bitmap)
-      {
-        m_bitmaps.Delete(i, true);
-        delete(bitmap);
-        break;
-      }
-    }
-  }
+	/* void Remove(LICE_IBitmap* const bitmap)
+	{
+		m_mutex.Enter();
+		const int* const id = m_bitmaps.ReverseLookupPtr(bitmap);
+		if (id)
+		{
+			m_bitmaps.Delete(*id);
+			delete bitmap;
+		}
+		m_mutex.Leave();
+	} */
 
-  ~BitmapStorage()
-  {
-    int i, n = m_bitmaps.GetSize();
-    for (i = 0; i < n; ++i)
-    {
-      delete(m_bitmaps.Get(i)->bitmap);
-    }
-    m_bitmaps.Empty(true);
-  }
+	static void Dispose(LICE_IBitmap* const bitmap)
+	{
+		delete bitmap;
+	}
+
+	static const LICE_WrapperBitmap kEmptyBitmap;
 };
+
+const LICE_WrapperBitmap BitmapStorage::kEmptyBitmap(NULL, 0, 0, 0, false);
 
 static BitmapStorage s_bitmapCache;
 

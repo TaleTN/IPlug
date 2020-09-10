@@ -5,6 +5,7 @@
 #include "WDL/lice/lice.h"
 #include "WDL/lice/lice_text.h"
 
+#include "WDL/assocarray.h"
 #include "WDL/ptrlist.h"
 
 #if defined(__APPLE__) && defined(__LP64__) && !defined(IPLUG_NO_CARBON_SUPPORT)
