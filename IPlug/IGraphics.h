@@ -28,8 +28,8 @@ public:
 
 	bool PrepDraw(int wantScale); // Recale the draw bitmap.
 	bool IsDirty(IRECT* pR); // Ask the plugin what needs to be redrawn.
-  bool Draw(IRECT* pR);           // The system announces what needs to be redrawn.  Ordering and drawing logic.
-  virtual bool DrawScreen(IRECT* pR) = 0;  // Tells the OS class to put the final bitmap on the screen.
+	void Draw(const IRECT* pR); // The system announces what needs to be redrawn. Ordering and drawing logic.
+	virtual void DrawScreen(const IRECT* pR) = 0; // Tells the OS class to put the final bitmap on the screen.
 
   // Methods for the drawing implementation class.
 	bool DrawBitmap(IBitmap* pBitmap, IRECT* pDest, int srcX, int srcY,
@@ -84,13 +84,6 @@ public:
   virtual void SetParamChangeTimer(int ticks) = 0;
   virtual void CancelParamChangeTimer() = 0;
 
-  // Strict (default): draw everything within the smallest rectangle that contains everything dirty.
-  // Every control is guaranteed to get no more than one Draw() call per cycle.
-  // Fast: draw only controls that intersect something dirty.
-  // If there are overlapping controls, fast drawing can generate multiple Draw() calls per cycle
-  // (a control may be asked to draw multiple parts of itself, if it intersects with something dirty.)
-  void SetStrictDrawing(bool strict);
-  
   virtual void* OpenWindow(void* pParentWnd) = 0;
   virtual void* OpenWindow(void* pParentWnd, void* pParentControl) { return 0; }  // For OSX Carbon hosts ... ugh.
 	virtual void CloseWindow() = 0;  
@@ -192,7 +185,6 @@ protected:
 
   WDL_PtrList<IControl> mControls;
 	IPlugBase* mPlug;
-  IRECT mDrawRECT;
 
   bool CanHandleMouseOver() { return mHandleMouseOver; }
   inline int GetMouseOver() const { return mMouseOver; }
@@ -212,5 +204,5 @@ private:
 	int mWidth, mHeight, mFPS, mIdleTicks;
 	int GetMouseControlIdx(int x, int y);
 	int mMouseCapture, mMouseOver, mMouseX, mMouseY;
-  bool mHandleMouseOver, mEnableTooltips, mStrict, mDisplayControlValue;
+	bool mHandleMouseOver, mEnableTooltips, mDisplayControlValue;
 };

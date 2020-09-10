@@ -763,68 +763,21 @@ void IGraphics::DisplayControlValue(IControl* pControl)
                          
 // The OS is announcing what needs to be redrawn,
 // which may be a larger area than what is strictly dirty.
-bool IGraphics::Draw(IRECT* pR)
+void IGraphics::Draw(const IRECT* const pR)
 {
-//  #pragma REMINDER("Mutex set while drawing")
-//  WDL_MutexLock lock(&mMutex);
-  
-  int i, j, n = mControls.GetSize();
-  if (!n) {
-    return true;
-  }
+	const int n = mControls.GetSize();
+	IControl* const* const ppControl = mControls.GetList();
+	for (int i = 0; i < n; ++i)
+	{
+		IControl* const pControl = ppControl[i];
+		if (!(pControl->IsHidden()) && pR->Intersects(pControl->GetRECT()))
+		{
+			pControl->Draw(this);
+		}
+		pControl->SetClean();
+	}
 
-  if (mStrict) {
-    mDrawRECT = *pR;
-    int n = mControls.GetSize();
-    IControl** ppControl = mControls.GetList();
-    for (int i = 0; i < n; ++i, ++ppControl) {
-      IControl* pControl = *ppControl;
-      if (!(pControl->IsHidden()) && pR->Intersects(pControl->GetRECT())) {
-        pControl->Draw(this);
-//        if (mDisplayControlValue && i == mMouseCapture) {
-//          DisplayControlValue(pControl);
-//        }        
-      }
-      pControl->SetClean();
-    }
-  }
-  else {
-    IControl* pBG = mControls.Get(0);
-    if (pBG->IsDirty()) { // Special case when everything needs to be drawn.
-      mDrawRECT = *(pBG->GetRECT());
-      for (int j = 0; j < n; ++j) {
-        IControl* pControl2 = mControls.Get(j);
-        if (!j || !(pControl2->IsHidden())) {
-          pControl2->Draw(this);
-          pControl2->SetClean();
-        }
-      }
-    }
-    else {
-      for (i = 1; i < n; ++i) {
-        IControl* pControl = mControls.Get(i);
-        if (pControl->IsDirty()) {
-          mDrawRECT = *(pControl->GetRECT()); 
-          for (j = 0; j < n; ++j) {
-            IControl* pControl2 = mControls.Get(j);
-            if (!pControl2->IsHidden() && (i == j || pControl2->GetRECT()->Intersects(&mDrawRECT))) {
-              pControl2->Draw(this);
-            }
-          }
-          pControl->SetClean();
-        }
-      }
-    }
-  }
-
-  return DrawScreen(pR);
-
-}
-
-void IGraphics::SetStrictDrawing(bool strict)
-{
-  mStrict = strict;
-  SetAllControlsDirty();
+	DrawScreen(pR);
 }
 
 void IGraphics::OnMouseDown(int x, int y, IMouseMod* pMod)
