@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "WDL/mutex.h"
@@ -170,35 +171,28 @@ IGraphics::~IGraphics()
 	mPlug->ResizeGraphics(w, h);
 } */
 
-void IGraphics::SetFromStringAfterPrompt(IControl* pControl, IParam* pParam, char *txt)
+void IGraphics::SetFromStringAfterPrompt(IControl* const pControl, const IParam* const pParam, const char* const txt)
 {
 	if (pParam)
 	{
 		double v;
-		bool mapped = pParam->GetNDisplayTexts();
-		if (mapped)
-		{
-			int vi;
-			mapped = pParam->MapDisplayText(txt, &vi);
-			if (mapped) v = (double)vi;
-		}
+		const bool mapped = pParam->MapDisplayText(txt, &v);
 		if (!mapped)
 		{
-			v = atof(txt);
+			v = strtod(txt, NULL);
 			if (pParam->DisplayIsNegated()) v = -v;
+			v = pParam->GetNormalized(v);
 		}
-		int paramIdx = pControl->ParamIdx();
-		if (paramIdx >= 0) {
+		const int paramIdx = pControl->ParamIdx();
+		if (paramIdx >= 0)
+		{
 			mPlug->BeginInformHostOfParamChange(paramIdx);
 		}
-    	pControl->SetValueFromUserInput(pParam->GetNormalized(v));
-		if (paramIdx >= 0) {
+		pControl->SetValueFromUserInput(v);
+		if (paramIdx >= 0)
+		{
 			mPlug->EndInformHostOfParamChange(paramIdx);
 		}
-	}
-	else // if (pControl)
-	{
-		if (((IEditableTextControl*)pControl)->IsEditable()) ((ITextControl*)pControl)->SetTextFromPlug(txt);
 	}
 }
 
