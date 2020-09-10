@@ -70,9 +70,8 @@ public:
 	virtual bool PromptForFile(WDL_String* pFilename, int action = kFileOpen, const char* dir = NULL, const char* extensions = NULL) = 0;
 	// virtual bool PromptForColor(IColor* pColor, const char* prompt = NULL) = 0;
 
-  virtual bool OpenURL(const char* url, 
-    const char* msgWindowTitle = 0, const char* confirmMsg = 0, const char* errMsgOnFailure = 0) = 0;
-  
+	virtual bool OpenURL(const char* url, const char* windowTitle = NULL, const char* confirmMsg = NULL, const char* errMsg = NULL) = 0;
+
   // Return 1 if mouse wheel is processed
   virtual int ProcessMouseWheel(float delta) { return 0; }
 
