@@ -68,7 +68,7 @@ public:
 	// Run the "open file" or "save file" dialog; extensions = "txt wav" for example.
 	enum EFileAction { kFileOpen = 0, kFileSave };
 	virtual bool PromptForFile(WDL_String* pFilename, int action = kFileOpen, const char* dir = NULL, const char* extensions = NULL) = 0;
-  virtual bool PromptForColor(IColor* pColor, char* prompt = 0) = 0;
+	// virtual bool PromptForColor(IColor* pColor, const char* prompt = NULL) = 0;
 
   virtual bool OpenURL(const char* url, 
     const char* msgWindowTitle = 0, const char* confirmMsg = 0, const char* errMsgOnFailure = 0) = 0;
