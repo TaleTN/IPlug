@@ -321,14 +321,15 @@ bool IGraphics::PrepDraw(const int wantScale)
 	return !!mDrawBitmap.getBits();
 }
 
-bool IGraphics::DrawBitmap(IBitmap* pIBitmap, IRECT* pDest, int srcX, int srcY, const IChannelBlend* pBlend)
+void IGraphics::DrawBitmap(const IBitmap* const pIBitmap, const IRECT* const pDest, int srcX, int srcY, const float weight)
 {
-  LICE_IBitmap* pLB = (LICE_IBitmap*) pIBitmap->mData;
-  IRECT r = pDest->Intersect(&mDrawRECT);
-  srcX += r.L - pDest->L;
-  srcY += r.T - pDest->T;
-  _LICE::LICE_Blit(mDrawBitmap, pLB, r.L, r.T, srcX, srcY, r.W(), r.H(), LiceWeight(pBlend), LiceBlendMode(pBlend));
-	return true;
+	LICE_IBitmap* const pLB = (LICE_IBitmap*)pIBitmap->mData;
+	IRECT r = *pDest;
+
+	const int scale = Scale();
+	if (scale) { r.Downscale(scale); srcX >>= scale; srcY >>= scale; }
+
+	LICE_Blit(&mDrawBitmap, pLB, r.L, r.T, srcX, srcY, r.W(), r.H(), weight, IChannelBlend::kBlendNone);
 }
 
 bool IGraphics::DrawRotatedBitmap(IBitmap* pIBitmap, int destCtrX, int destCtrY, double angle, int yOffsetZeroDeg,

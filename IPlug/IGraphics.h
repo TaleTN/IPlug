@@ -31,9 +31,9 @@ public:
 	void Draw(const IRECT* pR); // The system announces what needs to be redrawn. Ordering and drawing logic.
 	virtual void DrawScreen(const IRECT* pR) = 0; // Tells the OS class to put the final bitmap on the screen.
 
-  // Methods for the drawing implementation class.
-	bool DrawBitmap(IBitmap* pBitmap, IRECT* pDest, int srcX, int srcY,
-		const IChannelBlend* pBlend = 0); 
+	// Methods for the drawing implementation class. Coordinates, offset,
+	// radius, font, etc. are full scale; bitmaps are actual scale.
+	void DrawBitmap(const IBitmap* pBitmap, const IRECT* pDest, int srcX, int srcY, float weight = 1.0f);
 	bool DrawRotatedBitmap(IBitmap* pBitmap, int destCtrX, int destCtrY, double angle, int yOffsetZeroDeg = 0,
 		const IChannelBlend* pBlend = 0); 
 	bool DrawRotatedMask(IBitmap* pBase, IBitmap* pMask, IBitmap* pTop, int x, int y, double angle,
