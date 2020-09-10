@@ -190,7 +190,14 @@ public:
 	// Returns true if the control receiving the double click will treat it as a single click
 	// (meaning the OS should capture the mouse).
 	bool OnMouseDblClick(int x, int y, IMouseMod mod);
+
+	// Enable/disable mouse wheel, or handle only when combined with modifier key.
+	enum EHandleMouseWheel { kMouseWheelEnable = 1, kMouseWheelDisable = 0, kMouseWheelModKey = -1 };
+	inline void HandleMouseWheel(const int canHandle) { mHandleMouseWheel = canHandle; }
 	void OnMouseWheel(int x, int y, IMouseMod mod, float d);
+
+	inline int CanHandleMouseWheel() const { return mHandleMouseWheel; }
+
 	void OnKeyDown(int x, int y, int key);
 
   void DisplayControlValue(IControl* pControl);
@@ -255,4 +262,5 @@ private:
 	int GetMouseControlIdx(int x, int y);
 	int mMouseCapture, mMouseOver, mMouseX, mMouseY;
 	bool mHandleMouseOver, mEnableTooltips, mDisplayControlValue;
+	char mHandleMouseWheel;
 };

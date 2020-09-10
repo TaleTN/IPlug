@@ -151,7 +151,8 @@ IGraphics::IGraphics(
 	mMouseX(0),
 	mMouseY(0),
 	mHandleMouseOver(false),
-	mEnableTooltips(false)
+	mEnableTooltips(false),
+	mHandleMouseWheel(kMouseWheelEnable)
 {
 }
 
