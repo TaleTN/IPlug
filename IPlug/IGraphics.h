@@ -204,6 +204,12 @@ public:
 	// Some controls may not need to capture the mouse for dragging, they can call ReleaseCapture when the mouse leaves.
 	void ReleaseMouseCapture() { mMouseY = mMouseX = mMouseCapture = -1; }
 
+	inline int GetMouseCapture() const { return mMouseCapture; }
+	inline int GetMouseOver() const { return mMouseOver; }
+	inline int GetMouseX() const { return mMouseX; }
+	inline int GetMouseY() const { return mMouseY; }
+	inline bool CanHandleMouseOver() const { return mHandleMouseOver; }
+	inline bool TooltipsEnabled() const { return mEnableTooltips; }
 	inline int CanHandleMouseWheel() const { return mHandleMouseWheel; }
 
 	void OnKeyDown(int x, int y, int key);
@@ -242,12 +248,6 @@ protected:
 	WDL_IntKeyedArray<IControl*> mControlIDs;
 	WDL_PtrList<IControl> mControls;
 	IPlugBase* mPlug;
-
-  bool CanHandleMouseOver() { return mHandleMouseOver; }
-  inline int GetMouseOver() const { return mMouseOver; }
-  inline int GetMouseX() const { return mMouseX; }
-  inline int GetMouseY() const { return mMouseY; }
-  inline bool TooltipsEnabled() const { return mEnableTooltips; }
 
 	virtual LICE_IBitmap* OSLoadBitmap(int ID, const char* name) = 0;
 	virtual bool OSLoadFont(int ID, const char* name) = 0;
