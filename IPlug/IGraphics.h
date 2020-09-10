@@ -131,8 +131,6 @@ public:
 	inline IPlugBase* GetPlug() { return mPlug; }
 
 	IBitmap LoadIBitmap(int ID, const char* name, int nStates = 1);
-  IBitmap ScaleBitmap(IBitmap* pSrcBitmap, int destW, int destH);
-  IBitmap CropBitmap(IBitmap* pSrcBitmap, IRECT* pR);
   void AttachBackground(int ID, const char* name);
   // Returns the control index of this control (not the number of controls).
 	int AttachControl(IControl* pControl);

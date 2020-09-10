@@ -711,30 +711,6 @@ bool IGraphics::DrawHorizontalLine(const IColor* pColor, int yi, int xLo, int xH
   return true;
 }
 
-IBitmap IGraphics::ScaleBitmap(IBitmap* pIBitmap, int destW, int destH)
-{
-  LICE_IBitmap* pSrc = (LICE_IBitmap*) pIBitmap->mData;
-  LICE_MemBitmap* pDest = new LICE_MemBitmap(destW, destH);
-  _LICE::LICE_ScaledBlit(pDest, pSrc, 0, 0, destW, destH, 0.0f, 0.0f, (float) pIBitmap->W, (float) pIBitmap->H, 1.0f, 
-    LICE_BLIT_MODE_COPY | LICE_BLIT_FILTER_BILINEAR);
-
-  IBitmap bmp(pDest, destW, destH, pIBitmap->N);
-  RetainBitmap(&bmp);
-  return bmp;
-}
-
-IBitmap IGraphics::CropBitmap(IBitmap* pIBitmap, IRECT* pR)
-{
-  int destW = pR->W(), destH = pR->H();
-  LICE_IBitmap* pSrc = (LICE_IBitmap*) pIBitmap->mData;
-  LICE_MemBitmap* pDest = new LICE_MemBitmap(destW, destH);
-  _LICE::LICE_Blit(pDest, pSrc, 0, 0, pR->L, pR->T, destW, destH, 1.0f, LICE_BLIT_MODE_COPY);
-
-  IBitmap bmp(pDest, destW, destH, pIBitmap->N);
-  RetainBitmap(&bmp);
-  return bmp;
-}
-
 LICE_pixel* IGraphics::GetBits()
 {
   return mDrawBitmap->getBits();
