@@ -80,8 +80,8 @@ public:
 	virtual void CancelParamChangeTimer() = 0;
 
 	virtual void* OpenWindow(void* pParentWnd) = 0;
-	virtual void CloseWindow() = 0;  
-	virtual void* GetWindow() = 0;
+	virtual void CloseWindow() = 0;
+	virtual void* GetWindow() const = 0;
 
 	////////////////////////////////////////
 
