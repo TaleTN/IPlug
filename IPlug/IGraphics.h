@@ -55,7 +55,7 @@ public:
 	int MeasureIText(IText* pTxt, const char* str, IRECT* pR);
 
 	IColor GetPoint(int x, int y);
-  void* GetData() { return GetBits(); }
+	// void* GetData() { return (void*)GetBits(); }
 
 	// Methods for the OS implementation class.  
   virtual void Resize(int w, int h);
