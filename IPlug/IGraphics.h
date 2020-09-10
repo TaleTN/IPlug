@@ -34,8 +34,7 @@ public:
 	// Methods for the drawing implementation class. Coordinates, offset,
 	// radius, font, etc. are full scale; bitmaps are actual scale.
 	void DrawBitmap(const IBitmap* pBitmap, const IRECT* pDest, int srcX, int srcY, float weight = 1.0f);
-	bool DrawRotatedBitmap(IBitmap* pBitmap, int destCtrX, int destCtrY, double angle, int yOffsetZeroDeg = 0,
-		const IChannelBlend* pBlend = 0); 
+	void DrawRotatedBitmap(const IBitmap* pBitmap, int destCtrX, int destCtrY, double angle, int yOffsetZeroDeg = 0, float weight = 1.0f);
 	bool DrawRotatedMask(IBitmap* pBase, IBitmap* pMask, IBitmap* pTop, int x, int y, double angle,
     const IChannelBlend* pBlend = 0); 
 	bool DrawPoint(const IColor* pColor, float x, float y, 

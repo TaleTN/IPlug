@@ -332,29 +332,29 @@ void IGraphics::DrawBitmap(const IBitmap* const pIBitmap, const IRECT* const pDe
 	LICE_Blit(&mDrawBitmap, pLB, r.L, r.T, srcX, srcY, r.W(), r.H(), weight, IChannelBlend::kBlendNone);
 }
 
-bool IGraphics::DrawRotatedBitmap(IBitmap* pIBitmap, int destCtrX, int destCtrY, double angle, int yOffsetZeroDeg,
-    const IChannelBlend* pBlend)
+void IGraphics::DrawRotatedBitmap(const IBitmap* const pIBitmap, const int destCtrX, const int destCtrY, const double angle,
+	const int yOffsetZeroDeg, const float weight)
 {
-	LICE_IBitmap* pLB = (LICE_IBitmap*) pIBitmap->mData;
+	LICE_IBitmap* const pLB = (LICE_IBitmap*)pIBitmap->mData;
 
-	//double dA = angle * PI / 180.0;
+	/* const double dA = angle * M_PI / 180.0;
 	// Can't figure out what LICE_RotatedBlit is doing for irregular bitmaps exactly.
-	//double w = (double) bitmap.W;
-	//double h = (double) bitmap.H;
-	//double sinA = fabs(sin(dA));
-	//double cosA = fabs(cos(dA));
-	//int W = int(h * sinA + w * cosA);
-	//int H = int(h * cosA + w * sinA);
+	const double w = (double)bitmap.W;
+	const double h = (double)bitmap.H;
+	const double sinA = fabs(sin(dA));
+	const double cosA = fabs(cos(dA));
+	const int W = (int)(h * sinA + w * cosA);
+	const int H = (int)(h * cosA + w * sinA); */
 
-	int W = pIBitmap->W;
-	int H = pIBitmap->H;
-	int destX = destCtrX - W / 2;
-	int destY = destCtrY - H / 2;
+	const int scale = Scale();
 
-  _LICE::LICE_RotatedBlit(mDrawBitmap, pLB, destX, destY, W, H, 0.0f, 0.0f, (float) W, (float) H, (float) angle, 
-		false, LiceWeight(pBlend), LiceBlendMode(pBlend) | LICE_BLIT_FILTER_BILINEAR, 0.0f, (float) yOffsetZeroDeg);
+	const int W = pIBitmap->W;
+	const int H = pIBitmap->H;
+	const int destX = (destCtrX >> scale) - W / 2;
+	const int destY = (destCtrY >> scale) - H / 2;
 
-	return true;
+	LICE_RotatedBlit(&mDrawBitmap, pLB, destX, destY, W, H, 0.0f, 0.0f, (float)W, (float)H, (float)angle,
+		false, weight, IChannelBlend::kBlendNone | LICE_BLIT_FILTER_BILINEAR, 0.0f, (float)(yOffsetZeroDeg >> scale));
 }
 
 bool IGraphics::DrawRotatedMask(IBitmap* pIBase, IBitmap* pIMask, IBitmap* pITop, int x, int y, double angle,
