@@ -47,7 +47,7 @@ public:
 	void FillRoundRect(IColor color, const IRECT* pR, float weight, int cornerradius, bool aa);
 
 	void FillIRect(IColor color, const IRECT* pR, float weight = 1.0f);
-  bool FillCircle(const IColor* pColor, float cx, float cy, float r, const IChannelBlend* pBlend = 0, bool antiAlias = false);
+	void FillCircle(IColor color, float cx, float cy, float r, float weight = 1.0f, bool antiAlias = false);
 
 	static inline void PrepDrawIText(IText* pTxt) { if (!pTxt->mCached) CacheFont(pTxt); }
 	bool DrawIText(IText* pTxt, char* str, IRECT* pR);

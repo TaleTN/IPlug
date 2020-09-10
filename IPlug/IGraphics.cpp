@@ -482,10 +482,16 @@ void IGraphics::FillIRect(const IColor color, const IRECT* const pR, const float
 	LICE_FillRect(&mDrawBitmap, r.L, r.T, r.W(), r.H(), color.Get(), weight, IChannelBlend::kBlendNone);
 }
 
-bool IGraphics::FillCircle(const IColor* pColor, float cx, float cy, float r, const IChannelBlend* pBlend, bool antiAlias)
+void IGraphics::FillCircle(const IColor color, float cx, float cy, float r, const float weight, const bool antiAlias)
 {
-  _LICE::LICE_FillCircle(mDrawBitmap, cx, cy, r, LiceColor(pColor), LiceWeight(pBlend), LiceBlendMode(pBlend), antiAlias);
-  return true;
+	const int scale = Scale();
+	if (scale)
+	{
+		// const float mul = 1.0f / (float)(1 << scale);
+		assert(scale == 1); static const float mul = 0.5f;
+		cx *= mul; cy *= mul; r *= mul;
+	}
+	LICE_FillCircle(&mDrawBitmap, cx, cy, r, color.Get(), weight, IChannelBlend::kBlendNone, antiAlias);
 }
 
 bool IGraphics::DrawIText(IText* pTxt, char* str, IRECT* pR)
