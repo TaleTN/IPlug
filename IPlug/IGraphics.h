@@ -261,3 +261,7 @@ private:
 	int mIdleTicks;
 	#endif
 };
+
+#ifndef NDEBUG
+void IPlugDebugLog(const char* str);
+#endif
