@@ -186,7 +186,7 @@ public:
 
 	void OnMouseDown(int x, int y, IMouseMod mod);
 	void OnMouseUp(int x, int y, IMouseMod mod);
-	void OnMouseDrag(int x, int y, IMouseMod* pMod);
+	void OnMouseDrag(int x, int y, IMouseMod mod);
   // Returns true if the control receiving the double click will treat it as a single click
   // (meaning the OS should capture the mouse).
 	bool OnMouseDblClick(int x, int y, IMouseMod* pMod);

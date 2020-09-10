@@ -929,18 +929,20 @@ void IGraphics::OnMouseOut()
   mMouseOver = -1;
 }
 
-void IGraphics::OnMouseDrag(int x, int y, IMouseMod* pMod)
+void IGraphics::OnMouseDrag(const int x, const int y, const IMouseMod mod)
 {
-  int c = mMouseCapture;
-  if (c >= 0) {
-	  int dX = x - mMouseX;
-	  int dY = y - mMouseY;
-    if (dX != 0 || dY != 0) {
-      mMouseX = x;
-      mMouseY = y;
-      mControls.Get(c)->OnMouseDrag(x, y, dX, dY, pMod);
-    }
-  }
+	const int c = mMouseCapture;
+	if (c >= 0)
+	{
+		const int dX = x - mMouseX;
+		const int dY = y - mMouseY;
+		if (dX != 0 || dY != 0)
+		{
+			mMouseX = x;
+			mMouseY = y;
+			mControls.Get(c)->OnMouseDrag(x, y, dX, dY, mod);
+		}
+	}
 }
 
 bool IGraphics::OnMouseDblClick(int x, int y, IMouseMod* pMod)
