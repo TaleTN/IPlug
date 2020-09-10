@@ -63,12 +63,11 @@ public:
 	enum EPromptFlags { kPromptCustomWidth = 0x80000000, kPromptCustomRect = 0xC0000000 };
 	virtual void PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int fontSize = 0) = 0;
 	void SetFromStringAfterPrompt(IControl* pControl, const IParam* pParam, const char* txt);
-	virtual void HostPath(WDL_String* pPath) = 0;   // Full path to host executable.
-  virtual void PluginPath(WDL_String* pPath) = 0; // Full path to plugin dll.
-	// Run the "open file" or "save file" dialog.  Default to host executable path.
-  enum EFileAction { kFileOpen, kFileSave };
-	virtual void PromptForFile(WDL_String* pFilename, EFileAction action = kFileOpen, char* dir = 0,
-        char* extensions = 0) = 0;  // extensions = "txt wav" for example.
+	virtual void HostPath(WDL_String* pPath) = 0; // Full path to host executable.
+	virtual void PluginPath(WDL_String* pPath) = 0; // Full path to plugin dll.
+	// Run the "open file" or "save file" dialog; extensions = "txt wav" for example.
+	enum EFileAction { kFileOpen = 0, kFileSave };
+	virtual bool PromptForFile(WDL_String* pFilename, int action = kFileOpen, const char* dir = NULL, const char* extensions = NULL) = 0;
   virtual bool PromptForColor(IColor* pColor, char* prompt = 0) = 0;
 
   virtual bool OpenURL(const char* url, 
