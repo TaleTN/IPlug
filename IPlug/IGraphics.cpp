@@ -402,11 +402,12 @@ void IGraphics::ForcePixel(const IColor color, const int x, const int y)
 	*px = color.Get();
 }
 
-bool IGraphics::DrawLine(const IColor* pColor, float x1, float y1, float x2, float y2,
-  const IChannelBlend* pBlend, bool antiAlias)
+void IGraphics::DrawLine(const IColor color, const int x1, const int y1, const int x2, const int y2,
+	const float weight, const bool antiAlias)
 {
-  _LICE::LICE_Line(mDrawBitmap, x1, y1, x2, y2, LiceColor(pColor), LiceWeight(pBlend), LiceBlendMode(pBlend), antiAlias);
-	return true;
+	const int scale = Scale();
+	LICE_Line(&mDrawBitmap, x1 >> scale, y1 >> scale, x2 >> scale, y2 >> scale, color.Get(), weight,
+		IChannelBlend::kBlendNone, antiAlias);
 }
 
 bool IGraphics::DrawArc(const IColor* pColor, float cx, float cy, float r, float minAngle, float maxAngle, 

@@ -39,8 +39,7 @@ public:
 	void DrawPoint(IColor color, float x, float y, float weight = 1.0f);
 	// Live ammo! Will crash if out of bounds! etc.
 	void ForcePixel(IColor color, int x, int y);
-	bool DrawLine(const IColor* pColor, float x1, float y1, float x2, float y2,
-		const IChannelBlend* pBlend = 0, bool antiAlias = false);
+	void DrawLine(IColor color, int x1, int y1, int x2, int y2, float weight = 1.0f, bool antiAlias = false);
 	bool DrawArc(const IColor* pColor, float cx, float cy, float r, float minAngle, float maxAngle, 
 		const IChannelBlend* pBlend = 0, bool antiAlias = false);
 	bool DrawCircle(const IColor* pColor, float cx, float cy, float r,
