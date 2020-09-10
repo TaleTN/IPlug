@@ -7,11 +7,7 @@
 
 #include "WDL/mutex.h"
 
-#define DEFAULT_FPS 24
-
-// If not dirty for this many timer ticks, we call OnGUIIDle.
-// Only looked at if USE_IDLE_CALLS is defined.
-#define IDLE_TICKS 20
+const int IGraphics::kDefaultFPS;
 
 class BitmapStorage
 {

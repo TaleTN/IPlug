@@ -5,25 +5,27 @@
 #include "WDL/lice/lice.h"
 #include "WDL/lice/lice_text.h"
 
-#include "WDL/wdlstring.h"
 #include "WDL/ptrlist.h"
 
 #if defined(__APPLE__) && defined(__LP64__) && !defined(IPLUG_NO_CARBON_SUPPORT)
 	#define IPLUG_NO_CARBON_SUPPORT
 #endif
 
-#define MAX_PARAM_LEN 32
-#define MAX_EDIT_LEN  1000
-
 class IPlugBase;
 class IControl;
-class IEditableTextControl;
 class IParam;
 
 class IGraphics
 {
 public:
-  
+	static const int kDefaultFPS = 24;
+
+	// If not dirty for this many timer ticks, we call OnGUIIDle.
+	static const int kIdleTicks = 20;
+
+	static const int kMaxParamLen = 32;
+	static const int kMaxEditLen = kMaxParamLen;
+
   void PrepDraw();    // Called once, when the IGraphics class is attached to the IPlug class.
 	bool IsDirty(IRECT* pR);        // Ask the plugin what needs to be redrawn.
   bool Draw(IRECT* pR);           // The system announces what needs to be redrawn.  Ordering and drawing logic.
