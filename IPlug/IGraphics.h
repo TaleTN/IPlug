@@ -236,15 +236,6 @@ public:
 	LICE_pixel* GetBits() { return mDrawBitmap.getBits(); }
 	inline LICE_SysBitmap* GetDrawBitmap() { return &mDrawBitmap; }
 
-  WDL_Mutex mMutex;
-  
-  struct IMutexLock 
-  {
-    WDL_Mutex* mpMutex;
-    IMutexLock(IGraphics* pGraphics) : mpMutex(&(pGraphics->mMutex)) { mpMutex->Enter(); }
-    ~IMutexLock() { mpMutex->Leave(); }
-  };
-  
 protected:
 	WDL_IntKeyedArray<IControl*> mControlIDs;
 	WDL_PtrList<IControl> mControls;
