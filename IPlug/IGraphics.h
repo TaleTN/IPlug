@@ -60,7 +60,8 @@ public:
 	// Methods for the OS implementation class.
 	// virtual void Resize(int w, int h);
 	virtual bool WindowIsOpen() const { return !!GetWindow(); }
-	virtual void PromptUserInput(IControl* pControl, IParam* pParam) = 0;
+	enum EPromptFlags { kPromptCustomWidth = 0x80000000, kPromptCustomRect = 0xC0000000 };
+	virtual void PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int fontSize = 0) = 0;
 	virtual void PromptUserInput(IEditableTextControl* pControl) = 0;
 	void SetFromStringAfterPrompt(IControl* pControl, IParam* pParam, char *txt);
 	virtual void HostPath(WDL_String* pPath) = 0;   // Full path to host executable.
