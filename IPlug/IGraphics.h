@@ -127,8 +127,8 @@ public:
 
 	void LoadBitmapResources(const BitmapResource* pResources);
 
-  IPlugBase* GetPlug() { return mPlug; }
-  
+	inline IPlugBase* GetPlug() { return mPlug; }
+
 	IBitmap LoadIBitmap(int ID, const char* name, int nStates = 1);
   IBitmap ScaleBitmap(IBitmap* pSrcBitmap, int destW, int destH);
   IBitmap CropBitmap(IBitmap* pSrcBitmap, IRECT* pR);
