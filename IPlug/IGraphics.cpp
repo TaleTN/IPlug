@@ -733,11 +733,6 @@ void IGraphics::DrawHorizontalLine(const IColor color, int yi, int xLo, int xHi)
 	LICE_Line(&mDrawBitmap, xLo, yi, xHi, yi, color.Get(), 1.0f, LICE_BLIT_MODE_COPY, false);
 }
 
-LICE_pixel* IGraphics::GetBits()
-{
-  return mDrawBitmap->getBits();
-}
-
 void IGraphics::DrawBitmap(const IBitmap* const pBitmap, const IRECT* const pR, const int bmpState, const float weight)
 {
 	LICE_IBitmap* const pLB = (LICE_IBitmap*)pBitmap->mData;

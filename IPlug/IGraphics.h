@@ -232,11 +232,10 @@ public:
 	void OnGUIIdle();
 	#endif
 
-      LICE_pixel* GetBits();
+	// For controls that need to interface directly with LICE.
+	LICE_pixel* GetBits() { return mDrawBitmap.getBits(); }
+	inline LICE_SysBitmap* GetDrawBitmap() { return &mDrawBitmap; }
 
-  // For controls that need to interface directly with LICE.
-  inline LICE_SysBitmap* GetDrawBitmap() const { return mDrawBitmap; }
-  
   WDL_Mutex mMutex;
   
   struct IMutexLock 
