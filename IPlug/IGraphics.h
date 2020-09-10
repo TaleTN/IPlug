@@ -49,6 +49,7 @@ public:
 	void FillIRect(IColor color, const IRECT* pR, float weight = 1.0f);
 	void FillCircle(IColor color, float cx, float cy, float r, float weight = 1.0f, bool antiAlias = false);
 
+	bool LoadFont(int ID, const char* name);
 	static inline void PrepDrawIText(IText* pTxt) { if (!pTxt->mCached) CacheFont(pTxt); }
 	bool DrawIText(IText* pTxt, char* str, IRECT* pR);
 	bool MeasureIText(IText* pTxt, char* str, IRECT* pR);
@@ -187,7 +188,9 @@ protected:
   inline int GetMouseY() const { return mMouseY; }
   inline bool TooltipsEnabled() const { return mEnableTooltips; }
 
-  virtual LICE_IBitmap* OSLoadBitmap(int ID, const char* name) = 0;
+	virtual LICE_IBitmap* OSLoadBitmap(int ID, const char* name) = 0;
+	virtual bool OSLoadFont(int ID, const char* name) = 0;
+
 	LICE_SysBitmap* mDrawBitmap;
 
   static LICE_IFont* CacheFont(IText* pTxt);

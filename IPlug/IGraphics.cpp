@@ -84,6 +84,8 @@ public:
 	WDL_PtrList<FontKey> m_fonts;
 	WDL_Mutex m_mutex;
 
+	WDL_TypedBuf<int> m_load;
+
 	static WDL_UINT64 PackStyle(const int size, const int style, const int orientation)
 	{
 		assert(style >= 0 && style < 8);
@@ -572,6 +574,19 @@ bool IGraphics::MeasureIText(IText* pTxt, char* str, IRECT* pR)
   pR->B = pR->T + R.bottom - R.top;
 
   return true;
+}
+
+bool IGraphics::LoadFont(const int ID, const char* const name)
+{
+	s_fontCache.m_mutex.Enter();
+	bool ret = s_fontCache.m_load.Find(ID) >= 0;
+	if (!ret)
+	{
+		ret = OSLoadFont(ID, name);
+		if (ret) s_fontCache.m_load.Add(ID);
+	}
+	s_fontCache.m_mutex.Leave();
+	return ret;
 }
 
 LICE_IFont* IGraphics::CacheFont(IText* pTxt)
