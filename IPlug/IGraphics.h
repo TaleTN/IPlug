@@ -51,8 +51,9 @@ public:
 
 	bool LoadFont(int ID, const char* name);
 	static void PrepDrawIText(IText* const pTxt, const int scale = 0) { CacheFont(pTxt, scale); }
-	bool DrawIText(IText* pTxt, char* str, IRECT* pR);
-	bool MeasureIText(IText* pTxt, char* str, IRECT* pR);
+	int DrawIText(IText* pTxt, const char* str, const IRECT* pR);
+	int MeasureIText(IText* pTxt, const char* str, IRECT* pR);
+
   IColor GetPoint(int x, int y);
   void* GetData() { return GetBits(); }
 

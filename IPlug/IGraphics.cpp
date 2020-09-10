@@ -519,61 +519,83 @@ void IGraphics::FillCircle(const IColor color, float cx, float cy, float r, cons
 	LICE_FillCircle(&mDrawBitmap, cx, cy, r, color.Get(), weight, IChannelBlend::kBlendNone, antiAlias);
 }
 
-bool IGraphics::DrawIText(IText* pTxt, char* str, IRECT* pR)
+int IGraphics::DrawIText(IText* const pTxt, const char* const str, const IRECT* const pR)
 {
-  if (!str || str[0] == '\0') {
-    return true;
-  }
+	const int scale = Scale();
 
-  LICE_IFont* font = pTxt->mCached;
-  if (!font)
-  {
-    font = CacheFont(pTxt);
-    if (!font) return false;
-  }
+	LICE_IFont* font = pTxt->mCached;
+	if (!font)
+	{
+		font = CacheFont(pTxt, scale);
+		if (!font) return 0;
+	}
 
-  LICE_pixel color = LiceColor(&pTxt->mColor);
-  font->SetTextColor(color);
+	if (!str || !*str) return font->GetLineHeight();
 
-  UINT fmt = DT_NOCLIP;
-  if (LICE_GETA(color) < 255) fmt |= LICE_DT_USEFGALPHA;
-  if (pTxt->mAlign == IText::kAlignNear)
-    fmt |= DT_LEFT;
-  else if (pTxt->mAlign == IText::kAlignCenter)
-    fmt |= DT_CENTER;
-  else // if (pTxt->mAlign == IText::kAlignFar)
-    fmt |= DT_RIGHT;
+	const LICE_pixel color = pTxt->mColor.Get();
+	font->SetTextColor(color);
 
-  RECT R = { pR->L, pR->T, pR->R, pR->B };
-  font->DrawText(mDrawBitmap, str, -1, &R, fmt);
-  return true;
+	static const UINT align[3] = { DT_LEFT, DT_CENTER, DT_RIGHT };
+	assert(pTxt->mAlign >= 0 && pTxt->mAlign < 3);
+
+	UINT fmt = align[pTxt->mAlign] | DT_NOCLIP;
+	if (LICE_GETA(color) < 255) fmt |= LICE_DT_USEFGALPHA;
+
+	RECT R = { pR->L, pR->T, pR->R, pR->B };
+
+	if (scale)
+	{
+		R.left >>= scale;
+		R.top >>= scale;
+		R.right >>= scale;
+		R.bottom >>= scale;
+	}
+ 
+	const int h = font->DrawText(&mDrawBitmap, str, -1, &R, fmt) << scale;
+
+	return h;
 }
 
-bool IGraphics::MeasureIText(IText* pTxt, char* str, IRECT* pR)
+int IGraphics::MeasureIText(IText* const pTxt, const char* const str, IRECT* const pR)
 {
-  LICE_IFont* font = pTxt->mCached;
-  if (!font)
-  {
-    font = CacheFont(pTxt);
-    if (!font) return false;
-  }
+	const int scale = Scale();
 
-  if (!str || str[0] == '\0') {
-    pR->R = pR->L;
-    pR->B = pR->T + font->GetLineHeight();
-    return true;
-  }
+	LICE_IFont* font = pTxt->mCached;
+	if (!font)
+	{
+		font = CacheFont(pTxt, scale);
+		if (!font) return 0;
+	}
 
-  const UINT fmt = DT_CALCRECT | DT_NOCLIP | DT_LEFT;
-  RECT R = { 0 };
-  font->DrawText(mDrawBitmap, str, -1, &R, fmt);
+	if (!str || !*str)
+	{
+		const int lh = font->GetLineHeight() << scale;
+		pR->R = pR->L;
+		pR->B = pR->T + lh;
+		return lh;
+	}
 
-  pR->L += R.left;
-  pR->T += R.top;
-  pR->R = pR->L + R.right - R.left;
-  pR->B = pR->T + R.bottom - R.top;
+	const UINT fmt = DT_CALCRECT | DT_NOCLIP | DT_LEFT;
+	// if (LICE_GETA(color) < 255) fmt |= LICE_DT_USEFGALPHA;
 
-  return true;
+	RECT R = { 0 };
+	int h = font->DrawText(&mDrawBitmap, str, -1, &R, fmt);
+
+	if (scale)
+	{
+		h <<= scale;
+		R.left <<= scale;
+		R.top <<= scale;
+		R.right <<= scale;
+		R.bottom <<= scale;
+	}
+
+	pR->L += R.left;
+	pR->T += R.top;
+	pR->R = pR->L + R.right - R.left;
+	pR->B = pR->T + R.bottom - R.top;
+
+	return h;
 }
 
 bool IGraphics::LoadFont(const int ID, const char* const name)
