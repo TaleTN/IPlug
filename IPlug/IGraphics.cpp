@@ -283,12 +283,13 @@ void IGraphics::SetControlFromPlug(const int controlIdx, const double normalized
 
 void IGraphics::SetAllControlsDirty()
 {
-  int i, n = mControls.GetSize();
-  IControl** ppControl = mControls.GetList();
-	for (i = 0; i < n; ++i, ++ppControl) {
-    IControl* pControl = *ppControl;
-    pControl->SetDirty(false);
-  }
+	const int n = mControls.GetSize();
+	IControl* const* const ppControl = mControls.GetList();
+	for (int i = 0; i < n; ++i)
+	{
+		IControl* const pControl = ppControl[i];
+		pControl->SetDirty(false);
+	}
 }
 
 void IGraphics::SetParameterFromGUI(int paramIdx, double normalizedValue)

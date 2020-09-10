@@ -169,7 +169,7 @@ public:
 	// For setting a control that does not have a parameter associated with it.
 	void SetControlFromPlug(int controlIdx, double normalizedValue);
 
-  void SetAllControlsDirty();
+	void SetAllControlsDirty();
 
   // This is for when the gui needs to change a control value that it can't redraw 
   // for context reasons.  If the gui has redrawn the control, use IPlug::SetParameterFromGUI.
