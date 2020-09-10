@@ -1,6 +1,12 @@
 #include "IGraphics.h"
 #include "IControl.h"
 
+#include <assert.h>
+#include <math.h>
+#include <string.h>
+
+#include "WDL/mutex.h"
+
 #define DEFAULT_FPS 24
 
 // If not dirty for this many timer ticks, we call OnGUIIDle.
