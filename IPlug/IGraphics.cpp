@@ -338,10 +338,19 @@ void IGraphics::ReleaseBitmap(IBitmap* pBitmap)
   s_bitmapCache.Remove((LICE_IBitmap*)pBitmap->mData);
 }
 
-void IGraphics::PrepDraw()
+bool IGraphics::PrepDraw(const int wantScale)
 {
-  mDrawBitmap = new LICE_SysBitmap(Width(), Height());
-  mTmpBitmap = new LICE_MemBitmap();      
+	if (wantScale != mScale && mPlug->OnGUIRescale(wantScale))
+	{
+		const int n = mControls.GetSize();
+		IControl* const* const ppControl = mControls.GetList();
+		for (int i = 0; i < n; ++i)
+		{
+			IControl* const pControl = ppControl[i];
+			pControl->Rescale(this);
+		}
+	}
+	return !!mDrawBitmap.getBits();
 }
 
 bool IGraphics::DrawBitmap(IBitmap* pIBitmap, IRECT* pDest, int srcX, int srcY, const IChannelBlend* pBlend)

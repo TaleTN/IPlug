@@ -26,7 +26,7 @@ public:
 	static const int kMaxParamLen = 32;
 	static const int kMaxEditLen = kMaxParamLen;
 
-  void PrepDraw();    // Called once, when the IGraphics class is attached to the IPlug class.
+	bool PrepDraw(int wantScale); // Recale the draw bitmap.
 	bool IsDirty(IRECT* pR);        // Ask the plugin what needs to be redrawn.
   bool Draw(IRECT* pR);           // The system announces what needs to be redrawn.  Ordering and drawing logic.
   virtual bool DrawScreen(IRECT* pR) = 0;  // Tells the OS class to put the final bitmap on the screen.
