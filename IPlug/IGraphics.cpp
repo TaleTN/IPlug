@@ -902,32 +902,34 @@ void IGraphics::OnMouseUp(const int x, const int y, const IMouseMod mod)
 	}
 }
 
-bool IGraphics::OnMouseOver(int x, int y, IMouseMod* pMod)
+void IGraphics::OnMouseOver(const int x, const int y, const IMouseMod mod)
 {
-  if (mHandleMouseOver) {
-    int c = GetMouseControlIdx(x, y);
-    if (c >= 0) {
-	    mMouseX = x;
-	    mMouseY = y;
-	    mControls.Get(c)->OnMouseOver(x, y, pMod);
-      if (mMouseOver >= 0 && mMouseOver != c) {
-        mControls.Get(mMouseOver)->OnMouseOut();
-      }
-      mMouseOver = c;
-    }
-  }
-  return mHandleMouseOver;
+	assert(mHandleMouseOver == true);
+
+	const int c = GetMouseControlIdx(x, y);
+	if (c >= 0)
+	{
+		mMouseX = x;
+		mMouseY = y;
+		mControls.Get(c)->OnMouseOver(x, y, mod);
+		if (mMouseOver >= 0 && mMouseOver != c)
+		{
+			mControls.Get(mMouseOver)->OnMouseOut();
+		}
+		mMouseOver = c;
+	}
 }
 
 void IGraphics::OnMouseOut()
 {
-  int i, n = mControls.GetSize();
-  IControl** ppControl = mControls.GetList();
-	for (i = 0; i < n; ++i, ++ppControl) {
-		IControl* pControl = *ppControl;
+	const int n = mControls.GetSize();
+	IControl* const* const ppControl = mControls.GetList();
+	for (int i = 0; i < n; ++i)
+	{
+		IControl* const pControl = ppControl[i];
 		pControl->OnMouseOut();
 	}
-  mMouseOver = -1;
+	mMouseOver = -1;
 }
 
 void IGraphics::OnMouseDrag(const int x, const int y, const IMouseMod mod)

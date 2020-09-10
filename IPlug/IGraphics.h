@@ -196,16 +196,17 @@ public:
 	inline void HandleMouseWheel(const int canHandle) { mHandleMouseWheel = canHandle; }
 	void OnMouseWheel(int x, int y, IMouseMod mod, float d);
 
+	// For efficiency, mouseovers/mouseouts are ignored unless you explicity say you can handle them.
+	void HandleMouseOver(const bool canHandle) { mHandleMouseOver = canHandle; }
+	void OnMouseOver(int x, int y, IMouseMod mod);
+	void OnMouseOut();
+
 	inline int CanHandleMouseWheel() const { return mHandleMouseWheel; }
 
 	void OnKeyDown(int x, int y, int key);
 
   void DisplayControlValue(IControl* pControl);
   
-  // For efficiency, mouseovers/mouseouts are ignored unless you explicity say you can handle them.
-  void HandleMouseOver(bool canHandle) { mHandleMouseOver = canHandle; }
-  bool OnMouseOver(int x, int y, IMouseMod* pMod);   // Returns true if mouseovers are handled.
-  void OnMouseOut();
   // Some controls may not need to capture the mouse for dragging, they can call ReleaseCapture when the mouse leaves.
   void ReleaseMouseCapture();
 
