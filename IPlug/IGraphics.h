@@ -175,8 +175,8 @@ public:
 	// for context reasons.  If the GUI has redrawn the control, use IPlugBase::SetParameterFromGUI().
 	void SetParameterFromGUI(int paramIdx, double normalizedValue);
 
-  // Convenience wrappers.
-	bool DrawBitmap(IBitmap* pBitmap, IRECT* pR, int bmpState = 1, const IChannelBlend* pBlend = 0);
+	// Convenience wrappers.
+	void DrawBitmap(const IBitmap* pBitmap, const IRECT* pR, int bmpState = 1, float weight = 1.0f);
   bool DrawRect(const IColor* pColor, IRECT* pR);
   bool DrawVerticalLine(const IColor* pColor, IRECT* pR, float x);
   bool DrawHorizontalLine(const IColor* pColor, IRECT* pR, float y);

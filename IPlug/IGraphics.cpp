@@ -730,13 +730,16 @@ LICE_pixel* IGraphics::GetBits()
   return mDrawBitmap->getBits();
 }
 
-bool IGraphics::DrawBitmap(IBitmap* pBitmap, IRECT* pR, int bmpState, const IChannelBlend* pBlend)
+void IGraphics::DrawBitmap(const IBitmap* const pBitmap, const IRECT* const pR, const int bmpState, const float weight)
 {
-	int srcY = 0;
-	if (pBitmap->N > 1 && bmpState > 1) {
-		srcY = int(0.5 + (double) pBitmap->H * (double) (bmpState - 1) / (double) pBitmap->N);
-	}
-	return DrawBitmap(pBitmap, pR, 0, srcY, pBlend);    
+	LICE_IBitmap* const pLB = (LICE_IBitmap*)pBitmap->mData;
+	const int srcY = pBitmap->N > 1 && bmpState > 1 ? (bmpState - 1) * pBitmap->H : 0;
+
+	IRECT r = *pR;
+	const int scale = Scale();
+	if (scale) r.Downscale(scale);
+
+	LICE_Blit(&mDrawBitmap, pLB, r.L, r.T, 0, srcY, r.W(), r.H(), weight, IChannelBlend::kBlendNone);
 }
 
 bool IGraphics::DrawRect(const IColor* pColor, IRECT* pR)
