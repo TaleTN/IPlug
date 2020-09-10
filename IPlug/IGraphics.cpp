@@ -772,16 +772,16 @@ void IGraphics::DrawHorizontalLine(const IColor color, const IRECT* const pR, fl
 	DrawHorizontalLine(color, yi, pR->L, pR->R);
 }
 
-bool IGraphics::DrawRadialLine(const IColor* pColor, float cx, float cy, float angle, float rMin, float rMax, 
-  const IChannelBlend* pBlend, bool antiAlias)
+void IGraphics::DrawRadialLine(const IColor color, const float cx, const float cy, const float angle, const float rMin, const float rMax,
+	const float weight, const bool antiAlias)
 {
-  float sinV = sin(angle);
-  float cosV = cos(angle);
-  float xLo = cx + rMin * sinV;
-  float xHi = cx + rMax * sinV;
-  float yLo = cy - rMin * cosV;
-  float yHi = cy - rMax * cosV;
-  return DrawLine(pColor, xLo, yLo, xHi, yHi, pBlend, antiAlias);
+	const float sinV = sinf(angle);
+	const float cosV = cosf(angle);
+	const int xLo = (int)(cx + rMin * sinV);
+	const int xHi = (int)(cx + rMax * sinV);
+	const int yLo = (int)(cy - rMin * cosV);
+	const int yHi = (int)(cy - rMax * cosV);
+	DrawLine(color, xLo, yLo, xHi, yHi, weight, antiAlias);
 }
 
 bool IGraphics::IsDirty(IRECT* const pR)

@@ -182,8 +182,7 @@ public:
 	void DrawHorizontalLine(IColor color, const IRECT* pR, float y);
 	void DrawVerticalLine(IColor color, int xi, int yLo, int yHi);
 	void DrawHorizontalLine(IColor color, int yi, int xLo, int xHi);
-  bool DrawRadialLine(const IColor* pColor, float cx, float cy, float angle, float rMin, float rMax, 
-    const IChannelBlend* pBlend = 0, bool antiAlias = false);
+	void DrawRadialLine(IColor color, float cx, float cy, float angle, float rMin, float rMax, float weight = 1.0f, bool antiAlias = false);
 
 	void OnMouseDown(int x, int y, IMouseMod* pMod);
 	void OnMouseUp(int x, int y, IMouseMod* pMod);
