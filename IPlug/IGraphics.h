@@ -57,8 +57,8 @@ public:
 	IColor GetPoint(int x, int y);
 	// void* GetData() { return (void*)GetBits(); }
 
-	// Methods for the OS implementation class.  
-  virtual void Resize(int w, int h);
+	// Methods for the OS implementation class.
+	// virtual void Resize(int w, int h);
 	virtual bool WindowIsOpen() { return (GetWindow()); }
 	virtual void PromptUserInput(IControl* pControl, IParam* pParam) = 0;
 	virtual void PromptUserInput(IEditableTextControl* pControl) = 0;
