@@ -332,6 +332,25 @@ IBitmap IGraphics::LoadIBitmap(const int ID, const char* const name, const int n
 	return IBitmap(lb, lb->getWidth(), lb->getHeight() / nStates, nStates);
 }
 
+bool IGraphics::UpdateIBitmap(IBitmap* const pBitmap)
+{
+	LICE_IBitmap* const empty = (LICE_IBitmap*)&BitmapStorage::kEmptyBitmap;
+	LICE_IBitmap* lb = (LICE_IBitmap*)pBitmap->mData;
+
+	const int ID = pBitmap->ID() | Scale();
+	if (pBitmap->mID == ID && lb) return lb != empty;
+
+	lb = s_bitmapCache.Find(ID);
+	if (!lb) lb = empty;
+
+	pBitmap->mData = lb;
+	pBitmap->W = lb->getWidth();
+	pBitmap->H = lb->getHeight() / pBitmap->N;
+	pBitmap->mID = ID;
+
+	return lb != empty;
+}
+
 void IGraphics::Rescale(const int scale)
 {
 	assert(scale == kScaleFull || scale == kScaleHalf);
