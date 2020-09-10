@@ -35,8 +35,7 @@ public:
 	// radius, font, etc. are full scale; bitmaps are actual scale.
 	void DrawBitmap(const IBitmap* pBitmap, const IRECT* pDest, int srcX, int srcY, float weight = 1.0f);
 	void DrawRotatedBitmap(const IBitmap* pBitmap, int destCtrX, int destCtrY, double angle, int yOffsetZeroDeg = 0, float weight = 1.0f);
-	bool DrawRotatedMask(IBitmap* pBase, IBitmap* pMask, IBitmap* pTop, int x, int y, double angle,
-    const IChannelBlend* pBlend = 0); 
+	// void DrawRotatedMask(const IBitmap* pBase, const IBitmap* pMask, const IBitmap* pTop, int x, int y, double angle, float weight = 1.0f);
 	bool DrawPoint(const IColor* pColor, float x, float y, 
 		const IChannelBlend* pBlend = 0, bool antiAlias = false);
   // Live ammo!  Will crash if out of bounds!  etc.
@@ -197,8 +196,7 @@ protected:
   static LICE_IFont* CacheFont(IText* pTxt);
 
 private:
-
-	LICE_MemBitmap* mTmpBitmap;
+	// LICE_MemBitmap* mTmpBitmap;
 
 	int mWidth, mHeight, mFPS, mIdleTicks;
 	int GetMouseControlIdx(int x, int y);

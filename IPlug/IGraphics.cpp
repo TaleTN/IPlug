@@ -357,36 +357,30 @@ void IGraphics::DrawRotatedBitmap(const IBitmap* const pIBitmap, const int destC
 		false, weight, IChannelBlend::kBlendNone | LICE_BLIT_FILTER_BILINEAR, 0.0f, (float)(yOffsetZeroDeg >> scale));
 }
 
-bool IGraphics::DrawRotatedMask(IBitmap* pIBase, IBitmap* pIMask, IBitmap* pITop, int x, int y, double angle,
-    const IChannelBlend* pBlend)    
+/* void IGraphics::DrawRotatedMask(const IBitmap* const pIBase, const IBitmap* const pIMask, const IBitmap* const pITop,
+	const int x, const int y, const double angle, const float weight)
 {
-	LICE_IBitmap* pBase = (LICE_IBitmap*) pIBase->mData;
-	LICE_IBitmap* pMask = (LICE_IBitmap*) pIMask->mData;
-	LICE_IBitmap* pTop = (LICE_IBitmap*) pITop->mData;
+	LICE_IBitmap* const pBase = (LICE_IBitmap*)pIBase->mData;
+	LICE_IBitmap* const pMask = (LICE_IBitmap*)pIMask->mData;
+	LICE_IBitmap* const pTop = (LICE_IBitmap*)pITop->mData;
 
-	double dA = angle * PI / 180.0;
-	int W = pIBase->W;
-	int H = pIBase->H;
-//	RECT srcR = { 0, 0, W, H };
-	float xOffs = (W % 2 ? -0.5f : 0.0f);
+	const double dA = angle * M_PI / 180.0;
+	const int W = pIBase->W;
+	const int H = pIBase->H;
+	const float xOffs = (W & 1) ? -0.5f : 0.0f;
 
-	if (!mTmpBitmap) {
-		mTmpBitmap = new LICE_MemBitmap();
-	}
-  _LICE::LICE_Copy(mTmpBitmap, pBase);
-	_LICE::LICE_ClearRect(mTmpBitmap, 0, 0, W, H, LICE_RGBA(255, 255, 255, 0));
+	if (!mTmpBitmap) mTmpBitmap = new LICE_MemBitmap();
+	LICE_Copy(mTmpBitmap, pBase);
+	LICE_ClearRect(mTmpBitmap, 0, 0, W, H, LICE_RGBA(255, 255, 255, 0));
 
-	_LICE::LICE_RotatedBlit(mTmpBitmap, pMask, 0, 0, W, H, 0.0f, 0.0f, (float) W, (float) H, (float) dA, 
+	LICE_RotatedBlit(mTmpBitmap, pMask, 0, 0, W, H, 0.0f, 0.0f, (float)W, (float)H, (float)dA,
 		true, 1.0f, LICE_BLIT_MODE_ADD | LICE_BLIT_FILTER_BILINEAR | LICE_BLIT_USE_ALPHA, xOffs, 0.0f);
-	_LICE::LICE_RotatedBlit(mTmpBitmap, pTop, 0, 0, W, H, 0.0f, 0.0f, (float) W, (float) H, (float) dA,
+	LICE_RotatedBlit(mTmpBitmap, pTop, 0, 0, W, H, 0.0f, 0.0f, (float)W, (float)H, (float)dA,
 		true, 1.0f, LICE_BLIT_MODE_COPY | LICE_BLIT_FILTER_BILINEAR | LICE_BLIT_USE_ALPHA, xOffs, 0.0f);
 
-  IRECT r = IRECT(x, y, x + W, y + H).Intersect(&mDrawRECT);
-  _LICE::LICE_Blit(mDrawBitmap, mTmpBitmap, r.L, r.T, r.L - x, r.T - y, r.R - r.L, r.B - r.T,
-    LiceWeight(pBlend), LiceBlendMode(pBlend));
-//	ReaperExt::LICE_Blit(mDrawBitmap, mTmpBitmap, x, y, &srcR, LiceWeight(pBlend), LiceBlendMode(pBlend));
-	return true;
-}
+	const int scale = Scale();
+	LICE_Blit(&mDrawBitmap, mTmpBitmap, x >> scale, y >> scale, 0, 0, W, H, weight, IChannelBlend::kBlendNone);
+} */
 
 bool IGraphics::DrawPoint(const IColor* pColor, float x, float y, 
 		const IChannelBlend* pBlend, bool antiAlias)
