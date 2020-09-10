@@ -171,9 +171,9 @@ public:
 
 	void SetAllControlsDirty();
 
-  // This is for when the gui needs to change a control value that it can't redraw 
-  // for context reasons.  If the gui has redrawn the control, use IPlug::SetParameterFromGUI.
-  void SetParameterFromGUI(int paramIdx, double normalizedValue);
+	// This is for when the GUI needs to change a control value that it can't redraw
+	// for context reasons.  If the GUI has redrawn the control, use IPlugBase::SetParameterFromGUI().
+	void SetParameterFromGUI(int paramIdx, double normalizedValue);
 
   // Convenience wrappers.
 	bool DrawBitmap(IBitmap* pBitmap, IRECT* pR, int bmpState = 1, const IChannelBlend* pBlend = 0);

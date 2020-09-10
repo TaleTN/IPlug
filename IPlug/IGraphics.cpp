@@ -292,16 +292,18 @@ void IGraphics::SetAllControlsDirty()
 	}
 }
 
-void IGraphics::SetParameterFromGUI(int paramIdx, double normalizedValue)
+void IGraphics::SetParameterFromGUI(const int paramIdx, const double normalizedValue)
 {
-  int i, n = mControls.GetSize();
-  IControl** ppControl = mControls.GetList();
-	for (i = 0; i < n; ++i, ++ppControl) {
-    IControl* pControl = *ppControl;
-    if (pControl->ParamIdx() == paramIdx) {
-      pControl->SetValueFromUserInput(normalizedValue);
-      // Could be more than one, don't break until we check them all.
-    }
+	const int n = mControls.GetSize();
+	IControl* const* const ppControl = mControls.GetList();
+	for (int i = 0; i < n; ++i)
+	{
+		IControl* const pControl = ppControl[i];
+		if (pControl->ParamIdx() == paramIdx)
+		{
+			pControl->SetValueFromUserInput(normalizedValue);
+			// Could be more than one, don't break until we check them all.
+		}
 	}
 }
 
