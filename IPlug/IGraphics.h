@@ -75,12 +75,11 @@ public:
   // Return 1 if mouse wheel is processed
   virtual int ProcessMouseWheel(float delta) { return 0; }
 
-  // Delays mPlug->EndInformHostOfParamChange().
-  virtual void SetParamChangeTimer(int ticks) = 0;
-  virtual void CancelParamChangeTimer() = 0;
+	// Delays mPlug->EndInformHostOfParamChange().
+	virtual void SetParamChangeTimer(int ticks) = 0;
+	virtual void CancelParamChangeTimer() = 0;
 
-  virtual void* OpenWindow(void* pParentWnd) = 0;
-  virtual void* OpenWindow(void* pParentWnd, void* pParentControl) { return 0; }  // For OSX Carbon hosts ... ugh.
+	virtual void* OpenWindow(void* pParentWnd) = 0;
 	virtual void CloseWindow() = 0;  
 	virtual void* GetWindow() = 0;
 
