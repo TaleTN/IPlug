@@ -423,11 +423,16 @@ void IGraphics::DrawArc(const IColor color, float cx, float cy, float r, const f
 	LICE_Arc(&mDrawBitmap, cx, cy, r, minAngle, maxAngle, color.Get(), weight, IChannelBlend::kBlendNone, antiAlias);
 }
 
-bool IGraphics::DrawCircle(const IColor* pColor, float cx, float cy, float r,
-	const IChannelBlend* pBlend, bool antiAlias)
+void IGraphics::DrawCircle(const IColor color, float cx, float cy, float r, const float weight, const bool antiAlias)
 {
-  _LICE::LICE_Circle(mDrawBitmap, cx, cy, r, LiceColor(pColor), LiceWeight(pBlend), LiceBlendMode(pBlend), antiAlias);
-	return true;
+	const int scale = Scale();
+	if (scale)
+	{
+		// const float mul = 1.0f / (float)(1 << scale);
+		assert(scale == 1); static const float mul = 0.5f;
+		cx *= mul; cy *= mul; r *= mul;
+	}
+	LICE_Circle(&mDrawBitmap, cx, cy, r, color.Get(), weight, IChannelBlend::kBlendNone, antiAlias);
 }
 
 bool IGraphics::RoundRect(const IColor* pColor, IRECT* pR, const IChannelBlend* pBlend, int cornerradius, bool aa)
