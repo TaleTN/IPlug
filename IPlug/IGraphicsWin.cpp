@@ -12,7 +12,6 @@
 
 static int nWndClassReg = 0;
 static const WCHAR* const wndClassName = L"IPlugWndClass";
-static double sFPS = 0.0;
 
 #define PARAM_EDIT_ID 99
 
@@ -23,7 +22,7 @@ enum EParamEditMsg {
 	kCommit
 };
 
-#define IPLUG_TIMER_ID 2
+static const UINT_PTR IPLUG_TIMER_ID = 2;
 static const UINT IPLUG_DEFAULT_DPI = USER_DEFAULT_SCREEN_DPI * 2;
 
 static void ScalePoint(LPPOINT const lpPoint, const int dpi)
@@ -39,13 +38,9 @@ static void ScaleLParamXY(LPPOINT const lpPoint, const LPARAM lParam, const int 
 	ScalePoint(lpPoint, dpi);
 }
 
-inline void SetMouseWheelFocus(HWND hWnd, IGraphicsWin* pGraphics)
+static void SetMouseWheelFocus(HWND const hWnd, IGraphicsWin* const pGraphics)
 {
-	switch (pGraphics->GetPlug()->GetHost())
-	{
-		case kHostMixcraft:
-			SetFocus(hWnd);
-	}
+	if (pGraphics->GetPlug()->GetHost() == kHostMixcraft) SetFocus(hWnd);
 }
 
 static IMouseMod GetMouseMod(const WPARAM wParam, const bool bWheel = false)
@@ -65,12 +60,16 @@ static IMouseMod GetMouseMod(const WPARAM wParam, const bool bWheel = false)
 // static
 LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WPARAM wParam, const LPARAM lParam)
 {
-  if (msg == WM_CREATE) {
-    LPCREATESTRUCT lpcs = (LPCREATESTRUCT) lParam;
-    SetWindowLongPtr(hWnd, GWLP_USERDATA, (LPARAM) (lpcs->lpCreateParams));
-		int mSec = int(1000.0 / sFPS);
+	if (msg == WM_CREATE)
+	{
+		LPCREATESTRUCT const lpcs = (LPCREATESTRUCT)lParam;
+		IGraphicsWin* const pGraphics = (IGraphicsWin*)lpcs->lpCreateParams;
+		SetWindowLongPtrW(hWnd, GWLP_USERDATA, (LPARAM)pGraphics);
+
+		const int mSec = (int)(1000.0 / pGraphics->FPS());
 		SetTimer(hWnd, IPLUG_TIMER_ID, mSec, NULL);
-		SetMouseWheelFocus(hWnd, (IGraphicsWin*) (lpcs->lpCreateParams));
+
+		SetMouseWheelFocus(hWnd, pGraphics);
 		return 0;
 	}
 
