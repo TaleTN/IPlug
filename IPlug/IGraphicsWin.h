@@ -8,12 +8,11 @@
 #define IPLUG_RESOURCE(xxx) (xxx##_ID), NULL
 #define IPLUG_PNG_RESOURCE(id, name) (id), NULL
 
-class IGraphicsWin : public IGraphics
+class IGraphicsWin: public IGraphics
 {
 public:
-
 	IGraphicsWin(IPlugBase* pPlug, int w, int h, int refreshFPS = 0);
-	virtual ~IGraphicsWin();
+	~IGraphicsWin();
 
   void SetHInstance(HINSTANCE hInstance) { mHInstance = hInstance; }
   

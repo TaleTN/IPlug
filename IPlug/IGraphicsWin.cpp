@@ -290,13 +290,29 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND hWnd, UINT msg, WPARAM wParam,
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-IGraphicsWin::IGraphicsWin(IPlugBase* pPlug, int w, int h, int refreshFPS)
-:	IGraphics(pPlug, w, h, refreshFPS), mPlugWnd(0), mParamEditWnd(0), 
-  mPID(0), mParentWnd(0), mMainWnd(0), mCustomColorStorage(0),
-  mTooltipWnd(0), mShowingTooltip(false), mTooltipIdx(-1),
-	mEdControl(0), mEdParam(0), mDefEditProc(0), mParamEditMsg(kNone), mParamChangeTimer(0),
-  mHInstance(0)
+IGraphicsWin::IGraphicsWin(
+	IPlugBase* const pPlug,
+	const int w,
+	const int h,
+	const int refreshFPS
+):
+	IGraphics(pPlug, w, h, refreshFPS)
 {
+	mHInstance = NULL;
+	mParentWnd = NULL;
+	mPlugWnd = NULL;
+	mTooltipWnd = NULL;
+	mParamEditWnd = NULL;
+	mEdControl = NULL;
+	mEdParam = NULL;
+	mDefEditProc = NULL;
+	mParamEditMsg = kNone;
+	mShowingTooltip = false;
+	mTooltipIdx = -1;
+	mParamChangeTimer = 0;
+
+	mPID = 0;
+	mMainWnd = NULL;
 }
 
 IGraphicsWin::~IGraphicsWin()
