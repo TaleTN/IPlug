@@ -71,7 +71,12 @@ private:
 	bool mShowingTooltip;
 	int mTooltipIdx;
 	int mParamChangeTimer;
+	int mDPI;
 	COLORREF* mCustomColorStorage;
+
+	HMODULE mUser32DLL;
+	typedef UINT (WINAPI *GDFW)(HWND);
+	GDFW mGetDpiForWindow;
 
   DWORD mPID;
   HWND mParentWnd, mMainWnd;

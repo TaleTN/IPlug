@@ -11,7 +11,7 @@
 #include "WDL/wdlcstring.h"
 
 static int nWndClassReg = 0;
-static const char* wndClassName = "IPlugWndClass";
+static const WCHAR* const wndClassName = L"IPlugWndClass";
 static double sFPS = 0.0;
 
 #define PARAM_EDIT_ID 99
@@ -24,6 +24,7 @@ enum EParamEditMsg {
 };
 
 #define IPLUG_TIMER_ID 2
+static const UINT IPLUG_DEFAULT_DPI = USER_DEFAULT_SCREEN_DPI * 2;
 
 inline void SetMouseWheelFocus(HWND hWnd, IGraphicsWin* pGraphics)
 {
@@ -310,6 +311,10 @@ IGraphicsWin::IGraphicsWin(
 	mShowingTooltip = false;
 	mTooltipIdx = -1;
 	mParamChangeTimer = 0;
+	mDPI = USER_DEFAULT_SCREEN_DPI;
+
+	mUser32DLL = LoadLibrary("USER32.dll");
+	mGetDpiForWindow = mUser32DLL ? (GDFW)GetProcAddress(mUser32DLL, "GetDpiForWindow") : NULL;
 
 	mPID = 0;
 	mMainWnd = NULL;
@@ -319,6 +324,7 @@ IGraphicsWin::~IGraphicsWin()
 {
 	CloseWindow();
   FREE_NULL(mCustomColorStorage);
+	if (mUser32DLL) FreeLibrary(mUser32DLL);
 }
 
 LICE_IBitmap* IGraphicsWin::OSLoadBitmap(int ID, const char* name)
@@ -446,38 +452,46 @@ void IGraphicsWin::DrawScreen(const IRECT* const pR)
 	EndPaint(hWnd, &ps);
 }
 
-void* IGraphicsWin::OpenWindow(void* pParentWnd)
+void* IGraphicsWin::OpenWindow(void* const pParentWnd)
 {
-  int x = 0, y = 0, w = Width(), h = Height();
-  mParentWnd = (HWND) pParentWnd;
+	int x = 0, y = 0, w = Width(), h = Height();
+	mParentWnd = (HWND)pParentWnd;
 
-	if (mPlugWnd) {
+	mDPI = mGetDpiForWindow ? mGetDpiForWindow(mParentWnd) : USER_DEFAULT_SCREEN_DPI;
+	const int scale = mDPI > USER_DEFAULT_SCREEN_DPI ? kScaleFull : kScaleHalf;
+	if (!PrepDraw(scale)) return NULL;
+
+	w = MulDiv(w, mDPI, IPLUG_DEFAULT_DPI);
+	h = MulDiv(h, mDPI, IPLUG_DEFAULT_DPI);
+	GetPlug()->ResizeGraphics(w, h);
+
+	if (mPlugWnd)
+	{
 		RECT pR, cR;
-		GetWindowRect((HWND) pParentWnd, &pR);
+		GetWindowRect(mParentWnd, &pR);
 		GetWindowRect(mPlugWnd, &cR);
 		CloseWindow();
 		x = cR.left - pR.left;
 		y = cR.top - pR.top;
-		w = cR.right - cR.left;
-		h = cR.bottom - cR.top;
 	}
 
-	if (nWndClassReg++ == 0) {
-		WNDCLASS wndClass = { CS_DBLCLKS, WndProc, 0, 0, mHInstance, 0, LoadCursor(NULL, IDC_ARROW), 0, 0, wndClassName };
-		RegisterClass(&wndClass);
+	if (nWndClassReg++ == 0)
+	{
+		const WNDCLASSW wndClass = { CS_DBLCLKS, WndProc, 0, 0, mHInstance, NULL, LoadCursor(NULL, IDC_ARROW), NULL, NULL, wndClassName };
+		RegisterClassW(&wndClass);
 	}
 
-  sFPS = FPS();
-  mPlugWnd = CreateWindow(wndClassName, "IPlug", WS_CHILD | WS_VISIBLE, // | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
-		x, y, w, h, (HWND) pParentWnd, 0, mHInstance, this);
-	//SetWindowLong(mPlugWnd, GWL_USERDATA, (LPARAM) this);
+	mPlugWnd = CreateWindowW(wndClassName, L"IPlug", WS_CHILD | WS_VISIBLE,
+		x, y, w, h, (HWND)pParentWnd, NULL, mHInstance, this);
 
-	if (!mPlugWnd && --nWndClassReg == 0) {
-		UnregisterClass(wndClassName, mHInstance);
+	if (!mPlugWnd && --nWndClassReg == 0)
+	{
+		UnregisterClassW(wndClassName, mHInstance);
 	}
-  else {
-    SetAllControlsDirty();
-  }  
+	else
+	{
+		SetAllControlsDirty();
+	}
 
 	if (mPlugWnd && TooltipsEnabled())
 	{
@@ -485,14 +499,13 @@ void* IGraphicsWin::OpenWindow(void* pParentWnd)
 		static const INITCOMMONCONTROLSEX iccex = { sizeof(INITCOMMONCONTROLSEX), ICC_TAB_CLASSES };
 		if (InitCommonControlsEx(&iccex))
 		{
-			mTooltipWnd = CreateWindowEx(0, TOOLTIPS_CLASS, NULL, WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
+			mTooltipWnd = CreateWindowExW(0, TOOLTIPS_CLASSW, NULL, WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
 				CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, mPlugWnd, NULL, mHInstance, NULL);
 			if (mTooltipWnd)
 			{
 				SetWindowPos(mTooltipWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-				TOOLINFO ti = { TTTOOLINFOA_V2_SIZE, TTF_IDISHWND | TTF_SUBCLASS, mPlugWnd, (UINT_PTR)mPlugWnd };
-				ti.lpszText = (LPTSTR)NULL;
-				SendMessage(mTooltipWnd, TTM_ADDTOOL, 0, (LPARAM)&ti);
+				const TOOLINFOW ti = { TTTOOLINFOW_V2_SIZE, TTF_IDISHWND | TTF_SUBCLASS | TTF_TRANSPARENT, mPlugWnd, (UINT_PTR)mPlugWnd };
+				SendMessageW(mTooltipWnd, TTM_ADDTOOLW, 0, (LPARAM)&ti);
 				ok = true;
 			}
 		}
