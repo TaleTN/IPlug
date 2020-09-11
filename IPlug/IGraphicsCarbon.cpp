@@ -181,16 +181,28 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef const pH
 					pGraphicsMac->OnMouseDrag(x, y, mmod);
 					return noErr;
 				}
-        case kEventMouseWheelMoved: {
-          EventMouseWheelAxis axis;
-          GetEventParameter(pEvent, kEventParamMouseWheelAxis, typeMouseWheelAxis, 0, sizeof(EventMouseWheelAxis), 0, &axis);
-          if (axis == kEventMouseWheelAxisY) {
-            int d;
-            GetEventParameter(pEvent, kEventParamMouseWheelDelta, typeSInt32, 0, sizeof(SInt32), 0, &d);
-            pGraphicsMac->OnMouseWheel(x, y, &mmod, d);
-            return noErr;
-          }
-        }   
+				case kEventMouseWheelMoved:
+				{
+					EventMouseWheelAxis axis;
+					GetEventParameter(pEvent, kEventParamMouseWheelAxis, typeMouseWheelAxis, NULL, sizeof(EventMouseWheelAxis), NULL, &axis);
+					if (axis == kEventMouseWheelAxisY)
+					{
+						const int canHandle = pGraphicsMac->CanHandleMouseWheel();
+						if (canHandle)
+						{
+							mmod.W = canHandle >= 0;
+							const IMouseMod mask(false, false, true, true, true, true);
+
+							if (mmod.Get() & mask.Get())
+							{
+								SInt32 d;
+								GetEventParameter(pEvent, kEventParamMouseWheelDelta, typeSInt32, NULL, sizeof(SInt32), NULL, &d);
+								pGraphicsMac->OnMouseWheel(x, y, mmod, (float)d);
+							}
+						}
+						return noErr;
+					}
+				}
 			}
 			break;
 		}
