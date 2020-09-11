@@ -199,26 +199,29 @@ void* IGraphicsMac::OpenCarbonWindow(void* const pParentWnd, void* const pParent
 
 void IGraphicsMac::CloseWindow()
 {
-#ifndef IPLUG_NO_CARBON_SUPPORT
-  if (mGraphicsCarbon) 
-  {
-    DELETE_NULL(mGraphicsCarbon);
-  }
-  else  
-#endif
-	if (mGraphicsCocoa) 
-  {
-    IGRAPHICS_COCOA* graphicscocoa = (IGRAPHICS_COCOA*)mGraphicsCocoa;
-    [graphicscocoa removeAllToolTips];
-    GetPlug()->EndDelayedInformHostOfParamChange();
-    [graphicscocoa killTimer];
-    mGraphicsCocoa = 0;
-    if (graphicscocoa->mGraphics)
-    {
-      graphicscocoa->mGraphics = 0;
-      [graphicscocoa removeFromSuperview];   // Releases.
-    }
+	#ifndef IPLUG_NO_CARBON_SUPPORT
+	if (mGraphicsCarbon)
+	{
+		delete mGraphicsCarbon;
+		mGraphicsCarbon = NULL;
+	}
+	else
+	#endif
+	if (mGraphicsCocoa)
+	{
+		IGRAPHICS_COCOA* const graphicscocoa = (IGRAPHICS_COCOA*)mGraphicsCocoa;
+		[graphicscocoa removeAllToolTips];
+		GetPlug()->EndDelayedInformHostOfParamChange();
+		[graphicscocoa killTimer];
+		mGraphicsCocoa = NULL;
 
+		IGraphicsMac* pGraphicsMac;
+		object_getInstanceVariable(graphicscocoa, "_mGraphics", (void**)&pGraphicsMac);
+		if (pGraphicsMac)
+		{
+			object_setInstanceVariable(graphicscocoa, "_mGraphics", NULL);
+			[graphicscocoa removeFromSuperview]; // Releases.
+		}
 	}
 }
 
