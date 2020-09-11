@@ -120,33 +120,36 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef const pH
 
 			switch (eventKind)
 			{
-        case kEventMouseDown: {
-          _this->HideTooltip();
-          if (_this->mParamEditView)
-          {
-            HIViewRef view;
-            HIViewGetViewForMouseEvent(_this->mView, pEvent, &view);
-            if (view == _this->mParamEditView) break;
-            if (button == kEventMouseButtonSecondary)
-            {
-              _this->EndUserInput(false);
-              break;
-            }
-            _this->EndUserInput(true);
-          }
+				case kEventMouseDown:
+				{
+					_this->HideTooltip();
+					if (_this->mParamEditView)
+					{
+						HIViewRef view;
+						HIViewGetViewForMouseEvent(_this->mView, pEvent, &view);
+						if (view == _this->mParamEditView) break;
+						if (button == kEventMouseButtonSecondary)
+						{
+							_this->EndUserInput(false);
+							break;
+						}
+						_this->EndUserInput(true);
+					}
 
-          CallNextEventHandler(pHandlerCall, pEvent);   // Activates the window, if inactive.
-          
-          UInt32 clickCount = 0;
-          GetEventParameter(pEvent, kEventParamClickCount, typeUInt32, 0, sizeof(UInt32), 0, &clickCount);
-          if (clickCount > 1) {
-            pGraphicsMac->OnMouseDblClick(x, y, &mmod);
-          }
-          else {          
-            pGraphicsMac->OnMouseDown(x, y, &mmod);
-          }
-          return noErr;
-        }
+					CallNextEventHandler(pHandlerCall, pEvent); // Activates the window, if inactive.
+
+					UInt32 clickCount = 0;
+					GetEventParameter(pEvent, kEventParamClickCount, typeUInt32, NULL, sizeof(UInt32), NULL, &clickCount);
+					if (clickCount > 1)
+					{
+						pGraphicsMac->OnMouseDblClick(x, y, mmod);
+					}
+					else
+					{
+						pGraphicsMac->OnMouseDown(x, y, mmod);
+					}
+					return noErr;
+				}
         case kEventMouseUp: {
           pGraphicsMac->OnMouseUp(x, y, &mmod);
           return noErr;
