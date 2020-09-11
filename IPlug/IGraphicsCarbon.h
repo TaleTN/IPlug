@@ -26,11 +26,10 @@ public:
 	void PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int fontSize = 0);
 
 protected:
-
-  void InstallParamEditHandler(ControlRef control);
-  void SetParamEditText(const char* txt);
-  void ShowParamEditView();
-  void EndUserInput(bool commit);
+	void InstallParamEditHandler(ControlRef control);
+	void SetParamEditText(const char* txt);
+	void ShowParamEditView();
+	void EndUserInput(bool commit);
 
   void ShowTooltip();
   void HideTooltip();

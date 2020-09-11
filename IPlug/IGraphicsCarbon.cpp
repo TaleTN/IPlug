@@ -437,74 +437,73 @@ void IGraphicsCarbon::PromptUserInput(IControl* const pControl, IParam* const pP
 
 void IGraphicsCarbon::InstallParamEditHandler(ControlRef control)
 {
-  const EventTypeSpec events[] = {
-    { kEventClassKeyboard, kEventRawKeyDown },
-    { kEventClassKeyboard, kEventRawKeyRepeat }
-  };
-  InstallControlEventHandler(control, CarbonParamEditHandler, GetEventTypeCount(events), events, this, &mParamEditHandler);
+	static const EventTypeSpec events[] =
+	{
+		{ kEventClassKeyboard, kEventRawKeyDown },
+		{ kEventClassKeyboard, kEventRawKeyRepeat }
+	};
+	InstallControlEventHandler(control, CarbonParamEditHandler, GetEventTypeCount(events), events, this, &mParamEditHandler);
 }
 
-void IGraphicsCarbon::SetParamEditText(const char* txt)
+void IGraphicsCarbon::SetParamEditText(const char* const txt)
 {
-  if (txt && txt[0] != '\0')
-  {
-    CFStringRef str = CFStringCreateWithCString(NULL, txt, kCFStringEncodingUTF8);
-    if (str)
-    {
-      SetControlData(mParamEditView, kControlEditTextPart, kControlEditTextCFStringTag, sizeof(str), &str);
-      CFRelease(str);
-    }
-    ControlEditTextSelectionRec sel;
-    sel.selStart = 0;
-    sel.selEnd = strlen(txt);
-    SetControlData(mParamEditView, kControlEditTextPart, kControlEditTextSelectionTag, sizeof(sel), &sel);
-  }
+	if (txt && *txt)
+	{
+		CFStringRef str = CFStringCreateWithCString(NULL, txt, kCFStringEncodingUTF8);
+		if (str)
+		{
+			SetControlData(mParamEditView, kControlEditTextPart, kControlEditTextCFStringTag, sizeof(str), &str);
+			CFRelease(str);
+		}
+		ControlEditTextSelectionRec sel;
+		sel.selStart = 0;
+		sel.selEnd = strlen(txt);
+		SetControlData(mParamEditView, kControlEditTextPart, kControlEditTextSelectionTag, sizeof(sel), &sel);
+	}
 }
 
 void IGraphicsCarbon::ShowParamEditView()
 {
-  HIViewSetVisible(mParamEditView, true);
-  HIViewAdvanceFocus(mParamEditView, 0);
-  SetKeyboardFocus(mWindow, mParamEditView, kControlEditTextPart);
-  SetUserFocusWindow(mWindow);
+	HIViewSetVisible(mParamEditView, true);
+	HIViewAdvanceFocus(mParamEditView, 0);
+	SetKeyboardFocus(mWindow, mParamEditView, kControlEditTextPart);
+	SetUserFocusWindow(mWindow);
 }
 
-void IGraphicsCarbon::EndUserInput(bool commit)
+void IGraphicsCarbon::EndUserInput(const bool commit)
 {
-  RemoveEventHandler(mParamEditHandler);
-  mParamEditHandler = 0;
+	RemoveEventHandler(mParamEditHandler);
+	mParamEditHandler = NULL;
 
-  if (commit)
-  {
-    CFStringRef str;
-    if (GetControlData(mParamEditView, kControlEditTextPart, kControlEditTextCFStringTag, sizeof(str), &str, NULL) == noErr)
-    {
-      char txt[MAX_EDIT_LEN];
-      CFStringGetCString(str, txt, MAX_EDIT_LEN, kCFStringEncodingUTF8);
-      mGraphicsMac->SetFromStringAfterPrompt(mEdControl, mEdParam, txt);
-      CFRelease(str);
-    }
-  }
+	if (commit)
+	{
+		CFStringRef str;
+		if (GetControlData(mParamEditView, kControlEditTextPart, kControlEditTextCFStringTag, sizeof(str), &str, NULL) == noErr)
+		{
+			char txt[IGraphics::kMaxEditLen];
+			CFStringGetCString(str, txt, sizeof(txt), kCFStringEncodingUTF8);
+			mGraphicsMac->SetFromStringAfterPrompt(mEdControl, mEdParam, txt);
+			CFRelease(str);
+		}
+	}
 
-  HIViewSetVisible(mParamEditView, false);
-  HIViewRemoveFromSuperview(mParamEditView);
-  if (mIsComposited)
-  {
-    //IRECT* pR = mEdControl->GetRECT();
-    //HIViewSetNeedsDisplayInRect(mView, &CGRectMake(pR->L, pR->T, pR->W(), pR->H()), true);
-    HIViewSetNeedsDisplay(mView, true);
-  }
-  else
-  {
-    mEdControl->SetDirty(false);
-    mEdControl->Redraw();
-  }
-  SetThemeCursor(kThemeArrowCursor);
-  SetUserFocusWindow(kUserFocusAuto);
+	HIViewSetVisible(mParamEditView, false);
+	HIViewRemoveFromSuperview(mParamEditView);
+	if (mIsComposited)
+	{
+		HIViewSetNeedsDisplay(mView, true);
+	}
+	else
+	{
+		mEdControl->SetDirty(false);
+		mEdControl->Redraw();
+	}
+	SetThemeCursor(kThemeArrowCursor);
+	SetUserFocusWindow(kUserFocusAuto);
 
-  mParamEditView = 0;
-  mEdControl = 0;
-  mEdParam = 0;
+	mParamEditView = NULL;
+	mEdControl = NULL;
+	mEdParam = NULL;
 }
 
 void IGraphicsCarbon::ShowTooltip()
