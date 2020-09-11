@@ -23,8 +23,7 @@ public:
 	}
 
 	// bool Resize(int w, int h);
-  void PromptUserInput(IControl* pControl, IParam* pParam);
-  void PromptUserInput(IEditableTextControl* pControl);
+	void PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int fontSize = 0);
 
 protected:
 
