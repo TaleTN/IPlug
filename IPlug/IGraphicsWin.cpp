@@ -322,8 +322,8 @@ IGraphicsWin::IGraphicsWin(
 	mUser32DLL = LoadLibrary("USER32.dll");
 	mGetDpiForWindow = mUser32DLL ? (GDFW)GetProcAddress(mUser32DLL, "GetDpiForWindow") : NULL;
 
-	mPID = 0;
-	mMainWnd = NULL;
+	// mPID = 0;
+	// mMainWnd = NULL;
 
 	mCoInit = false;
 }
@@ -523,65 +523,80 @@ void* IGraphicsWin::OpenWindow(void* const pParentWnd)
 	return mPlugWnd;
 }
 
-#define MAX_CLASSNAME_LEN 128
-void GetWndClassName(HWND hWnd, WDL_String* pStr)
+/* static const int MAX_CLASSNAME_LEN = 128;
+
+static void GetWndClassName(HWND const hWnd, WDL_String* const pStr)
 {
-    char cStr[MAX_CLASSNAME_LEN];
-    cStr[0] = '\0';
-    GetClassName(hWnd, cStr, MAX_CLASSNAME_LEN);
-    pStr->Set(cStr);
+	if (pStr->SetLen(MAX_CLASSNAME_LEN - 1))
+	{
+		GetClassName(hWnd, pStr->Get(), MAX_CLASSNAME_LEN);
+	}
+	else
+	{
+		pStr->Set("");
+	}
 }
 
-BOOL CALLBACK IGraphicsWin::FindMainWindow(HWND hWnd, LPARAM lParam)
+BOOL CALLBACK IGraphicsWin::FindMainWindow(HWND const hWnd, const LPARAM lParam)
 {
-    IGraphicsWin* pGraphics = (IGraphicsWin*) lParam;
-    if (pGraphics) {
-        DWORD wPID;
-        GetWindowThreadProcessId(hWnd, &wPID);
-        WDL_String str;
-        GetWndClassName(hWnd, &str);
-        if (wPID == pGraphics->mPID && !strcmp(str.Get(), pGraphics->mMainWndClassName.Get())) {
-            pGraphics->mMainWnd = hWnd;
-            return FALSE;   // Stop enumerating.
-        }
-    }
-    return TRUE;
+	IGraphicsWin* const pGraphics = (IGraphicsWin*)lParam;
+	if (pGraphics)
+	{
+		DWORD wPID;
+		GetWindowThreadProcessId(hWnd, &wPID);
+		WDL_String str;
+		GetWndClassName(hWnd, &str);
+		if (wPID == pGraphics->mPID && !strcmp(str.Get(), pGraphics->mMainWndClassName.Get()))
+		{
+			pGraphics->mMainWnd = hWnd;
+			return FALSE; // Stop enumerating.
+		}
+	}
+	return TRUE;
 }
 
 HWND IGraphicsWin::GetMainWnd()
 {
-    if (!mMainWnd) {
-        if (mParentWnd) {
-            HWND parentWnd = mParentWnd;
-            while (parentWnd) {
-                mMainWnd = parentWnd;
-                parentWnd = GetParent(mMainWnd);
-            }
-            GetWndClassName(mMainWnd, &mMainWndClassName);
-        }
-        else
-        if (CSTR_NOT_EMPTY(mMainWndClassName.Get())) {
-            mPID = GetCurrentProcessId();
-            EnumWindows(FindMainWindow, (LPARAM) this);
-        }
-    }
-    return mMainWnd;
+	if (!mMainWnd)
+	{
+		if (mParentWnd)
+		{
+			HWND parentWnd = mParentWnd;
+			while (parentWnd)
+			{
+				mMainWnd = parentWnd;
+				parentWnd = GetParent(mMainWnd);
+			}
+			GetWndClassName(mMainWnd, &mMainWndClassName);
+		}
+		else
+		{
+			const char* const cStr = mMainWndClassName.Get();
+			if (cStr && *cStr)
+			{
+				mPID = GetCurrentProcessId();
+				EnumWindows(FindMainWindow, (LPARAM)this);
+			}
+		}
+	}
+	return mMainWnd;
 }
 
-#define TOOLWIN_BORDER_W 6
-#define TOOLWIN_BORDER_H 23
+static const int TOOLWIN_BORDER_W = 6;
+static const int TOOLWIN_BORDER_H = 23;
 
 IRECT IGraphicsWin::GetWindowRECT()
 {
-    if (mPlugWnd) {
-        RECT r;
-        GetWindowRect(mPlugWnd, &r);
-        r.right -= TOOLWIN_BORDER_W;
-        r.bottom -= TOOLWIN_BORDER_H;
-        return IRECT(r.left, r.top, r.right, r.bottom);
-    }
-    return IRECT();
-}
+	if (mPlugWnd)
+	{
+		RECT r;
+		GetWindowRect(mPlugWnd, &r);
+		r.right -= TOOLWIN_BORDER_W;
+		r.bottom -= TOOLWIN_BORDER_H;
+		return IRECT(r.left, r.top, r.right, r.bottom);
+	}
+	return IRECT();
+} */
 
 void IGraphicsWin::SetWindowTitle(char* str)
 {

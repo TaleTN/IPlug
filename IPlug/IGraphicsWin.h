@@ -43,10 +43,10 @@ public:
     // Specialty use!
 	void* GetWindow() const { return mPlugWnd; }
 	inline HWND GetParentWindow() const { return mParentWnd; }
-  HWND GetMainWnd();
-  void SetMainWndClassName(char* name) { mMainWndClassName.Set(name); }
-  void GetMainWndClassName(char* name) { strcpy(name, mMainWndClassName.Get()); }
-  IRECT GetWindowRECT();
+	// HWND GetMainWnd();
+	// void SetMainWndClassName(const char* const name) { mMainWndClassName.Set(name); }
+	// void GetMainWndClassName(char* const name) { strcpy(name, mMainWndClassName.Get()); }
+	// IRECT GetWindowRECT();
   void SetWindowTitle(char* str);
 
 protected:
@@ -60,7 +60,7 @@ protected:
 
 private:
 	HINSTANCE mHInstance;
-  HWND mPlugWnd, mTooltipWnd, mParamEditWnd;
+	HWND mParentWnd, mPlugWnd, mTooltipWnd, mParamEditWnd;
 	// Ed = being edited manually.
 	IControl* mEdControl;
 	IParam* mEdParam;
@@ -75,9 +75,9 @@ private:
 	typedef UINT (WINAPI *GDFW)(HWND);
 	GDFW mGetDpiForWindow;
 
-  DWORD mPID;
-  HWND mParentWnd, mMainWnd;
-  WDL_String mMainWndClassName;
+	// DWORD mPID;
+	// HWND mMainWnd;
+	// WDL_String mMainWndClassName;
 
 	bool mCoInit;
 
@@ -85,5 +85,5 @@ public:
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	static LRESULT CALLBACK ParamEditProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-  static BOOL CALLBACK FindMainWindow(HWND hWnd, LPARAM lParam);
+	// static BOOL CALLBACK FindMainWindow(HWND hWnd, LPARAM lParam);
 };
