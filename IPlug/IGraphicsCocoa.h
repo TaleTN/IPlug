@@ -1,11 +1,18 @@
 #import <Cocoa/Cocoa.h>
 #include "IGraphicsMac.h"
 
-// Cocoa objects can be supplied by any existing component, 
-// so we need to make sure the C++ static lib code gets the 
+// Cocoa objects can be supplied by any existing component,
+// so we need to make sure the C++ static lib code gets the
 // IGraphicsCocoa that it expects.
 #ifndef IGRAPHICS_COCOA
-	#define IGRAPHICS_COCOA IGraphicsCocoa_xxxxxxx
+	// You should add IGRAPHICS_COCOA=$(PRODUCT_NAME:identifier)_AU or VST
+	// to GCC_PREPROCESSOR_DEFINITIONS under buildSettings in Xcode project.
+	#error "IGRAPHICS_COCOA not defined!"
+
+// TN: Dammit Jim, I'm a plugin not an app! so we really shouldn't need
+// SWELL_APP_PREFIX, but just to be sure...
+#elif !defined(SWELL_APP_PREFIX)
+	#define SWELL_APP_PREFIX IGRAPHICS_COCOA
 #endif
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
