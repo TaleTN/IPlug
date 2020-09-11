@@ -15,39 +15,39 @@
 	#define SWELL_APP_PREFIX IGRAPHICS_COCOA
 #endif
 
-@interface IGRAPHICS_COCOA : NSView
+@interface IGRAPHICS_COCOA: NSView <NSTextFieldDelegate>
 {
-  IGraphicsMac* mGraphics;
-  NSTimer* mTimer;
-  NSTextField* mParamEditView;
-  // Ed = being edited manually.
-  IControl* mEdControl;
-  IParam* mEdParam;
-  int mParamChangeTimer;
+	IGraphicsMac* mGraphics;
+	NSTimer* mTimer;
+	NSTextField* mParamEditView;
+	// Ed = being edited manually.
+	IControl* mEdControl;
+	IParam* mEdParam;
+	int mParamChangeTimer;
 }
 - (id) init;
-- (id) initWithIGraphics: (IGraphicsMac*) pGraphics;
+- (id) initWithIGraphics: (IGraphicsMac*)pGraphics;
 - (BOOL) isOpaque;
 - (BOOL) acceptsFirstResponder;
-- (BOOL) acceptsFirstMouse: (NSEvent*) pEvent;
+- (BOOL) acceptsFirstMouse: (NSEvent*)pEvent;
 - (void) viewDidMoveToWindow;
-- (void) drawRect: (NSRect) rect;
-- (void) onTimer: (NSTimer*) pTimer;
-- (void) getMouseXY: (NSEvent*) pEvent x: (int*) pX y: (int*) pY;
-- (void) mouseDown: (NSEvent*) pEvent;
-- (void) mouseUp: (NSEvent*) pEvent;
-- (void) mouseDragged: (NSEvent*) pEvent;
-- (void) rightMouseDown: (NSEvent*) pEvent;
-- (void) rightMouseUp: (NSEvent*) pEvent;
-- (void) rightMouseDragged: (NSEvent*) pEvent;
-- (void) mouseMoved: (NSEvent*) pEvent;
-- (void) scrollWheel: (NSEvent*) pEvent;
+- (void) drawRect: (NSRect)rect;
+- (void) onTimer: (NSTimer*)pTimer;
+- (void) getMouseXY: (NSEvent*)pEvent x: (int*)pX y: (int*)pY;
+- (void) mouseDown: (NSEvent*)pEvent;
+- (void) mouseUp: (NSEvent*)pEvent;
+- (void) mouseDragged: (NSEvent*)pEvent;
+- (void) rightMouseDown: (NSEvent*)pEvent;
+- (void) rightMouseUp: (NSEvent*)pEvent;
+- (void) rightMouseDragged: (NSEvent*)pEvent;
+- (void) mouseMoved: (NSEvent*)pEvent;
+- (void) scrollWheel: (NSEvent*)pEvent;
 - (void) killTimer;
 - (void) controlTextDidChange: (NSNotification *) aNotification;
 - (void) promptUserInput: (IControl*) pControl param: (IParam*) pParam;
 - (void) promptUserInput: (IEditableTextControl*) pControl;
-- (NSString*) view: (NSView*) pView stringForToolTip: (NSToolTipTag) tag point: (NSPoint) point userData: (void*) pData;
+- (NSString*) view: (NSView*)pView stringForToolTip: (NSToolTipTag)tag point: (NSPoint)point userData: (void*)pData;
 - (void) registerToolTip: (int) controlIdx rect: (IRECT*) pRECT;
-- (void) setParamChangeTimer: (int) ticks;
+- (void) setParamChangeTimer: (int)ticks;
 - (void) cancelParamChangeTimer;
 @end
