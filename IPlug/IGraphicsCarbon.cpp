@@ -114,7 +114,9 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef const pH
 			EventMouseButton button;
 			GetEventParameter(pEvent, kEventParamMouseButton, typeMouseButton, NULL, sizeof(EventMouseButton), NULL, &button);
 			if (button == kEventMouseButtonPrimary && (mods & cmdKey)) button = kEventMouseButtonSecondary;
-			IMouseMod mmod(true, button == kEventMouseButtonSecondary, !!(mods & shiftKey), !!(mods & controlKey), !!(mods & optionKey));
+
+			const bool right = button == kEventMouseButtonSecondary, left = !right;
+			IMouseMod mmod(left, right, !!(mods & shiftKey), !!(mods & controlKey), !!(mods & optionKey));
 
 			switch (eventKind)
 			{
