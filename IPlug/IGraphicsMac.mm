@@ -51,55 +51,34 @@ IGraphicsMac::~IGraphicsMac()
 	CloseWindow();
 }
 
-LICE_IBitmap* LoadImgFromResourceOSX(const char* bundleID, const char* filename)
-{ 
-  if (!filename) return 0;
-  CocoaAutoReleasePool pool;
-  
-#ifndef IPLUG_NO_JPEG_SUPPORT
-  const char* ext = filename+strlen(filename)-1;
-  while (ext >= filename && *ext != '.') --ext;
-  ++ext;
-  
-  bool ispng = !stricmp(ext, "png");
-  bool isjpg = !stricmp(ext, "jpg");
-  if (!isjpg && !ispng) return 0;
-#endif
-  
-  NSBundle* pBundle = [NSBundle bundleWithIdentifier:ToNSString(bundleID)];
-  NSString* pFile = [[ToNSString(filename) lastPathComponent] stringByDeletingPathExtension];
-  if (pBundle && pFile) 
-  {
-    NSString* pPath = 0;
-#ifndef IPLUG_NO_JPEG_SUPPORT
-    if (ispng)
-#endif
-    pPath = [pBundle pathForResource:pFile ofType:@"png"];  
-#ifndef IPLUG_NO_JPEG_SUPPORT
-    if (isjpg) pPath = [pBundle pathForResource:pFile ofType:@"jpg"];  
-#endif
+static const char* FindResourceOSX(const char* const bundleID, const char* const filename, const char* const type)
+{
+	if (!filename) return NULL;
+	// const CocoaAutoReleasePool pool;
 
-    if (pPath) 
-    {
-      const char* resourceFileName = [pPath UTF8String];
-      if (CSTR_NOT_EMPTY(resourceFileName))
-      {
-#ifndef IPLUG_NO_JPEG_SUPPORT
-        if (ispng)
-#endif
-        return LICE_LoadPNG(resourceFileName);
-#ifndef IPLUG_NO_JPEG_SUPPORT
-        if (isjpg) return LICE_LoadJPG(resourceFileName);
-#endif
-      }
-    }
-  }
-  return 0;
+	NSBundle* const pBundle = [NSBundle bundleWithIdentifier: ToNSString(bundleID)];
+	NSString* const pFile = [[ToNSString(filename) lastPathComponent] stringByDeletingPathExtension];
+	if (pBundle && pFile)
+	{
+		NSString* const pPath = [pBundle pathForResource: pFile ofType: ToNSString(type)];
+
+		if (pPath)
+		{
+			const char* const resourceFileName = [pPath UTF8String];
+			if (resourceFileName && *resourceFileName)
+			{
+				return resourceFileName;
+			}
+		}
+	}
+	return NULL;
 }
 
-LICE_IBitmap* IGraphicsMac::OSLoadBitmap(int ID, const char* name)
+LICE_IBitmap* IGraphicsMac::OSLoadBitmap(int /* ID */, const char* const name)
 {
-  return LoadImgFromResourceOSX(GetBundleID(), name);
+	const CocoaAutoReleasePool pool;
+	const char* const resourceFileName = FindResourceOSX(GetBundleID(), name, "png");
+	return resourceFileName ? LICE_LoadPNG(resourceFileName) : NULL;
 }
 
 void IGraphicsMac::DrawScreen(const IRECT* /* pR */)

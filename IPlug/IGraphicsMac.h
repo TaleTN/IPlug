@@ -59,9 +59,8 @@ public:
 	static double GetUserFoundationVersion(); // Returns a number like 677.00 (10.5).
 
 protected:
-  
-  virtual LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
-  
+	LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
+
 private:
 	#ifndef IPLUG_NO_CARBON_SUPPORT
 	IGraphicsCarbon* mGraphicsCarbon;
