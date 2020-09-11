@@ -15,24 +15,6 @@
 	#define SWELL_APP_PREFIX IGRAPHICS_COCOA
 #endif
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
-  #if __LP64__ || NS_BUILD_32_LIKE_64
-    typedef long NSInteger;
-    typedef unsigned long NSUInteger;
-  #else
-    typedef int NSInteger;
-    typedef unsigned int NSUInteger;
-  #endif
-#endif
-
-NSString* ToNSString(const char* cStr);
-
-inline CGRect ToCGRect(int h, IRECT* pR)
-{
-  int B = h - pR->B;
-  return CGRectMake(pR->L, B, pR->W(), B + pR->H()); 
-}
-
 @interface IGRAPHICS_COCOA : NSView
 {
   IGraphicsMac* mGraphics;
