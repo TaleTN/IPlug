@@ -249,8 +249,8 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
 - (void) killTimer
 {
-  [mTimer invalidate];
-  mTimer = 0;
+	[mTimer invalidate];
+	mTimer = nil;
 }
 
 - (void) removeFromSuperview
