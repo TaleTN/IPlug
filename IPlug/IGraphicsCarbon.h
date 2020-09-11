@@ -17,7 +17,11 @@ public:
 	inline ControlRef GetView() const { return mView; }
 	inline CGContextRef GetCGContext() const { return mCGC; }
 
-  void OffsetContentRect(CGRect* pR);
+	void OffsetContentRect(CGRect* const pR) const
+	{
+		*pR = CGRectOffset(*pR, 0.0f, (CGFloat)mContentYOffset);
+	}
+
   bool Resize(int w, int h);
   void PromptUserInput(IControl* pControl, IParam* pParam);
   void PromptUserInput(IEditableTextControl* pControl);

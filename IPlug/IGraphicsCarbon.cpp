@@ -363,11 +363,6 @@ IGraphicsCarbon::~IGraphicsCarbon()
 	mView = NULL;
 }
 
-void IGraphicsCarbon::OffsetContentRect(CGRect* pR)
-{
-  *pR = CGRectOffset(*pR, (float) mContentXOffset, (float) mContentYOffset);
-}
-
 bool IGraphicsCarbon::Resize(int w, int h)
 {
   if (mWindow && mView) {
