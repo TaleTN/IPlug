@@ -264,21 +264,14 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 	}
 }
 
-- (void) controlTextDidEndEditing: (NSNotification*) aNotification
+- (void) controlTextDidEndEditing: (NSNotification*)aNotification
 {
-  char* txt = (char*)[[mParamEditView stringValue] UTF8String];
+	const char* const txt = (const char*)[[mParamEditView stringValue] UTF8String];
+	mGraphics->SetFromStringAfterPrompt(mEdControl, mEdParam, txt);
 
-  NSInteger vi = -1;
-  if ([mParamEditView respondsToSelector: @selector(indexOfSelectedItem)] == YES)
-    vi = (NSInteger)[mParamEditView indexOfSelectedItem];
-  if (vi != -1)
-    mEdControl->SetValueFromUserInput(mEdParam->GetNormalized((double)vi));
-  else
-    mGraphics->SetFromStringAfterPrompt(mEdControl, mEdParam, txt);
-
-  EndUserInput(self);
-  [self viewDidMoveToWindow];
-  [self setNeedsDisplay: YES];
+	EndUserInput(self);
+	[self viewDidMoveToWindow];
+	[self setNeedsDisplay: YES];
 }
 
 #define PARAM_EDIT_W 42
