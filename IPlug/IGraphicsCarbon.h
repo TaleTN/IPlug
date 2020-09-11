@@ -12,8 +12,8 @@ public:
 	static const int kScaleFixed = IGraphicsMac::kScaleOS;
 
 	IGraphicsCarbon(IGraphicsMac* pGraphicsMac, WindowRef pWindow, ControlRef pParentControl);
-  ~IGraphicsCarbon();
-  
+	~IGraphicsCarbon();
+
   ControlRef GetView() { return mView; }
   CGContextRef GetCGContext() { return mCGC; }
   void OffsetContentRect(CGRect* pR);

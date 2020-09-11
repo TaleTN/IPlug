@@ -344,24 +344,23 @@ IGraphicsCarbon::IGraphicsCarbon(
 
 IGraphicsCarbon::~IGraphicsCarbon()
 {
-  // Called from IGraphicsMac::CloseWindow.
-  if (mParamEditView)
-  {
-    RemoveEventHandler(mParamEditHandler);
-    mParamEditHandler = 0;
-    HIViewRemoveFromSuperview(mParamEditView);
-    mParamEditView = 0;
-    mEdControl = 0;
-    mEdParam = 0;
-  }
-  HideTooltip();
-  if (mParamChangeTimer) mGraphicsMac->GetPlug()->EndDelayedInformHostOfParamChange();
-  RemoveEventLoopTimer(mTimer);
-  RemoveEventHandler(mControlHandler);
-  RemoveEventHandler(mWindowHandler);
-  mTimer = 0;
-  mView = 0;
-  DisposeRgn(mRgn);
+	// Called from IGraphicsMac::CloseWindow().
+	if (mParamEditView)
+	{
+		RemoveEventHandler(mParamEditHandler);
+		mParamEditHandler = NULL;
+		HIViewRemoveFromSuperview(mParamEditView);
+		mParamEditView = NULL;
+		mEdControl = NULL;
+		mEdParam = NULL;
+	}
+	HideTooltip();
+	if (mParamChangeTimer) mGraphicsMac->GetPlug()->EndDelayedInformHostOfParamChange();
+	RemoveEventLoopTimer(mTimer);
+	RemoveEventHandler(mControlHandler);
+	RemoveEventHandler(mWindowHandler);
+	mTimer = NULL;
+	mView = NULL;
 }
 
 void IGraphicsCarbon::OffsetContentRect(CGRect* pR)
