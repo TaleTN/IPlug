@@ -96,9 +96,13 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 	}
 }
 
-- (void) drawRect: (NSRect) rect 
+- (void) drawRect: (NSRect)rect
 {
-  if (mGraphics) mGraphics->Draw(&ToIRECT(mGraphics, &rect));
+	if (mGraphics)
+	{
+		const IRECT r = ToIRECT(mGraphics, &rect);
+		mGraphics->Draw(&r);
+	}
 }
 
 - (void) onTimer: (NSTimer*) pTimer
