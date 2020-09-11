@@ -34,8 +34,8 @@ public:
 
 	bool OpenURL(const char* url, const char* windowTitle = NULL, const char* confirmMsg = NULL, const char* errMsg = NULL);
 
-  // Return 1 if mouse wheel is processed
-  int ProcessMouseWheel(float delta);
+	// Return 1 if mouse wheel is processed.
+	int ProcessMouseWheel(float delta);
 
   void SetParamChangeTimer(int ticks) { mParamChangeTimer = ticks; }
   void CancelParamChangeTimer() { mParamChangeTimer = 0; }
@@ -51,6 +51,8 @@ public:
 
 protected:
   LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
+
+	void ScaleMouseWheel(HWND hWnd, const POINT* pPoint, IMouseMod mod, float delta);
 
   void SetTooltip(const char* tooltip);
   void ShowTooltip();

@@ -26,6 +26,12 @@ enum EParamEditMsg {
 #define IPLUG_TIMER_ID 2
 static const UINT IPLUG_DEFAULT_DPI = USER_DEFAULT_SCREEN_DPI * 2;
 
+static void ScalePoint(LPPOINT const lpPoint, const int dpi)
+{
+	lpPoint->x = MulDiv(lpPoint->x, IPLUG_DEFAULT_DPI, dpi);
+	lpPoint->y = MulDiv(lpPoint->y, IPLUG_DEFAULT_DPI, dpi);
+}
+
 inline void SetMouseWheelFocus(HWND hWnd, IGraphicsWin* pGraphics)
 {
 	switch (pGraphics->GetPlug()->GetHost())
@@ -863,19 +869,43 @@ bool IGraphicsWin::OpenURL(const char* const url, const char* const windowTitle,
 	return false;
 }
 
-int IGraphicsWin::ProcessMouseWheel(float delta)
+int IGraphicsWin::ProcessMouseWheel(const float delta)
 {
-  POINT p;
-  GetCursorPos(&p);
-  HWND hWnd = WindowFromPoint(p);
-  if (hWnd == mPlugWnd) {
-    int d = int(delta);
-    RECT r;
-    GetWindowRect(hWnd, &r);
-    OnMouseWheel(p.x - r.left, p.y - r.top, &IMouseMod(false, false, GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_MENU) < 0), d);
-    return 1;
-  }
-  return 0;
+	const int canHandle = CanHandleMouseWheel();
+	if (canHandle)
+	{
+		POINT p;
+		GetCursorPos(&p);
+		HWND const hWnd = WindowFromPoint(p);
+		if (hWnd == mPlugWnd)
+		{
+			HideTooltip();
+
+			const IMouseMod mod(false, false, GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_MENU) < 0, canHandle >= 0);
+			const IMouseMod mask(false, false, true, true, true, true);
+
+			if (mod.Get() & mask.Get())
+			{
+				ScaleMouseWheel(hWnd, &p, mod, delta);
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+void IGraphicsWin::ScaleMouseWheel(HWND const hWnd, const POINT* const pPoint, const IMouseMod mod, const float delta)
+{
+	if (mParamEditWnd) return;
+
+	RECT r;
+	GetWindowRect(hWnd, &r);
+
+	r.left = pPoint->x - r.left;
+	r.top = pPoint->y - r.top;
+	ScalePoint((LPPOINT)&r, mDPI);
+
+	OnMouseWheel(r.left, r.top, mod, delta);
 }
 
 void IGraphicsWin::SetTooltip(const char* tooltip)
