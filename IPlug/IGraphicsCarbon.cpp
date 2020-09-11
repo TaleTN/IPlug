@@ -14,18 +14,20 @@ static IRECT GetRegionRect(EventRef const pEvent, const int gfxW, const int gfxH
 	return IRECT(0, 0, gfxW, gfxH);
 }
 
-IRECT GetControlRect(EventRef pEvent, int gfxW, int gfxH)
+/* static IRECT GetControlRect(EventRef const pEvent, const int gfxW, const int gfxH)
 {
-  Rect rct;
-  if (GetEventParameter(pEvent, kEventParamCurrentBounds, typeQDRectangle, 0, sizeof(Rect), 0, &rct) == noErr) {
-    int w = rct.right - rct.left;
-    int h = rct.bottom - rct.top;
-    if (w > 0 && h > 0) {
-      return IRECT(0, 0, w, h);
-    }
-  }  
-  return IRECT(0, 0, gfxW, gfxH);
-}
+	Rect rct;
+	if (GetEventParameter(pEvent, kEventParamCurrentBounds, typeQDRectangle, NULL, sizeof(Rect), NULL, &rct) == noErr)
+	{
+		const int w = rct.right - rct.left;
+		const int h = rct.bottom - rct.top;
+		if (w > 0 && h > 0)
+		{
+			return IRECT(0, 0, w, h);
+		}
+	}
+	return IRECT(0, 0, gfxW, gfxH);
+} */
 
 // static
 pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef const pHandlerCall, EventRef const pEvent, void* const pGraphicsCarbon)
@@ -79,12 +81,15 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef const pH
 
 					return noErr;
 				}
-        case kEventControlBoundsChanged: {        
-          int gfxW = pGraphicsMac->Width(), gfxH = pGraphicsMac->Height();
-          IRECT r = GetControlRect(pEvent, gfxW, gfxH);
-          //pGraphicsMac->GetPlug()->UserResizedWindow(&r);
-          return noErr;
-        }        
+				case kEventControlBoundsChanged:
+				{
+					// const int gfxW = pGraphicsMac->Width() >> kScaleFixed;
+					// const int gfxH = pGraphicsMac->Height() >> kScaleFixed;
+					// IRECT r = GetControlRect(pEvent, gfxW, gfxH);
+					// r.Upscale(scale);
+					// pGraphicsMac->GetPlug()->UserResizedWindow(&r);
+					return noErr;
+				}
 				case kEventControlDispose:
 				{
 					// kComponentCloseSelect call should already have done this for us (and deleted mGraphicsMac, for that matter).
