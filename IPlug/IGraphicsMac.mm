@@ -7,6 +7,10 @@
 
 #include "WDL/swell/swell.h"
 
+// TN: I guess "undocumented" see WDL/swell/swell-misc.mm, but it works!
+#define SWELL_IMPLEMENT_GETOSXVERSION
+#include "WDL/swell/swell-internal.h"
+
 #include <string.h>
 #import <objc/runtime.h>
 
@@ -444,37 +448,15 @@ void* IGraphicsMac::GetWindow() const
 }
 
 // static
-int IGraphicsMac::GetUserOSVersion()   // Returns a number like 0x1050 (10.5).
+int IGraphicsMac::GetUserOSVersion() // Returns a number like 0x1050 (10.5).
 {
-  CocoaAutoReleasePool pool;
-
-  // http://cocoadev.com/wiki/DeterminingOSVersion
-  NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/CoreServices/SystemVersion.plist"];
-  if (!dict) return 0;
-  NSString* versionString = [dict objectForKey:@"ProductVersion"];
-  if (!versionString) return 0;
-  NSArray* versions = [versionString componentsSeparatedByString:@"."];
-  int i = atoi([[versions objectAtIndex:0] UTF8String]);
-  int ver = (i / 10 * 16 + i % 10) << 8;
-  if ([versions count] >= 2)
-  {
-    i = atoi([[versions objectAtIndex:1] UTF8String]);
-    ver |= i < 10 ? (i % 10) << 4 : 0x90;
-    if ([versions count] >= 3)
-    {
-      i = atoi([[versions objectAtIndex:2] UTF8String]);
-      ver |= i < 10 ? (i % 10) : 0x9;
-    }
-  }
-
-  Trace(TRACELOC, "%x", ver);
-  return ver;
+	return SWELL_GetOSXVersion();
 }
 
 // static
-double IGraphicsMac::GetUserFoundationVersion()   // Returns a number like 677.00 (10.5).
+double IGraphicsMac::GetUserFoundationVersion() // Returns a number like 677.00 (10.5).
 {
-  return NSFoundationVersionNumber;
+	return NSFoundationVersionNumber;
 }
 
 void IGraphicsMac::SetParamChangeTimer(const int ticks)

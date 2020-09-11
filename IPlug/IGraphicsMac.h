@@ -55,9 +55,9 @@ public:
 	void* GetWindow() const;
 
 	const char* GetBundleID() const { return mBundleID.Get(); }
-  static int GetUserOSVersion();   // Returns a number like 0x1050 (10.5).
-  static double GetUserFoundationVersion();   // Returns a number like 677.00 (10.5).
-  
+	static int GetUserOSVersion(); // Returns a number like 0x1050 (10.5).
+	static double GetUserFoundationVersion(); // Returns a number like 677.00 (10.5).
+
 protected:
   
   virtual LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
