@@ -14,8 +14,9 @@ public:
 	IGraphicsCarbon(IGraphicsMac* pGraphicsMac, WindowRef pWindow, ControlRef pParentControl);
 	~IGraphicsCarbon();
 
-  ControlRef GetView() { return mView; }
-  CGContextRef GetCGContext() { return mCGC; }
+	inline ControlRef GetView() const { return mView; }
+	inline CGContextRef GetCGContext() const { return mCGC; }
+
   void OffsetContentRect(CGRect* pR);
   bool Resize(int w, int h);
   void PromptUserInput(IControl* pControl, IParam* pParam);
