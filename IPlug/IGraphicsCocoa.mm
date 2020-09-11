@@ -105,18 +105,37 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 	}
 }
 
-- (void) onTimer: (NSTimer*) pTimer
+- (void) onTimer: (NSTimer*)pTimer
 {
-  IRECT r;
-  if (pTimer == mTimer && mGraphics) {
-    if (mGraphics->IsDirty(&r)) {
-      [self setNeedsDisplayInRect:ToNSRect(mGraphics, &r)];
-    }
+	if (pTimer == mTimer && mGraphics)
+	{
+		if (mGraphics->ScaleNeedsUpdate() && mGraphics->UpdateScale())
+		{
+			const int w = mGraphics->Width(), h = mGraphics->Height();
+			const int scale = mGraphics->Scale();
 
-    if (mParamChangeTimer && !--mParamChangeTimer) {
-      mGraphics->GetPlug()->EndDelayedInformHostOfParamChange();
-    }
-  }
+			const NSSize size = NSMakeSize((CGFloat)(w >> scale), (CGFloat)(h >> scale));
+			[self setBoundsSize: size];
+
+			const CGFloat unit = (CGFloat)(1 << (IGraphicsMac::kScaleOS - scale));
+			[self scaleUnitSquareToSize: NSMakeSize(unit, unit)];
+
+			mGraphics->SetAllControlsDirty();
+			mGraphics->UpdateTooltips();
+		}
+
+		IRECT r;
+		if (mGraphics->IsDirty(&r))
+		{
+			[self setNeedsDisplayInRect: ToNSRect(mGraphics, &r)];
+		}
+
+		const int timer = mParamChangeTimer;
+		if (timer && !(mParamChangeTimer = timer - 1))
+		{
+			mGraphics->GetPlug()->EndDelayedInformHostOfParamChange();
+		}
+	}
 }
 
 - (void) getMouseXY: (NSEvent*) pEvent x: (int*) pX y: (int*) pY
