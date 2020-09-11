@@ -211,36 +211,48 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef const pH
 	return eventNotHandledErr;
 }    
 
-// static 
-pascal void IGraphicsCarbon::CarbonTimerHandler(EventLoopTimerRef pTimer, void* pGraphicsCarbon)
+// static
+pascal void IGraphicsCarbon::CarbonTimerHandler(EventLoopTimerRef /* pTimer */, void* const pGraphicsCarbon)
 {
-  IGraphicsCarbon* _this = (IGraphicsCarbon*) pGraphicsCarbon;
-  IGraphicsMac* pGraphicsMac = _this->mGraphicsMac;
-  IRECT r;
-  if (pGraphicsMac->IsDirty(&r)) {
-    if (_this->mIsComposited) {
-      HIViewSetNeedsDisplayInRect(_this->mView, &CGRectMake(r.L, r.T, r.W(), r.H()), true);
-    }
-    else {
-      int h = pGraphicsMac->Height();
-      SetRectRgn(_this->mRgn, r.L, h - r.B, r.R, h - r.T);
-      UpdateControls(_this->mWindow, 0);// _this->mRgn);
-    }
-  } 
+	IGraphicsCarbon* const _this = (IGraphicsCarbon*)pGraphicsCarbon;
+	IGraphicsMac* const pGraphicsMac = _this->mGraphicsMac;
+	IRECT r;
+	if (pGraphicsMac->IsDirty(&r))
+	{
+		if (_this->mIsComposited)
+		{
+			const int x = r.L >> kScaleFixed;
+			const int y = r.T >> kScaleFixed;
+			const int w = r.W() >> kScaleFixed;
+			const int h = r.H() >> kScaleFixed;
+			const HIRect hr = CGRectMake((CGFloat)x, (CGFloat)y, (CGFloat)w, (CGFloat)h);
+			HIViewSetNeedsDisplayInRect(_this->mView, &hr, true);
+		}
+		else
+		{
+			UpdateControls(_this->mWindow, NULL);
+		}
+	}
 
-  if (_this->mTooltipTimer && !--_this->mTooltipTimer) {
-    if (!_this->mShowingTooltip) {
-      _this->ShowTooltip();
-      _this->mTooltipTimer = pGraphicsMac->FPS() * 10; // 10 seconds
-    }
-    else {
-      _this->HideTooltip();
-    }
-  }
+	int timer = _this->mTooltipTimer;
+	if (timer && !(_this->mTooltipTimer = timer - 1))
+	{
+		if (!_this->mShowingTooltip)
+		{
+			_this->ShowTooltip();
+			_this->mTooltipTimer = pGraphicsMac->FPS() * 10; // 10 seconds
+		}
+		else
+		{
+			_this->HideTooltip();
+		}
+	}
 
-  if (_this->mParamChangeTimer && !--_this->mParamChangeTimer) {
-    pGraphicsMac->GetPlug()->EndDelayedInformHostOfParamChange();
-  }
+	timer = _this->mParamChangeTimer;
+	if (timer && !(_this->mParamChangeTimer = timer - 1))
+	{
+		pGraphicsMac->GetPlug()->EndDelayedInformHostOfParamChange();
+	}
 }
 
 // static
