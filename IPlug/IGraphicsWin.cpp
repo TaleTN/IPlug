@@ -598,9 +598,12 @@ IRECT IGraphicsWin::GetWindowRECT()
 	return IRECT();
 } */
 
-void IGraphicsWin::SetWindowTitle(char* str)
+void IGraphicsWin::SetWindowTitle(const char* const str)
 {
-    SetWindowText(mPlugWnd, str);
+	static const int maxLen = 128;
+	WCHAR buf[maxLen];
+	if (!MultiByteToWideChar(CP_UTF8, 0, str, -1, buf, maxLen)) buf[0] = 0;
+	SetWindowTextW(mPlugWnd, buf);
 }
 
 void IGraphicsWin::CloseWindow()

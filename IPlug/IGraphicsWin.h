@@ -47,7 +47,7 @@ public:
 	// void SetMainWndClassName(const char* const name) { mMainWndClassName.Set(name); }
 	// void GetMainWndClassName(char* const name) { strcpy(name, mMainWndClassName.Get()); }
 	// IRECT GetWindowRECT();
-  void SetWindowTitle(char* str);
+	void SetWindowTitle(const char* str);
 
 protected:
   LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
