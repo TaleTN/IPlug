@@ -1,12 +1,14 @@
 #include "IGraphicsWin.h"
-#include "IControl.h"
-#include "Log.h"
-#include <wininet.h>
-#include <commctrl.h>
+#include "Hosts.h"
 
-#pragma warning(disable:4244)	// Pointer size cast mismatch.
-#pragma warning(disable:4312)	// Pointer size cast mismatch.
-#pragma warning(disable:4311)	// Pointer size cast mismatch.
+#include <commctrl.h>
+#include <objbase.h>
+#include <shellapi.h>
+#include <windowsx.h>
+#include <wininet.h>
+
+#include <string.h>
+#include "WDL/wdlcstring.h"
 
 static int nWndClassReg = 0;
 static const char* wndClassName = "IPlugWndClass";

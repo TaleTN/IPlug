@@ -1,12 +1,9 @@
-#ifndef _IGRAPHICSWIN_
-#define _IGRAPHICSWIN_
+#pragma once
 
 #include "IControl.h"
 #include "IGraphics.h"
 
 #include <windows.h>
-#include <windowsx.h>
-#include <winuser.h>
 
 #ifndef IPLUG_NO_JPEG_SUPPORT
 	#define IPLUG_PNG_RESOURCE(id, name) (id), ".png"
@@ -91,7 +88,3 @@ public:
 	static LRESULT CALLBACK ParamEditProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
   static BOOL CALLBACK FindMainWindow(HWND hWnd, LPARAM lParam);
 };
-
-////////////////////////////////////////
-
-#endif
