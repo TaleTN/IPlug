@@ -313,31 +313,26 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 			return 0;
 		}
 
-    case WM_KEYDOWN:
-    {
-      bool ok = true;
-      int key;     
+		case WM_KEYDOWN:
+		{
+			bool ok;
+			int key = (int)wParam;
 
-      if (wParam == VK_SPACE) key = KEY_SPACE;
-      else if (wParam == VK_UP) key = KEY_UPARROW;
-      else if (wParam == VK_DOWN) key = KEY_DOWNARROW;
-      else if (wParam == VK_LEFT) key = KEY_LEFTARROW;
-      else if (wParam == VK_RIGHT) key = KEY_RIGHTARROW;
-      else if (wParam >= '0' && wParam <= '9') key = KEY_DIGIT_0+wParam-'0';
-      else if (wParam >= 'A' && wParam <= 'Z') key = KEY_ALPHA_A+wParam-'A';
-      else if (wParam >= 'a' && wParam <= 'z') key = KEY_ALPHA_A+wParam-'a';
-      else ok = false;
+			if (key >= 0x41) ok = key <= 0x5A; // A..Z
+			else if (key >= 0x30) ok = key <= 0x39; // 0..9
+			else if (key >= VK_LEFT) ok = key <= VK_DOWN;
+			else ok = key == VK_SPACE;
 
-      if (ok)
-      {
-        POINT p;
-        GetCursorPos(&p); 
-        ScreenToClient(hWnd, &p);
-        pGraphics->OnKeyDown(p.x, p.y, key);
-      }
-    }
-    return 0;
-
+			if (ok)
+			{
+				POINT p;
+				GetCursorPos(&p);
+				ScreenToClient(hWnd, &p);
+				ScalePoint(&p, pGraphics->mDPI);
+				pGraphics->OnKeyDown(p.x, p.y, key);
+			}
+			return 0;
+		}
 
 		case WM_PAINT: {
       RECT r;
