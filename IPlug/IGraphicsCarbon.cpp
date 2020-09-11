@@ -155,23 +155,27 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef const pH
 					pGraphicsMac->OnMouseUp(x, y, mmod);
 					return noErr;
 				}
-        case kEventMouseMoved: {
-          pGraphicsMac->OnMouseOver(x, y, &mmod);
+				case kEventMouseMoved:
+				{
+					pGraphicsMac->OnMouseOver(x, y, mmod);
 
-          if (pGraphicsMac->TooltipsEnabled()) {
-            int c = pGraphicsMac->GetMouseOver();
-            if (c != _this->mTooltipIdx) {
-              _this->mTooltipIdx = c;
-              _this->HideTooltip();
-              const char* tooltip = c >= 0 ? pGraphicsMac->GetControl(c)->GetTooltip() : NULL;
-              if (CSTR_NOT_EMPTY(tooltip)) {
-                _this->mTooltip = tooltip;
-                _this->mTooltipTimer = pGraphicsMac->FPS() * 3 / 2; // 1.5 seconds
-              }
-            }
-          }
-          return noErr;
-        }
+					if (pGraphicsMac->TooltipsEnabled())
+					{
+						const int c = pGraphicsMac->GetMouseOver();
+						if (c != _this->mTooltipIdx)
+						{
+							_this->mTooltipIdx = c;
+							_this->HideTooltip();
+							const char* tooltip = c >= 0 ? pGraphicsMac->GetControl(c)->GetTooltip() : NULL;
+							if (tooltip && *tooltip)
+							{
+								_this->mTooltip = tooltip;
+								_this->mTooltipTimer = (pGraphicsMac->FPS() * 3) / 2; // 1.5 seconds
+							}
+						}
+					}
+					return noErr;
+				}
         case kEventMouseDragged: {
           pGraphicsMac->OnMouseDrag(x, y, &mmod);
           return noErr; 
