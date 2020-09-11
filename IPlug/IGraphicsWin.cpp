@@ -334,12 +334,26 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 			return 0;
 		}
 
-		case WM_PAINT: {
-      RECT r;
-      if (GetUpdateRect(hWnd, &r, FALSE)) {
-        IRECT ir(r.left, r.top, r.right, r.bottom);
-        pGraphics->Draw(&ir);
-      }
+		case WM_PAINT:
+		{
+			RECT r;
+			if (GetUpdateRect(hWnd, &r, FALSE))
+			{
+				IRECT ir(r.left, r.top, r.right, r.bottom);
+				GetClientRect(hWnd, &r);
+
+				int mul = pGraphics->Width();
+				int div = r.right - r.left;
+				ir.L = MulDiv(ir.L, mul, div);
+				ir.R = MulDiv(ir.R, mul, div);
+
+				mul = pGraphics->Height();
+				div = r.bottom - r.top;
+				ir.T = MulDiv(ir.T, mul, div);
+				ir.B = MulDiv(ir.B, mul, div);
+
+				pGraphics->Draw(&ir);
+			}
 			return 0;
 		}
 
