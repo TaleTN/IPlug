@@ -202,27 +202,48 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 			return 0;
 		}
 
-    case WM_MOUSEMOVE: {
-			if (!(wParam & (MK_LBUTTON | MK_RBUTTON))) { 
-        if (pGraphics->OnMouseOver(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), &GetMouseMod(wParam))) {
-          TRACKMOUSEEVENT eventTrack = { sizeof(TRACKMOUSEEVENT), TME_LEAVE, hWnd, HOVER_DEFAULT };
-          if (pGraphics->TooltipsEnabled()) {
-            int c = pGraphics->GetMouseOver();
-            if (c != pGraphics->mTooltipIdx) {
-              if (c >= 0) eventTrack.dwFlags |= TME_HOVER;
-              pGraphics->mTooltipIdx = c;
-              pGraphics->HideTooltip();
-            }
-          }
-          TrackMouseEvent(&eventTrack);
-        }
+		case WM_MOUSEMOVE:
+		{
+			POINT p;
+			ScaleLParamXY(&p, lParam, pGraphics->mDPI);
+
+			if (!(wParam & (MK_LBUTTON | MK_RBUTTON)))
+			{
+				if (pGraphics->CanHandleMouseOver())
+				{
+					pGraphics->OnMouseOver(p.x, p.y, GetMouseMod(wParam));
+					TRACKMOUSEEVENT eventTrack = { sizeof(TRACKMOUSEEVENT), TME_LEAVE, hWnd, HOVER_DEFAULT };
+					if (pGraphics->TooltipsEnabled())
+					{
+						const int c = pGraphics->GetMouseOver();
+						if (pGraphics->mTooltipIdx != c)
+						{
+							pGraphics->mTooltipIdx = c;
+							const char* const tooltip = pGraphics->GetTooltip(c);
+							if (tooltip)
+							{
+								const bool hidden = !pGraphics->mTooltipBuf[0];
+								pGraphics->SetTooltip(tooltip);
+								if (hidden)
+									eventTrack.dwFlags |= TME_HOVER;
+								else
+									pGraphics->ShowTooltip();
+							}
+							else
+							{
+								pGraphics->HideTooltip();
+							}
+						}
+					}
+					TrackMouseEvent(&eventTrack);
+				}
 			}
-      else
-			if (GetCapture() == hWnd) {
-				pGraphics->OnMouseDrag(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), &GetMouseMod(wParam));
+			else if (GetCapture() == hWnd)
+			{
+				pGraphics->OnMouseDrag(p.x, p.y, GetMouseMod(wParam));
 			}
 			return 0;
-    }
+		}
 
 		case WM_MOUSEHOVER:
 		{
