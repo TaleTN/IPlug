@@ -86,13 +86,6 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 
 	IGraphicsWin* const pGraphics = (IGraphicsWin*)GetWindowLongPtrW(hWnd, GWLP_USERDATA);
 
-	if (pGraphics->mParamEditWnd && pGraphics->mParamEditMsg == kEditing) {
-		if (msg == WM_RBUTTONDOWN) {
-			pGraphics->mParamEditMsg = kCancel;
-			return 0;
-		}
-	}
-
 	if (pGraphics && hWnd == pGraphics->mPlugWnd)
 	switch (msg)
 	{
@@ -187,13 +180,15 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 			return 0;
 		}
 
-    case WM_RBUTTONDOWN: {
-			if (pGraphics->mParamEditWnd) {
+		case WM_RBUTTONDOWN:
+		{
+			if (pGraphics->mParamEditWnd)
+			{
 				pGraphics->mParamEditMsg = kCancel;
 				return 0;
 			}
 			// Else fall through.
-    }
+		}
     case WM_LBUTTONDOWN: {
 			pGraphics->HideTooltip();
 			if (pGraphics->mParamEditWnd) pGraphics->mParamEditMsg = kCommit;
