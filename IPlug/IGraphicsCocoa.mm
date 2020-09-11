@@ -1,15 +1,23 @@
 #include "IGraphicsCocoa.h"
 
-inline NSRect ToNSRect(IGraphics* pGraphics, IRECT* pR) 
+static NSRect ToNSRect(const IGraphics* const pGraphics, const IRECT* const pR)
 {
-  int B = pGraphics->Height() - pR->B;
-  return NSMakeRect(pR->L, B, pR->W(), pR->H()); 
+	static const int scale = IGraphicsMac::kScaleOS;
+	const int B = pGraphics->Height() - pR->B;
+
+	return NSMakeRect((CGFloat)(pR->L >> scale), (CGFloat)(B >> scale),
+	(CGFloat)(pR->W() >> scale), (CGFloat)(pR->H() >> scale));
 }
 
-inline IRECT ToIRECT(IGraphics* pGraphics, NSRect* pR) 
+static IRECT ToIRECT(const IGraphics* const pGraphics, const NSRect* const pR)
 {
-  int x = pR->origin.x, y = pR->origin.y, w = pR->size.width, h = pR->size.height, gh = pGraphics->Height();
-  return IRECT(x, gh - (y + h), x + w, gh - y);
+	static const int scale = IGraphicsMac::kScaleOS;
+
+	const int x = (int)pR->origin.x << scale, y = (int)pR->origin.y << scale,
+	w = (int)pR->size.width << scale, h = (int)pR->size.height << scale;
+
+	const int gh = pGraphics->Height();
+	return IRECT(x, gh - (y + h), x + w, gh - y);
 }
 
 static NSString* ToNSString(const char* const cStr)
