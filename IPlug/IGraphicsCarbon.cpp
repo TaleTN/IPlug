@@ -256,37 +256,34 @@ pascal void IGraphicsCarbon::CarbonTimerHandler(EventLoopTimerRef /* pTimer */, 
 }
 
 // static
-pascal OSStatus IGraphicsCarbon::CarbonParamEditHandler(EventHandlerCallRef pHandlerCall, EventRef pEvent, void* pGraphicsCarbon)
+pascal OSStatus IGraphicsCarbon::CarbonParamEditHandler(EventHandlerCallRef const pHandlerCall, EventRef const pEvent, void* const pGraphicsCarbon)
 {
-  IGraphicsCarbon* _this = (IGraphicsCarbon*) pGraphicsCarbon;
-  UInt32 eventClass = GetEventClass(pEvent);
-  UInt32 eventKind = GetEventKind(pEvent);
+	IGraphicsCarbon* const _this = (IGraphicsCarbon*)pGraphicsCarbon;
+	const UInt32 eventClass = GetEventClass(pEvent);
+	const UInt32 eventKind = GetEventKind(pEvent);
 
-  _this->HideTooltip();
+	_this->HideTooltip();
 
-  switch (eventClass)
-  {
-    case kEventClassKeyboard:
-    {
-      switch (eventKind)
-      {
-        case kEventRawKeyDown:
-        case kEventRawKeyRepeat:
-        {
-          char ch;
-          GetEventParameter(pEvent, kEventParamKeyMacCharCodes, typeChar, NULL, sizeof(ch), NULL, &ch);
-          if (ch == 13)
-          {
-            _this->EndUserInput(true);
-            return noErr;
-          }
-          break;
-        }
-      }
-      break;
-    }
-  }
-  return eventNotHandledErr;
+	if (eventClass == kEventClassKeyboard)
+	{
+		switch (eventKind)
+		{
+			case kEventRawKeyDown:
+			case kEventRawKeyRepeat:
+			{
+				char ch;
+				GetEventParameter(pEvent, kEventParamKeyMacCharCodes, typeChar, NULL, sizeof(char), NULL, &ch);
+				if (ch == 13)
+				{
+					_this->EndUserInput(true);
+					return noErr;
+				}
+				break;
+			}
+		}
+	}
+
+	return eventNotHandledErr;
 }
 
 /* static void ResizeWindow(WindowRef const pWindow, const int w, const int h)
