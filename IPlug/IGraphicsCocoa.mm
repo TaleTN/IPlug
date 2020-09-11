@@ -274,105 +274,66 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 	[self setNeedsDisplay: YES];
 }
 
-#define PARAM_EDIT_W 42
-#define PARAM_EDIT_H 21
-#define PARAM_LIST_MIN_W 24
-#define PARAM_LIST_W_PER_CHAR 8
-#define PARAM_LIST_H 26
+static const int PARAM_EDIT_W = 42;
+static const int PARAM_EDIT_H = 21;
 
-- (void) promptUserInput: (IControl*) pControl param: (IParam*) pParam
+- (void) promptUserInput: (IControl*)pControl param: (IParam*)pParam rect: (const IRECT*)pR size: (int)fontSize
 {
-  if (!pControl || !pParam || mParamEditView) return;
+	if (mParamEditView || !pControl || !pParam) return;
 
-  IRECT* pR = pControl->GetRECT();
-  int cX = pR->MW(), cY = pR->MH();
-  char currentText[MAX_PARAM_LEN];
-  pParam->GetDisplayForHost(currentText);
+	char currentText[IGraphics::kMaxParamLen];
+	pParam->GetDisplayForHost(currentText);
 
-  int n = pParam->GetNDisplayTexts();
-  if (n && (pParam->Type() == IParam::kTypeEnum || pParam->Type() == IParam::kTypeBool))
-  {
-    int i, currentIdx = -1;
-    int w = PARAM_LIST_MIN_W, h = PARAM_LIST_H;
-    for (i = 0; i < n; ++i)
-    {
-      const char* str = pParam->GetDisplayText(i);
-      w = MAX(w, PARAM_LIST_MIN_W + strlen(str) * PARAM_LIST_W_PER_CHAR);
-      if (!strcmp(str, currentText)) currentIdx = i;
-    }
+	static const int kPromptCustomHeight = IGraphics::kPromptCustomRect ^ IGraphics::kPromptCustomWidth;
+	static const int scale = IGraphicsMac::kScaleOS;
 
-    NSRect r = { cX - w/2, mGraphics->Height() - cY - h, w, h };
-    mParamEditView = [[NSComboBox alloc] initWithFrame: r];
-    [mParamEditView setFont: [NSFont fontWithName: @"Arial" size: 11.]];
-    [mParamEditView setNumberOfVisibleItems: n];
+	const int gh = mGraphics->Height() >> scale;
+	if (!pR) pR = pControl->GetTargetRECT();
 
-    for (i = 0; i < n; ++i)
-    {
-      const char* str = pParam->GetDisplayText(i);
-      [mParamEditView addItemWithObjectValue: ToNSString(str)];
-    }
-    [mParamEditView selectItemAtIndex: currentIdx];
-  }
-  else
-  {
-    const int w = PARAM_EDIT_W, h = PARAM_EDIT_H;
-    NSRect r = { cX - w/2, mGraphics->Height() - cY - h/2, w, h };
-    mParamEditView = [[NSTextField alloc] initWithFrame: r];
-    [mParamEditView setFont: [NSFont fontWithName: @"Arial" size: 11.]];
-    [mParamEditView setAlignment: NSCenterTextAlignment];
-    [[mParamEditView cell] setLineBreakMode: NSLineBreakByTruncatingTail];
-    [mParamEditView setStringValue: ToNSString(currentText)];
-  }
+	int x, y, w, h;
+	if (!(fontSize & IGraphics::kPromptCustomWidth))
+	{
+		const int cX = (pR->L + pR->R) >> scale;
+		w = PARAM_EDIT_W;
+		x = (cX - w) / 2;
+	}
+	else
+	{
+		w = pR->W() >> scale;
+		x = pR->L >> scale;
+	}
 
-  [mParamEditView setDelegate: self];
-  [self addSubview: mParamEditView];
-  NSWindow* pWindow = [self window];
-  [pWindow makeKeyAndOrderFront:nil];
-  [pWindow makeFirstResponder: mParamEditView];
+	if (!(fontSize & kPromptCustomHeight))
+	{
+		const int cY = (pR->T + pR->B) >> scale;
+		h = PARAM_EDIT_H;
+		y = (cY + h) / 2;
+	}
+	else
+	{
+		h = pR->W() >> scale;
+		y = (pR->T >> scale) + h;
+	}
 
-  mEdControl = pControl;
-  mEdParam = pParam;
-}
+	fontSize &= ~IGraphics::kPromptCustomRect;
+	const CGFloat sz = fontSize ? (CGFloat)(fontSize >> scale) : (CGFloat)PARAM_EDIT_H * (11.0f / 21.0f);
 
-- (void) promptUserInput: (IEditableTextControl*) pControl
-{
-  if (!pControl || mParamEditView) return;
+	const NSRect r = NSMakeRect((CGFloat)x, (CGFloat)(gh - y), (CGFloat)w, (CGFloat)h);
 
-  IRECT* pR = pControl->GetRECT();
+	mParamEditView = [[NSTextField alloc] initWithFrame: r];
+	[mParamEditView setFont: [NSFont fontWithName: @"Arial" size: sz]];
+	[mParamEditView setAlignment: NSCenterTextAlignment];
+	[[mParamEditView cell] setLineBreakMode: NSLineBreakByTruncatingTail];
+	[mParamEditView setStringValue: ToNSString(currentText)];
 
-  NSRect r = { pR->L, mGraphics->Height() - (pR->B + 3), pR->W(), pR->H() + 6 };
-  if (pControl->IsSecure())
-    mParamEditView = [[NSSecureTextField alloc] initWithFrame: r];
-  else
-    mParamEditView = [[NSTextField alloc] initWithFrame: r];
-  if (!pControl->IsEditable())
-  {
-    [mParamEditView setEditable: NO]; 
-    [mParamEditView setSelectable: YES];
-  }
+	[mParamEditView setDelegate: self];
+	[self addSubview: mParamEditView];
+	NSWindow* pWindow = [self window];
+	[pWindow makeKeyAndOrderFront: nil];
+	[pWindow makeFirstResponder: mParamEditView];
 
-  const IText* txt = pControl->GetIText();
-  [mParamEditView setFont: [NSFont fontWithName: ToNSString(txt->mFont) size: AdjustFontSize(txt->mSize)]];
-  NSTextAlignment align;
-  switch (txt->mAlign)
-  {
-    case IText::kAlignNear:   align = NSLeftTextAlignment;   break;
-    case IText::kAlignFar:    align = NSRightTextAlignment;  break;
-    case IText::kAlignCenter:
-    default:                  align = NSCenterTextAlignment; break;
-  }
-  [mParamEditView setAlignment: align];
-  [[mParamEditView cell] setLineBreakMode: NSLineBreakByTruncatingTail];
-  [mParamEditView setStringValue: ToNSString(pControl->GetText())];
-
-  [mParamEditView setDelegate: self];
-  [self addSubview: mParamEditView];
-  NSWindow* pWindow = [self window];
-  [pWindow makeKeyAndOrderFront:nil];
-  [pWindow makeFirstResponder: mParamEditView];
-
-  mEdControl = pControl;
-  mEdParam = 0;
+	mEdControl = pControl;
+	mEdParam = pParam;
 }
 
 - (NSString*) view: (NSView*) pView stringForToolTip: (NSToolTipTag) tag point: (NSPoint) point userData: (void*) pData
