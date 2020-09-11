@@ -274,12 +274,18 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 			return 0;
 		}
 
-    case WM_LBUTTONDBLCLK: {
-      if (pGraphics->OnMouseDblClick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), &GetMouseMod(wParam))) {
-        SetCapture(hWnd);
-      }
+		case WM_LBUTTONDBLCLK:
+		case WM_RBUTTONDBLCLK:
+		{
+			POINT p;
+			ScaleLParamXY(&p, lParam, pGraphics->mDPI);
+
+			if (pGraphics->OnMouseDblClick(p.x, p.y, GetMouseMod(wParam)))
+			{
+				SetCapture(hWnd);
+			}
 			return 0;
-    }
+		}
 
 		case WM_MOUSEACTIVATE:
 		{
