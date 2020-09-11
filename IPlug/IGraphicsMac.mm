@@ -284,29 +284,37 @@ void IGraphicsMac::UpdateTooltips()
 	}
 }
 
-void IGraphicsMac::HostPath(WDL_String* pPath)
+void IGraphicsMac::HostPath(WDL_String* const pPath)
 {
-  CocoaAutoReleasePool pool;
-  NSBundle* pBundle = [NSBundle bundleWithIdentifier: ToNSString(GetBundleID())];
-  if (pBundle) {
-    NSString* path = [pBundle executablePath];
-    if (path) {
-      pPath->Set([path UTF8String]);
-    }
-  }
+	const CocoaAutoReleasePool pool;
+	NSBundle* const pBundle = [NSBundle bundleWithIdentifier: ToNSString(GetBundleID())];
+	if (pBundle)
+	{
+		NSString* const path = [pBundle executablePath];
+		if (path)
+		{
+			pPath->Set([path UTF8String]);
+			return;
+		}
+	}
+	pPath->Set("");
 }
 
-void IGraphicsMac::PluginPath(WDL_String* pPath)
+void IGraphicsMac::PluginPath(WDL_String* const pPath)
 {
-  CocoaAutoReleasePool pool;
-  NSBundle* pBundle = [NSBundle bundleWithIdentifier: ToNSString(GetBundleID())];
-  if (pBundle) {
-    NSString* path = [[pBundle bundlePath] stringByDeletingLastPathComponent]; 
-    if (path) {
-      pPath->Set([path UTF8String]);
-      pPath->Append("/");
-    }
-  }
+	const CocoaAutoReleasePool pool;
+	NSBundle* const pBundle = [NSBundle bundleWithIdentifier: ToNSString(GetBundleID())];
+	if (pBundle)
+	{
+		NSString* const path = [[pBundle bundlePath] stringByDeletingLastPathComponent];
+		if (path)
+		{
+			pPath->Set([path UTF8String]);
+			pPath->Append("/");
+			return;
+		}
+	}
+	pPath->Set("");
 }
 
 // extensions = "txt wav" for example

@@ -40,8 +40,8 @@ public:
 
 	void UpdateTooltips();
 
-	void HostPath(WDL_String* pPath); 
-  void PluginPath(WDL_String* pPath);
+	void HostPath(WDL_String* pPath);
+	void PluginPath(WDL_String* pPath);
 
 	void PromptForFile(WDL_String* pFilename, EFileAction action = kFileOpen, char* dir = "",
     char* extensions = "");   // extensions = "txt wav" for example.
