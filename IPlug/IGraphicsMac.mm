@@ -36,7 +36,8 @@ IGraphicsMac::IGraphicsMac(
 	mGraphicsCarbon(NULL),
 	#endif
 
-	mGraphicsCocoa(NULL)
+	mGraphicsCocoa(NULL),
+	mWantScale(-1)
 {
 	NSApplicationLoad();
 }
@@ -97,33 +98,71 @@ LICE_IBitmap* IGraphicsMac::OSLoadBitmap(int ID, const char* name)
   return LoadImgFromResourceOSX(GetBundleID(), name);
 }
 
-bool IGraphicsMac::DrawScreen(IRECT* pR)
+void IGraphicsMac::DrawScreen(const IRECT* /* pR */)
 {
-  CGContextRef pCGC = 0;
-  CGRect r = CGRectMake(0, 0, Width(), Height());
-  if (mGraphicsCocoa) {
-    pCGC = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];  // Leak?
-    NSGraphicsContext* gc = [NSGraphicsContext graphicsContextWithGraphicsPort: pCGC flipped: YES];
-    pCGC = (CGContextRef) [gc graphicsPort];    
-  }
-#ifndef IPLUG_NO_CARBON_SUPPORT
-  else
-  if (mGraphicsCarbon) {
-    pCGC = mGraphicsCarbon->GetCGContext();
-    mGraphicsCarbon->OffsetContentRect(&r);
-    // Flipping is handled in IGraphicsCarbon.
-  }
-#endif
-  if (!pCGC) {
-    return false;
-  }
-  
-  HDC__ * srcCtx = (HDC__*) mDrawBitmap->getDC();
-  CGImageRef img = CGBitmapContextCreateImage(srcCtx->ctx); 
-  r.size.width = mDrawBitmap->getRowSpan();
-  CGContextDrawImage(pCGC, r, img);
-  CGImageRelease(img);
-  return true;
+	CGContextRef pCGC = NULL;
+	CGRect r = CGRectMake(0.0f, 0.0f, (CGFloat)(Width() >> kScaleOS), (CGFloat)(Height() >> kScaleOS));
+
+	if (mGraphicsCocoa)
+	{
+		pCGC = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort]; // Leak?
+		NSGraphicsContext* const gc = [NSGraphicsContext graphicsContextWithGraphicsPort: pCGC flipped: YES];
+		pCGC = (CGContextRef)[gc graphicsPort];
+
+		const CGSize retina = CGContextConvertSizeToDeviceSpace(pCGC, CGSizeMake(1.0f, 1.0f));
+		const int wantScale = retina.width > 1.0f ? kScaleFull : kScaleHalf;
+		if (wantScale != mWantScale) mWantScale = wantScale;
+	}
+	#ifndef IPLUG_NO_CARBON_SUPPORT
+	else if (mGraphicsCarbon)
+	{
+		pCGC = mGraphicsCarbon->GetCGContext();
+		mGraphicsCarbon->OffsetContentRect(&r);
+		// Flipping is handled in IGraphicsCarbon.
+	}
+	#endif
+	if (!pCGC) return;
+
+	CGContextRef const srcCtx = (CGContextRef)SWELL_GetCtxGC(mDrawBitmap.getDC());
+	CGImageRef img = srcCtx ? CGBitmapContextCreateImage(srcCtx) : NULL;
+
+	// TN: If GUI width is multiple of 8, then getRowSpan() == getWidth() at
+	// both kScaleFull and kScaleHalf, so clipping isn't necessary. Do note
+	// that after downsizing GUI clipping will always be necessary, because
+	// LICE_SysBitmap doesn't actually resize down.
+	const int w = mDrawBitmap.getWidth();
+	if (mDrawBitmap.getRowSpan() > w)
+	{
+		const int h = mDrawBitmap.getHeight();
+		const int scale = kScaleOS - Scale();
+		const CGRect clip = CGRectMake(0.0f, 0.0f, (CGFloat)(w >> scale), (CGFloat)(h >> scale));
+		if (img)
+		{
+			CGImageRef const tmp = CGImageCreateWithImageInRect(img, clip);
+			CGImageRelease(img);
+			img = tmp;
+		}
+	}
+	if (!img) return;
+
+	CGContextDrawImage(pCGC, r, img);
+	CGImageRelease(img);
+}
+
+bool IGraphicsMac::InitScale()
+{
+	if (mWantScale < 0)
+	{
+		if (!PreloadScale(kScaleOS)) return false;
+		mWantScale = mPrevScale = kScaleOS;
+	}
+	return true;
+}
+
+bool IGraphicsMac::UpdateScale()
+{
+	mPrevScale = mWantScale;
+	return PrepDraw(mWantScale);
 }
 
 void* IGraphicsMac::OpenWindow(void* pParent)

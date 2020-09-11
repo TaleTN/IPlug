@@ -13,12 +13,19 @@
 class IGraphicsMac: public IGraphics
 {
 public:
+	static const int kScaleOS = kScaleHalf;
+
 	IGraphicsMac(IPlugBase* pPlug, int w, int h, int refreshFPS = 0);
 	~IGraphicsMac();
 
 	void SetBundleID(const char* const bundleID) { mBundleID.Set(bundleID); }
 
-  bool DrawScreen(IRECT* pR);
+	void DrawScreen(const IRECT* pR);
+
+	bool InitScale();
+	bool UpdateScale();
+
+	inline bool ScaleNeedsUpdate() const { return mWantScale != mPrevScale; }
 
   void* OpenWindow(void* pWindow);
 #ifndef IPLUG_NO_CARBON_SUPPORT
@@ -67,6 +74,7 @@ private:
 	void* mGraphicsCocoa; // Can't forward-declare IGraphicsCocoa because it's an obj-C object.
 
 	WDL_FastString mBundleID;
+	int mWantScale, mPrevScale;
 };
 
 inline int AdjustFontSize(int size)
