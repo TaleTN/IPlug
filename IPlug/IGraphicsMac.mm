@@ -225,13 +225,13 @@ void IGraphicsMac::CloseWindow()
 	}
 }
 
-bool IGraphicsMac::WindowIsOpen()
+bool IGraphicsMac::WindowIsOpen() const
 {
-#ifndef IPLUG_NO_CARBON_SUPPORT
-	return (mGraphicsCarbon || mGraphicsCocoa);
-#else
-	return mGraphicsCocoa;
-#endif
+	return
+	#ifndef IPLUG_NO_CARBON_SUPPORT
+	mGraphicsCarbon ||
+	#endif
+	mGraphicsCocoa;
 }
 
 void IGraphicsMac::Resize(int w, int h)

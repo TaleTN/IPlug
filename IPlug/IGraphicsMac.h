@@ -35,7 +35,7 @@ public:
 	#endif
   
 	void CloseWindow();
-	bool WindowIsOpen();
+	bool WindowIsOpen() const;
   void Resize(int w, int h);
   
   void UpdateTooltips();
