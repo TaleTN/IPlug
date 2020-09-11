@@ -251,11 +251,15 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 			return 0;
 		}
 
-    case WM_MOUSELEAVE: {
-      pGraphics->HideTooltip();
-      pGraphics->OnMouseOut();
-      return 0;
-    }
+		case WM_MOUSELEAVE:
+		{
+			pGraphics->HideTooltip();
+			pGraphics->mTooltipIdx = -1;
+
+			pGraphics->OnMouseOut();
+			return 0;
+		}
+
     case WM_LBUTTONUP:
     case WM_RBUTTONUP: {
       ReleaseCapture();
