@@ -16,8 +16,8 @@ public:
 	IGraphicsMac(IPlugBase* pPlug, int w, int h, int refreshFPS = 0);
 	~IGraphicsMac();
 
-  void SetBundleID(const char* bundleID) { mBundleID.Set(bundleID); }
-  
+	void SetBundleID(const char* const bundleID) { mBundleID.Set(bundleID); }
+
   bool DrawScreen(IRECT* pR);
 
   void* OpenWindow(void* pWindow);
@@ -51,7 +51,7 @@ public:
 
 	void* GetWindow();
 
-  const char* GetBundleID()  { return mBundleID.Get(); }
+	const char* GetBundleID() const { return mBundleID.Get(); }
   static int GetUserOSVersion();   // Returns a number like 0x1050 (10.5).
   static double GetUserFoundationVersion();   // Returns a number like 677.00 (10.5).
   
@@ -66,7 +66,7 @@ private:
 
 	void* mGraphicsCocoa; // Can't forward-declare IGraphicsCocoa because it's an obj-C object.
 
-  WDL_String mBundleID;
+	WDL_FastString mBundleID;
 };
 
 inline int AdjustFontSize(int size)
