@@ -336,12 +336,14 @@ static const int PARAM_EDIT_H = 21;
 	mEdParam = NULL;
 }
 
-- (NSString*) view: (NSView*) pView stringForToolTip: (NSToolTipTag) tag point: (NSPoint) point userData: (void*) pData
+- (NSString*) view: (NSView*)pView stringForToolTip: (NSToolTipTag)tag point: (NSPoint)point userData: (void*)pData
 {
-  int c = (long) pData;
-  IControl* pControl = mGraphics->GetControl(c);
-  const char* tooltip = pControl->GetTooltip();
-  return CSTR_NOT_EMPTY(tooltip) && !pControl->IsHidden() && !pControl->IsGrayed() ? ToNSString((const char*) tooltip) : @"";
+	const int c = /* (long)pData */ mGraphics->GetMouseOver();
+	IControl* const pControl = mGraphics->GetControl(c);
+	if (!pControl) return @"";
+
+	const char* const tooltip = pControl->GetTooltip();
+	return tooltip && *tooltip ? ToNSString(tooltip) : @"";
 }
 
 - (void) registerToolTip: (int) controlIdx rect: (IRECT*) pRECT
