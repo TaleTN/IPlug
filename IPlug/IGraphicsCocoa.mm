@@ -25,16 +25,16 @@ static NSString* ToNSString(const char* const cStr)
 	return [NSString stringWithCString: cStr encoding: NSUTF8StringEncoding];
 }
 
-inline IMouseMod GetMouseMod(NSEvent* pEvent)
+static IMouseMod GetMouseMod(const NSEvent* const pEvent, const bool wheel = false)
 {
-  int mods = [pEvent modifierFlags];
-  return IMouseMod(true, (mods & NSCommandKeyMask), (mods & NSShiftKeyMask), (mods & NSControlKeyMask), (mods & NSAlternateKeyMask));
+	const int mods = [pEvent modifierFlags], cmd = !!(mods & NSCommandKeyMask);
+	return IMouseMod(!cmd, cmd, !!(mods & NSShiftKeyMask), !!(mods & NSControlKeyMask), !!(mods & NSAlternateKeyMask), wheel);
 }
 
-inline IMouseMod GetRightMouseMod(NSEvent* pEvent)
+static IMouseMod GetRightMouseMod(const NSEvent* const pEvent)
 {
-  int mods = [pEvent modifierFlags];
-  return IMouseMod(false, true, (mods & NSShiftKeyMask), (mods & NSControlKeyMask), (mods & NSAlternateKeyMask));
+	const int mods = [pEvent modifierFlags];
+	return IMouseMod(false, true, !!(mods & NSShiftKeyMask), !!(mods & NSControlKeyMask), !!(mods & NSAlternateKeyMask));
 }
 
 inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
