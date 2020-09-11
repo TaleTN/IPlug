@@ -13,10 +13,11 @@
 static int nWndClassReg = 0;
 static const WCHAR* const wndClassName = L"IPlugWndClass";
 
-#define PARAM_EDIT_ID 99
+static const int PARAM_EDIT_ID = 99;
 
-enum EParamEditMsg {
-	kNone,
+enum EParamEditMsg
+{
+	kNone = 0,
 	kEditing,
 	kCancel,
 	kCommit
@@ -57,6 +58,16 @@ static IMouseMod GetMouseMod(const WPARAM wParam, const bool bWheel = false)
 	return mod;
 }
 
+static void DeleteParamEditFont(HWND const hWnd)
+{
+	HFONT const font = (HFONT)SendMessageW(hWnd, WM_GETFONT, 0, 0);
+	if (font)
+	{
+		SendMessageW(hWnd, WM_SETFONT, NULL, FALSE);
+		DeleteObject(font);
+	}
+}
+
 // static
 LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WPARAM wParam, const LPARAM lParam)
 {
@@ -74,7 +85,6 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 	}
 
 	IGraphicsWin* const pGraphics = (IGraphicsWin*)GetWindowLongPtrW(hWnd, GWLP_USERDATA);
-	char txt[MAX_EDIT_LEN];
 
 	if (pGraphics->mParamEditWnd && pGraphics->mParamEditMsg == kEditing) {
 		if (msg == WM_RBUTTONDOWN) {
@@ -86,48 +96,97 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 	if (pGraphics && hWnd == pGraphics->mPlugWnd)
 	switch (msg)
 	{
-		case WM_TIMER: {
-			if (wParam == IPLUG_TIMER_ID) {
-				if (pGraphics->mParamEditWnd && pGraphics->mParamEditMsg != kNone) {
-					switch (pGraphics->mParamEditMsg) {
-            case kCommit: {
-							SendMessage(pGraphics->mParamEditWnd, WM_GETTEXT, MAX_EDIT_LEN, (LPARAM) txt);
-							pGraphics->SetFromStringAfterPrompt(pGraphics->mEdControl, pGraphics->mEdParam, txt);
+		case WM_TIMER:
+		{
+			if (wParam == IPLUG_TIMER_ID)
+			{
+				if (pGraphics->mParamEditWnd)
+				{
+					switch (pGraphics->mParamEditMsg)
+					{
+						case kNone: break;
+
+						case kCommit:
+						{
+							WCHAR buf[kMaxEditLen];
+							SendMessageW(pGraphics->mParamEditWnd, WM_GETTEXT, kMaxEditLen, (LPARAM)buf);
+
+							char txt[kMaxEditLen];
+							if (WideCharToMultiByte(CP_UTF8, 0, buf, -1, txt, sizeof(txt), NULL, NULL))
+							{
+								pGraphics->SetFromStringAfterPrompt(pGraphics->mEdControl, pGraphics->mEdParam, txt);
+							}
 							// Fall through.
-            }
-            case kCancel:
-			      {
-							SetWindowLongPtr(pGraphics->mParamEditWnd, GWLP_WNDPROC, (LPARAM) pGraphics->mDefEditProc);
+						}
+						case kCancel:
+						{
+							DeleteParamEditFont(pGraphics->mParamEditWnd);
+							SetWindowLongPtrW(pGraphics->mParamEditWnd, GWLP_WNDPROC, (LPARAM)pGraphics->mDefEditProc);
 							DestroyWindow(pGraphics->mParamEditWnd);
-							pGraphics->mParamEditWnd = 0;
-							pGraphics->mEdParam = 0;
-							pGraphics->mEdControl = 0;
-							pGraphics->mDefEditProc = 0;
-            }
-            break;            
-          }
-					pGraphics->mParamEditMsg = kNone;
-					//return 0;
+							pGraphics->mParamEditWnd = NULL;
+							pGraphics->mEdParam = NULL;
+							pGraphics->mEdControl = NULL;
+							pGraphics->mDefEditProc = NULL;
+							// Fall through.
+						}
+						default:
+						{
+							pGraphics->mParamEditMsg = kNone;
+							break;
+						}
+					}
+					// return 0;
 				}
 
-        IRECT dirtyR;
-        if (pGraphics->IsDirty(&dirtyR)) {
-          RECT r = { dirtyR.L, dirtyR.T, dirtyR.R, dirtyR.B };
-          InvalidateRect(hWnd, &r, FALSE);
-          if (pGraphics->mParamEditWnd) {
-            GetClientRect(pGraphics->mParamEditWnd, &r);
-            MapWindowPoints(pGraphics->mParamEditWnd, hWnd, (LPPOINT)&r, 2);
-            ValidateRect(hWnd, &r);
-          }
-          UpdateWindow(hWnd);
-        }
+				IRECT dirtyR;
+				if (pGraphics->IsDirty(&dirtyR))
+				{
+					RECT cR, r;
+					GetClientRect(hWnd, &cR);
 
-        if (pGraphics->mParamChangeTimer && !--pGraphics->mParamChangeTimer) {
-          pGraphics->GetPlug()->EndDelayedInformHostOfParamChange();
-        }
-      }
-      return 0;
-    }
+					const int scale = pGraphics->Scale();
+
+					int mul = cR.right - cR.left;
+					int div = pGraphics->Width();
+					bool stretch = (div >> scale) != mul;
+
+					r.left = MulDiv(dirtyR.L, mul, div);
+					r.right = MulDiv(dirtyR.R, mul, div);
+
+					mul = cR.bottom - cR.top;
+					div = pGraphics->Height();
+					stretch |= (div >> scale) != mul;
+
+					r.top = MulDiv(dirtyR.T, mul, div);
+					r.bottom = MulDiv(dirtyR.B, mul, div);
+
+					if (stretch)
+					{
+						r.left--; r.left = wdl_max(r.left, cR.left);
+						r.top--; r.top = wdl_max(r.top, cR.top);
+						r.right++; r.right = wdl_min(r.right, cR.right);
+						r.bottom++; r.bottom = wdl_min(r.bottom, cR.bottom);
+					}
+					InvalidateRect(hWnd, &r, FALSE);
+
+					if (pGraphics->mParamEditWnd)
+					{
+						GetClientRect(pGraphics->mParamEditWnd, &r);
+						MapWindowPoints(pGraphics->mParamEditWnd, hWnd, (LPPOINT)&r, 2);
+						ValidateRect(hWnd, &r);
+					}
+					UpdateWindow(hWnd);
+				}
+
+				const int timer = pGraphics->mParamChangeTimer;
+				if (timer && !(pGraphics->mParamChangeTimer = timer - 1))
+				{
+					pGraphics->GetPlug()->EndDelayedInformHostOfParamChange();
+				}
+			}
+			return 0;
+		}
+
     case WM_RBUTTONDOWN: {
 			if (pGraphics->mParamEditWnd) {
 				pGraphics->mParamEditMsg = kCancel;
@@ -636,6 +695,7 @@ void IGraphicsWin::CloseWindow()
 		{
 			GetPlug()->EndDelayedInformHostOfParamChange();
 		}
+		if (mParamEditWnd) DeleteParamEditFont(mParamEditWnd);
 
 		DestroyWindow(mPlugWnd);
 		mPlugWnd = NULL;
