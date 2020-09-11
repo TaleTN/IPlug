@@ -1,10 +1,10 @@
-#ifndef _IGRAPHICSCARBON_
-#define _IGRAPHICSCARBON_
+#pragma once
 
-#include <Carbon/Carbon.h>
 #include "IGraphicsMac.h"
 
 #ifndef IPLUG_NO_CARBON_SUPPORT
+
+#include <Carbon/Carbon.h>
 
 class IGraphicsCarbon
 {
@@ -67,4 +67,3 @@ public:
 };
 
 #endif // IPLUG_NO_CARBON_SUPPORT
-#endif // _IGRAPHICSCARBON_
