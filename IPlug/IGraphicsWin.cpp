@@ -335,20 +335,9 @@ IGraphicsWin::~IGraphicsWin()
 	if (mCoInit) CoUninitialize();
 }
 
-LICE_IBitmap* IGraphicsWin::OSLoadBitmap(int ID, const char* name)
+LICE_IBitmap* IGraphicsWin::OSLoadBitmap(const int ID, const char*)
 {
-#ifndef IPLUG_NO_JPEG_SUPPORT
-  const char* ext = name+strlen(name)-1;
-  while (ext > name && *ext != '.') --ext;
-  ++ext;
-
-  if (!stricmp(ext, "png"))
-#endif
-  return _LICE::LICE_LoadPNGFromResource(mHInstance, MAKEINTRESOURCE(ID), 0);
-#ifndef IPLUG_NO_JPEG_SUPPORT
-  if (!stricmp(ext, "jpg") || !stricmp(ext, "jpeg")) return _LICE::LICE_LoadJPGFromResource(mHInstance, MAKEINTRESOURCE(ID), 0);
-  return 0;
-#endif
+	return LICE_LoadPNGFromResource(mHInstance, MAKEINTRESOURCE(ID));
 }
 
 /* static void GetWindowSize(HWND const pWnd, int* const pW, int* const pH)

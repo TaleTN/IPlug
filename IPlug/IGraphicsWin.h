@@ -50,7 +50,7 @@ public:
 	void SetWindowTitle(const char* str);
 
 protected:
-  LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
+	LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
 
 	void ScaleMouseWheel(HWND hWnd, const POINT* pPoint, IMouseMod mod, float delta);
 
