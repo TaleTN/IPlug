@@ -21,7 +21,7 @@ public:
 
 	void* OpenWindow(void* pParentWnd);
 	void CloseWindow();
-	bool WindowIsOpen() { return (mPlugWnd); }
+	bool WindowIsOpen() const { return !!mPlugWnd; }
 
 	inline void UpdateTooltips() { if (!TooltipsEnabled()) HideTooltip(); }
 
