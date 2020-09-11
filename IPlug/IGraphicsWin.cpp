@@ -452,7 +452,6 @@ IGraphicsWin::IGraphicsWin(
 	mEdParam = NULL;
 	mDefEditProc = NULL;
 	mParamEditMsg = kNone;
-	mShowingTooltip = false;
 	mTooltipIdx = -1;
 	mParamChangeTimer = 0;
 	mDPI = USER_DEFAULT_SCREEN_DPI;
@@ -463,6 +462,7 @@ IGraphicsWin::IGraphicsWin(
 	// mPID = 0;
 	// mMainWnd = NULL;
 
+	mTooltipBuf[0] = 0;
 	mCoInit = false;
 }
 
@@ -770,7 +770,7 @@ void IGraphicsWin::CloseWindow()
 		{
 			mTooltipWnd = NULL;
 			mTooltipIdx = -1;
-			mShowingTooltip = false;
+			mTooltipBuf[0] = 0;
 		}
 
 		if (mParamEditWnd)
@@ -1074,32 +1074,31 @@ void IGraphicsWin::ScaleMouseWheel(HWND const hWnd, const POINT* const pPoint, c
 	OnMouseWheel(r.left, r.top, mod, delta);
 }
 
-void IGraphicsWin::SetTooltip(const char* tooltip)
+const char* IGraphicsWin::GetTooltip(const int controlIdx)
 {
-	TOOLINFO ti = { TTTOOLINFOA_V2_SIZE, 0, mPlugWnd, (UINT_PTR)mPlugWnd };
-	ti.lpszText = (LPTSTR)tooltip;
-	SendMessage(mTooltipWnd, TTM_UPDATETIPTEXT, 0, (LPARAM)&ti);
+	return controlIdx >= 0 ? GetControl(controlIdx)->GetTooltip() : NULL;
+}
+
+void IGraphicsWin::SetTooltip(const char* const tooltip)
+{
+	if (!MultiByteToWideChar(CP_UTF8, 0, tooltip, -1, mTooltipBuf, kMaxTooltipLen))
+	{
+		mTooltipBuf[0] = 0;
+	}
 }
 
 void IGraphicsWin::ShowTooltip()
 {
-	mTooltipIdx = TooltipsEnabled() ? GetMouseOver() : -1;
-	if (mTooltipIdx < 0) return;
-
-	const char* tooltip = GetControl(mTooltipIdx)->GetTooltip();
-	if (tooltip)
-	{
-		assert(strlen(tooltip) < 80);
-		SetTooltip(tooltip);
-		mShowingTooltip = true;
-	}
+	TOOLINFOW ti = { TTTOOLINFOW_V2_SIZE, TTF_IDISHWND, mPlugWnd, (UINT_PTR)mPlugWnd };
+	ti.lpszText = mTooltipBuf;
+	SendMessageW(mTooltipWnd, TTM_UPDATETIPTEXTW, 0, (LPARAM)&ti);
 }
 
 void IGraphicsWin::HideTooltip()
 {
-	if (mShowingTooltip)
+	if (mTooltipBuf[0])
 	{
-		SetTooltip(NULL);
-		mShowingTooltip = false;
+		mTooltipBuf[0] = 0;
+		ShowTooltip();
 	}
 }

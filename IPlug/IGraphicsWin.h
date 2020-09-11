@@ -55,9 +55,10 @@ protected:
 
 	void ScaleMouseWheel(HWND hWnd, const POINT* pPoint, IMouseMod mod, float delta);
 
-  void SetTooltip(const char* tooltip);
-  void ShowTooltip();
-  void HideTooltip();
+	const char* GetTooltip(int controlIdx);
+	void SetTooltip(const char* tooltip);
+	void ShowTooltip();
+	void HideTooltip();
 
 private:
 	HINSTANCE mHInstance;
@@ -67,7 +68,6 @@ private:
 	IParam* mEdParam;
 	WNDPROC mDefEditProc;
 	int mParamEditMsg;
-	bool mShowingTooltip;
 	int mTooltipIdx;
 	int mParamChangeTimer;
 	int mDPI;
@@ -79,6 +79,9 @@ private:
 	// DWORD mPID;
 	// HWND mMainWnd;
 	// WDL_String mMainWndClassName;
+
+	static const int kMaxTooltipLen = 80;
+	WCHAR mTooltipBuf[kMaxTooltipLen];
 
 	bool mCoInit;
 
