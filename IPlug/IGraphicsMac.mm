@@ -397,11 +397,6 @@ bool IGraphicsMac::PromptForFile(WDL_String* const pFilename, const int action, 
 	return ok;
 }
 
-bool IGraphicsMac::PromptForColor(IColor* pColor, char* prompt)
-{
-	return false;
-}
-
 void IGraphicsMac::PromptUserInput(IControl* pControl, IParam* pParam)
 {
   if (mGraphicsCocoa)

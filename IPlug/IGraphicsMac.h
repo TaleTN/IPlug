@@ -44,7 +44,7 @@ public:
 	void PluginPath(WDL_String* pPath);
 
 	bool PromptForFile(WDL_String* pFilename, int action = kFileOpen, const char* dir = NULL, const char* extensions = NULL);
-  bool PromptForColor(IColor* pColor, char* prompt = "");
+	// bool PromptForColor(IColor* pColor, const char* prompt = NULL) { return false; }
 	void PromptUserInput(IControl* pControl, IParam* pParam);
 	void PromptUserInput(IEditableTextControl* pControl);
   bool OpenURL(const char* url, const char* msgWindowTitle = 0, const char* confirmMsg = 0, const char* errMsgOnFailure = 0);
