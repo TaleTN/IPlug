@@ -5,12 +5,8 @@
 
 #include <windows.h>
 
-#ifndef IPLUG_NO_JPEG_SUPPORT
-	#define IPLUG_PNG_RESOURCE(id, name) (id), ".png"
-	#define IPLUG_JPEG_RESOURCE(id, name) (id), ".jpg"
-#else
-	#define IPLUG_PNG_RESOURCE(id, name) (id), NULL
-#endif
+#define IPLUG_RESOURCE(xxx) (xxx##_ID), NULL
+#define IPLUG_PNG_RESOURCE(id, name) (id), NULL
 
 class IGraphicsWin : public IGraphics
 {
