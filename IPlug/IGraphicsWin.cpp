@@ -400,14 +400,50 @@ void IGraphicsWin::Resize(int w, int h)
 	}
 } */
 
-bool IGraphicsWin::DrawScreen(IRECT* pR)
+void IGraphicsWin::DrawScreen(const IRECT* const pR)
 {
-  PAINTSTRUCT ps;
-  HWND hWnd = (HWND) GetWindow();
-	HDC dc = BeginPaint(hWnd, &ps);
-	BitBlt(dc, pR->L, pR->T, pR->W(), pR->H(), mDrawBitmap->getDC(), pR->L, pR->T, SRCCOPY);
+	HWND const hWnd = (HWND)GetWindow();
+
+	PAINTSTRUCT ps;
+	HDC const dc = BeginPaint(hWnd, &ps);
+
+	RECT r;
+	GetClientRect(hWnd, &r);
+
+	HDC const dcSrc = mDrawBitmap.getDC();
+	const int scale = Scale();
+
+	const int wDiv = Width() >> scale;
+	const int hDiv = Height() >> scale;
+	const int wMul = r.right - r.left;
+	const int hMul = r.bottom - r.top;
+
+	if (wMul == wDiv && hMul == hDiv)
+	{
+		const int x = pR->L >> scale;
+		const int cx = pR->W() >> scale;
+		const int y = pR->T >> scale;
+		const int cy = pR->H() >> scale;
+
+		BitBlt(dc, x, y, cx, cy, dcSrc, x, y, SRCCOPY);
+	}
+	else
+	{
+		SetStretchBltMode(dc, HALFTONE);
+		SetBrushOrgEx(dc, 0, 0, NULL);
+
+		const int wSrc = pR->W();
+		const int xDest = MulDiv(pR->L, wMul, wDiv);
+		const int wDest = MulDiv(wSrc, wMul, wDiv);
+
+		const int hSrc = pR->H();
+		const int yDest = MulDiv(pR->T, hMul, hDiv);
+		const int hDest = MulDiv(hSrc, hMul, hDiv);
+
+		StretchBlt(dc, xDest, yDest, wDest, hDest, dcSrc, pR->L, pR->T, wSrc, hSrc, SRCCOPY);
+	}
+
 	EndPaint(hWnd, &ps);
-	return true;
 }
 
 void* IGraphicsWin::OpenWindow(void* pParentWnd)
