@@ -78,7 +78,7 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
 - (BOOL) acceptsFirstResponder
 {
-  return YES;
+	return YES;
 }
 
 - (BOOL) acceptsFirstMouse: (NSEvent*) pEvent
