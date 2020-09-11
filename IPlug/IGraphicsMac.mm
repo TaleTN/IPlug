@@ -318,74 +318,83 @@ void IGraphicsMac::PluginPath(WDL_String* const pPath)
 }
 
 // extensions = "txt wav" for example
-void IGraphicsMac::PromptForFile(WDL_String* pFilename, EFileAction action, char* dir, char* extensions)
+bool IGraphicsMac::PromptForFile(WDL_String* const pFilename, const int action, const char* const dir, const char* const extensions)
 {
-  if (!WindowIsOpen()) {
-    pFilename->Set("");
-    return;
-  }
-  CocoaAutoReleasePool pool;
+	if (!WindowIsOpen())
+	{
+		pFilename->Set("");
+		return false;
+	}
+	const CocoaAutoReleasePool pool;
 
-  NSSavePanel* panel = nil;
-  switch (action) {
-    case kFileSave: {
-      panel = [NSSavePanel savePanel];
-      break;
-    }
-    case kFileOpen: {
-      panel = [NSOpenPanel openPanel];
-      [panel setCanChooseFiles: YES];
-      [panel setCanChooseDirectories: NO];
-      [panel setResolvesAliases: YES];
-      break;
-    }
-    default:
-      return;
-  }
+	NSSavePanel* panel = nil;
+	switch (action)
+	{
+		case kFileSave:
+		{
+			panel = [NSSavePanel savePanel];
+			break;
+		}
+		case kFileOpen:
+		{
+			NSOpenPanel* const openPanel = [NSOpenPanel openPanel];
+			panel = openPanel;
+			[openPanel setCanChooseFiles: YES];
+			[openPanel setCanChooseDirectories: NO];
+			[openPanel setResolvesAliases: YES];
+			break;
+		}
+		default:
+		{
+			pFilename->Set("");
+			return false;
+		}
+	}
 
-  if (CSTR_NOT_EMPTY(extensions)) {
-    NSArray* fileTypes = [[NSString stringWithUTF8String:extensions] componentsSeparatedByString: @" "];
-    [panel setAllowedFileTypes: fileTypes];
-    [panel setAllowsOtherFileTypes: NO];
-  }
+	if (extensions && *extensions)
+	{
+		NSArray* const fileTypes = [[NSString stringWithUTF8String: extensions] componentsSeparatedByString: @" "];
+		[panel setAllowedFileTypes: fileTypes];
+		[panel setAllowsOtherFileTypes: NO];
+	}
 
-  // Apple's documentation states that runModalForDirectory is deprecated in
-  // Mac OS X v10.6, use setDirectoryURL, setNameFieldStringValue, and
-  // runModal instead, which are available in v10.6 and later.
-  // http://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/nssavepanel_Class/
+	// Apple's documentation states that runModalForDirectory is deprecated
+	// in Mac OS X v10.6, use setDirectoryURL, setNameFieldStringValue, and
+	// runModal instead, which are available in v10.6 and later.
+	// http://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/nssavepanel_Class/
 
-  int result;
-  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6 && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-  if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_6)
-  #endif
-  #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-  {
-    if (CSTR_NOT_EMPTY(dir)) {
-      [panel setDirectoryURL: [NSURL fileURLWithPath: [NSString stringWithUTF8String: dir]]];
-    }
-    if (pFilename->GetLength()) {
-      [panel setNameFieldStringValue: [NSString stringWithUTF8String: pFilename->Get()]];
-    }
-    result = [panel runModal];
-  }
-  #endif
-  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6 && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-  else
-  #endif
-  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6
-  {
-    NSString* nsDir = CSTR_NOT_EMPTY(dir) ? [NSString stringWithUTF8String: dir] : nil;
-    NSString* nsFile = pFilename->GetLength() ? [NSString stringWithUTF8String: pFilename->Get()] : nil;
-    result = [panel runModalForDirectory: nsDir file: nsFile];
-  }
-  #endif
+	int result;
+	#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6 && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+	if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_6)
+	#endif
+	#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+	{
+		if (dir && *dir)
+		{
+			[panel setDirectoryURL: [NSURL fileURLWithPath: [NSString stringWithUTF8String: dir]]];
+		}
+		if (pFilename->GetLength())
+		{
+			[panel setNameFieldStringValue: [NSString stringWithUTF8String: pFilename->Get()]];
+		}
+		result = [panel runModal];
+	}
+	#endif
+	#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6 && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+	else
+	#endif
+	#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6
+	{
+		NSString* const nsDir = dir && *dir ? [NSString stringWithUTF8String: dir] : nil;
+		NSString* const nsFile = pFilename->GetLength() ? [NSString stringWithUTF8String: pFilename->Get()] : nil;
+		result = [panel runModalForDirectory: nsDir file: nsFile];
+	}
+	#endif
 
-  if (result == NSOKButton) {
-    pFilename->Set([[[panel URL] path] UTF8String]);
-  }
-  else {
-    pFilename->Set("");
-  }
+	const bool ok = result == NSOKButton;
+	pFilename->Set(ok ? [[[panel URL] path] UTF8String] : "");
+
+	return ok;
 }
 
 bool IGraphicsMac::PromptForColor(IColor* pColor, char* prompt)

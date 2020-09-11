@@ -958,8 +958,6 @@ bool IGraphicsWin::PromptForFile(WDL_String* const pFilename, const int action, 
 			ofn.Flags |= OFN_FILEMUSTEXIST;
 			rc = GetOpenFileName(&ofn);
 			break;
-
-		default: break;
 	}
 
 	pFilename->Set(rc ? ofn.lpstrFile : "");
