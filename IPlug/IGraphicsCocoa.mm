@@ -146,30 +146,32 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 	*pY = mGraphics->Height() - (int)(pt.y * scale);
 }
 
-- (void) mouseDown: (NSEvent*) pEvent
+- (void) mouseDown: (NSEvent*)pEvent
 {
-  if (mGraphics)
-  {
-    if (mParamEditView) EndUserInput(self);
-    int x, y;
-    [self getMouseXY:pEvent x:&x y:&y];
-    if ([pEvent clickCount] > 1) {
-      mGraphics->OnMouseDblClick(x, y, &GetMouseMod(pEvent));
-    }
-    else {
-      mGraphics->OnMouseDown(x, y, &GetMouseMod(pEvent));
-    }
-  }
+	if (mGraphics)
+	{
+		if (mParamEditView) EndUserInput(self);
+		int x, y;
+		[self getMouseXY: pEvent x: &x y: &y];
+		if ([pEvent clickCount] > 1)
+		{
+			mGraphics->OnMouseDblClick(x, y, GetMouseMod(pEvent));
+		}
+		else
+		{
+			mGraphics->OnMouseDown(x, y, GetMouseMod(pEvent));
+		}
+	}
 }
 
-- (void) mouseUp: (NSEvent*) pEvent
+- (void) mouseUp: (NSEvent*)pEvent
 {
-  if (mGraphics)
-  {
-    int x, y;
-    [self getMouseXY:pEvent x:&x y:&y];
-    mGraphics->OnMouseUp(x, y, &GetMouseMod(pEvent));
-  }
+	if (mGraphics)
+	{
+		int x, y;
+		[self getMouseXY: pEvent x: &x y: &y];
+		mGraphics->OnMouseUp(x, y, GetMouseMod(pEvent));
+	}
 }
 
 - (void) mouseDragged: (NSEvent*) pEvent
