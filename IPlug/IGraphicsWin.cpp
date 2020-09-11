@@ -323,7 +323,6 @@ IGraphicsWin::IGraphicsWin(
 IGraphicsWin::~IGraphicsWin()
 {
 	CloseWindow();
-  FREE_NULL(mCustomColorStorage);
 	if (mUser32DLL) FreeLibrary(mUser32DLL);
 }
 
@@ -815,44 +814,45 @@ bool IGraphicsWin::PromptForFile(WDL_String* const pFilename, const int action, 
 	return rc;
 }
 
-UINT_PTR CALLBACK CCHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
+/* static UINT_PTR CALLBACK CCHookProc(HWND const hdlg, const UINT uiMsg, const WPARAM wParam, const LPARAM lParam)
 {
-    if (uiMsg == WM_INITDIALOG && lParam) {
-        CHOOSECOLOR* cc = (CHOOSECOLOR*) lParam;
-        if (cc && cc->lCustData) {
-            char* str = (char*) cc->lCustData;
-            SetWindowText(hdlg, str);
-        }
-    }
-    return 0;
+	if (uiMsg == WM_INITDIALOG && lParam)
+	{
+		const CHOOSECOLOR* const cc = (const CHOOSECOLOR*)lParam;
+		if (cc && cc->lCustData)
+		{
+			const char* const str = (const char*)cc->lCustData;
+			SetWindowText(hdlg, str);
+		}
+	}
+	return 0;
 }
 
-bool IGraphicsWin::PromptForColor(IColor* pColor, char* prompt)
+static COLORREF sCustomColorStorage[16] = { 0 };
+
+bool IGraphicsWin::PromptForColor(IColor* const pColor, const char* const prompt)
 {
-    if (!mPlugWnd) {
-        return false;
-    }
-    if (!mCustomColorStorage) {
-        mCustomColorStorage = (COLORREF*) calloc(16, sizeof(COLORREF));
-    }
-    CHOOSECOLOR cc;
-    memset(&cc, 0, sizeof(CHOOSECOLOR));
-    cc.lStructSize = sizeof(CHOOSECOLOR);
-    cc.hwndOwner = mPlugWnd;
-    cc.rgbResult = RGB(pColor->R, pColor->G, pColor->B);
-    cc.lpCustColors = mCustomColorStorage;
-    cc.lCustData = (LPARAM) prompt;
-    cc.lpfnHook = CCHookProc;
-    cc.Flags = CC_RGBINIT | CC_ANYCOLOR | CC_FULLOPEN | CC_SOLIDCOLOR | CC_ENABLEHOOK;
-    
-    if (ChooseColor(&cc)) {
-        pColor->R = GetRValue(cc.rgbResult);
-        pColor->G = GetGValue(cc.rgbResult);
-        pColor->B = GetBValue(cc.rgbResult);
-        return true;
-    }
-    return false;
-}
+	if (!mPlugWnd) return false;
+
+	CHOOSECOLOR cc;
+	memset(&cc, 0, sizeof(CHOOSECOLOR));
+	cc.lStructSize = sizeof(CHOOSECOLOR);
+	cc.hwndOwner = mPlugWnd;
+	cc.rgbResult = RGB(pColor->R, pColor->G, pColor->B);
+	cc.lpCustColors = sCustomColorStorage;
+	cc.lCustData = (LPARAM)prompt;
+	cc.lpfnHook = CCHookProc;
+	cc.Flags = CC_RGBINIT | CC_ANYCOLOR | CC_FULLOPEN | CC_SOLIDCOLOR | CC_ENABLEHOOK;
+
+	if (ChooseColor(&cc))
+	{
+		pColor->R = GetRValue(cc.rgbResult);
+		pColor->G = GetGValue(cc.rgbResult);
+		pColor->B = GetBValue(cc.rgbResult);
+		return true;
+	}
+	return false;
+} */
 
 #define MAX_INET_ERR_CODE 32
 bool IGraphicsWin::OpenURL(const char* url, 
