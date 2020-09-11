@@ -81,9 +81,9 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 	return YES;
 }
 
-- (BOOL) acceptsFirstMouse: (NSEvent*) pEvent
+- (BOOL) acceptsFirstMouse: (NSEvent*)pEvent
 {
-  return YES;
+	return YES;
 }
 
 - (void) viewDidMoveToWindow
