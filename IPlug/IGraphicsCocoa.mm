@@ -56,22 +56,19 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 	return self;
 }
 
-- (id) initWithIGraphics: (IGraphicsMac*) pGraphics
+- (id) initWithIGraphics: (IGraphicsMac*)pGraphics
 {
-  TRACE;
-   
-  mGraphics = pGraphics;
-  NSRect r;
-  r.origin.x = r.origin.y = 0.0f;
-  r.size.width = (float) pGraphics->Width();
-  r.size.height = (float) pGraphics->Height();
-  self = [super initWithFrame:r];
+	mGraphics = pGraphics;
+	static const int scale = IGraphicsMac::kScaleOS;
+	const int w = pGraphics->Width(), h = pGraphics->Height();
+	const NSRect r = NSMakeRect(0.0f, 0.0f, (CGFloat)(w >> scale), (CGFloat)(h >> scale));
+	self = [super initWithFrame: r];
 
-  double sec = 1.0 / (double) pGraphics->FPS();
-  mTimer = [NSTimer timerWithTimeInterval:sec target:self selector:@selector(onTimer:) userInfo:nil repeats:YES];  
-  [[NSRunLoop currentRunLoop] addTimer: mTimer forMode: (NSString*) kCFRunLoopCommonModes];
-  
-  return self;
+	const double sec = 1.0 / (double)pGraphics->FPS();
+	mTimer = [NSTimer timerWithTimeInterval: sec target: self selector: @selector(onTimer:) userInfo: nil repeats: YES];
+	[[NSRunLoop currentRunLoop] addTimer: mTimer forMode: (NSString*)kCFRunLoopCommonModes];
+
+	return self;
 }
 
 - (BOOL) isOpaque
