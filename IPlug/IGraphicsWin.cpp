@@ -318,12 +318,15 @@ IGraphicsWin::IGraphicsWin(
 
 	mPID = 0;
 	mMainWnd = NULL;
+
+	mCoInit = false;
 }
 
 IGraphicsWin::~IGraphicsWin()
 {
 	CloseWindow();
 	if (mUser32DLL) FreeLibrary(mUser32DLL);
+	if (mCoInit) CoUninitialize();
 }
 
 LICE_IBitmap* IGraphicsWin::OSLoadBitmap(int ID, const char* name)
@@ -831,23 +834,33 @@ bool IGraphicsWin::PromptForColor(IColor* const pColor, const char* const prompt
 	return false;
 } */
 
-#define MAX_INET_ERR_CODE 32
-bool IGraphicsWin::OpenURL(const char* url, 
-  const char* msgWindowTitle, const char* confirmMsg, const char* errMsgOnFailure)
+static const int MAX_INET_ERR_CODE = 32;
+
+bool IGraphicsWin::OpenURL(const char* const url, const char* const windowTitle,
+	const char* const confirmMsg, const char* const errMsg)
 {
-  if (confirmMsg && MessageBox(mPlugWnd, confirmMsg, msgWindowTitle, MB_YESNO) != IDYES) {
-    return false;
-  }
-  DWORD inetStatus = 0;
-  if (InternetGetConnectedState(&inetStatus, 0)) {
-    if ((INT_PTR) ShellExecute(mPlugWnd, "open", url, 0, 0, SW_SHOWNORMAL) > MAX_INET_ERR_CODE) {
-      return true;
-    }
-  }
-  if (errMsgOnFailure) {
-    MessageBox(mPlugWnd, errMsgOnFailure, msgWindowTitle, MB_OK);
-  }
-  return false;
+	if (confirmMsg && MessageBox(mPlugWnd, confirmMsg, windowTitle, MB_YESNO) != IDYES)
+	{
+		return false;
+	}
+	DWORD inetStatus = 0;
+	if (InternetGetConnectedState(&inetStatus, 0))
+	{
+		if (!mCoInit)
+		{
+			const HRESULT hres = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+			mCoInit = SUCCEEDED(hres);
+		}
+		if (mCoInit && (int)(INT_PTR)ShellExecute(mPlugWnd, "open", url, 0, 0, SW_SHOWNORMAL) > MAX_INET_ERR_CODE)
+		{
+			return true;
+		}
+	}
+	if (errMsg)
+	{
+		MessageBox(mPlugWnd, errMsg, windowTitle, MB_OK);
+	}
+	return false;
 }
 
 int IGraphicsWin::ProcessMouseWheel(float delta)

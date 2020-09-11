@@ -32,8 +32,7 @@ public:
 	// bool PromptForColor(IColor* pColor, const char* prompt = NULL);
 	void PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int fontSize = 0);
 
-  bool OpenURL(const char* url, 
-    const char* msgWindowTitle = 0, const char* confirmMsg = 0, const char* errMsgOnFailure = 0);
+	bool OpenURL(const char* url, const char* windowTitle = NULL, const char* confirmMsg = NULL, const char* errMsg = NULL);
 
   // Return 1 if mouse wheel is processed
   int ProcessMouseWheel(float delta);
@@ -77,6 +76,8 @@ private:
   DWORD mPID;
   HWND mParentWnd, mMainWnd;
   WDL_String mMainWndClassName;
+
+	bool mCoInit;
 
 public:
 
