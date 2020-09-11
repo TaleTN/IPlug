@@ -472,3 +472,10 @@ void IGraphicsMac::CancelParamChangeTimer()
 	}
 	#endif
 }
+
+#ifndef NDEBUG
+void IPlugDebugLog(const char* const str)
+{
+	NSLog(@"%s", str);
+}
+#endif
