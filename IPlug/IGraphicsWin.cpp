@@ -260,12 +260,20 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 			return 0;
 		}
 
-    case WM_LBUTTONUP:
-    case WM_RBUTTONUP: {
-      ReleaseCapture();
-			pGraphics->OnMouseUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), &GetMouseMod(wParam));
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		{
+			ReleaseCapture();
+
+			POINT p;
+			ScaleLParamXY(&p, lParam, pGraphics->mDPI);
+
+			// TN: Shouldn't this set left/right mouse button flag, so you
+			// can detect which button was turned off?
+			pGraphics->OnMouseUp(p.x, p.y, GetMouseMod(wParam));
 			return 0;
-    }
+		}
+
     case WM_LBUTTONDBLCLK: {
       if (pGraphics->OnMouseDblClick(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), &GetMouseMod(wParam))) {
         SetCapture(hWnd);
