@@ -45,8 +45,7 @@ public:
 
 	bool PromptForFile(WDL_String* pFilename, int action = kFileOpen, const char* dir = NULL, const char* extensions = NULL);
 	// bool PromptForColor(IColor* pColor, const char* prompt = NULL) { return false; }
-	void PromptUserInput(IControl* pControl, IParam* pParam);
-	void PromptUserInput(IEditableTextControl* pControl);
+	void PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int fontSize = 0);
   bool OpenURL(const char* url, const char* msgWindowTitle = 0, const char* confirmMsg = 0, const char* errMsgOnFailure = 0);
 
   void SetParamChangeTimer(int ticks);
@@ -72,8 +71,3 @@ private:
 	WDL_FastString mBundleID;
 	int mWantScale, mPrevScale;
 };
-
-inline int AdjustFontSize(int size)
-{
-	return int(0.75 * (double)size);
-}

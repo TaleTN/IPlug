@@ -397,24 +397,18 @@ bool IGraphicsMac::PromptForFile(WDL_String* const pFilename, const int action, 
 	return ok;
 }
 
-void IGraphicsMac::PromptUserInput(IControl* pControl, IParam* pParam)
+void IGraphicsMac::PromptUserInput(IControl* const pControl, IParam* const pParam, const IRECT* const pR, const int fontSize)
 {
-  if (mGraphicsCocoa)
-    [mGraphicsCocoa promptUserInput: pControl param: pParam];
-#ifndef IPLUG_NO_CARBON_SUPPORT
-  else if (mGraphicsCarbon)
-    mGraphicsCarbon->PromptUserInput(pControl, pParam);
-#endif
-}
-
-void IGraphicsMac::PromptUserInput(IEditableTextControl* pControl)
-{
-  if (mGraphicsCocoa)
-    [mGraphicsCocoa promptUserInput: pControl];
-#ifndef IPLUG_NO_CARBON_SUPPORT
-  else if (mGraphicsCarbon)
-    mGraphicsCarbon->PromptUserInput(pControl);
-#endif
+	if (mGraphicsCocoa)
+	{
+		[(IGRAPHICS_COCOA*)mGraphicsCocoa promptUserInput: pControl param: pParam rect: pR size: fontSize];
+	}
+	#ifndef IPLUG_NO_CARBON_SUPPORT
+	else if (mGraphicsCarbon)
+	{
+		mGraphicsCarbon->PromptUserInput(pControl, pParam, pR, fontSize);
+	}
+	#endif
 }
 
 bool IGraphicsMac::OpenURL(const char* url,
