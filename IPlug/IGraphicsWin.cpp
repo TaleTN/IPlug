@@ -293,12 +293,23 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 			return MA_ACTIVATE;
 		}
 
-		case WM_MOUSEWHEEL: {
-			int d = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
-			int x = GET_X_LPARAM(lParam), y = GET_Y_LPARAM(lParam);
-			RECT r;
-			GetWindowRect(hWnd, &r);
-			pGraphics->OnMouseWheel(x - r.left, y - r.top, &GetMouseMod(wParam), d);
+		case WM_MOUSEWHEEL:
+		{
+			const int canHandle = pGraphics->CanHandleMouseWheel();
+			if (canHandle)
+			{
+				pGraphics->HideTooltip();
+
+				const IMouseMod mod = GetMouseMod(wParam, canHandle >= 0);
+				const IMouseMod mask(false, false, true, true, true, true);
+
+				if (mod.Get() & mask.Get())
+				{
+					const float d = (float)GET_WHEEL_DELTA_WPARAM(wParam) / (float)WHEEL_DELTA;
+					const POINT p = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+					pGraphics->ScaleMouseWheel(hWnd, &p, mod, d);
+				}
+			}
 			return 0;
 		}
 
