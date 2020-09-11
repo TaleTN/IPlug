@@ -255,13 +255,13 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
 - (void) removeFromSuperview
 {
-  if (mParamEditView) EndUserInput(self);
-  if (mGraphics)
-  {
-    IGraphics* graphics = mGraphics;
-    mGraphics = 0;
-    graphics->CloseWindow();
-  }
+	if (mParamEditView) EndUserInput(self);
+	if (mGraphics)
+	{
+		IGraphics* const graphics = mGraphics;
+		mGraphics = NULL;
+		graphics->CloseWindow();
+	}
 }
 
 - (void) controlTextDidEndEditing: (NSNotification*) aNotification
