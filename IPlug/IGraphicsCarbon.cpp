@@ -26,16 +26,19 @@ IRECT GetControlRect(EventRef pEvent, int gfxW, int gfxH)
   return IRECT(0, 0, gfxW, gfxH);
 }
 
-// static 
-pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef pHandlerCall, EventRef pEvent, void* pGraphicsCarbon)
+// static
+pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef const pHandlerCall, EventRef const pEvent, void* const pGraphicsCarbon)
 {
-  IGraphicsCarbon* _this = (IGraphicsCarbon*) pGraphicsCarbon;
-  IGraphicsMac* pGraphicsMac = _this->mGraphicsMac;
-  UInt32 eventClass = GetEventClass(pEvent);
-  UInt32 eventKind = GetEventKind(pEvent);
-  switch (eventClass) {      
-    case kEventClassControl: {
-      switch (eventKind) {          
+	IGraphicsCarbon* const _this = (IGraphicsCarbon*)pGraphicsCarbon;
+	IGraphicsMac* const pGraphicsMac = _this->mGraphicsMac;
+	const UInt32 eventClass = GetEventClass(pEvent);
+	const UInt32 eventKind = GetEventKind(pEvent);
+	switch (eventClass)
+	{
+		case kEventClassControl:
+		{
+			switch (eventKind)
+			{
         case kEventControlDraw: {
           
           int gfxW = pGraphicsMac->Width(), gfxH = pGraphicsMac->Height();
@@ -84,29 +87,34 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef pHandler
           //pGraphicsMac->GetPlug()->UserResizedWindow(&r);
           return noErr;
         }        
-        case kEventControlDispose: {
-          // kComponentCloseSelect call should already have done this for us (and deleted mGraphicsMac, for that matter).
-          // pGraphicsMac->CloseWindow();
-          return noErr;
-        }
-      }
-      break;
-    }
-    case kEventClassMouse: {
-      HIPoint hp;
-      GetEventParameter(pEvent, kEventParamWindowMouseLocation, typeHIPoint, 0, sizeof(HIPoint), 0, &hp);
-      HIPointConvert(&hp, kHICoordSpaceWindow, _this->mWindow, kHICoordSpaceView, _this->mView);
-      int x = (int) hp.x;
-      int y = (int) hp.y;
+				case kEventControlDispose:
+				{
+					// kComponentCloseSelect call should already have done this for us (and deleted mGraphicsMac, for that matter).
+					// pGraphicsMac->CloseWindow();
+					return noErr;
+				}
+			}
+			break;
+		}
 
-      UInt32 mods;
-      GetEventParameter(pEvent, kEventParamKeyModifiers, typeUInt32, 0, sizeof(UInt32), 0, &mods);
-      EventMouseButton button;
-      GetEventParameter(pEvent, kEventParamMouseButton, typeMouseButton, 0, sizeof(EventMouseButton), 0, &button);
-      if (button == kEventMouseButtonPrimary && (mods & cmdKey)) button = kEventMouseButtonSecondary;
-      IMouseMod mmod(true, button == kEventMouseButtonSecondary, (mods & shiftKey), (mods & controlKey), (mods & optionKey));
-      
-      switch (eventKind) {
+		case kEventClassMouse:
+		{
+			HIPoint hp;
+			GetEventParameter(pEvent, kEventParamWindowMouseLocation, typeHIPoint, NULL, sizeof(HIPoint), NULL, &hp);
+			HIPointConvert(&hp, kHICoordSpaceWindow, _this->mWindow, kHICoordSpaceView, _this->mView);
+			const CGFloat scale = (CGFloat)(1 << kScaleFixed);
+			const int x = (int)(hp.x * scale);
+			const int y = (int)(hp.y * scale);
+
+			UInt32 mods;
+			GetEventParameter(pEvent, kEventParamKeyModifiers, typeUInt32, NULL, sizeof(UInt32), NULL, &mods);
+			EventMouseButton button;
+			GetEventParameter(pEvent, kEventParamMouseButton, typeMouseButton, NULL, sizeof(EventMouseButton), NULL, &button);
+			if (button == kEventMouseButtonPrimary && (mods & cmdKey)) button = kEventMouseButtonSecondary;
+			IMouseMod mmod(true, button == kEventMouseButtonSecondary, !!(mods & shiftKey), !!(mods & controlKey), !!(mods & optionKey));
+
+			switch (eventKind)
+			{
         case kEventMouseDown: {
           _this->HideTooltip();
           if (_this->mParamEditView)
@@ -169,11 +177,12 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef pHandler
             return noErr;
           }
         }   
-      }
-      break;    
-    }
-  }
-  return eventNotHandledErr;
+			}
+			break;
+		}
+	}
+
+	return eventNotHandledErr;
 }    
 
 // static 
