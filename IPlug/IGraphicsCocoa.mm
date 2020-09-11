@@ -346,9 +346,9 @@ static const int PARAM_EDIT_H = 21;
 	return tooltip && *tooltip ? ToNSString(tooltip) : @"";
 }
 
-- (void) registerToolTip: (int) controlIdx rect: (IRECT*) pRECT
+- (void) registerToolTip: (int)controlIdx rect: (const IRECT*)pRECT
 {
-  [self addToolTipRect: ToNSRect(mGraphics, pRECT) owner: self userData: (void*)(long) controlIdx];
+	[self addToolTipRect: ToNSRect(mGraphics, pRECT) owner: self userData: (void*)(long)controlIdx];
 }
 
 - (void) setParamChangeTimer: (int) ticks
