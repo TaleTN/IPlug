@@ -434,8 +434,12 @@ bool IGraphicsMac::OpenURL(const char* const url, const char* /* windowTitle */,
 	return true;
 }
 
-void* IGraphicsMac::GetWindow()
+void* IGraphicsMac::GetWindow() const
 {
+	#ifndef IPLUG_NO_CARBON_SUPPORT
+	if (mGraphicsCarbon) return mGraphicsCarbon->GetView();
+	#endif
+
 	return mGraphicsCocoa;
 }
 

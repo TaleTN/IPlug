@@ -52,7 +52,7 @@ public:
 	void SetParamChangeTimer(int ticks);
 	void CancelParamChangeTimer();
 
-	void* GetWindow();
+	void* GetWindow() const;
 
 	const char* GetBundleID() const { return mBundleID.Get(); }
   static int GetUserOSVersion();   // Returns a number like 0x1050 (10.5).
