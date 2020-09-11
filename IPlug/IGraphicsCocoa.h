@@ -46,6 +46,7 @@
 - (void) removeFromSuperview;
 - (void) controlTextDidEndEditing: (NSNotification*)aNotification;
 - (void) promptUserInput: (IControl*)pControl param: (IParam*)pParam rect: (const IRECT*)pR size: (int)fontSize;
+- (void) endUserInput;
 - (NSString*) view: (NSView*)pView stringForToolTip: (NSToolTipTag)tag point: (NSPoint)point userData: (void*)pData;
 - (void) registerToolTip: (int) controlIdx rect: (IRECT*) pRECT;
 - (void) setParamChangeTimer: (int)ticks;

@@ -37,15 +37,6 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent)
 	return IMouseMod(false, true, !!(mods & NSShiftKeyMask), !!(mods & NSControlKeyMask), !!(mods & NSAlternateKeyMask));
 }
 
-inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
-{
-  [pGraphicsCocoa->mParamEditView setDelegate: nil];
-  [pGraphicsCocoa->mParamEditView removeFromSuperview];
-  pGraphicsCocoa->mParamEditView = 0;
-  pGraphicsCocoa->mEdControl = 0;
-  pGraphicsCocoa->mEdParam = 0;
-}
-
 @implementation IGRAPHICS_COCOA
 
 - (id) init
@@ -150,7 +141,7 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 {
 	if (mGraphics)
 	{
-		if (mParamEditView) EndUserInput(self);
+		if (mParamEditView) [self endUserInput];
 		int x, y;
 		[self getMouseXY: pEvent x: &x y: &y];
 		if ([pEvent clickCount] > 1)
@@ -190,7 +181,7 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 	{
 		if (mParamEditView)
 		{
-			EndUserInput(self);
+			[self endUserInput];
 			return;
 		}
 		int x, y;
@@ -255,7 +246,7 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
 - (void) removeFromSuperview
 {
-	if (mParamEditView) EndUserInput(self);
+	if (mParamEditView) [self endUserInput];
 	if (mGraphics)
 	{
 		IGraphics* const graphics = mGraphics;
@@ -269,7 +260,7 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 	const char* const txt = (const char*)[[mParamEditView stringValue] UTF8String];
 	mGraphics->SetFromStringAfterPrompt(mEdControl, mEdParam, txt);
 
-	EndUserInput(self);
+	[self endUserInput];
 	[self viewDidMoveToWindow];
 	[self setNeedsDisplay: YES];
 }
@@ -334,6 +325,15 @@ static const int PARAM_EDIT_H = 21;
 
 	mEdControl = pControl;
 	mEdParam = pParam;
+}
+
+- (void) endUserInput
+{
+	[mParamEditView setDelegate: nil];
+	[mParamEditView removeFromSuperview];
+	mParamEditView = nil;
+	mEdControl = NULL;
+	mEdParam = NULL;
 }
 
 - (NSString*) view: (NSView*) pView stringForToolTip: (NSToolTipTag) tag point: (NSPoint) point userData: (void*) pData
