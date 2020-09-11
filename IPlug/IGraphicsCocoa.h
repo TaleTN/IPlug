@@ -43,6 +43,7 @@
 - (void) mouseMoved: (NSEvent*)pEvent;
 - (void) scrollWheel: (NSEvent*)pEvent;
 - (void) killTimer;
+- (void) removeFromSuperview;
 - (void) controlTextDidChange: (NSNotification *) aNotification;
 - (void) promptUserInput: (IControl*) pControl param: (IParam*) pParam;
 - (void) promptUserInput: (IEditableTextControl*) pControl;
