@@ -27,15 +27,12 @@ public:
 
 	inline bool ScaleNeedsUpdate() const { return mWantScale != mPrevScale; }
 
-  void* OpenWindow(void* pWindow);
-#ifndef IPLUG_NO_CARBON_SUPPORT
-  void* OpenWindow(void* pWindow, void* pControl);
-#endif
-  
-	void* OpenCocoaWindow(void* pParentView);  
-#ifndef IPLUG_NO_CARBON_SUPPORT
-  void* OpenCarbonWindow(void* pParentWnd, void* pParentControl);
-#endif
+	void* OpenWindow(void* const pWindow) { return OpenCocoaWindow(pWindow); }
+	void* OpenCocoaWindow(void* pParentView);
+
+	#ifndef IPLUG_NO_CARBON_SUPPORT
+	void* OpenCarbonWindow(void* pParentWnd, void* pParentControl = NULL);
+	#endif
   
 	void CloseWindow();
 	bool WindowIsOpen();

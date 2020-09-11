@@ -165,44 +165,35 @@ bool IGraphicsMac::UpdateScale()
 	return PrepDraw(mWantScale);
 }
 
-void* IGraphicsMac::OpenWindow(void* pParent)
-{ 
-  return OpenCocoaWindow(pParent);
+void* IGraphicsMac::OpenCocoaWindow(void* const pParentView)
+{
+	CloseWindow();
+	InitScale();
+
+	mGraphicsCocoa = (IGRAPHICS_COCOA*)[[IGRAPHICS_COCOA alloc] initWithIGraphics: this];
+	if (pParentView) // Cocoa VST host.
+	{
+		[(NSView*)pParentView addSubview: (IGRAPHICS_COCOA*)mGraphicsCocoa];
+	}
+	// Else we are being called by IGraphicsCocoaFactory, which is being called by a Cocoa AU host,
+	// and the host will take care of attaching the view to the window.
+
+	UpdateTooltips();
+
+	return mGraphicsCocoa;
 }
 
 #ifndef IPLUG_NO_CARBON_SUPPORT
-void* IGraphicsMac::OpenWindow(void* pWindow, void* pControl)
+void* IGraphicsMac::OpenCarbonWindow(void* const pParentWnd, void* const pParentControl)
 {
-  return OpenCarbonWindow(pWindow, pControl);
-}
-#endif
+	CloseWindow();
+	InitScale();
 
-void* IGraphicsMac::OpenCocoaWindow(void* pParentView)
-{
-  TRACE;
-  CloseWindow();
-  mGraphicsCocoa = (IGRAPHICS_COCOA*) [[IGRAPHICS_COCOA alloc] initWithIGraphics: this];
-  if (pParentView) {    // Cocoa VST host.
-    [(NSView*) pParentView addSubview: (IGRAPHICS_COCOA*) mGraphicsCocoa];
-  }
-  // Else we are being called by IGraphicsCocoaFactory, which is being called by a Cocoa AU host, 
-  // and the host will take care of attaching the view to the window. 
-
-  UpdateTooltips();
-
-  return mGraphicsCocoa;
-}
-
-#ifndef IPLUG_NO_CARBON_SUPPORT
-void* IGraphicsMac::OpenCarbonWindow(void* pParentWnd, void* pParentControl)
-{
-  TRACE;
-  CloseWindow();
-  WindowRef pWnd = (WindowRef) pParentWnd;
-  ControlRef pControl = (ControlRef) pParentControl;
-  // On 10.5 or later we could have used HICocoaViewCreate, but for 10.4 we have to support Carbon explicitly.
-  mGraphicsCarbon = new IGraphicsCarbon(this, pWnd, pControl);
-  return mGraphicsCarbon->GetView();
+	WindowRef const pWnd = (WindowRef)pParentWnd;
+	ControlRef const pControl = (ControlRef)pParentControl;
+	// On 10.5 or later we could have used HICocoaViewCreate, but for 10.4 we have to support Carbon explicitly.
+	mGraphicsCarbon = new IGraphicsCarbon(this, pWnd, pControl);
+	return mGraphicsCarbon->GetView();
 }
 #endif
 
