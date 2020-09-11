@@ -30,8 +30,7 @@ public:
 
 	bool PromptForFile(WDL_String* pFilename, int action = kFileOpen, const char* dir = NULL, const char* extensions = NULL);
 	// bool PromptForColor(IColor* pColor, const char* prompt = NULL);
-	void PromptUserInput(IControl* pControl, IParam* pParam);
-	void PromptUserInput(IEditableTextControl* pControl);
+	void PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int fontSize = 0);
 
   bool OpenURL(const char* url, 
     const char* msgWindowTitle = 0, const char* confirmMsg = 0, const char* errMsgOnFailure = 0);

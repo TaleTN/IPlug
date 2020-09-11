@@ -613,98 +613,75 @@ void IGraphicsWin::CloseWindow()
 	}
 }
 
-#define PARAM_EDIT_W 36
-#define PARAM_EDIT_H 16
-#define PARAM_EDIT_H_PER_ENUM 36
-#define PARAM_LIST_MIN_W 24
-#define PARAM_LIST_W_PER_CHAR 8
+static const int PARAM_EDIT_W = 40 * 2;
+static const int PARAM_EDIT_H = 16 * 2;
 
-void IGraphicsWin::PromptUserInput(IControl* pControl, IParam* pParam)
+void IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pParam, const IRECT* pR, int fontSize)
 {
-	if (!pControl || !pParam || mParamEditWnd) {
-		return;
-	}
+	if (mParamEditWnd || !pControl || !pParam) return;
 
-	IRECT* pR = pControl->GetRECT();
-	int cX = int(pR->MW()), cY = int(pR->MH());
-  char currentText[MAX_PARAM_LEN];
-  pParam->GetDisplayForHost(currentText);
+	char currentText[kMaxParamLen];
+	pParam->GetDisplayForHost(currentText, sizeof(currentText));
 
-  int n = pParam->GetNDisplayTexts();
-  if (n && (pParam->Type() == IParam::kTypeEnum || pParam->Type() == IParam::kTypeBool)) {
-    int i, currentIdx = -1;
-		int w = PARAM_LIST_MIN_W, h = PARAM_EDIT_H_PER_ENUM * (n + 1);
-		for (i = 0; i < n; ++i) {
-      const char* str = pParam->GetDisplayText(i);
-      w = MAX(w, PARAM_LIST_MIN_W + strlen(str) * PARAM_LIST_W_PER_CHAR);
-			if (!strcmp(str, currentText)) {
-				currentIdx = i;
-			}
-		}			
-
-		mParamEditWnd = CreateWindow("COMBOBOX", "", WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST,
-			cX - w/2, cY, w, h, mPlugWnd, (HMENU) PARAM_EDIT_ID, mHInstance, 0);
-
-		for (i = 0; i < n; ++i) {
-      const char* str = pParam->GetDisplayText(i);
-			SendMessage(mParamEditWnd, CB_ADDSTRING, 0, (LPARAM) str);
-		}
-		SendMessage(mParamEditWnd, CB_SETCURSEL, (WPARAM) currentIdx, 0);
-	}
-	else {
-		int w = PARAM_EDIT_W, h = PARAM_EDIT_H;
-		mParamEditWnd = CreateWindow("EDIT", currentText, WS_CHILD | WS_VISIBLE | ES_CENTER | ES_MULTILINE,
-			cX - w/2, cY - h/2, w, h, mPlugWnd, (HMENU) PARAM_EDIT_ID, mHInstance, 0);
-		SendMessage(mParamEditWnd, EM_SETSEL, 0, -1);
-	}
-	SetFocus(mParamEditWnd);
-
-	mDefEditProc = (WNDPROC) SetWindowLongPtr(mParamEditWnd, GWLP_WNDPROC, (LONG_PTR) ParamEditProc);
-  SetWindowLongPtr(mParamEditWnd, GWLP_USERDATA, 0xdeadf00b);
-
-  IText txt;
-	HFONT font = CreateFont(txt.mSize, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, txt.mFont);
-	SendMessage(mParamEditWnd, WM_SETFONT, (WPARAM) font, 0);
-	//DeleteObject(font);	
-
-	mEdControl = pControl;
-	mEdParam = pParam;	
-}
-
-void IGraphicsWin::PromptUserInput(IEditableTextControl* pControl)
-{
-	if (!pControl || mParamEditWnd) return;
-
-	IRECT* pR = pControl->GetRECT();
-
-	const IText* txt = pControl->GetIText();
-	DWORD editStyle;
-	switch (txt->mAlign)
+	WCHAR buf[kMaxParamLen];
+	if (!MultiByteToWideChar(CP_UTF8, 0, currentText, -1, buf, kMaxParamLen))
 	{
-		case IText::kAlignNear:   editStyle = ES_LEFT;   break;
-		case IText::kAlignFar:    editStyle = ES_RIGHT;  break;
-		case IText::kAlignCenter:
-		default:                  editStyle = ES_CENTER; break;
+		buf[0] = 0;
 	}
-	if (!pControl->IsEditable()) editStyle |= ES_READONLY;
-	if (pControl->IsSecure())
-		editStyle |= ES_PASSWORD;
+
+	static const int kPromptCustomHeight = kPromptCustomRect ^ kPromptCustomWidth;
+	static const int w = PARAM_EDIT_W, h = PARAM_EDIT_H;
+
+	if (!pR) pR = pControl->GetTargetRECT();
+
+	int r[5];
+	if (!(fontSize & kPromptCustomWidth))
+	{
+		r[0] = (pR->L + pR->R - w) / 2;
+		r[2] = w;
+	}
 	else
-		editStyle |= ES_MULTILINE;
-	mParamEditWnd = CreateWindow("EDIT", pControl->GetText(), WS_CHILD | WS_VISIBLE | editStyle,
-		pR->L, pR->T, pR->W(), pR->H(), mPlugWnd, (HMENU) PARAM_EDIT_ID, mHInstance, 0);
-	SendMessage(mParamEditWnd, EM_SETSEL, 0, -1);
+	{
+		r[0] = pR->L;
+		r[2] = pR->W();
+	}
+
+	if (!(fontSize & kPromptCustomHeight))
+	{
+		r[1] = (pR->T + pR->B - h) / 2;
+		r[3] = h;
+	}
+	else
+	{
+		r[1] = pR->T;
+		r[3] = pR->H();
+	}
+
+	fontSize &= ~kPromptCustomRect;
+	r[4] = fontSize ? fontSize : (h * 14) / 16;
+
+	if (mDPI != IPLUG_DEFAULT_DPI)
+	{
+		for (int i = 0; i < 5; ++i)
+		{
+			r[i] = MulDiv(r[i], mDPI, IPLUG_DEFAULT_DPI);
+		}
+	}
+
+	mParamEditWnd = CreateWindowW(L"EDIT", buf, WS_CHILD | WS_VISIBLE | ES_CENTER | ES_MULTILINE,
+		r[0], r[1], r[2], r[3], mPlugWnd, (HMENU)(INT_PTR)PARAM_EDIT_ID, mHInstance, NULL);
+	SendMessageW(mParamEditWnd, EM_SETSEL, 0, -1);
+
 	SetFocus(mParamEditWnd);
 
-	mDefEditProc = (WNDPROC) SetWindowLongPtr(mParamEditWnd, GWLP_WNDPROC, (LONG_PTR) ParamEditProc);
-  SetWindowLongPtr(mParamEditWnd, GWLP_USERDATA, 0xdeadf00b);
+	mDefEditProc = (WNDPROC)SetWindowLongPtrW(mParamEditWnd, GWLP_WNDPROC, (LONG_PTR)ParamEditProc);
+	SetWindowLongPtrW(mParamEditWnd, GWLP_USERDATA, 0xdeadf00b);
 
-	HFONT font = CreateFont(txt->mSize, 0, 0, 0, txt->mStyle == IText::kStyleBold ? FW_BOLD : 0, txt->mStyle == IText::kStyleItalic ? TRUE : 0, 0, 0, 0, 0, 0, 0, 0, txt->mFont);
-	SendMessage(mParamEditWnd, WM_SETFONT, (WPARAM) font, 0);
-	//DeleteObject(font);	
+	HFONT const font = CreateFont(r[4], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, IText::kDefaultFont);
+	SendMessageW(mParamEditWnd, WM_SETFONT, (WPARAM)font, FALSE);
 
 	mEdControl = pControl;
-	mEdParam = 0;
+	mEdParam = pParam;
 }
 
 static void GetModulePath(HMODULE const hModule, WDL_String* const pPath)
