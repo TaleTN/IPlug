@@ -3,4 +3,5 @@
 *.cpp text=auto
 *.h   text=auto
 *.mm  text=auto
+*.pch text=auto
 *.r   text=auto

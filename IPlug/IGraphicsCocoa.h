@@ -1,7 +1,4 @@
 #import <Cocoa/Cocoa.h>
-#include <Carbon/Carbon.h>
-#include <AudioUnit/AudioUnit.h>
-#import <AudioUnit/AUCocoaUIView.h>
 #include "IGraphicsMac.h"
 
 // Cocoa objects can be supplied by any existing component, 
