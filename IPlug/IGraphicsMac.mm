@@ -473,22 +473,30 @@ double IGraphicsMac::GetUserFoundationVersion()   // Returns a number like 677.0
   return NSFoundationVersionNumber;
 }
 
-void IGraphicsMac::SetParamChangeTimer(int ticks)
+void IGraphicsMac::SetParamChangeTimer(const int ticks)
 {
-  if (mGraphicsCocoa)
-    [mGraphicsCocoa setParamChangeTimer: ticks];
-#ifndef IPLUG_NO_CARBON_SUPPORT
-  else if (mGraphicsCarbon)
-    mGraphicsCarbon->SetParamChangeTimer(ticks);
-#endif
+	if (mGraphicsCocoa)
+	{
+		[(IGRAPHICS_COCOA*)mGraphicsCocoa setParamChangeTimer: ticks];
+	}
+	#ifndef IPLUG_NO_CARBON_SUPPORT
+	else if (mGraphicsCarbon)
+	{
+		mGraphicsCarbon->SetParamChangeTimer(ticks);
+	}
+	#endif
 }
 
 void IGraphicsMac::CancelParamChangeTimer()
 {
-  if (mGraphicsCocoa)
-    [mGraphicsCocoa cancelParamChangeTimer];
-#ifndef IPLUG_NO_CARBON_SUPPORT
-  else if (mGraphicsCarbon)
-    mGraphicsCarbon->CancelParamChangeTimer();
-#endif
+	if (mGraphicsCocoa)
+	{
+		[(IGRAPHICS_COCOA*)mGraphicsCocoa cancelParamChangeTimer];
+	}
+	#ifndef IPLUG_NO_CARBON_SUPPORT
+	else if (mGraphicsCarbon)
+	{
+		mGraphicsCarbon->CancelParamChangeTimer();
+	}
+	#endif
 }

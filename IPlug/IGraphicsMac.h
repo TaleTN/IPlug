@@ -49,8 +49,8 @@ public:
 
 	bool OpenURL(const char* url, const char* windowTitle = NULL, const char* confirmMsg = NULL, const char* errMsg = NULL);
 
-  void SetParamChangeTimer(int ticks);
-  void CancelParamChangeTimer();
+	void SetParamChangeTimer(int ticks);
+	void CancelParamChangeTimer();
 
 	void* GetWindow();
 
