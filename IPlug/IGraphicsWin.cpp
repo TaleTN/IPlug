@@ -1102,3 +1102,10 @@ void IGraphicsWin::HideTooltip()
 		ShowTooltip();
 	}
 }
+
+#ifndef NDEBUG
+void IPlugDebugLog(const char* const str)
+{
+	OutputDebugString(str);
+}
+#endif
