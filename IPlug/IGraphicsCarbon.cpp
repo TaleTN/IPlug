@@ -242,14 +242,14 @@ pascal OSStatus IGraphicsCarbon::CarbonParamEditHandler(EventHandlerCallRef pHan
   return eventNotHandledErr;
 }
 
-void ResizeWindow(WindowRef pWindow, int w, int h)
+/* static void ResizeWindow(WindowRef const pWindow, const int w, const int h)
 {
-  Rect gr;  // Screen.
-  GetWindowBounds(pWindow, kWindowContentRgn, &gr);
-  gr.right = gr.left + w;
-  gr.bottom = gr.top + h;
-  SetWindowBounds(pWindow, kWindowContentRgn, &gr); 
-}
+	Rect gr; // Screen.
+	GetWindowBounds(pWindow, kWindowContentRgn, &gr);
+	gr.right = gr.left + w;
+	gr.bottom = gr.top + h;
+	SetWindowBounds(pWindow, kWindowContentRgn, &gr);
+} */
 
 IGraphicsCarbon::IGraphicsCarbon(
 	IGraphicsMac* const pGraphicsMac,
@@ -363,14 +363,16 @@ IGraphicsCarbon::~IGraphicsCarbon()
 	mView = NULL;
 }
 
-bool IGraphicsCarbon::Resize(int w, int h)
+/* bool IGraphicsCarbon::Resize(int w, int h)
 {
-  if (mWindow && mView) {
-    ResizeWindow(mWindow, w, h);
-    return (HIViewSetFrame(mView, &CGRectMake(0, 0, w, h)) == noErr);
-  }
-  return false;
-}
+	if (mWindow && mView)
+	{
+		ResizeWindow(mWindow, w >>= kScaleFixed, h >>= kScaleFixed);
+		const HIRect hr = CGRectMake(0.0f, 0.0f, (CGFloat)w, (CGFloat)h);
+		return HIViewSetFrame(mView, &hr) == noErr;
+	}
+	return false;
+} */
 
 #define PARAM_EDIT_W 32
 #define PARAM_EDIT_H 14

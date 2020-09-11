@@ -22,7 +22,7 @@ public:
 		*pR = CGRectOffset(*pR, 0.0f, (CGFloat)mContentYOffset);
 	}
 
-  bool Resize(int w, int h);
+	// bool Resize(int w, int h);
   void PromptUserInput(IControl* pControl, IParam* pParam);
   void PromptUserInput(IEditableTextControl* pControl);
 
