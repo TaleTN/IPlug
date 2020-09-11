@@ -251,73 +251,95 @@ void ResizeWindow(WindowRef pWindow, int w, int h)
   SetWindowBounds(pWindow, kWindowContentRgn, &gr); 
 }
 
-IGraphicsCarbon::IGraphicsCarbon(IGraphicsMac* pGraphicsMac, WindowRef pWindow, ControlRef pParentControl)
-: mGraphicsMac(pGraphicsMac), mWindow(pWindow), mView(0), mTimer(0), mControlHandler(0), mWindowHandler(0), mCGC(0),
-  mContentXOffset(0), mContentYOffset(0), mParamEditView(0), mParamEditHandler(0), mEdControl(0), mEdParam(0),
-  mShowingTooltip(false), mTooltipIdx(-1), mTooltipTimer(0), mParamChangeTimer(0)
-{ 
-  TRACE;
-  
-  Rect r;   // Client.
-  r.left = r.top = 0;
-  r.right = pGraphicsMac->Width();
-  r.bottom = pGraphicsMac->Height();   
-  //ResizeWindow(pWindow, r.right, r.bottom);
+IGraphicsCarbon::IGraphicsCarbon(
+	IGraphicsMac* const pGraphicsMac,
+	WindowRef const pWindow,
+	ControlRef pParentControl
+):
+	mGraphicsMac(pGraphicsMac),
+	mContentYOffset(0),
+	mWindow(pWindow),
+	mView(NULL),
+	mTimer(NULL),
+	mControlHandler(NULL),
+	mWindowHandler(NULL),
+	mCGC(NULL),
+	mParamEditView(NULL),
+	mParamEditHandler(NULL),
+	mEdControl(NULL),
+	mEdParam(NULL),
+	mShowingTooltip(false),
+	mTooltipIdx(-1),
+	mTooltipTimer(0),
+	mParamChangeTimer(0)
+{
+	Rect r; // Client.
+	r.left = r.top = 0;
+	r.bottom = pGraphicsMac->Height() >> kScaleFixed;
+	r.right = pGraphicsMac->Width() >> kScaleFixed;
 
-  WindowAttributes winAttrs = 0;
-  GetWindowAttributes(pWindow, &winAttrs);
-  mIsComposited = (winAttrs & kWindowCompositingAttribute);
-  mRgn = NewRgn();  
-  
-  UInt32 features =  kControlSupportsFocus | kControlHandlesTracking | kControlSupportsEmbedding;
-  if (mIsComposited) {
-    features |= kHIViewIsOpaque | kHIViewFeatureDoesNotUseSpecialParts;
-  }
-  CreateUserPaneControl(pWindow, &r, features, &mView);    
-  
-  const EventTypeSpec controlEvents[] = {	
-    //{ kEventClassControl, kEventControlInitialize },
-    //{kEventClassControl, kEventControlGetOptimalBounds},    
-    //{ kEventClassControl, kEventControlHitTest },
-    { kEventClassControl, kEventControlClick },
-    //{ kEventClassKeyboard, kEventRawKeyDown },
-    { kEventClassControl, kEventControlDraw },
-    { kEventClassControl, kEventControlDispose },
-    { kEventClassControl, kEventControlBoundsChanged }
-  };
-  InstallControlEventHandler(mView, CarbonEventHandler, GetEventTypeCount(controlEvents), controlEvents, this, &mControlHandler);
-  
-  const EventTypeSpec windowEvents[] = {
-    { kEventClassMouse, kEventMouseDown },
-    { kEventClassMouse, kEventMouseUp },
-    { kEventClassMouse, kEventMouseMoved },
-    { kEventClassMouse, kEventMouseDragged },
-    { kEventClassMouse, kEventMouseWheelMoved }
-  };
-  InstallWindowEventHandler(mWindow, CarbonEventHandler, GetEventTypeCount(windowEvents), windowEvents, this, &mWindowHandler);  
-  
-  double t = kEventDurationSecond/(double)pGraphicsMac->FPS();
-  OSStatus s = InstallEventLoopTimer(GetMainEventLoop(), 0.0, t, CarbonTimerHandler, this, &mTimer);
-  
-  if (mIsComposited) {
-    if (!pParentControl) {
-      HIViewRef hvRoot = HIViewGetRoot(pWindow);
-      s = HIViewFindByID(hvRoot, kHIViewWindowContentID, &pParentControl); 
-    }  
-    s = HIViewAddSubview(pParentControl, mView);
-  }
-  else {
-    if (!pParentControl) {
-      if (GetRootControl(pWindow, &pParentControl) != noErr) {
-        CreateRootControl(pWindow, &pParentControl);
-      }
-    }
-    s = EmbedControl(mView, pParentControl); 
-  }
+	WindowAttributes winAttrs = 0;
+	GetWindowAttributes(pWindow, &winAttrs);
+	mIsComposited = !!(winAttrs & kWindowCompositingAttribute);
 
-  if (s == noErr) {
-    SizeControl(mView, r.right, r.bottom);  // offset?
-  }
+	UInt32 features =  kControlSupportsFocus | kControlHandlesTracking | kControlSupportsEmbedding;
+	if (mIsComposited)
+	{
+		features |= kHIViewIsOpaque | kHIViewFeatureDoesNotUseSpecialParts;
+	}
+	CreateUserPaneControl(pWindow, &r, features, &mView);
+
+	static const EventTypeSpec controlEvents[] =
+	{
+		// { kEventClassControl, kEventControlInitialize },
+		// { kEventClassControl, kEventControlGetOptimalBounds },
+		// { kEventClassControl, kEventControlHitTest },
+		{ kEventClassControl, kEventControlClick },
+		// { kEventClassKeyboard, kEventRawKeyDown },
+		{ kEventClassControl, kEventControlDraw },
+		{ kEventClassControl, kEventControlDispose },
+		{ kEventClassControl, kEventControlBoundsChanged }
+	};
+	InstallControlEventHandler(mView, CarbonEventHandler, GetEventTypeCount(controlEvents), controlEvents, this, &mControlHandler);
+
+	static const EventTypeSpec windowEvents[] =
+	{
+		{ kEventClassMouse, kEventMouseDown },
+		{ kEventClassMouse, kEventMouseUp },
+		{ kEventClassMouse, kEventMouseMoved },
+		{ kEventClassMouse, kEventMouseDragged },
+		{ kEventClassMouse, kEventMouseWheelMoved }
+	};
+	InstallWindowEventHandler(mWindow, CarbonEventHandler, GetEventTypeCount(windowEvents), windowEvents, this, &mWindowHandler);
+
+	const double t = kEventDurationSecond / (double)pGraphicsMac->FPS();
+	OSStatus s = InstallEventLoopTimer(GetMainEventLoop(), 0.0, t, CarbonTimerHandler, this, &mTimer);
+
+	if (mIsComposited)
+	{
+		if (!pParentControl)
+		{
+			HIViewRef hvRoot = HIViewGetRoot(pWindow);
+			/* s = */ HIViewFindByID(hvRoot, kHIViewWindowContentID, &pParentControl);
+		}
+		s = HIViewAddSubview(pParentControl, mView);
+	}
+	else
+	{
+		if (!pParentControl)
+		{
+			if (GetRootControl(pWindow, &pParentControl) != noErr)
+			{
+				CreateRootControl(pWindow, &pParentControl);
+			}
+		}
+		s = EmbedControl(mView, pParentControl);
+	}
+
+	if (s == noErr)
+	{
+		SizeControl(mView, r.right, r.bottom); // offset?
+	}
 }
 
 IGraphicsCarbon::~IGraphicsCarbon()

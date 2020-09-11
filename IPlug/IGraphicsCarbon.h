@@ -9,8 +9,9 @@
 class IGraphicsCarbon
 {
 public:
-  
-  IGraphicsCarbon(IGraphicsMac* pGraphicsMac, WindowRef pWindow, ControlRef pParentControl);
+	static const int kScaleFixed = IGraphicsMac::kScaleOS;
+
+	IGraphicsCarbon(IGraphicsMac* pGraphicsMac, WindowRef pWindow, ControlRef pParentControl);
   ~IGraphicsCarbon();
   
   ControlRef GetView() { return mView; }
@@ -34,28 +35,26 @@ protected:
   void CancelParamChangeTimer() { mParamChangeTimer = 0; }
 
 private:
-  
-  IGraphicsMac* mGraphicsMac;
-  bool mIsComposited;
-  int mContentXOffset, mContentYOffset;
-  RgnHandle mRgn;
-  WindowRef mWindow;
-  ControlRef mView; // was HIViewRef
-  EventLoopTimerRef mTimer;
-  EventHandlerRef mControlHandler, mWindowHandler;
-  CGContextRef mCGC;
+	IGraphicsMac* mGraphicsMac;
+	bool mIsComposited;
+	int mContentYOffset;
+	WindowRef mWindow;
+	ControlRef mView;
+	EventLoopTimerRef mTimer;
+	EventHandlerRef mControlHandler, mWindowHandler;
+	CGContextRef mCGC;
 
-  ControlRef mParamEditView;
-  EventHandlerRef mParamEditHandler;
-  // Ed = being edited manually.
-  IControl* mEdControl;
-  IParam* mEdParam;
-  
-  bool mShowingTooltip;
-  int mTooltipIdx, mTooltipTimer;
-  const char* mTooltip;
+	ControlRef mParamEditView;
+	EventHandlerRef mParamEditHandler;
+	// Ed = being edited manually.
+	IControl* mEdControl;
+	IParam* mEdParam;
 
-  int mParamChangeTimer;
+	bool mShowingTooltip;
+	int mTooltipIdx, mTooltipTimer;
+	const char* mTooltip;
+
+	int mParamChangeTimer;
 
 public:
   
@@ -63,7 +62,7 @@ public:
   static pascal void CarbonTimerHandler(EventLoopTimerRef pTimer, void* pGraphicsCarbon);
   static pascal OSStatus CarbonParamEditHandler(EventHandlerCallRef pHandlerCall, EventRef pEvent, void* pGraphicsCarbon);
 
-  friend class IGraphicsMac;
+	friend class IGraphicsMac;
 };
 
 #endif // IPLUG_NO_CARBON_SUPPORT
