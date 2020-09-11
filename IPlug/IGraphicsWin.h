@@ -28,8 +28,7 @@ public:
 	void HostPath(WDL_String* pPath);
 	void PluginPath(WDL_String* pPath);
 
-	void PromptForFile(WDL_String* pFilename, EFileAction action = kFileOpen, char* dir = "",
-    char* extensions = "");   // extensions = "txt wav" for example.
+	bool PromptForFile(WDL_String* pFilename, int action = kFileOpen, const char* dir = NULL, const char* extensions = NULL);
 
   bool PromptForColor(IColor* pColor, char* prompt = "");
 	void PromptUserInput(IControl* pControl, IParam* pParam);

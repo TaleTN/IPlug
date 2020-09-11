@@ -737,91 +737,82 @@ void IGraphicsWin::PluginPath(WDL_String* const pPath)
 	GetModulePath(mHInstance, pPath);
 }
 
-void IGraphicsWin::PromptForFile(WDL_String* pFilename, EFileAction action, char* dir, char* extensions)
+bool IGraphicsWin::PromptForFile(WDL_String* const pFilename, const int action, const char* dir, const char* const extensions)
 {
-	if (!WindowIsOpen()) { 
+	if (!WindowIsOpen())
+	{
 		pFilename->Set("");
-		return;
+		return false;
 	}
 
-  WDL_String pathStr;
-	char fnCStr[MAX_PATH_LEN], dirCStr[MAX_PATH_LEN];
-	strncpy(fnCStr, pFilename->Get(), MAX_PATH_LEN - 1);
-	fnCStr[MAX_PATH_LEN - 1] = '\0';
-	dirCStr[0] = '\0';
-	if (CSTR_NOT_EMPTY(dir)) {
-  pathStr.Set(dir);
-		strcpy(dirCStr, dir);
-	}
-  else {
-    HostPath(&pathStr);
-  }
-	
 	OPENFILENAME ofn;
 	memset(&ofn, 0, sizeof(OPENFILENAME));
 
 	ofn.lStructSize = sizeof(OPENFILENAME);
 	ofn.hwndOwner = mPlugWnd;
-	ofn.lpstrFile = fnCStr;
-	ofn.nMaxFile = MAX_PATH_LEN - 1;
-	ofn.lpstrInitialDir = dirCStr;
+	ofn.lpstrFile = pFilename->Get();
+	ofn.nMaxFile = MAX_PATH;
+	ofn.lpstrInitialDir = dir;
 	ofn.Flags = OFN_PATHMUSTEXIST;
 
-	if (CSTR_NOT_EMPTY(extensions)) {
-		char extStr[256];
-		char defExtStr[16];
-		int i, p, n = strlen(extensions);
+	char extStr[256];
+	char defExtStr[16];
+
+	if (extensions && *extensions)
+	{
+		int p;
 
 		bool seperator = true;
-		for (i = 0, p = 0; i < n; ++i) {
-			if (seperator) {
-				if (p) {
-					extStr[p++] = ';';
-				}
+		for (int i = p = 0; extensions[i]; ++i)
+		{
+			if (seperator)
+			{
+				if (p) extStr[p++] = ';';
 				seperator = false;
 				extStr[p++] = '*';
 				extStr[p++] = '.';
 			}
-			if (extensions[i] == ' ') {
+			if (extensions[i] == ' ')
+			{
 				seperator = true;
 			}
-			else {
+			else
+			{
 				extStr[p++] = extensions[i];
 			}
 		}
-		extStr[p++] = '\0';
+		extStr[p++] = 0;
 
 		strcpy(&extStr[p], extStr);
-		extStr[p + p] = '\0';
+		extStr[p + p] = 0;
 		ofn.lpstrFilter = extStr;
 
-		for (i = 0, p = 0; i < n && extensions[i] != ' '; ++i) {
+		for (int i = p = 0; extensions[i] && extensions[i] != ' '; ++i)
+		{
 			defExtStr[p++] = extensions[i];
 		}
-		defExtStr[p++] = '\0';
+		defExtStr[p++] = 0;
 		ofn.lpstrDefExt = defExtStr;
 	}
 
-    bool rc = false;
-    switch (action) {
-        case kFileSave:
-            ofn.Flags |= OFN_OVERWRITEPROMPT;
-            rc = GetSaveFileName(&ofn);
-            break;
+	bool rc = false;
+	switch (action)
+	{
+		case kFileSave:
+			ofn.Flags |= OFN_OVERWRITEPROMPT;
+			rc = GetSaveFileName(&ofn);
+			break;
 
-        case kFileOpen:     
-        default:
-            ofn.Flags |= OFN_FILEMUSTEXIST;
-    	    rc = GetOpenFileName(&ofn);
-            break;
-    }
+		case kFileOpen:
+			ofn.Flags |= OFN_FILEMUSTEXIST;
+			rc = GetOpenFileName(&ofn);
+			break;
 
-    if (rc) {
-        pFilename->Set(ofn.lpstrFile);
-    }
-    else {
-        pFilename->Set("");
-    }
+		default: break;
+	}
+
+	pFilename->Set(rc ? ofn.lpstrFile : "");
+	return rc;
 }
 
 UINT_PTR CALLBACK CCHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
