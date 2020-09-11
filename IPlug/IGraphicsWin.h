@@ -14,8 +14,8 @@ public:
 	IGraphicsWin(IPlugBase* pPlug, int w, int h, int refreshFPS = 0);
 	~IGraphicsWin();
 
-  void SetHInstance(HINSTANCE hInstance) { mHInstance = hInstance; }
-  
+	inline void SetHInstance(HINSTANCE const hInstance) { mHInstance = hInstance; }
+
   void Resize(int w, int h);
   bool DrawScreen(IRECT* pR);  
   
@@ -61,7 +61,7 @@ protected:
   void HideTooltip();
 
 private:
-  HINSTANCE mHInstance;
+	HINSTANCE mHInstance;
   HWND mPlugWnd, mTooltipWnd, mParamEditWnd;
 	// Ed = being edited manually.
 	IControl* mEdControl;
