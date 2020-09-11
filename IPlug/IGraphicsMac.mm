@@ -411,23 +411,27 @@ void IGraphicsMac::PromptUserInput(IControl* const pControl, IParam* const pPara
 	#endif
 }
 
-bool IGraphicsMac::OpenURL(const char* url,
-  const char* msgWindowTitle, const char* confirmMsg, const char* errMsgOnFailure)
+bool IGraphicsMac::OpenURL(const char* const url, const char* /* windowTitle */,
+	const char* /* confirmMsg */, const char* /* errMsg */)
 {
-#pragma REMINDER("Warning and error messages for OpenURL not implemented")
-  NSURL* pURL = 0;
-  if (strstr(url, "http")) {
-    pURL = [NSURL URLWithString:ToNSString(url)];
-  }
-  else {
-    pURL = [NSURL fileURLWithPath:ToNSString(url)];
-  }    
-  if (pURL) {
-    bool ok = ([[NSWorkspace sharedWorkspace] openURL:pURL]);
-  // [pURL release];
-    return ok;
-  }
-  return true;
+	// Reminder: Warning and error messages for OpenURL not implemented.
+
+	const CocoaAutoReleasePool pool;
+	NSURL* pURL = nil;
+	if (!strncmp(url, "http", 4))
+	{
+		pURL = [NSURL URLWithString: ToNSString(url)];
+	}
+	else
+	{
+		pURL = [NSURL fileURLWithPath: ToNSString(url)];
+	}
+	if (pURL)
+	{
+		const bool ok = [[NSWorkspace sharedWorkspace] openURL: pURL];
+		return ok;
+	}
+	return true;
 }
 
 void* IGraphicsMac::GetWindow()
