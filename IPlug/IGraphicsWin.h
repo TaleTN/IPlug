@@ -41,8 +41,8 @@ public:
 	void CancelParamChangeTimer() { mParamChangeTimer = 0; }
 
     // Specialty use!
-	void* GetWindow() { return mPlugWnd; }
-  HWND GetParentWindow() { return mParentWnd; }
+	void* GetWindow() const { return mPlugWnd; }
+	inline HWND GetParentWindow() const { return mParentWnd; }
   HWND GetMainWnd();
   void SetMainWndClassName(char* name) { mMainWndClassName.Set(name); }
   void GetMainWndClassName(char* name) { strcpy(name, mMainWndClassName.Get()); }
