@@ -32,6 +32,13 @@ static void ScalePoint(LPPOINT const lpPoint, const int dpi)
 	lpPoint->y = MulDiv(lpPoint->y, IPLUG_DEFAULT_DPI, dpi);
 }
 
+static void ScaleLParamXY(LPPOINT const lpPoint, const LPARAM lParam, const int dpi)
+{
+	lpPoint->x = GET_X_LPARAM(lParam);
+	lpPoint->y = GET_Y_LPARAM(lParam);
+	ScalePoint(lpPoint, dpi);
+}
+
 inline void SetMouseWheelFocus(HWND hWnd, IGraphicsWin* pGraphics)
 {
 	switch (pGraphics->GetPlug()->GetHost())
@@ -41,14 +48,22 @@ inline void SetMouseWheelFocus(HWND hWnd, IGraphicsWin* pGraphics)
 	}
 }
 
-inline IMouseMod GetMouseMod(WPARAM wParam)
+static IMouseMod GetMouseMod(const WPARAM wParam, const bool bWheel = false)
 {
-	return IMouseMod((wParam & MK_LBUTTON), (wParam & MK_RBUTTON), 
-        (wParam & MK_SHIFT), (wParam & MK_CONTROL), GetKeyState(VK_MENU) < 0);
+	static const int mask = MK_LBUTTON | MK_RBUTTON | MK_SHIFT | MK_CONTROL;
+	static const int alt = mask + 1, wheel = alt << 1;
+
+	unsigned int bitfield = ((GetKeyState(VK_MENU) >> 11) & alt) | (wParam & mask);
+	if (bWheel) bitfield |= wheel;
+
+	IMouseMod mod;
+	mod.Set(bitfield);
+
+	return mod;
 }
 
 // static
-LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WPARAM wParam, const LPARAM lParam)
 {
   if (msg == WM_CREATE) {
     LPCREATESTRUCT lpcs = (LPCREATESTRUCT) lParam;
@@ -59,12 +74,9 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 		return 0;
 	}
 
-	IGraphicsWin* pGraphics = (IGraphicsWin*) GetWindowLongPtr(hWnd, GWLP_USERDATA);
+	IGraphicsWin* const pGraphics = (IGraphicsWin*)GetWindowLongPtrW(hWnd, GWLP_USERDATA);
 	char txt[MAX_EDIT_LEN];
 
-	if (!pGraphics || hWnd != pGraphics->mPlugWnd) {
-		return DefWindowProc(hWnd, msg, wParam, lParam);
-	}
 	if (pGraphics->mParamEditWnd && pGraphics->mParamEditMsg == kEditing) {
 		if (msg == WM_RBUTTONDOWN) {
 			pGraphics->mParamEditMsg = kCancel;
@@ -72,8 +84,9 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 		}
 	}
 
-	switch (msg) {
-
+	if (pGraphics && hWnd == pGraphics->mPlugWnd)
+	switch (msg)
+	{
 		case WM_TIMER: {
 			if (wParam == IPLUG_TIMER_ID) {
 				if (pGraphics->mParamEditWnd && pGraphics->mParamEditMsg != kNone) {
@@ -151,10 +164,13 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 			}
 			return 0;
     }
-	case WM_MOUSEHOVER: {
-		pGraphics->ShowTooltip();
-		return 0;
-	}
+
+		case WM_MOUSEHOVER:
+		{
+			pGraphics->ShowTooltip();
+			return 0;
+		}
+
     case WM_MOUSELEAVE: {
       pGraphics->HideTooltip();
       pGraphics->OnMouseOut();
@@ -172,10 +188,13 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
       }
 			return 0;
     }
-		case WM_MOUSEACTIVATE: {
+
+		case WM_MOUSEACTIVATE:
+		{
 			SetMouseWheelFocus(hWnd, pGraphics);
 			return MA_ACTIVATE;
- 		}
+		}
+
 		case WM_MOUSEWHEEL: {
 			int d = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
 			int x = GET_X_LPARAM(lParam), y = GET_Y_LPARAM(lParam);
@@ -220,19 +239,14 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 			return 0;
 		}
 
-		//case WM_CTLCOLOREDIT: {
-		//	// An edit control just opened.
-		//	HDC dc = (HDC) wParam;
-		//	SetTextColor(dc, ///);
-		//	return 0;
-		//}
-
-		case WM_CLOSE: {
+		case WM_CLOSE:
+		{
 			pGraphics->CloseWindow();
 			return 0;
 		}
 	}
-	return DefWindowProc(hWnd, msg, wParam, lParam);
+
+	return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
 // static 
