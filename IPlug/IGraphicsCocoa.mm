@@ -138,11 +138,12 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 	}
 }
 
-- (void) getMouseXY: (NSEvent*) pEvent x: (int*) pX y: (int*) pY
+- (void) getMouseXY: (NSEvent*)pEvent x: (int*)pX y: (int*)pY
 {
-  NSPoint pt = [self convertPoint:[pEvent locationInWindow] fromView:nil];
-  *pX = (int) pt.x;
-  *pY = mGraphics->Height() - (int) pt.y;
+	const NSPoint pt = [self convertPoint: [pEvent locationInWindow] fromView: nil];
+	const CGFloat scale = (CGFloat)(1 << IGraphicsMac::kScaleOS);
+	*pX = (int)(pt.x * scale);
+	*pY = mGraphics->Height() - (int)(pt.y * scale);
 }
 
 - (void) mouseDown: (NSEvent*) pEvent
