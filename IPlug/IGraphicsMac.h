@@ -36,8 +36,8 @@ public:
   
 	void CloseWindow();
 	bool WindowIsOpen() const;
-  void Resize(int w, int h);
-  
+	// void Resize(int w, int h);
+
   void UpdateTooltips();
 
 	void HostPath(WDL_String* pPath); 

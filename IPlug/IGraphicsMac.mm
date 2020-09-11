@@ -234,24 +234,24 @@ bool IGraphicsMac::WindowIsOpen() const
 	mGraphicsCocoa;
 }
 
-void IGraphicsMac::Resize(int w, int h)
+/* void IGraphicsMac::Resize(const int w, const int h)
 {
-  IGraphics::Resize(w, h);
-  if (mDrawBitmap) {
-    mDrawBitmap->resize(w, h);
-  } 
-  
-#ifndef IPLUG_NO_CARBON_SUPPORT
-  if (mGraphicsCarbon) {
-    mGraphicsCarbon->Resize(w, h);
-  }
-  else
-#endif
-  if (mGraphicsCocoa) {
-    NSSize size = { w, h };
-    [(IGRAPHICS_COCOA*) mGraphicsCocoa setFrameSize: size ];
-  }  
-}
+	IGraphics::Resize(w, h);
+    mDrawBitmap.resize(w, h);
+
+	#ifndef IPLUG_NO_CARBON_SUPPORT
+	if (mGraphicsCarbon)
+	{
+		mGraphicsCarbon->Resize(w, h);
+	}
+	else
+	#endif
+	if (mGraphicsCocoa)
+	{
+		const NSSize size = NSMakeSize((CGFloat)(w >> kScaleOS), (CGFloat)(h >> kScaleOS));
+		[(IGRAPHICS_COCOA*)mGraphicsCocoa setFrameSize: size];
+	}
+} */
 
 void IGraphicsMac::UpdateTooltips()
 {
