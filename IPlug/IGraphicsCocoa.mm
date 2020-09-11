@@ -351,14 +351,14 @@ static const int PARAM_EDIT_H = 21;
 	[self addToolTipRect: ToNSRect(mGraphics, pRECT) owner: self userData: (void*)(long)controlIdx];
 }
 
-- (void) setParamChangeTimer: (int) ticks
+- (void) setParamChangeTimer: (int)ticks
 {
-  mParamChangeTimer = ticks;
+	mParamChangeTimer = ticks;
 }
 
 - (void) cancelParamChangeTimer
 {
-  mParamChangeTimer = 0;
+	mParamChangeTimer = 0;
 }
 
 @end
