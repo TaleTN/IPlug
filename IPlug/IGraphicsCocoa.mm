@@ -184,29 +184,29 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 	}
 }
 
-- (void) rightMouseDown: (NSEvent*) pEvent
+- (void) rightMouseDown: (NSEvent*)pEvent
 {
-  if (mGraphics)
-  {
-    if (mParamEditView)
-    {
-      EndUserInput(self);
-      return;
-    }
-    int x, y;
-    [self getMouseXY:pEvent x:&x y:&y];
-    mGraphics->OnMouseDown(x, y, &GetRightMouseMod(pEvent));
-  }
+	if (mGraphics)
+	{
+		if (mParamEditView)
+		{
+			EndUserInput(self);
+			return;
+		}
+		int x, y;
+		[self getMouseXY: pEvent x: &x y: &y];
+		mGraphics->OnMouseDown(x, y, GetRightMouseMod(pEvent));
+	}
 }
 
-- (void) rightMouseUp: (NSEvent*) pEvent
+- (void) rightMouseUp: (NSEvent*)pEvent
 {
-  if (mGraphics)
-  {
-    int x, y;
-    [self getMouseXY:pEvent x:&x y:&y];
-    mGraphics->OnMouseUp(x, y, &GetRightMouseMod(pEvent));
-  }
+	if (mGraphics)
+	{
+		int x, y;
+		[self getMouseXY: pEvent x: &x y: &y];
+		mGraphics->OnMouseUp(x, y, GetRightMouseMod(pEvent));
+	}
 }
 
 - (void) rightMouseDragged: (NSEvent*) pEvent
