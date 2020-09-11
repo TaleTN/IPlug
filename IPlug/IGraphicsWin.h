@@ -16,7 +16,7 @@ public:
 
 	inline void SetHInstance(HINSTANCE const hInstance) { mHInstance = hInstance; }
 
-  void Resize(int w, int h);
+	// void Resize(int w, int h);
   bool DrawScreen(IRECT* pR);  
   
 	void* OpenWindow(void* pParentWnd);

@@ -337,62 +337,68 @@ LICE_IBitmap* IGraphicsWin::OSLoadBitmap(int ID, const char* name)
 #endif
 }
 
-void GetWindowSize(HWND pWnd, int* pW, int* pH)
+/* static void GetWindowSize(HWND const pWnd, int* const pW, int* const pH)
 {
-  if (pWnd) {
-    RECT r;
-    GetWindowRect(pWnd, &r);
-    *pW = r.right - r.left;
-    *pH = r.bottom - r.top;
-  }
-  else {
-    *pW = *pH = 0;
-  }
+	if (pWnd)
+	{
+		RECT r;
+		GetWindowRect(pWnd, &r);
+		*pW = r.right - r.left;
+		*pH = r.bottom - r.top;
+	}
+	else
+	{
+		*pW = *pH = 0;
+	}
 }
 
-bool IsChildWindow(HWND pWnd)
+static bool IsChildWindow(HWND const pWnd)
 {
-  if (pWnd) {
-    int style = GetWindowLong(pWnd, GWL_STYLE);
-    int exStyle = GetWindowLong(pWnd, GWL_EXSTYLE);
-    return ((style & WS_CHILD) && !(exStyle & WS_EX_MDICHILD));
-  }
-  return false;
+	if (pWnd)
+	{
+		const LONG style = GetWindowLong(pWnd, GWL_STYLE);
+		const LONG exStyle = GetWindowLong(pWnd, GWL_EXSTYLE);
+		return (style & WS_CHILD) && !(exStyle & WS_EX_MDICHILD);
+	}
+	return false;
 }
 
-#define SETPOS_FLAGS SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE
+static const UINT SETPOS_FLAGS = SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE;
 
 void IGraphicsWin::Resize(int w, int h)
 {
-  int dw = w - Width(), dh = h - Height();
-  IGraphics::Resize(w, h);
-  if (mDrawBitmap) {
-    mDrawBitmap->resize(w, h);
-  }
-  if (WindowIsOpen()) {
-    HWND pParent = 0, pGrandparent = 0;
-    int w = 0, h = 0, parentW = 0, parentH = 0, grandparentW = 0, grandparentH = 0;
-    GetWindowSize(mPlugWnd, &w, &h);
-    if (IsChildWindow(mPlugWnd)) {
-      pParent = GetParent(mPlugWnd);
-      GetWindowSize(pParent, &parentW, &parentH);
-      if (IsChildWindow(pParent)) {
-        pGrandparent = GetParent(pParent);
-        GetWindowSize(pGrandparent, &grandparentW, &grandparentH);
-      }
-    }
-    SetWindowPos(mPlugWnd, 0, 0, 0, w + dw, h + dh, SETPOS_FLAGS);
-    if (pParent) {
-      SetWindowPos(pParent, 0, 0, 0, parentW + dw, parentH + dh, SETPOS_FLAGS);
-    }
-    if (pGrandparent) {
-      SetWindowPos(pGrandparent, 0, 0, 0, grandparentW + dw, grandparentH + dh, SETPOS_FLAGS);
-    }
-          
-    RECT r = { 0, 0, w, h };
-    InvalidateRect(mPlugWnd, &r, FALSE);
-  }
-}
+	const int dw = w - Width(), dh = h - Height();
+	IGraphics::Resize(w, h);
+	mDrawBitmap.resize(w, h);
+	if (WindowIsOpen())
+	{
+		HWND pParent = NULL, pGrandparent = NULL;
+		int parentW = 0, parentH = 0, grandparentW = 0, grandparentH = 0;
+		GetWindowSize(mPlugWnd, &w, &h);
+		if (IsChildWindow(mPlugWnd))
+		{
+			pParent = GetParent(mPlugWnd);
+			GetWindowSize(pParent, &parentW, &parentH);
+			if (IsChildWindow(pParent))
+			{
+				pGrandparent = GetParent(pParent);
+				GetWindowSize(pGrandparent, &grandparentW, &grandparentH);
+			}
+		}
+		SetWindowPos(mPlugWnd, 0, 0, 0, w + dw, h + dh, SETPOS_FLAGS);
+		if (pParent)
+		{
+			SetWindowPos(pParent, 0, 0, 0, parentW + dw, parentH + dh, SETPOS_FLAGS);
+		}
+		if (pGrandparent)
+		{
+			SetWindowPos(pGrandparent, 0, 0, 0, grandparentW + dw, grandparentH + dh, SETPOS_FLAGS);
+		}
+
+		const RECT r = { 0, 0, w, h };
+		InvalidateRect(mPlugWnd, &r, FALSE);
+	}
+} */
 
 bool IGraphicsWin::DrawScreen(IRECT* pR)
 {
