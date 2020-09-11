@@ -88,11 +88,12 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
 - (void) viewDidMoveToWindow
 {
-  NSWindow* pWindow = [self window];
-  if (pWindow) {
-    [pWindow makeFirstResponder: self];
-    [pWindow setAcceptsMouseMovedEvents: YES];
-  }
+	NSWindow* const pWindow = [self window];
+	if (pWindow)
+	{
+		[pWindow makeFirstResponder: self];
+		[pWindow setAcceptsMouseMovedEvents: YES];
+	}
 }
 
 - (void) drawRect: (NSRect) rect 
