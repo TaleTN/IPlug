@@ -150,10 +150,11 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef const pH
 					}
 					return noErr;
 				}
-        case kEventMouseUp: {
-          pGraphicsMac->OnMouseUp(x, y, &mmod);
-          return noErr;
-        }
+				case kEventMouseUp:
+				{
+					pGraphicsMac->OnMouseUp(x, y, mmod);
+					return noErr;
+				}
         case kEventMouseMoved: {
           pGraphicsMac->OnMouseOver(x, y, &mmod);
 
