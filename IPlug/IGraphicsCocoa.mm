@@ -50,12 +50,10 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
 - (id) init
 {
-  TRACE;
-  
-  mGraphics = 0;
-  mTimer = 0;
-  mParamChangeTimer = 0;
-  return self;
+	mGraphics = NULL;
+	mTimer = nil;
+	mParamChangeTimer = 0;
+	return self;
 }
 
 - (id) initWithIGraphics: (IGraphicsMac*) pGraphics
