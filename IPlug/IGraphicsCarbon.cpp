@@ -508,33 +508,36 @@ void IGraphicsCarbon::EndUserInput(const bool commit)
 
 void IGraphicsCarbon::ShowTooltip()
 {
-  HMHelpContentRec helpTag;
-  helpTag.version = kMacHelpVersion;
+	HMHelpContentRec helpTag;
+	helpTag.version = kMacHelpVersion;
 
-  helpTag.tagSide = kHMInsideTopLeftCorner;
-  HIRect r = CGRectMake(mGraphicsMac->GetMouseX(), mGraphicsMac->GetMouseY() + 23, 1, 1);
-  HIRectConvert(&r, kHICoordSpaceView, mView, kHICoordSpaceScreenPixel, NULL);
-  helpTag.absHotRect.top = (int)r.origin.y;
-  helpTag.absHotRect.left = (int)r.origin.x;
-  helpTag.absHotRect.bottom = helpTag.absHotRect.top + (int)r.size.height;
-  helpTag.absHotRect.right = helpTag.absHotRect.left + (int)r.size.width;
+	helpTag.tagSide = kHMInsideTopLeftCorner;
+	const int x = mGraphicsMac->GetMouseX() >> kScaleFixed;
+	const int y = mGraphicsMac->GetMouseY() >> kScaleFixed;
+	HIRect r = CGRectMake((CGFloat)x, (CGFloat)(y + 23), 1.0f, 1.0f);
+	HIRectConvert(&r, kHICoordSpaceView, mView, kHICoordSpaceScreenPixel, NULL);
+	helpTag.absHotRect.top = (int)r.origin.y;
+	helpTag.absHotRect.left = (int)r.origin.x;
+	helpTag.absHotRect.bottom = helpTag.absHotRect.top + (int)r.size.height;
+	helpTag.absHotRect.right = helpTag.absHotRect.left + (int)r.size.width;
 
-  helpTag.content[kHMMinimumContentIndex].contentType = kHMCFStringLocalizedContent;
-  CFStringRef str = CFStringCreateWithCString(NULL, mTooltip, kCFStringEncodingUTF8);
-  helpTag.content[kHMMinimumContentIndex].u.tagCFString = str;
-  helpTag.content[kHMMaximumContentIndex].contentType = kHMNoContent;
-  HMDisplayTag(&helpTag);
-  CFRelease(str);
-  mShowingTooltip = true;
+	helpTag.content[kHMMinimumContentIndex].contentType = kHMCFStringLocalizedContent;
+	CFStringRef const str = CFStringCreateWithCString(NULL, mTooltip, kCFStringEncodingUTF8);
+	helpTag.content[kHMMinimumContentIndex].u.tagCFString = str;
+	helpTag.content[kHMMaximumContentIndex].contentType = kHMNoContent;
+	HMDisplayTag(&helpTag);
+	CFRelease(str);
+	mShowingTooltip = true;
 }
 
 void IGraphicsCarbon::HideTooltip()
 {
-  mTooltipTimer = 0;
-  if (mShowingTooltip) {
-    HMHideTag();
-    mShowingTooltip = false;
-  }
+	mTooltipTimer = 0;
+	if (mShowingTooltip)
+	{
+		HMHideTag();
+		mShowingTooltip = false;
+	}
 }
 
 #endif // IPLUG_NO_CARBON_SUPPORT

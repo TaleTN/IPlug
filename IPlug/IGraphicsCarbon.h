@@ -31,9 +31,9 @@ protected:
 	void ShowParamEditView();
 	void EndUserInput(bool commit);
 
-  void ShowTooltip();
-  void HideTooltip();
-  
+	void ShowTooltip();
+	void HideTooltip();
+
   void SetParamChangeTimer(int ticks) { mParamChangeTimer = ticks; }
   void CancelParamChangeTimer() { mParamChangeTimer = 0; }
 
