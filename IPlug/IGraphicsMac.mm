@@ -10,19 +10,13 @@
 #include <string.h>
 #import <objc/runtime.h>
 
+// TN: Would like to use SWELL_AutoReleaseHelper instead, but can't because
+// that would require much more than just SWELL GDI...
 struct CocoaAutoReleasePool
 {
-  NSAutoreleasePool* mPool;
-    
-  CocoaAutoReleasePool() 
-  {
-    mPool = [[NSAutoreleasePool alloc] init];
-  }
-    
-  ~CocoaAutoReleasePool()
-  {
-    [mPool release];
-  }
+	NSAutoreleasePool* const mPool;
+	CocoaAutoReleasePool(): mPool([[NSAutoreleasePool alloc] init]) {}
+	~CocoaAutoReleasePool() { [mPool release]; }
 };
 
 inline NSColor* ToNSColor(IColor* pColor)
