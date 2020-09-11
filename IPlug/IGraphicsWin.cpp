@@ -367,66 +367,72 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 	return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
-// static 
-LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+// static
+LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND const hWnd, const UINT msg, const WPARAM wParam, const LPARAM lParam)
 {
-	IGraphicsWin* pGraphics = (IGraphicsWin*) GetWindowLongPtr(GetParent(hWnd), GWLP_USERDATA);
+	IGraphicsWin* const pGraphics = (IGraphicsWin*)GetWindowLongPtrW(GetParent(hWnd), GWLP_USERDATA);
 
-	if (pGraphics && pGraphics->mParamEditWnd && pGraphics->mParamEditWnd == hWnd) 
-  {
+	if (pGraphics && pGraphics->mParamEditWnd == hWnd)
+	{
 		pGraphics->HideTooltip();
 
-		switch (msg) {
-			case WM_KEYDOWN: {
-				if (wParam == VK_RETURN) {
+		switch (msg)
+		{
+			case WM_KEYDOWN:
+			{
+				if (wParam == VK_RETURN)
+				{
 					// Deselect, because in some hosts (FL Studio, VSTHost)
 					// selected text gets deleted when processing VK_RETURN.
-					char className[5];
-					if (GetClassName(pGraphics->mParamEditWnd, className, sizeof(className)) == 4 && !stricmp(className, "EDIT")) {
-						SendMessage(pGraphics->mParamEditWnd, EM_SETSEL, -1, 0);
-					}
+					SendMessageW(hWnd, EM_SETSEL, -1, 0);
 					pGraphics->mParamEditMsg = kCommit;
 					return 0;
 				}
 				// Fall through.
 			}
-			case WM_SETFOCUS: {
+			case WM_SETFOCUS:
+			{
 				pGraphics->mParamEditMsg = kEditing;
 				break;
 			}
-			case WM_KILLFOCUS: {
+
+			case WM_KILLFOCUS:
+			{
 				pGraphics->mParamEditMsg = kNone;
 				break;
 			}
-			// handle WM_GETDLGCODE so that we can say that we want the return key message
-			//  (normally single line edit boxes don't get sent return key messages)
-			case WM_GETDLGCODE: {
+
+			// Handle WM_GETDLGCODE so that we can say that we want the return key message
+			// (normally single line edit boxes don't get sent return key messages).
+			case WM_GETDLGCODE:
+			{
 				if (pGraphics->mEdParam) break;
 				LPARAM lres;
-				// find out if the original control wants it
-				lres = CallWindowProc(pGraphics->mDefEditProc, hWnd, WM_GETDLGCODE, wParam, lParam);
-				// add in that we want it if it is a return keydown
-				if (lParam  &&	 ((MSG*)lParam)->message == WM_KEYDOWN  &&  wParam == VK_RETURN) {
+				// Find out if the original control wants it.
+				lres = CallWindowProcW(pGraphics->mDefEditProc, hWnd, WM_GETDLGCODE, wParam, lParam);
+				// Add in that we want it if it is a return keydown.
+				if (lParam && ((MSG*)lParam)->message == WM_KEYDOWN && wParam == VK_RETURN)
+				{
 					lres |= DLGC_WANTMESSAGE;
 				}
 				return lres;
 			}
-			case WM_COMMAND: {
-				switch HIWORD(wParam) {
-					case CBN_SELCHANGE: {
-						if (pGraphics->mParamEditWnd) {
-							pGraphics->mParamEditMsg = kCommit;
-							return 0;
-						}
-					}
-				
+
+			case WM_COMMAND:
+			{
+				if (HIWORD(wParam) == CBN_SELCHANGE)
+				{
+					pGraphics->mParamEditMsg = kCommit;
+					return 0;
 				}
-				break;	// Else let the default proc handle it.
+				break; // Else let the default proc handle it.
 			}
 		}
-		return CallWindowProc(pGraphics->mDefEditProc, hWnd, msg, wParam, lParam);
+
+		return CallWindowProcW(pGraphics->mDefEditProc, hWnd, msg, wParam, lParam);
 	}
-	return DefWindowProc(hWnd, msg, wParam, lParam);
+
+	return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
 IGraphicsWin::IGraphicsWin(
