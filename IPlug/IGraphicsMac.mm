@@ -19,6 +19,11 @@ struct CocoaAutoReleasePool
 	~CocoaAutoReleasePool() { [mPool release]; }
 };
 
+static NSString* ToNSString(const char* const cStr)
+{
+	return [NSString stringWithCString: cStr encoding: NSUTF8StringEncoding];
+}
+
 IGraphicsMac::IGraphicsMac(
 	IPlugBase* const pPlug,
 	const int w,
