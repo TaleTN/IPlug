@@ -255,30 +255,33 @@ bool IGraphicsMac::WindowIsOpen() const
 
 void IGraphicsMac::UpdateTooltips()
 {
-#ifndef IPLUG_NO_CARBON_SUPPORT
-  if (mGraphicsCarbon) {
-    if (!TooltipsEnabled()) mGraphicsCarbon->HideTooltip();
-    return;
-  }
-#endif
+	#ifndef IPLUG_NO_CARBON_SUPPORT
+	if (mGraphicsCarbon)
+	{
+		if (!TooltipsEnabled()) mGraphicsCarbon->HideTooltip();
+		return;
+	}
+	#endif
 
-  if (!mGraphicsCocoa) return;
-  CocoaAutoReleasePool pool;
+	if (!mGraphicsCocoa) return;
+	const CocoaAutoReleasePool pool;
 
-  [(IGRAPHICS_COCOA*) mGraphicsCocoa removeAllToolTips];
-  if (!TooltipsEnabled()) return;
+	[(IGRAPHICS_COCOA*)mGraphicsCocoa removeAllToolTips];
+	if (!TooltipsEnabled()) return;
 
-  IControl** ppControl = mControls.GetList();
-  for (int i = 0, n = mControls.GetSize(); i < n; ++i, ++ppControl) {
-    IControl* pControl = *ppControl;
-    const char* tooltip = pControl->GetTooltip();
-    if (tooltip && !pControl->IsHidden()) {
-      IRECT* pR = pControl->GetTargetRECT();
-      if (!pControl->GetTargetRECT()->Empty()) {
-        [(IGRAPHICS_COCOA*) mGraphicsCocoa registerToolTip: i rect: pR];
-      }
-    }
-  }
+	IControl* const* const ppControl = mControls.GetList();
+	for (int i = mControls.GetSize() - 1; i >= 0; --i)
+	{
+		IControl* const pControl = ppControl[i];
+		if (!pControl->IsHidden())
+		{
+			const IRECT* const pR = pControl->GetTargetRECT();
+			if (!pR->Empty())
+			{
+				[(IGRAPHICS_COCOA*)mGraphicsCocoa registerToolTip: i rect: pR];
+			}
+		}
+	}
 }
 
 void IGraphicsMac::HostPath(WDL_String* pPath)
