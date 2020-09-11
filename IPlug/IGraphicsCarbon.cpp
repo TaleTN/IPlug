@@ -176,10 +176,11 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef const pH
 					}
 					return noErr;
 				}
-        case kEventMouseDragged: {
-          pGraphicsMac->OnMouseDrag(x, y, &mmod);
-          return noErr; 
-        }
+				case kEventMouseDragged:
+				{
+					pGraphicsMac->OnMouseDrag(x, y, mmod);
+					return noErr;
+				}
         case kEventMouseWheelMoved: {
           EventMouseWheelAxis axis;
           GetEventParameter(pEvent, kEventParamMouseWheelAxis, typeMouseWheelAxis, 0, sizeof(EventMouseWheelAxis), 0, &axis);
