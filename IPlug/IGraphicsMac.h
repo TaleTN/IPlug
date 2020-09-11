@@ -3,11 +3,8 @@
 #include "IControl.h"
 #include "IGraphics.h"
 
+#define IPLUG_RESOURCE(xxx) (xxx##_ID), (xxx##_FN)
 #define IPLUG_PNG_RESOURCE(id, name) (id), (name)
-
-#ifndef IPLUG_NO_JPEG_SUPPORT
-#define IPLUG_JPEG_RESOURCE(id, name) (id), (name)
-#endif
 
 #ifndef IPLUG_NO_CARBON_SUPPORT
 	class IGraphicsCarbon;
