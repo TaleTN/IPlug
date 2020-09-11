@@ -708,34 +708,33 @@ void IGraphicsWin::PromptUserInput(IEditableTextControl* pControl)
 	mEdParam = 0;
 }
 
-#define MAX_PATH_LEN 256
-
-void GetModulePath(HMODULE hModule, WDL_String* pPath) 
+static void GetModulePath(HMODULE const hModule, WDL_String* const pPath)
 {
-  pPath->Set("");
-	char pathCStr[MAX_PATH_LEN];
-	pathCStr[0] = '\0';
-	if (GetModuleFileName(hModule, pathCStr, MAX_PATH_LEN)) {
-    int s = -1;
-    for (int i = 0; i < strlen(pathCStr); ++i) {
-      if (pathCStr[i] == '\\') {
-        s = i;
-      }
-    }
-    if (s >= 0 && s + 1 < strlen(pathCStr)) {
-      pPath->Set(pathCStr, s + 1);
-    }
-  }
+	if (!pPath->SetLen(MAX_PATH)) // Allocates MAX_PATH+1
+	{
+		pPath->Set("");
+		return;
+	}
+
+	char* const pathCStr = pPath->Get();
+	int s = GetModuleFileName(hModule, pathCStr, MAX_PATH);
+
+	// Windows XP: String is truncated to nSize chars and is not
+	// null-terminated.
+	// pathCStr[MAX_PATH] = 0;
+
+	while (--s >= 0 && pathCStr[s] != '\\');
+	pathCStr[s + 1] = 0;
 }
 
-void IGraphicsWin::HostPath(WDL_String* pPath)
+void IGraphicsWin::HostPath(WDL_String* const pPath)
 {
-  GetModulePath(0, pPath);
+	GetModulePath(NULL, pPath);
 }
 
-void IGraphicsWin::PluginPath(WDL_String* pPath)
+void IGraphicsWin::PluginPath(WDL_String* const pPath)
 {
-  GetModulePath(mHInstance, pPath);
+	GetModulePath(mHInstance, pPath);
 }
 
 void IGraphicsWin::PromptForFile(WDL_String* pFilename, EFileAction action, char* dir, char* extensions)
