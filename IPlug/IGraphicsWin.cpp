@@ -340,6 +340,26 @@ LICE_IBitmap* IGraphicsWin::OSLoadBitmap(const int ID, const char*)
 	return LICE_LoadPNGFromResource(mHInstance, MAKEINTRESOURCE(ID));
 }
 
+bool IGraphicsWin::OSLoadFont(const int ID, const char*)
+{
+	HRSRC const hResource = FindResource(mHInstance, MAKEINTRESOURCE(ID), "TTF");
+	if (!hResource) return false;
+
+	const DWORD dwSize = SizeofResource(mHInstance, hResource);
+	if (!dwSize) return false;
+
+	HGLOBAL const res = LoadResource(mHInstance, hResource);
+	if (!res) return false;
+
+	void* const pResourceData = LockResource(res);
+	if (!pResourceData) return false;
+
+	DWORD dwNumFonts;
+	HANDLE const hFont = AddFontMemResourceEx(pResourceData, dwSize, NULL, &dwNumFonts);
+
+	return !!hFont;
+}
+
 /* static void GetWindowSize(HWND const pWnd, int* const pW, int* const pH)
 {
 	if (pWnd)
