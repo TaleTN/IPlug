@@ -1,10 +1,7 @@
-#ifndef _IGRAPHICSMAC_
-#define _IGRAPHICSMAC_
+#pragma once
 
 #include "IControl.h"
 #include "IGraphics.h"
-#include "../swell/swell.h"
-#include <Carbon/Carbon.h>
 
 #define IPLUG_PNG_RESOURCE(id, name) (id), (name)
 
@@ -84,5 +81,3 @@ inline int AdjustFontSize(int size)
 {
 	return int(0.75 * (double)size);
 }
-
-#endif

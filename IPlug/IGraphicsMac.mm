@@ -1,13 +1,14 @@
-#include <Foundation/NSArchiver.h>
 #include "IGraphicsMac.h"
-#include "IControl.h"
-#include "Log.h"
 #import "IGraphicsCocoa.h"
+
 #ifndef IPLUG_NO_CARBON_SUPPORT
 	#include "IGraphicsCarbon.h"
 #endif
-#include "../swell/swell-internal.h"
-#include <stdlib.h>
+
+#include "WDL/swell/swell.h"
+
+#include <string.h>
+#import <objc/runtime.h>
 
 struct CocoaAutoReleasePool
 {
