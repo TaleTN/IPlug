@@ -229,15 +229,22 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 	}
 }
 
-- (void) scrollWheel: (NSEvent*) pEvent
+- (void) scrollWheel: (NSEvent*)pEvent
 {
-  if (mGraphics)
-  {
-    int x, y;
-    [self getMouseXY:pEvent x:&x y:&y];
-    int d = [pEvent deltaY];
-    mGraphics->OnMouseWheel(x, y, &GetMouseMod(pEvent), d);
-  }
+	int canHandle;
+	if (mGraphics && (canHandle = mGraphics->CanHandleMouseWheel()))
+	{
+		const IMouseMod mod = GetMouseMod(pEvent, canHandle >= 0);
+		const IMouseMod mask(false, false, true, true, true, true);
+
+		if (mod.Get() & mask.Get())
+		{
+			int x, y;
+			[self getMouseXY: pEvent x: &x y: &y];
+			const CGFloat d = [pEvent deltaY];
+			mGraphics->OnMouseWheel(x, y, mod, (float)d);
+		}
+	}
 }
 
 - (void) killTimer
