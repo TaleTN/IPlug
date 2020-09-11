@@ -34,15 +34,21 @@ inline NSColor* ToNSColor(IColor* pColor)
   return [NSColor colorWithCalibratedRed:r green:g blue:b alpha:a];
 }
 
-IGraphicsMac::IGraphicsMac(IPlugBase* pPlug, int w, int h, int refreshFPS)
-:	IGraphics(pPlug, w, h, refreshFPS),
-#ifndef IPLUG_NO_CARBON_SUPPORT
-	mGraphicsCarbon(0),
-#endif
-	mGraphicsCocoa(0)
+IGraphicsMac::IGraphicsMac(
+	IPlugBase* const pPlug,
+	const int w,
+	const int h,
+	const int refreshFPS
+):
+	IGraphics(pPlug, w, h, refreshFPS),
+
+	#ifndef IPLUG_NO_CARBON_SUPPORT
+	mGraphicsCarbon(NULL),
+	#endif
+
+	mGraphicsCocoa(NULL)
 {
-  NSApplicationLoad();
-  
+	NSApplicationLoad();
 }
 
 IGraphicsMac::~IGraphicsMac()

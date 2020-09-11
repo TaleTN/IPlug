@@ -10,12 +10,11 @@
 	class IGraphicsCarbon;
 #endif
 
-class IGraphicsMac : public IGraphics
+class IGraphicsMac: public IGraphics
 {
 public:
-
 	IGraphicsMac(IPlugBase* pPlug, int w, int h, int refreshFPS = 0);
-	virtual ~IGraphicsMac();
+	~IGraphicsMac();
 
   void SetBundleID(const char* bundleID) { mBundleID.Set(bundleID); }
   
@@ -61,17 +60,13 @@ protected:
   virtual LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
   
 private:
-  
-#ifndef IPLUG_NO_CARBON_SUPPORT
-  IGraphicsCarbon* mGraphicsCarbon; 
-#endif
-  void* mGraphicsCocoa;   // Can't forward-declare IGraphicsCocoa because it's an obj-C object.
-  
-  WDL_String mBundleID;
+	#ifndef IPLUG_NO_CARBON_SUPPORT
+	IGraphicsCarbon* mGraphicsCarbon;
+	#endif
 
-#ifndef IPLUG_NO_CARBON_SUPPORT
-  friend class IGraphicsCarbon;
-#endif
+	void* mGraphicsCocoa; // Can't forward-declare IGraphicsCocoa because it's an obj-C object.
+
+  WDL_String mBundleID;
 };
 
 inline int AdjustFontSize(int size)
