@@ -582,31 +582,34 @@ void IGraphicsWin::SetWindowTitle(char* str)
 
 void IGraphicsWin::CloseWindow()
 {
-	if (mPlugWnd) {
-		if (mTooltipWnd) {
-			DestroyWindow(mTooltipWnd);
-			mTooltipWnd = 0;
-			mShowingTooltip = false;
-			mTooltipIdx = -1;
-		}
-
-		if (mParamChangeTimer) {
+	if (mPlugWnd)
+	{
+		if (mParamChangeTimer)
+		{
 			GetPlug()->EndDelayedInformHostOfParamChange();
 		}
 
 		DestroyWindow(mPlugWnd);
-		mPlugWnd = 0;
+		mPlugWnd = NULL;
+
+		if (mTooltipWnd)
+		{
+			mTooltipWnd = NULL;
+			mTooltipIdx = -1;
+			mShowingTooltip = false;
+		}
 
 		if (mParamEditWnd)
 		{
-			mParamEditWnd = 0;
-			mEdParam = 0;
-			mEdControl = 0;
-			mDefEditProc = 0;
+			mParamEditWnd = NULL;
+			mEdParam = NULL;
+			mEdControl = NULL;
+			mDefEditProc = NULL;
 		}
 
-		if (--nWndClassReg == 0) {
-			UnregisterClass(wndClassName, mHInstance);
+		if (--nWndClassReg == 0)
+		{
+			UnregisterClassW(wndClassName, mHInstance);
 		}
 	}
 }
