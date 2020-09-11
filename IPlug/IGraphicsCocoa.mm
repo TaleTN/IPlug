@@ -73,7 +73,7 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 
 - (BOOL) isOpaque
 {
-  return mGraphics ? YES : NO;
+	return mGraphics ? YES : NO;
 }
 
 - (BOOL) acceptsFirstResponder
