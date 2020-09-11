@@ -209,14 +209,14 @@ inline void EndUserInput(IGRAPHICS_COCOA* pGraphicsCocoa)
 	}
 }
 
-- (void) rightMouseDragged: (NSEvent*) pEvent
+- (void) rightMouseDragged: (NSEvent*)pEvent
 {
-  if (mGraphics)
-  {
-    int x, y;
-    [self getMouseXY:pEvent x:&x y:&y];
-    mGraphics->OnMouseDrag(x, y, &GetRightMouseMod(pEvent));
-  }
+	if (mGraphics)
+	{
+		int x, y;
+		[self getMouseXY: pEvent x: &x y: &y];
+		mGraphics->OnMouseDrag(x, y, GetRightMouseMod(pEvent));
+	}
 }
 
 - (void) mouseMoved: (NSEvent*) pEvent
