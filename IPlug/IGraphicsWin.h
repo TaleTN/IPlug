@@ -37,8 +37,8 @@ public:
 	// Return 1 if mouse wheel is processed.
 	int ProcessMouseWheel(float delta);
 
-  void SetParamChangeTimer(int ticks) { mParamChangeTimer = ticks; }
-  void CancelParamChangeTimer() { mParamChangeTimer = 0; }
+	void SetParamChangeTimer(const int ticks) { mParamChangeTimer = ticks; }
+	void CancelParamChangeTimer() { mParamChangeTimer = 0; }
 
     // Specialty use!
 	void* GetWindow() { return mPlugWnd; }
