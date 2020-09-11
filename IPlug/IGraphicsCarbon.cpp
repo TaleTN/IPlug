@@ -2,15 +2,16 @@
 
 #ifndef IPLUG_NO_CARBON_SUPPORT
 
-IRECT GetRegionRect(EventRef pEvent, int gfxW, int gfxH)
+static IRECT GetRegionRect(EventRef const pEvent, const int gfxW, const int gfxH)
 {
-  RgnHandle pRgn = 0;
-  if (GetEventParameter(pEvent, kEventParamRgnHandle, typeQDRgnHandle, 0, sizeof(RgnHandle), 0, &pRgn) == noErr && pRgn) {
-    Rect rct;
-    GetRegionBounds(pRgn, &rct);
-    return IRECT(rct.left, rct.top, rct.right, rct.bottom); 
-  }
-  return IRECT(0, 0, gfxW, gfxH);
+	RgnHandle pRgn = NULL;
+	if (GetEventParameter(pEvent, kEventParamRgnHandle, typeQDRgnHandle, NULL, sizeof(RgnHandle), NULL, &pRgn) == noErr && pRgn)
+	{
+		Rect rct;
+		GetRegionBounds(pRgn, &rct);
+		return IRECT(rct.left, rct.top, rct.right, rct.bottom);
+	}
+	return IRECT(0, 0, gfxW, gfxH);
 }
 
 IRECT GetControlRect(EventRef pEvent, int gfxW, int gfxH)
@@ -39,48 +40,45 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef const pH
 		{
 			switch (eventKind)
 			{
-        case kEventControlDraw: {
-          
-          int gfxW = pGraphicsMac->Width(), gfxH = pGraphicsMac->Height();
-          IRECT r = GetRegionRect(pEvent, gfxW, gfxH);  
-          
-          CGrafPtr port = 0;
-          if (_this->mIsComposited) {
-            GetEventParameter(pEvent, kEventParamCGContextRef, typeCGContextRef, 0, sizeof(CGContextRef), 0, &(_this->mCGC));         
-            CGContextTranslateCTM(_this->mCGC, 0, gfxH);
-            CGContextScaleCTM(_this->mCGC, 1.0, -1.0);     
-            //pGraphicsMac->Draw(&r);
-          }
-          else {
-            #pragma REMINDER("not swapping gfx ports in non-composited mode")
-            
-            int ctlH = r.H();
-            _this->mContentYOffset = ctlH - gfxH;
-            
-            //Rect rct;          
-            //GetWindowBounds(_this->mWindow, kWindowContentRgn, &rct);
-            //int wndH = rct.bottom - rct.top;
-            //if (wndH > gfxH) {
-            //  int yOffs = wndH - gfxH;
-            //  _this->mContentYOffset = yOffs;
-            // }
-            
-            GetEventParameter(pEvent, kEventParamGrafPort, typeGrafPtr, 0, sizeof(CGrafPtr), 0, &port);
-            QDBeginCGContext(port, &(_this->mCGC));        
-            // Old-style controls drawing, ask the plugin what's dirty rather than relying on the OS.
-            r.R = r.T = r.R = r.B = 0;
-            _this->mGraphicsMac->IsDirty(&r);         
-          }       
-          
-          pGraphicsMac->Draw(&r);
-            
-          if (port) {
-            CGContextFlush(_this->mCGC);
-            QDEndCGContext(port, &(_this->mCGC));
-          }
-                     
-          return noErr;
-        }  
+				case kEventControlDraw:
+				{
+					const int gfxW = pGraphicsMac->Width() >> kScaleFixed;
+					const int gfxH = pGraphicsMac->Height() >> kScaleFixed;
+					IRECT r = GetRegionRect(pEvent, gfxW, gfxH);
+
+					CGrafPtr port = NULL;
+					if (_this->mIsComposited)
+					{
+						r.Upscale(kScaleFixed);
+						GetEventParameter(pEvent, kEventParamCGContextRef, typeCGContextRef, NULL, sizeof(CGContextRef), NULL, &_this->mCGC);
+						CGContextTranslateCTM(_this->mCGC, 0.0f, (CGFloat)gfxH);
+						CGContextScaleCTM(_this->mCGC, 1.0f, -1.0f);
+						// pGraphicsMac->Draw(&r);
+					}
+					else
+					{
+						// Reminder: Not swapping gfx ports in non-composited mode.
+
+						const int ctlH = r.H();
+						_this->mContentYOffset = ctlH - gfxH;
+
+						GetEventParameter(pEvent, kEventParamGrafPort, typeGrafPtr, NULL, sizeof(CGrafPtr), NULL, &port);
+						QDBeginCGContext(port, &_this->mCGC);
+						// Old-style controls drawing, ask the plugin what's dirty rather than relying on the OS.
+						r.Clear();
+						_this->mGraphicsMac->IsDirty(&r);
+					}
+
+					pGraphicsMac->Draw(&r);
+
+					if (port)
+					{
+						CGContextFlush(_this->mCGC);
+						QDEndCGContext(port, &_this->mCGC);
+					}
+
+					return noErr;
+				}
         case kEventControlBoundsChanged: {        
           int gfxW = pGraphicsMac->Width(), gfxH = pGraphicsMac->Height();
           IRECT r = GetControlRect(pEvent, gfxW, gfxH);
