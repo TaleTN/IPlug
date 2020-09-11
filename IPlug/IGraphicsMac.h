@@ -60,6 +60,7 @@ public:
 
 protected:
 	LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
+	bool OSLoadFont(int ID, const char* name);
 
 private:
 	#ifndef IPLUG_NO_CARBON_SUPPORT

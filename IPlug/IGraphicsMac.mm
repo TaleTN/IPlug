@@ -81,6 +81,13 @@ LICE_IBitmap* IGraphicsMac::OSLoadBitmap(int /* ID */, const char* const name)
 	return resourceFileName ? LICE_LoadPNG(resourceFileName) : NULL;
 }
 
+bool IGraphicsMac::OSLoadFont(int /* ID */, const char* const name)
+{
+	const CocoaAutoReleasePool pool;
+	const char* const resourceFileName = FindResourceOSX(GetBundleID(), name, "ttf");
+	return resourceFileName ? !!AddFontResourceEx(resourceFileName, FR_PRIVATE, NULL) : NULL;
+}
+
 void IGraphicsMac::DrawScreen(const IRECT* /* pR */)
 {
 	CGContextRef pCGC = NULL;
