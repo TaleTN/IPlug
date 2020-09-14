@@ -92,8 +92,8 @@ public:
 	virtual void OnGUIIdle() {}
 	#endif
 
-  IPlugBase* GetPlug() { return mPlug; }
-  IGraphics* GetGUI() { return mPlug->GetGUI(); }
+	inline IPlugBase* GetPlug() const { return mPlug; }
+	inline IGraphics* GetGUI() const { return mPlug->GetGUI(); }
 
 protected:
 	IPlugBase* mPlug;
