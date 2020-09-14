@@ -90,7 +90,7 @@ public:
 protected:
 	IPlugBase* mPlug;
 	int mParamIdx;
-	bool mDirty, mHide, mGrayed, mRedraw, mDisablePrompt, mClamped, mDblAsSingleClick;
+	unsigned int mDirty:1, mRedraw:1, mHide:1, mGrayed:1, mDisablePrompt:1, mDblAsSingleClick:1, mReverse:1, mDirection:1, _unused:24;
 	IRECT mRECT;
 	const char* mTooltip;
 };
