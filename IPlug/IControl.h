@@ -78,8 +78,8 @@ public:
 	inline void DisablePrompt(const bool disable) { mDisablePrompt = disable; }
 	inline bool IsPromptDisabled() const { return mDisablePrompt; }
 
-	inline void SetTooltip(const char* tooltip) { mTooltip = tooltip; }
-	inline const char* GetTooltip() const { return mTooltip; }
+	virtual void SetTooltip(const char* tooltip) {}
+	virtual const char* GetTooltip() { return NULL; }
 
   // Sometimes a control changes its state as part of its Draw method.
   // Redraw() prevents the control from being cleaned immediately after drawing.
@@ -98,7 +98,6 @@ protected:
 	int mParamIdx;
 	unsigned int mDirty:1, mRedraw:1, mHide:1, mGrayed:1, mDisablePrompt:1, mDblAsSingleClick:1, mReverse:1, mDirection:1, _unused:24;
 	IRECT mRECT;
-	const char* mTooltip;
 };
 
 enum EDirection { kVertical, kHorizontal };
