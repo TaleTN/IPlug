@@ -63,6 +63,9 @@ public:
 	virtual void GrayOut(const bool gray) { mGrayed = gray; }
 	inline bool IsGrayed() const { return mGrayed; }
 
+	inline void Reverse(const bool reverse) { mReverse = reverse; }
+	inline bool IsReversed() const { return mReverse; }
+
 	// Override if you want the control to be hit only if a visible part of it is hit, or whatever.
 	virtual bool IsHit(int x, int y);
 
