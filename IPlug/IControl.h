@@ -73,7 +73,10 @@ public:
 	virtual void SetClean() { mDirty = mRedraw; mRedraw = 0; }
 	inline bool IsDirty() const { return mDirty; }
 	virtual void Clamp(double lo = 0.0, double hi = 1.0) {}
-  void DisablePrompt(bool disable) { mDisablePrompt = disable; }  // Disables the right-click manual value entry.
+
+	// Disables the right-click manual value entry.
+	inline void DisablePrompt(const bool disable) { mDisablePrompt = disable; }
+	inline bool IsPromptDisabled() const { return mDisablePrompt; }
 
 	inline void SetTooltip(const char* tooltip) { mTooltip = tooltip; }
 	inline const char* GetTooltip() const { return mTooltip; }
