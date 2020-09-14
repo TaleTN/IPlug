@@ -3,21 +3,6 @@
 
 const float IControl::kGrayedAlpha = 0.25f;
 
-void IControl::SetDirty(bool pushParamToPlug)
-{
-	mValue = BOUNDED(mValue, mClampLo, mClampHi);
-  mDirty = true;
-	if (pushParamToPlug && mPlug && mParamIdx >= 0) {
-		mPlug->SetParameterFromGUI(mParamIdx, mValue);
-	}
-}
-
-void IControl::SetClean()
-{
-  mDirty = mRedraw;
-  mRedraw = false;
-}
-	
 void IControl::PromptUserInput()
 {
 	if (mParamIdx >= 0)

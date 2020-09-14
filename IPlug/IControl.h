@@ -69,8 +69,8 @@ public:
 	// Override if you want the control to be hit only if a visible part of it is hit, or whatever.
 	virtual bool IsHit(int x, int y);
 
-  virtual void SetDirty(bool pushParamToPlug = true);
-	virtual void SetClean();
+	virtual void SetDirty(bool pushParamToPlug = true) { mDirty = 1; }
+	virtual void SetClean() { mDirty = mRedraw; mRedraw = 0; }
 	virtual bool IsDirty() { return mDirty; }
   void Clamp(double lo, double hi) { mClampLo = lo; mClampHi = hi; }
   void DisablePrompt(bool disable) { mDisablePrompt = disable; }  // Disables the right-click manual value entry.
