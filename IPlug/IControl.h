@@ -26,21 +26,21 @@ public:
 
 	virtual ~IControl() {}
 
-	virtual void OnMouseDown(int x, int y, IMouseMod* pMod);
-	virtual void OnMouseUp(int x, int y, IMouseMod* pMod) {}
-	virtual void OnMouseDrag(int x, int y, int dX, int dY, IMouseMod* pMod) {}
-	virtual void OnMouseDblClick(int x, int y, IMouseMod* pMod);
-	virtual void OnMouseWheel(int x, int y, IMouseMod* pMod, int d);
+	virtual void OnMouseDown(int x, int y, IMouseMod mod) {}
+	virtual void OnMouseUp(int x, int y, IMouseMod mod) {}
+	virtual void OnMouseDrag(int x, int y, int dX, int dY, IMouseMod mod) {}
+	virtual void OnMouseDblClick(int x, int y, IMouseMod mod) {}
+	virtual void OnMouseWheel(int x, int y, IMouseMod mod, float d) {}
 	virtual void OnKeyDown(int x, int y, int key) {}
 
-  // For efficiency, mouseovers/mouseouts are ignored unless you call IGraphics::HandleMouseOver.
-  virtual void OnMouseOver(int x, int y, IMouseMod* pMod) {}
-  virtual void OnMouseOut() {}
+	// For efficiency, mouseovers/mouseouts are ignored unless you call IGraphics::HandleMouseOver.
+	virtual void OnMouseOver(int x, int y, IMouseMod mod) {}
+	virtual void OnMouseOut() {}
 
-  // By default, mouse double click has its own handler.  A control can set mDblAsSingleClick to true to change, 
-  // which maps double click to single click for this control (and also causes the mouse to be
-  // captured by the control on double click).
-  bool MouseDblAsSingleClick() { return mDblAsSingleClick; }
+	// By default, mouse double click has its own handler. A control can set mDblAsSingleClick to true to change,
+	// which maps double click to single click for this control (and also causes the mouse to be
+	// captured by the control on double click).
+	inline bool MouseDblAsSingleClick() const { return mDblAsSingleClick; }
 
 	virtual bool Draw(IGraphics* pGraphics) = 0;
 

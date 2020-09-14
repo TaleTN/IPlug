@@ -56,32 +56,6 @@ void IControl::GrayOut(bool gray)
   SetDirty(false);
 }
 
-void IControl::OnMouseDown(int x, int y, IMouseMod* pMod)
-{
-	if (pMod->R) {
-		PromptUserInput();
-	}
-}
-
-void IControl::OnMouseDblClick(int x, int y, IMouseMod* pMod)
-{
-	if (mDefaultValue >= 0.0) {
-		mValue = mDefaultValue;
-		SetDirty();
-	}
-}
-
-void IControl::OnMouseWheel(int x, int y, IMouseMod* pMod, int d)
-{
-	if (pMod->C || pMod->S) {
-		mValue += 0.001 * d;
-	}
-	else {
-		mValue += 0.01 * d;
-	}
-	SetDirty();
-}
-
 void IControl::PromptUserInput()
 {
 	if (mParamIdx >= 0 && !mDisablePrompt) {
