@@ -95,6 +95,8 @@ public:
 	inline IPlugBase* GetPlug() const { return mPlug; }
 	inline IGraphics* GetGUI() const { return mPlug->GetGUI(); }
 
+	virtual void Rescale(IGraphics* pGraphics) {}
+
 protected:
 	IPlugBase* mPlug;
 	int mParamIdx;
