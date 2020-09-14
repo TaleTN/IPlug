@@ -1,6 +1,5 @@
 #include "IControl.h"
 #include "math.h"
-#include "Log.h"
 
 const float GRAYED_ALPHA = 0.25f;
 

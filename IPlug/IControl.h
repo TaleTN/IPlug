@@ -1,11 +1,13 @@
-#ifndef _ICONTROL_
-#define _ICONTROL_
+#pragma once
 
 #include "IPlugBase.h"
 #include "IGraphics.h"
 
-// A control is anything on the GUI, it could be a static bitmap, or 
-// something that moves or changes.  The control could manipulate
+#include <assert.h>
+#include "WDL/wdltypes.h"
+
+// A control is anything on the GUI, it could be a static bitmap, or
+// something that moves or changes. The control could manipulate
 // canned bitmaps or do run-time vector drawing, or whatever.
 //
 // Some controls respond to mouse actions, either by moving a bitmap,
@@ -440,5 +442,3 @@ protected:
   IGraphics::EFileAction mFileAction;
 	EFileSelectorState mState;
 };
-
-#endif
