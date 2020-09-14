@@ -17,6 +17,7 @@
 class IControl
 {
 public:
+	enum EDirection { kVertical = 0, kHorizontal = 1 };
 	static const float kGrayedAlpha;
 
 	// If paramIdx is > -1, this control will be associated with a plugin parameter.
@@ -115,8 +116,6 @@ protected:
 	unsigned int mDirty:1, mRedraw:1, mHide:1, mGrayed:1, mDisablePrompt:1, mDblAsSingleClick:1, mReverse:1, mDirection:1, _unused:24;
 	IRECT mRECT;
 };
-
-enum EDirection { kVertical, kHorizontal };
 
 // Draws a bitmap, or one frame of a stacked bitmap depending on the current value.
 class IBitmapControl : public IControl
