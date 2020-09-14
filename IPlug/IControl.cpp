@@ -3,30 +3,6 @@
 
 const float GRAYED_ALPHA = 0.25f;
 
-void IControl::SetValueFromPlug(double value)
-{
-	if (mDefaultValue < 0.0) {
-		mDefaultValue = mValue = value;
-		SetDirty(false);
-    Redraw();
-	}
-	else 
-	if (mValue != value) {
-		mValue = value;
-		SetDirty(false);
-    Redraw();
-	}
-}
-
-void IControl::SetValueFromUserInput(double value)
-{
-	if (mValue != value) {
-		mValue = value;
-		SetDirty();
-		Redraw();
-	}
-}
-
 void IControl::SetDirty(bool pushParamToPlug)
 {
 	mValue = BOUNDED(mValue, mClampLo, mClampHi);
