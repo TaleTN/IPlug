@@ -230,7 +230,17 @@ void IInvisibleSwitchControl::SetDirty(const bool pushParamToPlug)
 	}
 }
 
-void IContactControl::OnMouseUp(int x, int y, IMouseMod* pMod)
+IContactControl::IContactControl(
+	IPlugBase* const pPlug,
+	const int x,
+	const int y,
+	const int paramIdx,
+	const IBitmap* const pBitmap
+):
+	ISwitchControl(pPlug, x, y, paramIdx, pBitmap)
+{}
+
+void IContactControl::OnMouseUp(int, int, IMouseMod)
 {
 	mValue = 0.0;
 	SetDirty();

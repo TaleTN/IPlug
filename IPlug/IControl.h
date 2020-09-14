@@ -223,15 +223,18 @@ protected:
 WDL_FIXALIGN;
 
 // A switch that reverts to 0.0 when released.
-class IContactControl : public ISwitchControl
+class IContactControl: public ISwitchControl
 {
 public:
+	IContactControl(
+		IPlugBase* pPlug,
+		int x,
+		int y,
+		int paramIdx,
+		const IBitmap* pBitmap
+	);
 
-	IContactControl(IPlugBase* pPlug, int x, int y, int paramIdx, IBitmap* pBitmap)
-	:	ISwitchControl(pPlug, x, y, paramIdx, pBitmap) {}
-	~IContactControl() {}
-
-	void OnMouseUp(int x, int y, IMouseMod* pMod);
+	void OnMouseUp(int x, int y, IMouseMod mod);
 };
 
 // A fader. The bitmap snaps to a mouse click or drag.
