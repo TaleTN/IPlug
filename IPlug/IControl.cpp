@@ -46,14 +46,105 @@ void IBackgroundControl::Rescale(IGraphics* const pGraphics)
 	pGraphics->UpdateIBitmap(&mBitmap);
 }
 
-bool IBitmapControl::Draw(IGraphics* pGraphics)
+IBitmapControl::IBitmapControl(
+	IPlugBase* const pPlug,
+	const int x,
+	const int y,
+	const int paramIdx,
+	const IBitmap* const pBitmap
+):
+	IControl(pPlug, paramIdx)
 {
-    int i = 1;
-    if (mBitmap.N > 1) {
-	    i = 1 + int(0.5 + mValue * (double) (mBitmap.N - 1));
-	    i = BOUNDED(i, 1, mBitmap.N);
-    }
-    return pGraphics->DrawBitmap(&mBitmap, &mRECT, i, &mBlend);
+	mTargetRECT = mRECT = IRECT(x, y, pBitmap);
+	mBitmap = *pBitmap;
+	mTooltip = NULL;
+	mValue = 0.0;
+}
+
+void IBitmapControl::Draw(IGraphics* const pGraphics)
+{
+	LICE_IBitmap* const dest = pGraphics->GetDrawBitmap();
+
+	const int scale = pGraphics->Scale();
+
+	const int x = mRECT.L >> scale;
+	const int y = mRECT.T >> scale;
+
+	const int n = mBitmap.N - 1;
+	int i = (int)((double)n * mValue + 0.5);
+
+	if (mReverse) i = n - i;
+
+	LICE_IBitmap* const src = (LICE_IBitmap*)mBitmap.mData;
+	const float weight = mGrayed ? kGrayedAlpha : 1.0f;
+
+	LICE_Blit(dest, src, x, y, 0, i * mBitmap.H, mBitmap.W, mBitmap.H, weight, LICE_BLIT_MODE_COPY | LICE_BLIT_USE_ALPHA);
+}
+
+void IBitmapControl::SetValueFromPlug(const double value)
+{
+	if (mValue != value)
+	{
+		mValue = value;
+		SetDirty(false);
+		Redraw();
+	}
+}
+
+void IBitmapControl::SetValueFromUserInput(const double value)
+{
+	if (mValue != value)
+	{
+		mValue = value;
+		SetDirty();
+		Redraw();
+	}
+}
+
+void IBitmapControl::UpdateValue(double value)
+{
+	value = wdl_max(value, 0.0);
+	value = wdl_min(value, 1.0);
+
+	if (mValue != value)
+	{
+		mValue = value;
+		SetDirty();
+	}
+}
+
+void IBitmapControl::SetTargetArea(const IRECT* const pR)
+{
+	mTargetRECT = *pR;
+}
+
+bool IBitmapControl::IsHit(const int x, const int y)
+{
+	return mTargetRECT.Contains(x, y);
+}
+
+void IBitmapControl::SetDirty(const bool pushParamToPlug)
+{
+	mDirty = 1;
+
+	if (pushParamToPlug && mParamIdx >= 0)
+	{
+		mPlug->SetParameterFromGUI(mParamIdx, mValue);
+	}
+}
+
+void IBitmapControl::Clamp(const double lo, const double hi)
+{
+	assert(lo >= 0.0 && lo <= 1.0);
+	assert(hi >= 0.0 && hi <= 1.0);
+
+	mValue = wdl_max(mValue, lo);
+	mValue = wdl_min(mValue, hi);
+}
+
+void IBitmapControl::Rescale(IGraphics* const pGraphics)
+{
+	pGraphics->UpdateIBitmap(&mBitmap);
 }
 
 void ISwitchControl::OnMouseDown(int x, int y, IMouseMod* pMod)

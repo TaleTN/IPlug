@@ -134,25 +134,45 @@ protected:
 };
 
 // Draws a bitmap, or one frame of a stacked bitmap depending on the current value.
-class IBitmapControl : public IControl
+class IBitmapControl: public IControl
 {
 public:
+	IBitmapControl(
+		IPlugBase* pPlug,
+		int x,
+		int y,
+		int paramIdx,
+		const IBitmap* pBitmap
+	);
 
-	IBitmapControl(IPlugBase* pPlug, int x, int y, int paramIdx, IBitmap* pBitmap,
-		IChannelBlend::EBlendMethod blendMethod = IChannelBlend::kBlendNone) 
-	:	IControl(pPlug, &IRECT(x, y, pBitmap), paramIdx, blendMethod), mBitmap(*pBitmap) {}
+	void Draw(IGraphics* pGraphics);
 
-	IBitmapControl(IPlugBase* pPlug, int x, int y, IBitmap* pBitmap,
-        IChannelBlend::EBlendMethod blendMethod = IChannelBlend::kBlendNone)
-	:	IControl(pPlug, &IRECT(x, y, pBitmap), -1, blendMethod), mBitmap(*pBitmap) {}
+	void SetValueFromPlug(double value);
+	void SetValueFromUserInput(double value);
+	double GetValue() const { return mValue; }
 
-	virtual ~IBitmapControl() {}
+	IRECT* GetTargetRECT() { return &mTargetRECT; }
+	void SetTargetArea(const IRECT* pR);
 
-	virtual bool Draw(IGraphics* pGraphics);
+	bool IsHit(int x, int y);
+
+	void SetDirty(bool pushParamToPlug = true);
+	void Clamp(double lo = 0.0, double hi = 1.0);
+
+	void SetTooltip(const char* tooltip) { mTooltip = tooltip; }
+	const char* GetTooltip() { return mTooltip; }
+
+	void Rescale(IGraphics* pGraphics);
 
 protected:
+	void UpdateValue(double value);
+
+	IRECT mTargetRECT;
 	IBitmap mBitmap;
-};
+	const char* mTooltip;
+	double WDL_FIXALIGN mValue;
+}
+WDL_FIXALIGN;
 
 // A switch.  Click to cycle through the bitmap states.
 class ISwitchControl : public IBitmapControl
