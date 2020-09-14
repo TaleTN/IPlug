@@ -1,5 +1,4 @@
 #include "IControl.h"
-#include "math.h"
 
 const float IControl::kGrayedAlpha = 0.25f;
 
@@ -389,41 +388,6 @@ void IFaderControl::Rescale(IGraphics* const pGraphics)
 
 const double IKnobMultiControl::kDefaultGearing = 4.0;
 
-IKnobLineControl::IKnobLineControl(IPlugBase* pPlug, IRECT* pR, int paramIdx, 
-    const IColor* pColor, double innerRadius, double outerRadius,
-    double minAngle, double maxAngle, EDirection direction, double gearing)
-:   IKnobControl(pPlug, pR, paramIdx, direction, gearing), 
-    mColor(*pColor)
-{
-    mMinAngle = (float) minAngle;
-    mMaxAngle = (float) maxAngle;
-    mInnerRadius = (float) innerRadius;
-    mOuterRadius = (float) outerRadius;
-    if (mOuterRadius == 0.0f) {
-        mOuterRadius = 0.5f * (float) pR->W();
-    }
-    mBlend = IChannelBlend(IChannelBlend::kBlendClobber);
-}
-
-bool IKnobLineControl::Draw(IGraphics* pGraphics)
-{
-    double v = mMinAngle + mValue * (mMaxAngle - mMinAngle);
-    float sinV = (float) sin(v);
-    float cosV = (float) cos(v);
-    float cx = mRECT.MW(), cy = mRECT.MH();
-    float x1 = cx + mInnerRadius * sinV, y1 = cy - mInnerRadius * cosV;
-    float x2 = cx + mOuterRadius * sinV, y2 = cy - mOuterRadius * cosV;
-    return pGraphics->DrawLine(&mColor, x1, y1, x2, y2, &mBlend, true);
-}
-
-bool IKnobRotaterControl::Draw(IGraphics* pGraphics)
-{
-	int cX = (mRECT.L + mRECT.R) / 2;
-	int cY = (mRECT.T + mRECT.B) / 2;
-	double angle = mMinAngle + mValue * (mMaxAngle - mMinAngle);
-	return pGraphics->DrawRotatedBitmap(&mBitmap, cX, cY, angle, mYOffset, &mBlend);
-}
-
 IKnobMultiControl::IKnobMultiControl(
 	IPlugBase* const pPlug,
 	const int x,
@@ -482,12 +446,6 @@ void IKnobMultiControl::SetValueFromPlug(const double value)
 {
 	if (mDefaultValue < 0.0) mDefaultValue = value;
 	IBitmapControl::SetValueFromPlug(value);
-}
-
-bool IKnobRotatingMaskControl::Draw(IGraphics* pGraphics)
-{
-	double angle = mMinAngle + mValue * (mMaxAngle - mMinAngle);
-	return pGraphics->DrawRotatedMask(&mBase, &mMask, &mTop, mRECT.L, mRECT.T, angle, &mBlend);
 }
 
 bool IBitmapOverlayControl::Draw(IGraphics* pGraphics)

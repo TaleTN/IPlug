@@ -289,62 +289,6 @@ protected:
 }
 WDL_FIXALIGN;
 
-// Parent for knobs, to handle mouse action and ballistics.
-class IKnobControl : public IControl
-{
-public:
-
-	IKnobControl(IPlugBase* pPlug, IRECT* pR, int paramIdx, EDirection direction = kVertical,
-		double gearing = DEFAULT_GEARING)
-	:	IControl(pPlug, pR, paramIdx), mDirection(direction), mGearing(gearing) {}
-	virtual ~IKnobControl() {}
-
-    void SetGearing(double gearing) { mGearing = gearing; }
-	virtual void OnMouseDrag(int x, int y, int dX, int dY, IMouseMod* pMod);
-
-protected:
-	EDirection mDirection;
-	double WDL_FIXALIGN mGearing;
-} WDL_FIXALIGN;
-
-// A knob that is just a line.
-class IKnobLineControl : public IKnobControl
-{
-public:
-
-    IKnobLineControl(IPlugBase* pPlug, IRECT* pR, int paramIdx, 
-        const IColor* pColor, double innerRadius = 0.0, double outerRadius = 0.0,
-        double minAngle = -0.75 * PI, double maxAngle = 0.75 * PI, 
-        EDirection direction = kVertical, double gearing = DEFAULT_GEARING);
-    ~IKnobLineControl() {}
-
-    bool Draw(IGraphics* pGraphics);
-
-protected:
-    IColor mColor;
-    float mMinAngle, mMaxAngle, mInnerRadius, mOuterRadius;
-};
-
-// A rotating knob.  The bitmap rotates with any mouse drag.
-class IKnobRotaterControl : public IKnobControl
-{
-public:
-
-	IKnobRotaterControl(IPlugBase* pPlug, int x, int y, int paramIdx, IBitmap* pBitmap,
-		double minAngle = -0.75 * PI, double maxAngle = 0.75 * PI, int yOffsetZeroDeg = 0, 
-		EDirection direction = kVertical, double gearing = DEFAULT_GEARING)
-	:	IKnobControl(pPlug, &IRECT(x, y, pBitmap), paramIdx, direction, gearing), 
-		mBitmap(*pBitmap), mMinAngle(minAngle), mMaxAngle(maxAngle), mYOffset(yOffsetZeroDeg) {}
-	~IKnobRotaterControl() {}
-
-	bool Draw(IGraphics* pGraphics);
-
-protected:
-	IBitmap mBitmap;
-	double WDL_FIXALIGN mMinAngle, mMaxAngle;
-	int mYOffset;
-} WDL_FIXALIGN;
-
 // A multibitmap knob. The bitmap cycles through states as the mouse drags.
 class IKnobMultiControl: public IBitmapControl
 {
@@ -382,27 +326,6 @@ protected:
 	double WDL_FIXALIGN mGearing, mDefaultValue;
 }
 WDL_FIXALIGN;
-
-// A knob that consists of a static base, a rotating mask, and a rotating top.
-// The bitmaps are assumed to be symmetrical and identical sizes.
-class IKnobRotatingMaskControl : public IKnobControl
-{
-public:
-
-	IKnobRotatingMaskControl(IPlugBase* pPlug, int x, int y, int paramIdx, 
-		IBitmap* pBase, IBitmap* pMask, IBitmap* pTop, 
-		double minAngle = -0.75 * PI, double maxAngle = 0.75 * PI, 
-		EDirection direction = kVertical, double gearing = DEFAULT_GEARING)
-	:	IKnobControl(pPlug, &IRECT(x, y, pBase), paramIdx, direction, gearing),
-		mBase(*pBase), mMask(*pMask), mTop(*pTop), mMinAngle(minAngle), mMaxAngle(maxAngle) {}
-	~IKnobRotatingMaskControl() {}
-
-	bool Draw(IGraphics* pGraphics);
-
-protected:
-	IBitmap mBase, mMask, mTop;
-	double WDL_FIXALIGN mMinAngle, mMaxAngle;
-} WDL_FIXALIGN;
 
 // Bitmap shows when value = 0, then toggles its target area to the whole bitmap
 // and waits for another click to hide itself.
