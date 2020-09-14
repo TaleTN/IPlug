@@ -42,7 +42,7 @@ public:
 	// captured by the control on double click).
 	inline bool MouseDblAsSingleClick() const { return mDblAsSingleClick; }
 
-	virtual bool Draw(IGraphics* pGraphics) = 0;
+	virtual void Draw(IGraphics* pGraphics) {}
 
 	// Ask the IGraphics object to open an edit box so the user can enter a value for this control.
 	void PromptUserInput();
