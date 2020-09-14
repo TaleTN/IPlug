@@ -289,8 +289,6 @@ protected:
 }
 WDL_FIXALIGN;
 
-const double DEFAULT_GEARING = 4.0;
-
 // Parent for knobs, to handle mouse action and ballistics.
 class IKnobControl : public IControl
 {
@@ -347,21 +345,43 @@ protected:
 	int mYOffset;
 } WDL_FIXALIGN;
 
-// A multibitmap knob.  The bitmap cycles through states as the mouse drags.
-class IKnobMultiControl : public IKnobControl
+// A multibitmap knob. The bitmap cycles through states as the mouse drags.
+class IKnobMultiControl: public IBitmapControl
 {
 public:
+	static const double kDefaultGearing;
 
-	IKnobMultiControl(IPlugBase* pPlug, int x, int y, int paramIdx, IBitmap* pBitmap,
-		EDirection direction = kVertical, double gearing = DEFAULT_GEARING)
-	:	IKnobControl(pPlug, &IRECT(x, y, pBitmap), paramIdx, direction, gearing), mBitmap(*pBitmap) {}
-	~IKnobMultiControl() {}
+	IKnobMultiControl(
+		IPlugBase* pPlug,
+		int x,
+		int y,
+		int paramIdx,
+		const IBitmap* pBitmap
+		// int direction = kVertical
+	);
 
-	bool Draw(IGraphics* pGraphics);
+	inline void SetGearing(const double gearing) { mGearing = gearing; }
+	inline double GetGearing() const { return mGearing; }
+
+	void OnMouseDown(int x, int y, IMouseMod mod);
+	void OnMouseDrag(int x, int y, int dX, int dY, IMouseMod mod);
+	void OnMouseDblClick(int x, int y, IMouseMod mod);
+	void OnMouseWheel(int x, int y, IMouseMod mod, float d);
+
+	void SetValueFromPlug(double value);
+
+	inline double GetDefaultValue() const { return mDefaultValue; }
+
+	inline void SetDefaultValue(const double value)
+	{
+		assert(value >= 0.0 && value <= 1.0);
+		mDefaultValue = value;
+	}
 
 protected:
-	IBitmap mBitmap;
-};
+	double WDL_FIXALIGN mGearing, mDefaultValue;
+}
+WDL_FIXALIGN;
 
 // A knob that consists of a static base, a rotating mask, and a rotating top.
 // The bitmaps are assumed to be symmetrical and identical sizes.

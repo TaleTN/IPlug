@@ -387,22 +387,7 @@ void IFaderControl::Rescale(IGraphics* const pGraphics)
 	pGraphics->UpdateIBitmap(&mBitmap);
 }
 
-void IKnobControl::OnMouseDrag(int x, int y, int dX, int dY, IMouseMod* pMod)
-{
-  double gearing = mGearing;
-	if (pMod->C || pMod->S) gearing *= 10.0;  
-
-	if (mDirection == kVertical) 
-  {
-		mValue += (double) dY / (double) (mRECT.T - mRECT.B) / gearing;
-	}
-	else
-  {
-		mValue += (double) dX / (double) (mRECT.R - mRECT.L) / gearing;
-	}
-
-	SetDirty();
-}
+const double IKnobMultiControl::kDefaultGearing = 4.0;
 
 IKnobLineControl::IKnobLineControl(IPlugBase* pPlug, IRECT* pR, int paramIdx, 
     const IColor* pColor, double innerRadius, double outerRadius,
@@ -439,12 +424,64 @@ bool IKnobRotaterControl::Draw(IGraphics* pGraphics)
 	return pGraphics->DrawRotatedBitmap(&mBitmap, cX, cY, angle, mYOffset, &mBlend);
 }
 
-// Same as IBitmapControl::Draw.
-bool IKnobMultiControl::Draw(IGraphics* pGraphics)
+IKnobMultiControl::IKnobMultiControl(
+	IPlugBase* const pPlug,
+	const int x,
+	const int y,
+	const int paramIdx,
+	const IBitmap* const pBitmap
+	// const int direction
+):
+	IBitmapControl(pPlug, x, y, paramIdx, pBitmap)
 {
-	int i = 1 + int(0.5 + mValue * (double) (mBitmap.N - 1));
-	i = BOUNDED(i, 1, mBitmap.N);
-  return pGraphics->DrawBitmap(&mBitmap, &mRECT, i, &mBlend);
+	// mDirection = direction;
+	mGearing = kDefaultGearing;
+	mDefaultValue = -1.0;
+}
+
+void IKnobMultiControl::OnMouseDown(int, int, const IMouseMod mod)
+{
+	if (mod.R && !mDisablePrompt) PromptUserInput();
+}
+
+void IKnobMultiControl::OnMouseDrag(int, int, int, const int dY, const IMouseMod mod)
+{
+	if (!mod.L) return;
+
+	double gearing = mGearing;
+	if (mod.C) gearing *= 10.0;
+
+	double value = mValue;
+	// if (mDirection == kVertical)
+	// {
+		value -= dY / (mTargetRECT.H() * gearing);
+	// }
+	// else
+	// {
+		// value += dX / (mTargetRECT.W() * gearing);
+	// }
+
+	UpdateValue(value);
+}
+
+void IKnobMultiControl::OnMouseDblClick(int, int, IMouseMod)
+{
+	if (mValue != mDefaultValue)
+	{
+		mValue = mDefaultValue;
+		SetDirty();
+	}
+}
+
+void IKnobMultiControl::OnMouseWheel(int, int, const IMouseMod mod, const float d)
+{
+	if (mod.C | mod.W) UpdateValue((mod.C ? 0.001 : 0.01) * d + mValue);
+}
+
+void IKnobMultiControl::SetValueFromPlug(const double value)
+{
+	if (mDefaultValue < 0.0) mDefaultValue = value;
+	IBitmapControl::SetValueFromPlug(value);
 }
 
 bool IKnobRotatingMaskControl::Draw(IGraphics* pGraphics)
