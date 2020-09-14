@@ -52,9 +52,9 @@ public:
 	virtual void SetValueFromUserInput(double value) {}
 	virtual double GetValue() const { return 0.0; }
 
-	IRECT* GetRECT() { return &mRECT; }				// The draw area for this control.
-	IRECT* GetTargetRECT() { return &mTargetRECT; }	// The mouse target area (default = draw area).
-	void SetTargetArea(IRECT* pR) { mTargetRECT = *pR; }
+	inline IRECT* GetRECT() { return &mRECT; }        // The draw area for this control.
+	virtual IRECT* GetTargetRECT() { return &mRECT; } // The mouse target area (default = draw area).
+	virtual void SetTargetArea(const IRECT* pR) {}
 
   virtual void Hide(bool hide);
   bool IsHidden() const { return mHide; }
@@ -62,8 +62,8 @@ public:
   virtual void GrayOut(bool gray);
   bool IsGrayed() { return mGrayed; }
 
-  // Override if you want the control to be hit only if a visible part of it is hit, or whatever.
-  virtual bool IsHit(int x, int y) { return mTargetRECT.Contains(x, y); }
+	// Override if you want the control to be hit only if a visible part of it is hit, or whatever.
+	virtual bool IsHit(int x, int y);
 
   void SetBlendMethod(IChannelBlend::EBlendMethod blendMethod) { mBlend = IChannelBlend(blendMethod); }
 
@@ -89,11 +89,10 @@ public:
   IGraphics* GetGUI() { return mPlug->GetGUI(); }
 
 protected:
-
 	IPlugBase* mPlug;
-	IRECT mRECT, mTargetRECT;
 	int mParamIdx;
 	bool mDirty, mHide, mGrayed, mRedraw, mDisablePrompt, mClamped, mDblAsSingleClick;
+	IRECT mRECT;
   IChannelBlend mBlend;
 	const char* mTooltip;
 };

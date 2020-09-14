@@ -41,6 +41,11 @@ void IControl::PromptUserInput()
 	}
 }
 
+bool IControl::IsHit(const int x, const int y)
+{
+	return mRECT.Contains(x, y);
+}
+
 bool IBitmapControl::Draw(IGraphics* pGraphics)
 {
     int i = 1;
