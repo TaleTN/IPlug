@@ -57,7 +57,7 @@ OSErr GetComponentVersionFromResource(Component inComponent, long * outVersion)
 {
 	OSErr error;
 	ComponentDescription desc;
-	short curRes, componentResFileID;
+	ResFileRefNum curRes, componentResFileID;
 	short thngResourceCount, i;
 	Boolean versionFound = false;
 
@@ -465,14 +465,14 @@ CFStringRef CFAUOtherPluginDescArrayCopyDescriptionCallBack(const void * inDesc)
 			pluginFormatString = CFSTR("AU");
 			break;
 		default:
-			pluginFormatString = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("unknown (%lu)"), desc->format);
+			pluginFormatString = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("unknown (%u)"), (unsigned int)desc->format);
 			if (pluginFormatString != NULL)
 				releasePluginFormatString = true;
 			break;
 	}
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_3
-	if (UTCreateStringForOSType != NULL)
+	if ((const void*)UTCreateStringForOSType != NULL)
 	{
 		CFStringRef typeString = UTCreateStringForOSType(desc->plugin.mType);
 		CFStringRef subTypeString = UTCreateStringForOSType(desc->plugin.mSubType);
@@ -491,8 +491,8 @@ CFStringRef CFAUOtherPluginDescArrayCopyDescriptionCallBack(const void * inDesc)
 #endif
 	{
 		descriptionString = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, 
-									CFSTR("AudioUnitOtherPluginDesc:\nplugin format = %@\ntype ID = %lu\nsub-type ID = %lu\nmanufacturer ID = %lu"), 
-									pluginFormatString, desc->plugin.mType, desc->plugin.mSubType, desc->plugin.mManufacturer);
+									CFSTR("AudioUnitOtherPluginDesc:\nplugin format = %@\ntype ID = %u\nsub-type ID = %u\nmanufacturer ID = %u"), 
+									pluginFormatString, (unsigned int)desc->plugin.mType, (unsigned int)desc->plugin.mSubType, (unsigned int)desc->plugin.mManufacturer);
 	}
 
 	if (releasePluginFormatString)
@@ -669,7 +669,14 @@ OSStatus GetAUNameAndManufacturerCStrings(Component inAUComponent, char * outNam
 		char * separatorByte;
 		// convert the Component name Pascal string to a C string
 		char componentFullNameCString[sizeof(Str255)];
-		CopyPascalStringToC(componentFullNamePString, componentFullNameCString);
+		componentFullNameCString[0] = 0;
+		CFStringRef tmp = CFStringCreateWithPascalString(NULL, componentFullNamePString, kCFStringEncodingUTF8);
+		if (tmp)
+		{
+			CFStringGetCString(tmp, componentFullNameCString, sizeof(Str255), kCFStringEncodingUTF8);
+			CFRelease(tmp);
+		}
+
 		// the manufacturer string is everything before the first : character, 
 		// and everything after that and any immediately following white space 
 		// is the plugin name string
@@ -794,7 +801,7 @@ Boolean ComponentAndDescriptionMatch_Loosely(Component inComponent, const Compon
 // the version value of interest to us is 0x1030 for Panther
 long GetMacOSVersion()
 {
-	long systemVersion = 0;
+	SInt32 systemVersion = 0;
 	OSErr error = Gestalt(gestaltSystemVersion, &systemVersion);
 	if (error == noErr)
 	{
@@ -810,7 +817,7 @@ long GetMacOSVersion()
 // the version value of interest to us is 0x06408000 (6.4 release)
 long GetQuickTimeVersion()
 {
-    long qtVersion = 0;
+    SInt32 qtVersion = 0;
     OSErr error = Gestalt(gestaltQuickTime, &qtVersion);
     if (error == noErr)
 		return qtVersion;
