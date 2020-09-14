@@ -237,34 +237,57 @@ public:
 	void OnMouseUp(int x, int y, IMouseMod mod);
 };
 
-// A fader. The bitmap snaps to a mouse click or drag.
-class IFaderControl : public IControl
+// A fader. The bitmap snaps/moves to a mouse click or drag.
+class IFaderControl: public IBitmapControl
 {
 public:
+	IFaderControl(
+		IPlugBase* pPlug,
+		int x,
+		int y,
+		int len,
+		int paramIdx,
+		const IBitmap* pBitmap,
+		int direction = kVertical
+	);
 
-	IFaderControl(IPlugBase* pPlug, int x, int y, int len, int paramIdx, IBitmap* pBitmap, 
-		EDirection direction = kVertical);	
-	~IFaderControl() {}
+	inline int GetLength() const { return mLen; }
+	// Size of the handle in pixels.
+	int GetHandleHeadroom() const { return mDirection == kVertical ? mHandleRECT.H() : mHandleRECT.W(); }
+	// Size of the handle in terms of the control value.
+	double GetHandleValueHeadroom() const { return (double)GetHandleHeadroom() / (double)mLen; }
+	// Where is the handle right now?
+	inline IRECT* GetHandleRECT() { return &mHandleRECT; }
 
-    int GetLength() const { return mLen; }
-    // Size of the handle in pixels.
-    int GetHandleHeadroom() const { return mHandleHeadroom; }
-    // Size of the handle in terms of the control value.
-    double GetHandleValueHeadroom() const { return (double) mHandleHeadroom / (double) mLen; }
-    // Where is the handle right now?
-    IRECT GetHandleRECT(double value = -1.0) const;  
+	void OnMouseDown(int x, int y, IMouseMod mod);
+	void OnMouseDrag(int x, int y, int dX, int dY, IMouseMod mod);
+	void OnMouseDblClick(int x, int y, IMouseMod mod);
+	void OnMouseWheel(int x, int y, IMouseMod mod, float d);
 
-	virtual void OnMouseDown(int x, int y, IMouseMod* pMod);
-	virtual void OnMouseDrag(int x, int y, int dX, int dY, IMouseMod* pMod);
+	void Draw(IGraphics* pGraphics);
+	void PromptUserInput();
 
-	virtual bool Draw(IGraphics* pGraphics);
+	void SetValueFromPlug(double value);
+
+	inline double GetDefaultValue() const { return mDefaultValue; }
+
+	inline void SetDefaultValue(const double value)
+	{
+		assert(value >= 0.0 && value <= 1.0);
+		mDefaultValue = value;
+	}
+
+	void Rescale(IGraphics* pGraphics);
 
 protected:
-  void SnapToMouse(int x, int y);
-  int mLen, mHandleHeadroom;
-	IBitmap mBitmap;
-	EDirection mDirection;
-};
+	void SnapToMouse(int x, int y);
+	void UpdateHandleRECT();
+
+	double WDL_FIXALIGN mDefaultValue;
+	IRECT mHandleRECT;
+	int mLen;
+}
+WDL_FIXALIGN;
 
 const double DEFAULT_GEARING = 4.0;
 

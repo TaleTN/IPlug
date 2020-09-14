@@ -246,68 +246,145 @@ void IContactControl::OnMouseUp(int, int, IMouseMod)
 	SetDirty();
 }
 
-IFaderControl::IFaderControl(IPlugBase* pPlug, int x, int y, int len, int paramIdx, IBitmap* pBitmap, EDirection direction)
-:	IControl(pPlug, &IRECT(), paramIdx), mLen(len), mBitmap(*pBitmap), mDirection(direction)
+IFaderControl::IFaderControl(
+	IPlugBase* const pPlug,
+	const int x,
+	const int y,
+	const int len,
+	const int paramIdx,
+	const IBitmap* const pBitmap,
+	const int direction
+):
+	IBitmapControl(pPlug, x, y, paramIdx, pBitmap),
+	mDefaultValue(-1.0),
+	mHandleRECT(mRECT),
+	mLen(len)
 {
-	if (direction == kVertical) {
-        mHandleHeadroom = mBitmap.H;
-        mRECT = mTargetRECT = IRECT(x, y, x + mBitmap.W, y + len);
-    }
-    else {
-        mHandleHeadroom = mBitmap.W;
-        mRECT = mTargetRECT = IRECT(x, y, x + len, y + mBitmap.H);
-    }
+	mDirection = direction;
+
+	if (direction == kVertical)
+		mTargetRECT.B = mRECT.B = y + len;
+	else
+		mTargetRECT.R = mRECT.R = x + len;
 }
 
-IRECT IFaderControl::GetHandleRECT(double value) const
+void IFaderControl::UpdateHandleRECT()
 {
-	if (value < 0.0) {
-		value = mValue;
+	const double range = (double)(mLen - GetHandleHeadroom());
+	const double pos = range * mValue;
+
+	if (mDirection == kVertical)
+	{
+		const int offs = (int)(range - pos) + mTargetRECT.T - mHandleRECT.T;
+		mHandleRECT.T += offs;
+		mHandleRECT.B += offs;
 	}
-	IRECT r(mRECT.L, mRECT.T, mRECT.L + mBitmap.W, mRECT.T + mBitmap.H);
-  if (mDirection == kVertical) {
-    int offs = int((1.0 - value) * (double) (mLen - mHandleHeadroom));
-		r.T += offs;
-    r.B += offs;
+	else
+	{
+		const int offs = (int)pos + mTargetRECT.L - mHandleRECT.L;
+		mHandleRECT.L += offs;
+		mHandleRECT.R += offs;
 	}
-	else {
-		int offs = int(value * (double) (mLen - mHandleHeadroom));
-    r.L += offs;
-    r.R += offs;
-	}
-  return r;
 }
 
-void IFaderControl::OnMouseDown(int x, int y, IMouseMod* pMod)
+void IFaderControl::OnMouseDown(const int x, const int y, const IMouseMod mod)
 {
-	if (pMod->R) {
+	if (mod.R && !mDisablePrompt)
+	{
 		PromptUserInput();
 		return;
 	}
 
-    return SnapToMouse(x, y);
+	if (!mod.L || mHandleRECT.Contains(x, y)) return;
+
+	SnapToMouse(x, y);
 }
 
-void IFaderControl::OnMouseDrag(int x, int y, int dX, int dY, IMouseMod* pMod)
+void IFaderControl::OnMouseDrag(const int x, const int y, const int dX, const int dY, const IMouseMod mod)
 {
-    return SnapToMouse(x, y);
+	if (!mod.L) return;
+
+	const int headroom = GetHandleHeadroom();
+	double range = (double)(mLen - headroom);
+
+	if (mod.C) range *= 10.0;
+
+	const int delta = mDirection == kVertical ? -dY : dX;
+	UpdateValue((double)delta / range + mValue);
 }
 
-void IFaderControl::SnapToMouse(int x, int y)
+void IFaderControl::OnMouseDblClick(int, int, IMouseMod)
 {
-  if (mDirection == kVertical) {
-		mValue = 1.0 - (double) (y - mRECT.T - mHandleHeadroom / 2) / (double) (mLen - mHandleHeadroom);
+	if (mValue != mDefaultValue)
+	{
+		mValue = mDefaultValue;
+		SetDirty();
 	}
-	else {
-		mValue = (double) (x - mRECT.L - mHandleHeadroom / 2) / (double) (mLen - mHandleHeadroom);
-	}
-	SetDirty();	
 }
 
-bool IFaderControl::Draw(IGraphics* pGraphics)
+void IFaderControl::OnMouseWheel(int, int, const IMouseMod mod, const float d)
 {
-  IRECT r = GetHandleRECT();
-	return pGraphics->DrawBitmap(&mBitmap, &r, 1, &mBlend);
+	if (mod.C | mod.W) UpdateValue((mod.C ? 0.001 : 0.01) * d + mValue);
+}
+
+void IFaderControl::SnapToMouse(const int x, const int y)
+{
+	int headroom = GetHandleHeadroom();
+	const double range = (double)(mLen - headroom);
+	headroom >>= 1;
+
+	double ofs;
+	int pos;
+
+	if (mDirection == kVertical)
+	{
+		ofs = 1.0;
+		pos = mTargetRECT.T - y + headroom;
+	}
+	else
+	{
+		ofs = 0.0;
+		pos = x - mTargetRECT.L - headroom;
+	}
+
+	UpdateValue((double)pos / range + ofs);
+}
+
+void IFaderControl::Draw(IGraphics* const pGraphics)
+{
+	UpdateHandleRECT();
+
+	LICE_IBitmap* const dest = pGraphics->GetDrawBitmap();
+
+	const int scale = pGraphics->Scale();
+
+	const int x = mHandleRECT.L >> scale;
+	const int y = mHandleRECT.T >> scale;
+
+	LICE_IBitmap* const src = (LICE_IBitmap*)mBitmap.mData;
+	const float weight = mGrayed ? kGrayedAlpha : 1.0f;
+
+	LICE_Blit(dest, src, x, y, 0, 0, mBitmap.W, mBitmap.H, weight, LICE_BLIT_MODE_COPY | LICE_BLIT_USE_ALPHA);
+}
+
+void IFaderControl::PromptUserInput()
+{
+	if (mParamIdx >= 0)
+	{
+		mPlug->GetGUI()->PromptUserInput(this, mPlug->GetParam(mParamIdx), &mHandleRECT);
+		Redraw();
+	}
+}
+
+void IFaderControl::SetValueFromPlug(const double value)
+{
+	if (mDefaultValue < 0.0) mDefaultValue = value;
+	IBitmapControl::SetValueFromPlug(value);
+}
+
+void IFaderControl::Rescale(IGraphics* const pGraphics)
+{
+	pGraphics->UpdateIBitmap(&mBitmap);
 }
 
 void IKnobControl::OnMouseDrag(int x, int y, int dX, int dY, IMouseMod* pMod)
