@@ -222,23 +222,6 @@ protected:
 }
 WDL_FIXALIGN;
 
-// A set of buttons that maps to a single selection.  Bitmap has 2 states, off and on.
-class IRadioButtonsControl : public IControl
-{
-public:
-
-    IRadioButtonsControl(IPlugBase* pPlug, IRECT* pR, int paramIdx, int nButtons, IBitmap* pBitmap,
-        EDirection direction = kVertical);
-    ~IRadioButtonsControl() {}
-
-    void OnMouseDown(int x, int y, IMouseMod* pMod);
-    bool Draw(IGraphics* pGraphics);
-
-protected:
-    WDL_TypedBuf<IRECT> mRECTs;
-    IBitmap mBitmap;
-};
-
 // A switch that reverts to 0.0 when released.
 class IContactControl : public ISwitchControl
 {

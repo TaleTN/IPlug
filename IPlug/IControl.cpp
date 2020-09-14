@@ -230,60 +230,6 @@ void IInvisibleSwitchControl::SetDirty(const bool pushParamToPlug)
 	}
 }
 
-IRadioButtonsControl::IRadioButtonsControl(IPlugBase* pPlug, IRECT* pR, int paramIdx, int nButtons, 
-    IBitmap* pBitmap, EDirection direction)
-:   IControl(pPlug, pR, paramIdx), mBitmap(*pBitmap)
-{
-    mRECTs.Resize(nButtons);
-    int x = mRECT.L, y = mRECT.T, h = int((double) pBitmap->H / (double) pBitmap->N);
-    if (direction == kHorizontal) {
-        int dX = int((double) (pR->W() - nButtons * pBitmap->W) / (double) (nButtons - 1));
-        for (int i = 0; i < nButtons; ++i) {
-            mRECTs.Get()[i] = IRECT(x, y, x + pBitmap->W, y + h);
-            x += pBitmap->W + dX;
-        }
-    }
-    else {
-        int dY = int((double) (pR->H() - nButtons * h) /  (double) (nButtons - 1));
-        for (int i = 0; i < nButtons; ++i) {
-            mRECTs.Get()[i] = IRECT(x, y, x + pBitmap->W, y + h);
-            y += h + dY;
-        }
-    }
-}
-
-void IRadioButtonsControl::OnMouseDown(int x, int y, IMouseMod* pMod)
-{
-	if (pMod->R) {
-		PromptUserInput();
-		return;
-	}
-    int i, n = mRECTs.GetSize();
-    for (i = 0; i < n; ++i) {
-        if (mRECTs.Get()[i].Contains(x, y)) {
-            mValue = (double) i / (double) (n - 1);
-            break;
-        }
-    }
-    SetDirty();
-}
-
-bool IRadioButtonsControl::Draw(IGraphics* pGraphics)
-{
-    int i, n = mRECTs.GetSize();
-    int active = int(0.5 + mValue * (double) (n - 1));
-    active = BOUNDED(active, 0, n - 1);
-    for (i = 0; i < n; ++i) {
-        if (i == active) {
-            pGraphics->DrawBitmap(&mBitmap, &mRECTs.Get()[i], 2, &mBlend);
-        }
-        else {
-            pGraphics->DrawBitmap(&mBitmap, &mRECTs.Get()[i], 1, &mBlend);
-        }
-    }
-    return true;
-}
-
 void IContactControl::OnMouseUp(int x, int y, IMouseMod* pMod)
 {
 	mValue = 0.0;
