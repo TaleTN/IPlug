@@ -20,10 +20,22 @@ public:
 	static const float kGrayedAlpha;
 
 	// If paramIdx is > -1, this control will be associated with a plugin parameter.
-  IControl(IPlugBase* pPlug, IRECT* pR, int paramIdx = -1, IChannelBlend blendMethod = IChannelBlend::kBlendNone)
-	:	mPlug(pPlug), mRECT(*pR), mTargetRECT(*pR), mParamIdx(paramIdx), mValue(0.0), mDefaultValue(-1.0),
-        mBlend(blendMethod), mDirty(true), mHide(false), mGrayed(false), mDisablePrompt(false), mDblAsSingleClick(false), 
-        mClampLo(0.0), mClampHi(1.0), mTooltip(NULL) {}
+	IControl(
+		IPlugBase* const pPlug,
+		const int paramIdx = -1
+	):
+		mPlug(pPlug),
+		mParamIdx(paramIdx),
+		mDirty(1),
+		mRedraw(0),
+		mHide(0),
+		mGrayed(0),
+		mDisablePrompt(0),
+		mDblAsSingleClick(0),
+		mReverse(0),
+		mDirection(0),
+		_unused(0)
+	{}
 
 	virtual ~IControl() {}
 
