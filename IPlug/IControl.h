@@ -47,7 +47,7 @@ public:
 	// Ask the IGraphics object to open an edit box so the user can enter a value for this control.
 	virtual void PromptUserInput();
 
-	int ParamIdx() { return mParamIdx; }
+	inline int ParamIdx() const { return mParamIdx; }
 	virtual void SetValueFromPlug(double value);
 	virtual void SetValueFromUserInput(double value);
 	double GetValue() { return mValue; }
