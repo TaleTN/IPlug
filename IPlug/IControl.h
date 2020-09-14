@@ -71,7 +71,7 @@ public:
 
 	virtual void SetDirty(bool pushParamToPlug = true) { mDirty = 1; }
 	virtual void SetClean() { mDirty = mRedraw; mRedraw = 0; }
-	virtual bool IsDirty() { return mDirty; }
+	inline bool IsDirty() const { return mDirty; }
   void Clamp(double lo, double hi) { mClampLo = lo; mClampHi = hi; }
   void DisablePrompt(bool disable) { mDisablePrompt = disable; }  // Disables the right-click manual value entry.
 
