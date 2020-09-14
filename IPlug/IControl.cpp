@@ -1,7 +1,7 @@
 #include "IControl.h"
 #include "math.h"
 
-const float GRAYED_ALPHA = 0.25f;
+const float IControl::kGrayedAlpha = 0.25f;
 
 void IControl::SetDirty(bool pushParamToPlug)
 {
@@ -18,20 +18,6 @@ void IControl::SetClean()
   mRedraw = false;
 }
 	
-void IControl::Hide(bool hide)
-{
-  mHide = hide;
-  mRedraw = true;
-  SetDirty(false);
-}
-
-void IControl::GrayOut(bool gray)
-{
-  mGrayed = gray;
-  mBlend.mWeight = (gray ? GRAYED_ALPHA : 1.0f);
-  SetDirty(false);
-}
-
 void IControl::PromptUserInput()
 {
 	if (mParamIdx >= 0)

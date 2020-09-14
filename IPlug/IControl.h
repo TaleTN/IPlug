@@ -17,6 +17,7 @@
 class IControl
 {
 public:
+	static const float kGrayedAlpha;
 
 	// If paramIdx is > -1, this control will be associated with a plugin parameter.
   IControl(IPlugBase* pPlug, IRECT* pR, int paramIdx = -1, IChannelBlend blendMethod = IChannelBlend::kBlendNone)
@@ -56,11 +57,11 @@ public:
 	virtual IRECT* GetTargetRECT() { return &mRECT; } // The mouse target area (default = draw area).
 	virtual void SetTargetArea(const IRECT* pR) {}
 
-  virtual void Hide(bool hide);
-  bool IsHidden() const { return mHide; }
+	virtual void Hide(const bool hide) { mHide = hide; }
+	inline bool IsHidden() const { return mHide; }
 
-  virtual void GrayOut(bool gray);
-  bool IsGrayed() { return mGrayed; }
+	virtual void GrayOut(const bool gray) { mGrayed = gray; }
+	inline bool IsGrayed() const { return mGrayed; }
 
 	// Override if you want the control to be hit only if a visible part of it is hit, or whatever.
 	virtual bool IsHit(int x, int y);
