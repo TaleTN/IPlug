@@ -81,9 +81,9 @@ public:
 	virtual void SetTooltip(const char* tooltip) {}
 	virtual const char* GetTooltip() { return NULL; }
 
-  // Sometimes a control changes its state as part of its Draw method.
-  // Redraw() prevents the control from being cleaned immediately after drawing.
-  void Redraw() { mRedraw = true; }
+	// Sometimes a control changes its state as part of its Draw method.
+	// Redraw() prevents the control from being cleaned immediately after drawing.
+	inline void Redraw() { mRedraw = 1; }
 
 	// This is an idle call from the GUI thread, as opposed to 
 	// IPlugBase::OnIdle which is called from the audio processing thread.
