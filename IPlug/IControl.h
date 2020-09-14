@@ -85,10 +85,12 @@ public:
 	// Redraw() prevents the control from being cleaned immediately after drawing.
 	inline void Redraw() { mRedraw = 1; }
 
-	// This is an idle call from the GUI thread, as opposed to 
+	// This is an idle call from the GUI thread, as opposed to
 	// IPlugBase::OnIdle which is called from the audio processing thread.
-  // Only active if USE_IDLE_CALLS is defined.
-  virtual void OnGUIIdle() {}
+	// Only active if IPLUG_USE_IDLE_CALLS is defined.
+	#ifdef IPLUG_USE_IDLE_CALLS
+	virtual void OnGUIIdle() {}
+	#endif
 
   IPlugBase* GetPlug() { return mPlug; }
   IGraphics* GetGUI() { return mPlug->GetGUI(); }
