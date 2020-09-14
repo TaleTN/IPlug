@@ -17,6 +17,35 @@ bool IControl::IsHit(const int x, const int y)
 	return mRECT.Contains(x, y);
 }
 
+IBackgroundControl::IBackgroundControl(
+	IPlugBase* const pPlug,
+	const IBitmap* const pBitmap
+):
+	IControl(pPlug)
+{
+	mRECT = IRECT(0, 0, pBitmap);
+	mBitmap = *pBitmap;
+}
+
+void IBackgroundControl::Draw(IGraphics* const pGraphics)
+{
+	LICE_IBitmap* const dest = pGraphics->GetDrawBitmap();
+
+	const int scale = pGraphics->Scale();
+
+	const int x = mRECT.L >> scale;
+	const int y = mRECT.T >> scale;
+
+	LICE_IBitmap* const src = (LICE_IBitmap*)mBitmap.mData;
+
+	LICE_Blit(dest, src, x, y, 0, 0, mBitmap.W, mBitmap.H, 1.0f, LICE_BLIT_MODE_COPY);
+}
+
+void IBackgroundControl::Rescale(IGraphics* const pGraphics)
+{
+	pGraphics->UpdateIBitmap(&mBitmap);
+}
+
 bool IBitmapControl::Draw(IGraphics* pGraphics)
 {
     int i = 1;

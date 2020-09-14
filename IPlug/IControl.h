@@ -117,6 +117,22 @@ protected:
 	IRECT mRECT;
 };
 
+// Draws the background bitmap.
+class IBackgroundControl: public IControl
+{
+public:
+	IBackgroundControl(
+		IPlugBase* pPlug,
+		const IBitmap* pBitmap
+	);
+
+	void Draw(IGraphics* pGraphics);
+	void Rescale(IGraphics* pGraphics);
+
+protected:
+	IBitmap mBitmap;
+};
+
 // Draws a bitmap, or one frame of a stacked bitmap depending on the current value.
 class IBitmapControl : public IControl
 {
