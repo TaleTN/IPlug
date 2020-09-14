@@ -66,8 +66,6 @@ public:
 	// Override if you want the control to be hit only if a visible part of it is hit, or whatever.
 	virtual bool IsHit(int x, int y);
 
-  void SetBlendMethod(IChannelBlend::EBlendMethod blendMethod) { mBlend = IChannelBlend(blendMethod); }
-
   virtual void SetDirty(bool pushParamToPlug = true);
 	virtual void SetClean();
 	virtual bool IsDirty() { return mDirty; }
@@ -94,7 +92,6 @@ protected:
 	int mParamIdx;
 	bool mDirty, mHide, mGrayed, mRedraw, mDisablePrompt, mClamped, mDblAsSingleClick;
 	IRECT mRECT;
-  IChannelBlend mBlend;
 	const char* mTooltip;
 };
 
