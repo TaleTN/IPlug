@@ -50,7 +50,7 @@ public:
 	inline int ParamIdx() const { return mParamIdx; }
 	virtual void SetValueFromPlug(double value) {}
 	virtual void SetValueFromUserInput(double value) {}
-	double GetValue() { return mValue; }
+	virtual double GetValue() const { return 0.0; }
 
 	IRECT* GetRECT() { return &mRECT; }				// The draw area for this control.
 	IRECT* GetTargetRECT() { return &mTargetRECT; }	// The mouse target area (default = draw area).
@@ -93,11 +93,10 @@ protected:
 	IPlugBase* mPlug;
 	IRECT mRECT, mTargetRECT;
 	int mParamIdx;
-	double WDL_FIXALIGN mValue, mDefaultValue, mClampLo, mClampHi;
 	bool mDirty, mHide, mGrayed, mRedraw, mDisablePrompt, mClamped, mDblAsSingleClick;
   IChannelBlend mBlend;
 	const char* mTooltip;
-} WDL_FIXALIGN;
+};
 
 enum EDirection { kVertical, kHorizontal };
 
