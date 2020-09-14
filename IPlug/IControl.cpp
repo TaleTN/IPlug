@@ -58,9 +58,10 @@ void IControl::GrayOut(bool gray)
 
 void IControl::PromptUserInput()
 {
-	if (mParamIdx >= 0 && !mDisablePrompt) {
+	if (mParamIdx >= 0)
+	{
 		mPlug->GetGUI()->PromptUserInput(this, mPlug->GetParam(mParamIdx));
-        Redraw();
+		Redraw();
 	}
 }
 
