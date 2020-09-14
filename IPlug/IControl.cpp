@@ -188,21 +188,46 @@ void ISwitchControl::Draw(IGraphics* const pGraphics)
 	IBitmapControl::Draw(pGraphics);
 }
 
-IInvisibleSwitchControl::IInvisibleSwitchControl(IPlugBase* pPlug, IRECT* pR, int paramIdx)
-:   IControl(pPlug, pR, paramIdx, IChannelBlend::kBlendClobber)
+IInvisibleSwitchControl::IInvisibleSwitchControl(
+	IPlugBase* const pPlug,
+	const IRECT* const pR,
+	const int paramIdx
+):
+	IControl(pPlug, paramIdx)
 {
-    mDisablePrompt = true;
+	mDisablePrompt = 1;
+	mDblAsSingleClick = 1;
+
+	mTargetRECT = *pR;
+	mTooltip = NULL;
+	mValue = 0.0;
 }
 
-void IInvisibleSwitchControl::OnMouseDown(int x, int y, IMouseMod* pMod)
+void IInvisibleSwitchControl::OnMouseDown(int, int, const IMouseMod mod)
 {
-    if (mValue < 0.5) {
-        mValue = 1.0;
-    }
-    else {
-        mValue = 0.0;
-    }
-    SetDirty();
+	if (mod.L)
+	{
+		mValue = mValue < 0.5 ? 1.0 : 0.0;
+		SetDirty();
+	}
+}
+
+void IInvisibleSwitchControl::SetTargetArea(const IRECT* const pR)
+{
+	mTargetRECT = *pR;
+}
+
+bool IInvisibleSwitchControl::IsHit(const int x, const int y)
+{
+	return mTargetRECT.Contains(x, y);
+}
+
+void IInvisibleSwitchControl::SetDirty(const bool pushParamToPlug)
+{
+	if (pushParamToPlug && mParamIdx >= 0)
+	{
+		mPlug->SetParameterFromGUI(mParamIdx, mValue);
+	}
 }
 
 IRadioButtonsControl::IRadioButtonsControl(IPlugBase* pPlug, IRECT* pR, int paramIdx, int nButtons, 

@@ -191,17 +191,36 @@ public:
 };
 
 // On/off switch that has a target area only.
-class IInvisibleSwitchControl : public IControl
+class IInvisibleSwitchControl: public IControl
 {
 public:
+	IInvisibleSwitchControl(
+		IPlugBase* pPlug,
+		const IRECT* pR,
+		int paramIdx
+	);
 
-    IInvisibleSwitchControl(IPlugBase* pPlug, IRECT* pR, int paramIdx);
-    ~IInvisibleSwitchControl() {}
+	void OnMouseDown(int x, int y, IMouseMod mod);
 
-    void OnMouseDown(int x, int y, IMouseMod* pMod);
+	void SetValueFromPlug(const double value) { mValue = value; }
+	double GetValue() const { return mValue; }
 
-    virtual bool Draw(IGraphics* pGraphics) { return true; }
-};
+	IRECT* GetTargetRECT() { return &mTargetRECT; }
+	void SetTargetArea(const IRECT* pR);
+
+	bool IsHit(int x, int y);
+
+	void SetDirty(bool pushParamToPlug = true);
+
+	void SetTooltip(const char* tooltip) { mTooltip = tooltip; }
+	const char* GetTooltip() { return mTooltip; }
+
+protected:
+	IRECT mTargetRECT;
+	const char* mTooltip;
+	double WDL_FIXALIGN mValue;
+}
+WDL_FIXALIGN;
 
 // A set of buttons that maps to a single selection.  Bitmap has 2 states, off and on.
 class IRadioButtonsControl : public IControl
