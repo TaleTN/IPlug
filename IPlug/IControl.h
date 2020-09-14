@@ -174,17 +174,20 @@ protected:
 }
 WDL_FIXALIGN;
 
-// A switch.  Click to cycle through the bitmap states.
-class ISwitchControl : public IBitmapControl
+// A switch. Click to toggle/cycle through the bitmap states.
+class ISwitchControl: public IBitmapControl
 {
 public:
+	ISwitchControl(
+		IPlugBase* pPlug,
+		int x,
+		int y,
+		int paramIdx,
+		const IBitmap* pBitmap
+	);
 
-	ISwitchControl(IPlugBase* pPlug, int x, int y, int paramIdx, IBitmap* pBitmap,
-		IChannelBlend::EBlendMethod blendMethod = IChannelBlend::kBlendNone)
-	:	IBitmapControl(pPlug, x, y, paramIdx, pBitmap, blendMethod) {}
-	~ISwitchControl() {}
-
-	void OnMouseDown(int x, int y, IMouseMod* pMod);
+	void OnMouseDown(int x, int y, IMouseMod mod);
+	void Draw(IGraphics* pGraphics);
 };
 
 // On/off switch that has a target area only.

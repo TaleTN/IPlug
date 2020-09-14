@@ -147,22 +147,45 @@ void IBitmapControl::Rescale(IGraphics* const pGraphics)
 	pGraphics->UpdateIBitmap(&mBitmap);
 }
 
-void ISwitchControl::OnMouseDown(int x, int y, IMouseMod* pMod)
+ISwitchControl::ISwitchControl(
+	IPlugBase* const pPlug,
+	const int x,
+	const int y,
+	const int paramIdx,
+	const IBitmap* const pBitmap
+):
+	IBitmapControl(pPlug, x, y, paramIdx, pBitmap)
 {
-  if (pMod->R) {
-    PromptUserInput();
-  }
-  else
-  if (mBitmap.N > 1) {
-    mValue += 1.0 / (double) (mBitmap.N - 1);
+	mDisablePrompt = 1;
+	mDblAsSingleClick = 1;
+}
+
+void ISwitchControl::OnMouseDown(int, int, const IMouseMod mod)
+{
+	if (mod.R && !mDisablePrompt)
+	{
+		PromptUserInput();
+		return;
 	}
-	else {
-		mValue += 1.0;
-	}
-	if (mValue > 1.001) {
-		mValue = 0.0;
-	}
+
+	if (!mod.L) return;
+
+	int n = mBitmap.N - 1;
+	n = wdl_max(n, 1);
+
+	const double m = (double)n;
+	int i = (int)(m * mValue + 0.5);
+
+	if (i++ >= n) i = 0;
+	mValue = (double)i / m;
+
 	SetDirty();
+}
+
+void ISwitchControl::Draw(IGraphics* const pGraphics)
+{
+	if (mBitmap.N == 1 && (mValue >= 0.5) == mReverse) return;
+	IBitmapControl::Draw(pGraphics);
 }
 
 IInvisibleSwitchControl::IInvisibleSwitchControl(IPlugBase* pPlug, IRECT* pR, int paramIdx)
