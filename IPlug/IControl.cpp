@@ -460,21 +460,41 @@ bool IBitmapOverlayControl::Draw(IGraphics* pGraphics)
 	}
 }
 
-void ITextControl::SetTextFromPlug(char* str)
+ITextControl::ITextControl(
+	IPlugBase* const pPlug,
+	const IRECT* const pR,
+	const IText* const pFont,
+	const char* const str
+):
+	IControl(pPlug)
 {
-	if (strcmp(mStr.Get(), str)) {
+	mRECT = *pR;
+	mFont = *pFont;
+	mStr.Set(str);
+}
+
+void ITextControl::SetTextFromPlug(const char* const str)
+{
+	if (strcmp(mStr.Get(), str))
+	{
 		SetDirty(false);
 		mStr.Set(str);
 	}
 }
 
-bool ITextControl::Draw(IGraphics* pGraphics)
+void ITextControl::Draw(IGraphics* const pGraphics)
 {
-  char* cStr = mStr.Get();
-	if (CSTR_NOT_EMPTY(cStr)) {
-  	return pGraphics->DrawIText(&mText, cStr, &mRECT);
-  }
-  return true;
+	pGraphics->DrawIText(&mFont, mStr.Get(), &mRECT);
+}
+
+bool ITextControl::IsHit(int /* x */, int /* y */)
+{
+	return false;
+}
+
+void ITextControl::Rescale(IGraphics* /* pGraphics */)
+{
+	mFont.mCached = NULL;
 }
 
 ICaptionControl::ICaptionControl(IPlugBase* pPlug, IRECT* pR, int paramIdx, IText* pText, bool showParamLabel)

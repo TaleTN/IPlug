@@ -348,30 +348,29 @@ protected:
 };
 
 // Output text to the screen.
-class ITextControl : public IControl
+class ITextControl: public IControl
 {
 public:
+	ITextControl(
+		IPlugBase* pPlug,
+		const IRECT* pR,
+		const IText* pFont,
+		const char* str = NULL
+	);
 
-	ITextControl(IPlugBase* pPlug, IRECT* pR, IText* pText, const char* str = "")
-	:	IControl(pPlug, pR), mText(*pText)
-  {
-    mStr.Set(str);
-  }
-	~ITextControl() {}
-
-	// GetText returns a pointer to a 0 char if the text has zero length
-	// (see wdlstring.h).
-	const char *GetText() { return mStr.Get(); }
-	void SetTextFromPlug(char* str);
+	const char* GetText() const { return mStr.Get(); }
+	void SetTextFromPlug(const char* str);
 	void ClearTextFromPlug() { SetTextFromPlug(""); }
 
-	const IText* GetIText() const { return &mText; }
+	inline IText* GetFont() { return &mFont; }
 
-	bool Draw(IGraphics* pGraphics);
+	void Draw(IGraphics* pGraphics);
+	bool IsHit(int x, int y);
+	void Rescale(IGraphics* pGraphics);
 
 protected:
-	IText mText;
-	WDL_String mStr;
+	IText mFont;
+	WDL_FastString mStr;
 };
 
 // If paramIdx is specified, the text is automatically set to the output
