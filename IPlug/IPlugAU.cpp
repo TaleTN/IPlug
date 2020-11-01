@@ -900,10 +900,11 @@ ComponentResult IPlugAU::GetProperty(const AudioUnitPropertyID propID, const Aud
 				AudioUnitParameterIDName* const pIDName = (AudioUnitParameterIDName*)pData;
 				const IParam* const pParam = GetParam(pIDName->inID);
 				char cStr[128];
-				lstrcpyn_safe(cStr, pParam->GetNameForHost(), sizeof(cStr));
-				if (pIDName->inDesiredLength != kAudioUnitParameterName_Full)
+				const int len = pIDName->inDesiredLength;
+				lstrcpyn_safe(cStr, pParam->GetNameForHost(len + 1), sizeof(cStr));
+				if (len != kAudioUnitParameterName_Full)
 				{
-					const int n = wdl_min(sizeof(cStr) - 1, pIDName->inDesiredLength);
+					const int n = wdl_min(sizeof(cStr) - 1, len);
 					cStr[n] = '\0';
 				}
 				pIDName->outName = MakeCFString(cStr);
