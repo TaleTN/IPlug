@@ -14,7 +14,7 @@
 #include "WDL/wdlcstring.h"
 #include "WDL/wdltypes.h"
 
-#define vst_strncpy(y, x, n) lstrcpyn_safe(y, x, (n) + 1)
+#define vst_strncpy(y, x, n) lstrcpyn_safe(y, x, n)
 
 struct CanDoTbl
 {
@@ -221,7 +221,7 @@ int IPlugVST2::GetHost()
 	int host = IPlugBase::GetHost();
 	if (host == kHostUninit)
 	{
-		char productStr[wdl_max(256, kVstMaxProductStrLen)];
+		char productStr[wdl_max(256, kVstMaxProductStrLen + 1)];
 		productStr[0] = 0;
 		int version = 0;
 		mHostCallback(&mAEffect, audioMasterGetProductString, 0, 0, productStr, 0.0f);
@@ -825,7 +825,7 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 		case effGetMidiKeyName:
 		{
 			MidiKeyName* const pMKN = (MidiKeyName*)ptr;
-			if (pMKN && _this->MidiNoteName(pMKN->thisKeyNumber, pMKN->keyName, kVstMaxNameLen + 1))
+			if (pMKN && _this->MidiNoteName(pMKN->thisKeyNumber, pMKN->keyName, kVstMaxNameLen))
 			{
 				ret = 1;
 			}
