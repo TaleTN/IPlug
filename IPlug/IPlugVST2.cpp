@@ -472,7 +472,8 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 		{
 			if (_this->NParams(idx))
 			{
-				vst_strncpy((char*)ptr, _this->GetParam(idx)->GetNameForHost(), _this->GetMaxParamStrLen());
+				const int len = _this->GetMaxParamStrLen();
+				vst_strncpy((char*)ptr, _this->GetParam(idx)->GetNameForHost(len), len);
 			}
 			break;
 		}
@@ -846,6 +847,8 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 						break;
 					}
 				}
+				static const int len = kVstMaxShortLabelLen;
+				vst_strncpy(pp->shortLabel, pParam->GetNameForHost(len), len);
 				ret = 1;
 			}
 			break;
