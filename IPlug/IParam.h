@@ -24,7 +24,9 @@ public:
 		mGlobalParam(0),
 		_unused(0),
 		mName(name)
-	{}
+	{
+		mShortName[0] = 0;
+	}
 
 	virtual ~IParam() {}
 
@@ -43,6 +45,13 @@ public:
 	virtual char* GetDisplayForHost(char* buf, int bufSize = 128) = 0;
 	virtual char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128) = 0;
 	const char* GetNameForHost() const { return mName.Get(); }
+
+	const char* GetNameForHost(const int wantSize) const
+	{
+		return wantSize <= 8 && mShortName[0] ? mShortName : mName.Get();
+	}
+
+	void SetShortName(const char* name);
 	virtual const char* GetLabelForHost() const { return ""; }
 
 	virtual int GetNDisplayTexts() const { return 0; }
@@ -66,6 +75,7 @@ protected:
 	unsigned int mNegateDisplay:1, mGlobalParam:1, _unused:30;
 
 	WDL_FastString mName;
+	char mShortName[8];
 };
 
 class IBoolParam: public IParam

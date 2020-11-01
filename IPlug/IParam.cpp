@@ -10,6 +10,12 @@
 #include "WDL/db2val.h"
 #include "WDL/wdlcstring.h"
 
+void IParam::SetShortName(const char* const name)
+{
+	assert(strlen(name) < 8);
+	strcpy(mShortName, name);
+}
+
 IBoolParam::IBoolParam(
 	const char* const name,
 	const bool defaultVal,
