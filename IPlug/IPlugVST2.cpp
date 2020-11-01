@@ -816,6 +816,34 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effGetParameterProperties:
+		{
+			if (ptr && _this->NParams(idx))
+			{
+				VstParameterProperties* const pp = (VstParameterProperties*)ptr;
+				const IParam* const pParam = _this->GetParam(idx);
+				vst_strncpy(pp->label, pParam->GetNameForHost(), kVstMaxLabelLen);
+				switch (pParam->Type())
+				{
+					case IParam::kTypeBool:
+					{
+						pp->flags = kVstParameterIsSwitch;
+						break;
+					}
+					case IParam::kTypeEnum:
+					{
+						pp->flags = kVstParameterUsesIntegerMinMax | kVstParameterUsesIntStep;
+						pp->minInteger = 0;
+						pp->maxInteger = ((const IEnumParam*)pParam)->NEnums() - 1;
+						pp->largeStepInteger = pp->stepInteger = 1;
+						break;
+					}
+				}
+				ret = 1;
+			}
+			break;
+		}
+
 		case effGetVstVersion:
 		{
 			ret = kVstVersion;
