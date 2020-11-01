@@ -388,6 +388,13 @@ static double VSTString2Parameter(const IParam* const pParam, const char* const 
 	return v;
 }
 
+int IPlugVST2::GetMaxParamStrLen() const
+{
+	// See https://www.reaper.fm/sdk/vst/
+	const bool hasCockosExtensions = !!(mHasVSTExtensions & VSTEXT_COCKOS);
+	return hasCockosExtensions ? 256 : kVstMaxParamStrLen;
+}
+
 VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const VstInt32 opCode, const VstInt32 idx, const VstIntPtr value, void* const ptr, const float opt)
 {
 	VstIntPtr ret = 0;
@@ -447,7 +454,7 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 		{
 			if (_this->NParams(idx))
 			{
-				vst_strncpy((char*)ptr, _this->GetParam(idx)->GetLabelForHost(), kVstMaxParamStrLen);
+				vst_strncpy((char*)ptr, _this->GetParam(idx)->GetLabelForHost(), _this->GetMaxParamStrLen());
 			}
 			break;
 		}
@@ -456,7 +463,7 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 		{
 			if (_this->NParams(idx))
 			{
-				_this->GetParam(idx)->GetDisplayForHost((char*)ptr, kVstMaxParamStrLen);
+				_this->GetParam(idx)->GetDisplayForHost((char*)ptr, _this->GetMaxParamStrLen());
 			}
 			break;
 		}
@@ -465,7 +472,7 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 		{
 			if (_this->NParams(idx))
 			{
-				vst_strncpy((char*)ptr, _this->GetParam(idx)->GetNameForHost(), kVstMaxParamStrLen);
+				vst_strncpy((char*)ptr, _this->GetParam(idx)->GetNameForHost(), _this->GetMaxParamStrLen());
 			}
 			break;
 		}

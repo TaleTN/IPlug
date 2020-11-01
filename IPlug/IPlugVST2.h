@@ -56,6 +56,7 @@ protected:
 	bool SendMidiMsg(const IMidiMsg* pMsg);
 	bool SendSysEx(const ISysEx* pSysEx);
 	inline audioMasterCallback GetHostCallback() const { return mHostCallback; }
+	int GetMaxParamStrLen() const;
 
 private:
 	template <class SAMPLETYPE>
