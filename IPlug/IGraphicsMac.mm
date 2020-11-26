@@ -6,11 +6,13 @@
 #endif
 
 #include "WDL/swell/swell.h"
+#include "WDL/wdltypes.h"
 
 // TN: I guess "undocumented" see WDL/swell/swell-misc.mm, but it works!
 #define SWELL_IMPLEMENT_GETOSXVERSION
 #include "WDL/swell/swell-internal.h"
 
+#include <pwd.h>
 #include <string.h>
 #import <objc/runtime.h>
 
@@ -304,6 +306,19 @@ bool IGraphicsMac::PluginPath(WDL_String* const pPath)
 			pPath->Append("/");
 			return true;
 		}
+	}
+	pPath->Set("");
+	return false;
+}
+
+bool IGraphicsMac::UserDataPath(WDL_String* const pPath)
+{
+	struct passwd* const pw = getpwuid(getuid());
+	if (pw)
+	{
+		pPath->Set(pw->pw_dir);
+		pPath->Append(WDL_DIRCHAR_STR "Library" WDL_DIRCHAR_STR "Application Support");
+		return true;
 	}
 	pPath->Set("");
 	return false;
