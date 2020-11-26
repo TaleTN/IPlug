@@ -68,8 +68,13 @@ public:
 	enum EPromptFlags { kPromptCustomWidth = 0x80000000, kPromptCustomRect = 0xC0000000 };
 	virtual void PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int fontSize = 0) = 0;
 	void SetFromStringAfterPrompt(IControl* pControl, const IParam* pParam, const char* txt);
+
 	virtual bool HostPath(WDL_String* pPath) = 0; // Full path to host executable.
 	virtual bool PluginPath(WDL_String* pPath) = 0; // Full path to plugin dll.
+
+	virtual bool UserDataPath(WDL_String* pPath) = 0; // Full path to user data dir.
+	bool UserDataPath(WDL_String* pPath, const char* mfrName, const char* plugName = NULL);
+
 	// Run the "open file" or "save file" dialog; extensions = "txt wav" for example.
 	enum EFileAction { kFileOpen = 0, kFileSave };
 	virtual bool PromptForFile(WDL_String* pFilename, int action = kFileOpen, const char* dir = NULL, const char* extensions = NULL) = 0;

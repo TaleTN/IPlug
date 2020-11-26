@@ -200,6 +200,23 @@ void IGraphics::SetFromStringAfterPrompt(IControl* const pControl, const IParam*
 	}
 }
 
+bool IGraphics::UserDataPath(WDL_String* const pPath, const char* const mfrName, const char* const plugName)
+{
+	const bool ok = UserDataPath(pPath);
+	if (ok)
+	{
+		pPath->Append(WDL_DIRCHAR_STR);
+		pPath->Append(mfrName);
+
+		if (plugName)
+		{
+			pPath->Append(WDL_DIRCHAR_STR);
+			pPath->Append(plugName);
+		}
+	}
+	return ok;
+}
+
 void IGraphics::AttachBackground(const int ID, const char* const name)
 {
 	const IBitmap bg = LoadIBitmap(ID, name);
