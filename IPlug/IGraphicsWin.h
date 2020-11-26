@@ -25,8 +25,8 @@ public:
 
 	void UpdateTooltips() { if (!TooltipsEnabled()) HideTooltip(); }
 
-	void HostPath(WDL_String* pPath);
-	void PluginPath(WDL_String* pPath);
+	bool HostPath(WDL_String* pPath);
+	bool PluginPath(WDL_String* pPath);
 
 	bool PromptForFile(WDL_String* pFilename, int action = kFileOpen, const char* dir = NULL, const char* extensions = NULL);
 	// bool PromptForColor(IColor* pColor, const char* prompt = NULL);

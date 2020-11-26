@@ -859,12 +859,12 @@ void IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pPara
 	mEdParam = pParam;
 }
 
-static void GetModulePath(HMODULE const hModule, WDL_String* const pPath)
+static bool GetModulePath(HMODULE const hModule, WDL_String* const pPath)
 {
 	if (!pPath->SetLen(MAX_PATH)) // Allocates MAX_PATH+1
 	{
 		pPath->Set("");
-		return;
+		return false;
 	}
 
 	char* const pathCStr = pPath->Get();
@@ -876,16 +876,18 @@ static void GetModulePath(HMODULE const hModule, WDL_String* const pPath)
 
 	while (--s >= 0 && pathCStr[s] != '\\');
 	pathCStr[s + 1] = 0;
+
+	return true;
 }
 
-void IGraphicsWin::HostPath(WDL_String* const pPath)
+bool IGraphicsWin::HostPath(WDL_String* const pPath)
 {
-	GetModulePath(NULL, pPath);
+	return GetModulePath(NULL, pPath);
 }
 
-void IGraphicsWin::PluginPath(WDL_String* const pPath)
+bool IGraphicsWin::PluginPath(WDL_String* const pPath)
 {
-	GetModulePath(mHInstance, pPath);
+	return GetModulePath(mHInstance, pPath);
 }
 
 bool IGraphicsWin::PromptForFile(WDL_String* const pFilename, const int action, const char* dir, const char* const extensions)
