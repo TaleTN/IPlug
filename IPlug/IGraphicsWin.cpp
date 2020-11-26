@@ -4,6 +4,7 @@
 #include <commctrl.h>
 #include <objbase.h>
 #include <shellapi.h>
+#include <shlobj.h>
 #include <windowsx.h>
 #include <wininet.h>
 
@@ -888,6 +889,17 @@ bool IGraphicsWin::HostPath(WDL_String* const pPath)
 bool IGraphicsWin::PluginPath(WDL_String* const pPath)
 {
 	return GetModulePath(mHInstance, pPath);
+}
+
+bool IGraphicsWin::UserDataPath(WDL_String* const pPath)
+{
+	if (!pPath->SetLen(MAX_PATH))
+	{
+		pPath->Set("");
+		return false;
+	}
+
+	return SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, pPath->Get()));
 }
 
 bool IGraphicsWin::PromptForFile(WDL_String* const pFilename, const int action, const char* dir, const char* const extensions)
