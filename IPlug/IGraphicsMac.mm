@@ -274,7 +274,7 @@ void IGraphicsMac::UpdateTooltips()
 	}
 }
 
-void IGraphicsMac::HostPath(WDL_String* const pPath)
+bool IGraphicsMac::HostPath(WDL_String* const pPath)
 {
 	const CocoaAutoReleasePool pool;
 	NSBundle* const pBundle = [NSBundle bundleWithIdentifier: ToNSString(GetBundleID())];
@@ -284,13 +284,14 @@ void IGraphicsMac::HostPath(WDL_String* const pPath)
 		if (path)
 		{
 			pPath->Set([path UTF8String]);
-			return;
+			return true;
 		}
 	}
 	pPath->Set("");
+	return false;
 }
 
-void IGraphicsMac::PluginPath(WDL_String* const pPath)
+bool IGraphicsMac::PluginPath(WDL_String* const pPath)
 {
 	const CocoaAutoReleasePool pool;
 	NSBundle* const pBundle = [NSBundle bundleWithIdentifier: ToNSString(GetBundleID())];
@@ -301,10 +302,11 @@ void IGraphicsMac::PluginPath(WDL_String* const pPath)
 		{
 			pPath->Set([path UTF8String]);
 			pPath->Append("/");
-			return;
+			return true;
 		}
 	}
 	pPath->Set("");
+	return false;
 }
 
 // extensions = "txt wav" for example
