@@ -66,6 +66,23 @@ public:
 	virtual int Unserialize(const ByteChunk* pChunk, int startPos) = 0;
 	virtual int Size() const = 0;
 
+	// Returns IDoublePowParam shape so non-normalized value
+	// y*(maxVal - minVal) + minVal corresponds to normalized value x.
+	static double GetPowShape(const double y, const double x = 0.5)
+	{
+		assert(y > 0.0 && y < 1.0);
+		assert(x > 0.0 && x < 1.0);
+		return log(y) / log(x);
+	}
+
+	// Returns IDoubleExpParam shape so non-normalized value
+	// y*(maxVal - minVal) + minVal corresponds to normalized value 0.5.
+	static double GetExpShape(const double y)
+	{
+		assert(y > 0.0 && y < 1.0);
+		return log((1.0 - y) / y) * 2.0;
+	}
+
 protected:
 	static void Delete(WDL_FastString* const str) { delete str; }
 
