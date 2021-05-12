@@ -538,6 +538,12 @@ IDoubleExpParam::IDoubleExpParam(
 	SetShape(shape);
 }
 
+void IDoubleExpParam::SetShape(const double nonNormalizedValue, const double normalizedValue)
+{
+	assert(normalizedValue == 0.5);
+	SetShape(IParam::GetExpShape(IDoubleParam::ToNormalized(nonNormalizedValue)));
+}
+
 void IDoubleExpParam::SetNormalized(const double normalizedValue)
 {
 	mValue = FromNormalized(normalizedValue);

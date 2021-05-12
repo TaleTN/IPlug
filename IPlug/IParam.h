@@ -434,6 +434,8 @@ public:
 		mExpMin1 = exp(shape) - 1.0;
 	}
 
+	// Adjusts the shape so nonNormalizedValue corresponds to normalizedValue = 0.5.
+	void SetShape(double nonNormalizedValue, double normalizedValue);
 	inline double GetShape() const { return mShape; }
 
 	double FromNormalized(const double normalizedValue) const
