@@ -506,17 +506,7 @@ IDoublePowParam::IDoublePowParam(
 
 void IDoublePowParam::SetShape(const double nonNormalizedValue, const double normalizedValue)
 {
-	#ifndef NDEBUG
-	{
-		const double minVal = wdl_min(mMin, mMax);
-		const double maxVal = wdl_max(mMin, mMax);
-
-		assert(nonNormalizedValue > minVal && nonNormalizedValue < maxVal);
-		assert(normalizedValue > 0.0 && normalizedValue < 1.0);
-	}
-	#endif
-
-	SetShape(log(IDoubleParam::ToNormalized(nonNormalizedValue)) / log(normalizedValue));
+	SetShape(IParam::GetPowShape(IDoubleParam::ToNormalized(nonNormalizedValue), normalizedValue));
 }
 
 void IDoublePowParam::SetNormalized(const double normalizedValue)
