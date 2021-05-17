@@ -55,6 +55,7 @@ public:
 	void FillCircle(IColor color, float cx, float cy, float r, float weight = 1.0f, bool antiAlias = false);
 
 	bool LoadFont(int ID, const char* name);
+	bool UpdateIText(IText* const pTxt) { return !!CacheFont(pTxt, Scale()); }
 	static void PrepDrawIText(IText* const pTxt, const int scale = 0) { CacheFont(pTxt, scale); }
 	int DrawIText(IText* pTxt, const char* str, const IRECT* pR);
 	int MeasureIText(IText* pTxt, const char* str, IRECT* pR);
