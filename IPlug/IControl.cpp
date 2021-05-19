@@ -52,7 +52,7 @@ IBitmapControl::IBitmapControl(
 	const int paramIdx,
 	const IBitmap* const pBitmap
 ):
-	IControl(pPlug, paramIdx)
+	IControl(pPlug, NULL, paramIdx)
 {
 	mTargetRECT = mRECT = IRECT(x, y, pBitmap);
 	mBitmap = *pBitmap;
@@ -192,12 +192,12 @@ IInvisibleSwitchControl::IInvisibleSwitchControl(
 	const IRECT* const pR,
 	const int paramIdx
 ):
-	IControl(pPlug, paramIdx)
+	IControl(pPlug, NULL, paramIdx)
 {
 	mDisablePrompt = 1;
 	mDblAsSingleClick = 1;
 
-	mTargetRECT = *pR;
+	if (pR) mTargetRECT = *pR;
 	mTooltip = NULL;
 	mValue = 0.0;
 }
@@ -454,9 +454,8 @@ ITextControl::ITextControl(
 	const IText* const pFont,
 	const char* const str
 ):
-	IControl(pPlug)
+	IControl(pPlug, pR)
 {
-	mRECT = *pR;
 	mFont = *pFont;
 	mStr.Set(str);
 }

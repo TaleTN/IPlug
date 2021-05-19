@@ -23,6 +23,7 @@ public:
 	// If paramIdx is > -1, this control will be associated with a plugin parameter.
 	IControl(
 		IPlugBase* const pPlug,
+		const IRECT* const pR = NULL,
 		const int paramIdx = -1
 	):
 		mPlug(pPlug),
@@ -36,7 +37,9 @@ public:
 		mReverse(0),
 		mDirection(0),
 		_unused(0)
-	{}
+	{
+		if (pR) mRECT = *pR;
+	}
 
 	virtual ~IControl() {}
 
