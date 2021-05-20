@@ -162,7 +162,7 @@ public:
 	void SetDirty(bool pushParamToPlug = true);
 	void Clamp(double lo = 0.0, double hi = 1.0);
 
-	void SetTooltip(const char* tooltip) { mTooltip = tooltip; }
+	void SetTooltip(const char* const tooltip) { mTooltip = tooltip; }
 	const char* GetTooltip() { return mTooltip; }
 
 	void Rescale(IGraphics* pGraphics);
@@ -215,7 +215,7 @@ public:
 
 	void SetDirty(bool pushParamToPlug = true);
 
-	void SetTooltip(const char* tooltip) { mTooltip = tooltip; }
+	void SetTooltip(const char* const tooltip) { mTooltip = tooltip; }
 	const char* GetTooltip() { return mTooltip; }
 
 protected:
