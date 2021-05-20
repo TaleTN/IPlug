@@ -323,7 +323,11 @@ void IFaderControl::OnMouseDblClick(int, int, IMouseMod)
 
 void IFaderControl::OnMouseWheel(int, int, const IMouseMod mod, const float d)
 {
-	if (mod.C | mod.W) UpdateValue((mod.C ? 0.001 : 0.01) * d + mValue);
+	if (mod.C | mod.W)
+	{
+		const double delta = mod.C ? 0.001 : 0.01;
+		UpdateValue((double)d * delta + mValue);
+	}
 }
 
 void IFaderControl::SnapToMouse(const int x, const int y)
@@ -439,7 +443,11 @@ void IKnobMultiControl::OnMouseDblClick(int, int, IMouseMod)
 
 void IKnobMultiControl::OnMouseWheel(int, int, const IMouseMod mod, const float d)
 {
-	if (mod.C | mod.W) UpdateValue((mod.C ? 0.001 : 0.01) * d + mValue);
+	if (mod.C | mod.W)
+	{
+		const double delta = mod.C ? 0.001 : 0.01;
+		UpdateValue((double)d * delta + mValue);
+	}
 }
 
 void IKnobMultiControl::SetValueFromPlug(const double value)
