@@ -316,7 +316,7 @@ void IFaderControl::OnMouseDblClick(int, int, IMouseMod)
 {
 	if (mValue != mDefaultValue)
 	{
-		mValue = mDefaultValue;
+		mValue = wdl_max(mDefaultValue, 0.0);
 		SetDirty();
 	}
 }
@@ -436,7 +436,7 @@ void IKnobMultiControl::OnMouseDblClick(int, int, IMouseMod)
 {
 	if (mValue != mDefaultValue)
 	{
-		mValue = mDefaultValue;
+		mValue = wdl_max(mDefaultValue, 0.0);
 		SetDirty();
 	}
 }
