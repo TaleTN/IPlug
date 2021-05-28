@@ -65,8 +65,9 @@ public:
 	virtual void PromptUserInput();
 
 	inline int ParamIdx() const { return mParamIdx; }
-	virtual void SetValueFromPlug(double value) {}
-	virtual void SetValueFromUserInput(double value) {}
+	virtual void SetValueFromPlug(double value);
+	virtual void SetValueFromUserInput(double value);
+	virtual void SetValue(double value) {}
 	virtual double GetValue() const { return 0.0; }
 
 	inline IRECT* GetRECT() { return &mRECT; }        // The draw area for this control.

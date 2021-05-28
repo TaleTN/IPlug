@@ -2,6 +2,30 @@
 
 const float IControl::kGrayedAlpha = 0.25f;
 
+void IControl::SetValueFromPlug(const double value)
+{
+	assert(value >= 0.0 && value <= 1.0);
+
+	if (GetValue() != value)
+	{
+		SetValue(value);
+		SetDirty(false);
+		Redraw();
+	}
+}
+
+void IControl::SetValueFromUserInput(const double value)
+{
+	assert(value >= 0.0 && value <= 1.0);
+
+	if (GetValue() != value)
+	{
+		SetValue(value);
+		SetDirty();
+		Redraw();
+	}
+}
+
 void IControl::PromptUserInput()
 {
 	if (mParamIdx >= 0)
