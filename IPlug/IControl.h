@@ -151,8 +151,7 @@ public:
 
 	void Draw(IGraphics* pGraphics);
 
-	void SetValueFromPlug(double value);
-	void SetValueFromUserInput(double value);
+	void SetValue(double value);
 	double GetValue() const { return mValue; }
 
 	IRECT* GetTargetRECT() { return &mTargetRECT; }

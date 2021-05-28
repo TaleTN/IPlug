@@ -104,24 +104,10 @@ void IBitmapControl::Draw(IGraphics* const pGraphics)
 	LICE_Blit(dest, src, x, y, 0, i * mBitmap.H, mBitmap.W, mBitmap.H, weight, LICE_BLIT_MODE_COPY | LICE_BLIT_USE_ALPHA);
 }
 
-void IBitmapControl::SetValueFromPlug(const double value)
+void IBitmapControl::SetValue(const double value)
 {
-	if (mValue != value)
-	{
-		mValue = value;
-		SetDirty(false);
-		Redraw();
-	}
-}
-
-void IBitmapControl::SetValueFromUserInput(const double value)
-{
-	if (mValue != value)
-	{
-		mValue = value;
-		SetDirty();
-		Redraw();
-	}
+	assert(value >= 0.0 && value <= 1.0);
+	mValue = value;
 }
 
 void IBitmapControl::UpdateValue(double value)
