@@ -221,6 +221,12 @@ void IInvisibleSwitchControl::OnMouseDown(int, int, const IMouseMod mod)
 	}
 }
 
+void IInvisibleSwitchControl::SetValue(const double value)
+{
+	assert(value >= 0.0 && value <= 1.0);
+	mValue = value;
+}
+
 void IInvisibleSwitchControl::SetTargetArea(const IRECT* const pR)
 {
 	mTargetRECT = *pR;
