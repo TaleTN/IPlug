@@ -26,6 +26,26 @@ void IControl::SetValueFromUserInput(const double value)
 	}
 }
 
+void IControl::SetDirty(const bool pushParamToPlug)
+{
+	mDirty = 1;
+
+	if (pushParamToPlug && mParamIdx >= 0)
+	{
+		const double value = GetValue();
+		mPlug->SetParameterFromGUI(mParamIdx, value);
+
+		if (mAutoUpdate)
+		{
+			IGraphics* const pGraphics = GetGUI();
+			if (pGraphics)
+			{
+				pGraphics->SetParameterFromPlug(mParamIdx, value, true);
+			}
+		}
+	}
+}
+
 void IControl::PromptUserInput()
 {
 	if (mParamIdx >= 0)
@@ -132,16 +152,6 @@ bool IBitmapControl::IsHit(const int x, const int y)
 	return mTargetRECT.Contains(x, y);
 }
 
-void IBitmapControl::SetDirty(const bool pushParamToPlug)
-{
-	mDirty = 1;
-
-	if (pushParamToPlug && mParamIdx >= 0)
-	{
-		mPlug->SetParameterFromGUI(mParamIdx, mValue);
-	}
-}
-
 void IBitmapControl::Clamp(const double lo, const double hi)
 {
 	assert(lo >= 0.0 && lo <= 1.0);
@@ -235,16 +245,6 @@ void IInvisibleSwitchControl::SetTargetArea(const IRECT* const pR)
 bool IInvisibleSwitchControl::IsHit(const int x, const int y)
 {
 	return mTargetRECT.Contains(x, y);
-}
-
-void IInvisibleSwitchControl::SetDirty(const bool pushParamToPlug)
-{
-	mDirty = 1;
-
-	if (pushParamToPlug && mParamIdx >= 0)
-	{
-		mPlug->SetParameterFromGUI(mParamIdx, mValue);
-	}
 }
 
 IContactControl::IContactControl(

@@ -36,6 +36,7 @@ public:
 		mDblAsSingleClick(0),
 		mReverse(0),
 		mDirection(0),
+		mAutoUpdate(0),
 		_unused(0)
 	{
 		if (pR) mRECT = *pR;
@@ -83,10 +84,14 @@ public:
 	inline void Reverse(const bool reverse) { mReverse = reverse; }
 	inline bool IsReversed() const { return mReverse; }
 
+	// Automatically update other controls with same paramIdx.
+	inline void AutoUpdate(const bool update) { mAutoUpdate = update; }
+	inline bool DoesAutoUpdate() const { return mAutoUpdate; }
+
 	// Override if you want the control to be hit only if a visible part of it is hit, or whatever.
 	virtual bool IsHit(int x, int y);
 
-	virtual void SetDirty(bool pushParamToPlug = true) { mDirty = 1; }
+	virtual void SetDirty(bool pushParamToPlug = true);
 	virtual void SetClean() { mDirty = mRedraw; mRedraw = 0; }
 	inline bool IsDirty() const { return mDirty; }
 	virtual void Clamp(double lo = 0.0, double hi = 1.0) {}
@@ -117,7 +122,7 @@ public:
 protected:
 	IPlugBase* mPlug;
 	int mParamIdx;
-	unsigned int mDirty:1, mRedraw:1, mHide:1, mGrayed:1, mDisablePrompt:1, mDblAsSingleClick:1, mReverse:1, mDirection:1, _unused:24;
+	unsigned int mDirty:1, mRedraw:1, mHide:1, mGrayed:1, mDisablePrompt:1, mDblAsSingleClick:1, mReverse:1, mDirection:1, mAutoUpdate:1, _unused:23;
 	IRECT mRECT;
 };
 
@@ -159,7 +164,6 @@ public:
 
 	bool IsHit(int x, int y);
 
-	void SetDirty(bool pushParamToPlug = true);
 	void Clamp(double lo = 0.0, double hi = 1.0);
 
 	void SetTooltip(const char* const tooltip) { mTooltip = tooltip; }
@@ -213,8 +217,6 @@ public:
 	void SetTargetArea(const IRECT* pR);
 
 	bool IsHit(int x, int y);
-
-	void SetDirty(bool pushParamToPlug = true);
 
 	void SetTooltip(const char* const tooltip) { mTooltip = tooltip; }
 	const char* GetTooltip() { return mTooltip; }
