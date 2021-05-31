@@ -58,6 +58,7 @@ public:
 	// By default, mouse double click has its own handler. A control can set mDblAsSingleClick to true to change,
 	// which maps double click to single click for this control (and also causes the mouse to be
 	// captured by the control on double click).
+	inline void SetMouseDblAsSingleClick(const bool single) { mDblAsSingleClick = single; }
 	inline bool MouseDblAsSingleClick() const { return mDblAsSingleClick; }
 
 	virtual void Draw(IGraphics* pGraphics) {}
