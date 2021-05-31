@@ -239,6 +239,8 @@ bool IInvisibleSwitchControl::IsHit(const int x, const int y)
 
 void IInvisibleSwitchControl::SetDirty(const bool pushParamToPlug)
 {
+	mDirty = 1;
+
 	if (pushParamToPlug && mParamIdx >= 0)
 	{
 		mPlug->SetParameterFromGUI(mParamIdx, mValue);
