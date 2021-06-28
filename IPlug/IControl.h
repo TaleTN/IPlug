@@ -212,7 +212,6 @@ public:
 
 	void OnMouseDown(int x, int y, IMouseMod mod);
 
-	void SetValueFromPlug(const double value) { SetValue(value); }
 	void SetValue(double value);
 	double GetValue() const { return mValue; }
 
