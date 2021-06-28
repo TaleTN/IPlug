@@ -76,10 +76,10 @@ public:
 	virtual IRECT* GetTargetRECT() { return &mRECT; } // The mouse target area (default = draw area).
 	virtual void SetTargetArea(const IRECT* pR) {}
 
-	virtual void Hide(const bool hide) { mHide = hide; }
+	virtual void Hide(bool hide);
 	inline bool IsHidden() const { return mHide; }
 
-	virtual void GrayOut(const bool gray) { mGrayed = gray; }
+	virtual void GrayOut(bool gray);
 	inline bool IsGrayed() const { return mGrayed; }
 
 	inline void Reverse(const bool reverse) { mReverse = reverse; }

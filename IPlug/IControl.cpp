@@ -46,6 +46,19 @@ void IControl::SetDirty(const bool pushParamToPlug)
 	}
 }
 
+void IControl::Hide(const bool hide)
+{
+	mRedraw = 1;
+	mHide = hide;
+	SetDirty(false);
+}
+
+void IControl::GrayOut(const bool gray)
+{
+	mGrayed = gray;
+	SetDirty(false);
+}
+
 void IControl::PromptUserInput()
 {
 	if (mParamIdx >= 0)
