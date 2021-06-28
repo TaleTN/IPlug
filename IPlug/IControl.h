@@ -67,6 +67,8 @@ public:
 	virtual void PromptUserInput();
 
 	inline int ParamIdx() const { return mParamIdx; }
+	inline void SetParamIdx(const int paramIdx) { mParamIdx = paramIdx; }
+
 	virtual void SetValueFromPlug(double value);
 	virtual void SetValueFromUserInput(double value);
 	virtual void SetValue(double value) {}
