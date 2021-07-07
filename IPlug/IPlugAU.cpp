@@ -1856,8 +1856,7 @@ IPlugBase(
 bool IPlugAU::AllocStateChunk(int chunkSize)
 {
 	if (chunkSize < 0) chunkSize = GetParamsChunkSize(0, NParams());
-	mState.Alloc(chunkSize);
-	return mState.Size() == chunkSize;
+	return mState.Alloc(chunkSize) == chunkSize;
 }
 
 bool IPlugAU::AllocBankChunk(const int chunkSize)
