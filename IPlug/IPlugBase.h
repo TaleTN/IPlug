@@ -347,7 +347,7 @@ protected:
 	const char* GetPresetName(int idx) const;
 	void ModifyCurrentPreset(const char* name = NULL); // Sets the currently active preset to whatever current params are.
 
-	bool SerializePresets(int fromIdx, int toIdx /* up to not *not* including */, ByteChunk* pChunk) const;
+	bool SerializePresets(int fromIdx, int toIdx /* up to but *not* including */, ByteChunk* pChunk) const;
 	// Returns the new chunk position (endPos).
 	int UnserializePresets(int fromIdx, int toIdx, const ByteChunk* pChunk, int startPos);
 
