@@ -323,10 +323,11 @@ public:
 	// Optimal default size = 4095 - 96, see WDL_HeapBuf.
 	static const int kDefaultSize = 3999;
 
-	void Alloc(const int size = kDefaultSize, const bool resizeDown = true)
+	int Alloc(const int size = kDefaultSize, const bool resizeDown = true)
 	{
 		mBytes.Resize(size, resizeDown);
 		Clear();
+		return mBytes.GetSize();
 	}
 
 	inline void Clear()
