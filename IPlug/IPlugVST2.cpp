@@ -143,8 +143,7 @@ bool IPlugVST2::AllocStateChunk(int chunkSize)
 		chunkSize = GetParamsChunkSize(0, NParams());
 	}
 	chunkSize += kInitializeVSTChunkSize;
-	mState.Alloc(chunkSize);
-	return mState.Size() == chunkSize;
+	return mState.Alloc(chunkSize) == chunkSize;
 }
 
 bool IPlugVST2::AllocBankChunk(int chunkSize)
@@ -155,8 +154,7 @@ bool IPlugVST2::AllocBankChunk(int chunkSize)
 		chunkSize = GetBankChunkSize(NPresets(), mPresetChunkSize);
 	}
 	chunkSize += kInitializeVSTChunkSize;
-	mBankState.Alloc(chunkSize);
-	return mBankState.Size() == chunkSize;
+	return mBankState.Alloc(chunkSize) == chunkSize;
 }
 
 void IPlugVST2::BeginInformHostOfParamChange(const int idx)
