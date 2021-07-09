@@ -718,7 +718,7 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 				VstPinProperties* const pp = (VstPinProperties*)ptr;
 				const int i = idx + 1;
 				sprintf(pp->label, "Input %d", i);
-				pp->flags = (i & 1) & (i < _this->NInChannels()) ? kVstPinIsActive | kVstPinIsStereo : kVstPinIsActive;
+				pp->flags = ((i & 1) & (i < _this->NInChannels())) ? kVstPinIsActive | kVstPinIsStereo : kVstPinIsActive;
 				ret = 1;
 			}
 			break;
@@ -731,7 +731,7 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 				VstPinProperties* const pp = (VstPinProperties*)ptr;
 				const int i = idx + 1;
 				sprintf(pp->label, "Output %d", i);
-				pp->flags = (i & 1) & (i < _this->NOutChannels()) ? kVstPinIsActive | kVstPinIsStereo : kVstPinIsActive;
+				pp->flags = ((i & 1) & (i < _this->NOutChannels())) ? kVstPinIsActive | kVstPinIsStereo : kVstPinIsActive;
 				ret = 1;
 			}
 			break;
