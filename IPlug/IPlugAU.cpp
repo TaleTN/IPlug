@@ -1974,7 +1974,7 @@ void IPlugAU::SetBlockSize(int blockSize)
 
 	if (pScratchInput)
 		memset(pScratchInput, 0, nIn * sizeof(AudioSampleType));
-	else
+	else if (nIn)
 		blockSize = 0;
 
 	const int nOut = NOutChannels() * blockSize;
@@ -1982,7 +1982,7 @@ void IPlugAU::SetBlockSize(int blockSize)
 
 	if (pScratchOutput)
 		memset(pScratchOutput, 0, nOut * sizeof(AudioSampleType));
-	else
+	else if (nOut)
 		blockSize = 0;
 
 	mBlockSize = blockSize;
