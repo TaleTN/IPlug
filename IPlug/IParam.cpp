@@ -524,6 +524,12 @@ double IDoublePowParam::GetNormalized(const double nonNormalizedValue) const
 	return ToNormalized(Bounded(nonNormalizedValue));
 }
 
+char* IDoublePowParam::GetDisplayForHost(const double normalizedValue, char* const buf, const int bufSize)
+{
+	const double nonNormalizedValue = FromNormalized(normalizedValue);
+	return ToString(nonNormalizedValue, buf, bufSize, &normalizedValue);
+}
+
 IDoubleExpParam::IDoubleExpParam(
 	const double shape,
 	const char* const name,
@@ -557,6 +563,12 @@ double IDoubleExpParam::GetNormalized() const
 double IDoubleExpParam::GetNormalized(const double nonNormalizedValue) const
 {
 	return ToNormalized(Bounded(nonNormalizedValue));
+}
+
+char* IDoubleExpParam::GetDisplayForHost(const double normalizedValue, char* const buf, const int bufSize)
+{
+	const double nonNormalizedValue = FromNormalized(normalizedValue);
+	return ToString(nonNormalizedValue, buf, bufSize, &normalizedValue);
 }
 
 INormalizedParam::INormalizedParam(

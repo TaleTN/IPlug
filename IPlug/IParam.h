@@ -406,6 +406,7 @@ public:
 	void SetNormalized(double normalizedValue);
 	double GetNormalized() const;
 	double GetNormalized(double nonNormalizedValue) const;
+	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
 
 protected:
 	double WDL_FIXALIGN mShape;
@@ -451,6 +452,7 @@ public:
 	void SetNormalized(double normalizedValue);
 	double GetNormalized() const;
 	double GetNormalized(double nonNormalizedValue) const;
+	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
 
 protected:
 	double WDL_FIXALIGN mShape, mExpMin1;
