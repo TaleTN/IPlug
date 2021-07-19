@@ -196,6 +196,21 @@ struct IRECT
 
 	void Clank(const IRECT* pRHS);
 
+	void Adjust(const int w)
+	{
+		L -= w; R += w;
+	}
+
+	void Adjust(const int w, const int h)
+	{
+		L -= w; T -= h; R += w; B += h;
+	}
+
+	void Adjust(const int l, const int t, const int r, const int b)
+	{
+		L += l; T += t; R += r; B += b;
+	}
+
 	void Downscale(const int scale)
 	{
 		assert(scale >= 0 && scale < 32);
