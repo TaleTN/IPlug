@@ -1015,7 +1015,7 @@ int IGraphics::GetMouseControlIdx(const int x, const int y)
 	for (int i = mControls.GetSize() - 1; i >= 0; --i)
 	{
 		IControl* const pControl = ppControl[i];
-		if (!pControl->IsHidden() && !pControl->IsGrayed() && pControl->IsHit(x, y))
+		if (!pControl->IsHidden() && !pControl->IsReadOnly() && pControl->IsHit(x, y))
 		{
 			return i;
 		}
