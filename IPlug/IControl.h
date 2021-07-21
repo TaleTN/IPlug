@@ -37,6 +37,8 @@ public:
 		mReverse(0),
 		mDirection(0),
 		mAutoUpdate(0),
+		mReadOnly(0),
+		mBypass(0),
 		_unused(0)
 	{
 		if (pR) mRECT = *pR;
@@ -91,6 +93,12 @@ public:
 	inline void AutoUpdate(const bool update) { mAutoUpdate = update; }
 	inline bool DoesAutoUpdate() const { return mAutoUpdate; }
 
+	inline void ReadOnly(const bool readOnly) { mReadOnly = readOnly; }
+	inline bool IsReadOnly() const { return mReadOnly; }
+
+	inline void Bypass(const bool bypass) { mBypass = bypass; }
+	inline bool IsBypassed() const { return mBypass; }
+
 	// Override if you want the control to be hit only if a visible part of it is hit, or whatever.
 	virtual bool IsHit(int x, int y);
 
@@ -125,7 +133,7 @@ public:
 protected:
 	IPlugBase* mPlug;
 	int mParamIdx;
-	unsigned int mDirty:1, mRedraw:1, mHide:1, mGrayed:1, mDisablePrompt:1, mDblAsSingleClick:1, mReverse:1, mDirection:1, mAutoUpdate:1, _unused:23;
+	unsigned int mDirty:1, mRedraw:1, mHide:1, mGrayed:1, mDisablePrompt:1, mDblAsSingleClick:1, mReverse:1, mDirection:1, mAutoUpdate:1, mReadOnly:1, mBypass:1, _unused:21;
 	IRECT mRECT;
 };
 

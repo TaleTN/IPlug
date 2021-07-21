@@ -55,7 +55,7 @@ void IControl::Hide(const bool hide)
 
 void IControl::GrayOut(const bool gray)
 {
-	mGrayed = gray;
+	mReadOnly = mGrayed = gray;
 	SetDirty(false);
 }
 
