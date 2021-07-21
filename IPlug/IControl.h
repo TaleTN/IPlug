@@ -153,8 +153,8 @@ public:
 		IPlugBase* pPlug,
 		int x,
 		int y,
-		int paramIdx,
-		const IBitmap* pBitmap
+		int paramIdx = -1,
+		const IBitmap* pBitmap = NULL
 	);
 
 	void Draw(IGraphics* pGraphics);
@@ -192,8 +192,8 @@ public:
 		IPlugBase* pPlug,
 		int x,
 		int y,
-		int paramIdx,
-		const IBitmap* pBitmap
+		int paramIdx = -1,
+		const IBitmap* pBitmap = NULL
 	);
 
 	void OnMouseDown(int x, int y, IMouseMod mod);
@@ -206,8 +206,8 @@ class IInvisibleSwitchControl: public IControl
 public:
 	IInvisibleSwitchControl(
 		IPlugBase* pPlug,
-		const IRECT* pR,
-		int paramIdx
+		const IRECT* pR = NULL,
+		int paramIdx = -1
 	);
 
 	void OnMouseDown(int x, int y, IMouseMod mod);
@@ -238,8 +238,8 @@ public:
 		IPlugBase* pPlug,
 		int x,
 		int y,
-		int paramIdx,
-		const IBitmap* pBitmap
+		int paramIdx = -1,
+		const IBitmap* pBitmap = NULL
 	);
 
 	void OnMouseUp(int x, int y, IMouseMod mod);
@@ -254,8 +254,8 @@ public:
 		int x,
 		int y,
 		int len,
-		int paramIdx,
-		const IBitmap* pBitmap,
+		int paramIdx = -1,
+		const IBitmap* pBitmap = NULL,
 		int direction = kVertical
 	);
 
@@ -307,8 +307,8 @@ public:
 		IPlugBase* pPlug,
 		int x,
 		int y,
-		int paramIdx,
-		const IBitmap* pBitmap
+		int paramIdx = -1,
+		const IBitmap* pBitmap = NULL
 		// int direction = kVertical
 	);
 
@@ -341,8 +341,8 @@ class ITextControl: public IControl
 public:
 	ITextControl(
 		IPlugBase* pPlug,
-		const IRECT* pR,
-		const IText* pFont,
+		const IRECT* pR = NULL,
+		const IText* pFont = NULL,
 		const char* str = NULL
 	);
 

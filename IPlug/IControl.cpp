@@ -112,7 +112,7 @@ IBitmapControl::IBitmapControl(
 	IControl(pPlug, NULL, paramIdx)
 {
 	mTargetRECT = mRECT = IRECT(x, y, pBitmap);
-	mBitmap = *pBitmap;
+	if (pBitmap) mBitmap = *pBitmap;
 	mTooltip = NULL;
 	mValue = 0.0;
 }
@@ -495,7 +495,7 @@ ITextControl::ITextControl(
 ):
 	IControl(pPlug, pR)
 {
-	mFont = *pFont;
+	if (pFont) mFont = *pFont;
 	mStr.Set(str);
 }
 
