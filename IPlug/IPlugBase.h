@@ -132,6 +132,17 @@ public:
 		return (T*)mParams.Add(pParam);
 	}
 
+	int NPresets() const { return mPresets.GetSize(); }
+	bool NPresets(const int idx) const { return (unsigned int)idx < (unsigned int)NPresets(); }
+
+	inline int GetCurrentPresetIdx() const { return mCurrentPresetIdx; }
+	const char* GetPresetName(int idx) const;
+
+	bool MakeDefaultPreset(const char* name = NULL, int nPresets = 1);
+
+	bool RestorePreset(int idx = -1);
+	bool RestorePreset(const char* name);
+
 	inline IGraphics* GetGUI() const { return mGraphics; }
 
 	const char* GetEffectName() const { return mEffectName.Get(); }
@@ -295,7 +306,6 @@ protected:
 		return !!(mPlugFlags & plugDoes);
 	}
 
-	bool MakeDefaultPreset(const char* name = NULL, int nPresets = 1);
 	// MakePreset(name, param1, param2, ..., paramN)
 	bool MakePreset(const char* name, ...);
 	// MakePresetFromNamedParams(name, nParamsNamed, paramEnum1, paramVal1, paramEnum2, paramVal2, ..., paramEnumN, paramVal2)
@@ -336,15 +346,8 @@ protected:
 
 	void OnParamReset(); // Calls OnParamChange(each param).
 
-	int NPresets() const { return mPresets.GetSize(); }
-	bool NPresets(const int idx) const { return (unsigned int)idx < (unsigned int)NPresets(); }
-
 	void InitPresetChunk(IPreset* pPreset, const char* name = NULL);
-	inline int GetCurrentPresetIdx() const { return mCurrentPresetIdx; }
 	void PruneUninitializedPresets();
-	bool RestorePreset(int idx = -1);
-	bool RestorePreset(const char* name);
-	const char* GetPresetName(int idx) const;
 	void ModifyCurrentPreset(const char* name = NULL); // Sets the currently active preset to whatever current params are.
 
 	bool SerializePresets(int fromIdx, int toIdx /* up to but *not* including */, ByteChunk* pChunk) const;
