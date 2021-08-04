@@ -270,10 +270,17 @@ static const int PARAM_EDIT_H = 21;
 
 - (void) promptUserInput: (IControl*)pControl param: (IParam*)pParam rect: (const IRECT*)pR size: (int)fontSize
 {
-	if (mParamEditView || !pControl || !pParam) return;
+	if (mParamEditView || !pControl) return;
 
 	char currentText[IGraphics::kMaxParamLen];
-	pParam->GetDisplayForHost(currentText);
+	if (pParam)
+	{
+		pParam->GetDisplayForHost(currentText, sizeof(currentText));
+	}
+	else
+	{
+		pControl->GetTextForUserInput(currentText, sizeof(currentText));
+	}
 
 	static const int kPromptCustomHeight = IGraphics::kPromptCustomRect ^ IGraphics::kPromptCustomWidth;
 	static const int scale = IGraphicsMac::kScaleOS;
