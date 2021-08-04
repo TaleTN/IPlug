@@ -159,10 +159,17 @@ class IBitmapControl: public IControl
 public:
 	IBitmapControl(
 		IPlugBase* pPlug,
-		int x,
-		int y,
+		int x = 0,
+		int y = 0,
 		int paramIdx = -1,
 		const IBitmap* pBitmap = NULL
+	);
+
+	IBitmapControl(
+		IPlugBase* pPlug,
+		int x,
+		int y,
+		const IBitmap* pBitmap
 	);
 
 	void Draw(IGraphics* pGraphics);

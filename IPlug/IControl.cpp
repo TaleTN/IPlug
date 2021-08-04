@@ -111,8 +111,27 @@ IBitmapControl::IBitmapControl(
 ):
 	IControl(pPlug, NULL, paramIdx)
 {
+	if (pBitmap)
+	{
+		mTargetRECT = mRECT = IRECT(x, y, pBitmap);
+		mBitmap = *pBitmap;
+	}
+
+	mTooltip = NULL;
+	mValue = 0.0;
+}
+
+IBitmapControl::IBitmapControl(
+	IPlugBase* const pPlug,
+	const int x,
+	const int y,
+	const IBitmap* const pBitmap
+):
+	IControl(pPlug)
+{
 	mTargetRECT = mRECT = IRECT(x, y, pBitmap);
-	if (pBitmap) mBitmap = *pBitmap;
+	mBitmap = *pBitmap;
+
 	mTooltip = NULL;
 	mValue = 0.0;
 }
