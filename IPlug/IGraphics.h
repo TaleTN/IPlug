@@ -27,7 +27,7 @@ public:
 	#endif
 
 	static const int kMaxParamLen = 32;
-	static const int kMaxEditLen = kMaxParamLen;
+	static const int kMaxEditLen = 1024;
 
 	enum EGUIScale { kScaleFull = 0, kScaleHalf = 1 };
 

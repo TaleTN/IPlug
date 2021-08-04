@@ -198,6 +198,10 @@ void IGraphics::SetFromStringAfterPrompt(IControl* const pControl, const IParam*
 			mPlug->EndInformHostOfParamChange(paramIdx);
 		}
 	}
+	else
+	{
+		pControl->SetTextFromUserInput(txt);
+	}
 }
 
 bool IGraphics::UserDataPath(WDL_String* const pPath, const char* const mfrName, const char* const plugName)
