@@ -73,6 +73,7 @@ public:
 
 	virtual void SetValueFromPlug(double value);
 	virtual void SetValueFromUserInput(double value);
+
 	virtual void SetValue(double value) {}
 	virtual double GetValue() const { return 0.0; }
 
@@ -129,6 +130,10 @@ public:
 	inline IGraphics* GetGUI() const { return mPlug->GetGUI(); }
 
 	virtual void Rescale(IGraphics* pGraphics) {}
+
+	// For pure text edit controls (i.e. no value, paramIdx < 0).
+	virtual void SetTextFromUserInput(const char* txt) {}
+	virtual char* GetTextForUserInput(char* buf, int bufSize = 128);
 
 protected:
 	IPlugBase* mPlug;

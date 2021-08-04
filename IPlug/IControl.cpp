@@ -73,6 +73,13 @@ bool IControl::IsHit(const int x, const int y)
 	return mRECT.Contains(x, y);
 }
 
+char* IControl::GetTextForUserInput(char* const buf, const int bufSize)
+{
+	assert(bufSize >= 1);
+	*buf = 0;
+	return buf;
+}
+
 IBackgroundControl::IBackgroundControl(
 	IPlugBase* const pPlug,
 	const IBitmap* const pBitmap
