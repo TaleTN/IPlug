@@ -57,7 +57,7 @@ public:
 	bool LoadFont(int ID, const char* name);
 	bool UpdateIText(IText* const pTxt) { return !!CacheFont(pTxt, Scale()); }
 	static void PrepDrawIText(IText* const pTxt, const int scale = 0) { CacheFont(pTxt, scale); }
-	int DrawIText(IText* pTxt, const char* str, const IRECT* pR);
+	int DrawIText(IText* pTxt, const char* str, const IRECT* pR, int clip = DT_NOCLIP);
 	int MeasureIText(IText* pTxt, const char* str, IRECT* pR);
 
 	IColor GetPoint(int x, int y);

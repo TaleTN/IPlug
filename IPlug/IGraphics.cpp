@@ -580,7 +580,7 @@ void IGraphics::FillCircle(const IColor color, float cx, float cy, float r, cons
 	LICE_FillCircle(&mDrawBitmap, cx, cy, r, color.Get(), weight, IChannelBlend::kBlendNone, antiAlias);
 }
 
-int IGraphics::DrawIText(IText* const pTxt, const char* const str, const IRECT* const pR)
+int IGraphics::DrawIText(IText* const pTxt, const char* const str, const IRECT* const pR, const int clip)
 {
 	const int scale = Scale();
 
@@ -599,7 +599,7 @@ int IGraphics::DrawIText(IText* const pTxt, const char* const str, const IRECT* 
 	static const UINT align[3] = { DT_LEFT, DT_CENTER, DT_RIGHT };
 	assert(pTxt->mAlign >= 0 && pTxt->mAlign < 3);
 
-	UINT fmt = align[pTxt->mAlign] | DT_NOCLIP;
+	UINT fmt = align[pTxt->mAlign] | clip;
 	if (LICE_GETA(color) < 255) fmt |= LICE_DT_USEFGALPHA;
 
 	RECT R = { pR->L, pR->T, pR->R, pR->B };
