@@ -407,7 +407,7 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND const hWnd, const UINT msg, co
 			// (normally single line edit boxes don't get sent return key messages).
 			case WM_GETDLGCODE:
 			{
-				if (pGraphics->mEdParam) break;
+				if (pGraphics->mEdControl) break;
 				LPARAM lres;
 				// Find out if the original control wants it.
 				lres = CallWindowProcW(pGraphics->mDefEditProc, hWnd, WM_GETDLGCODE, wParam, lParam);
@@ -794,10 +794,17 @@ static const int PARAM_EDIT_H = 16 * 2;
 
 void IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pParam, const IRECT* pR, int fontSize)
 {
-	if (mParamEditWnd || !pControl || !pParam) return;
+	if (mParamEditWnd || !pControl) return;
 
 	char currentText[kMaxParamLen];
-	pParam->GetDisplayForHost(currentText, sizeof(currentText));
+	if (pParam)
+	{
+		pParam->GetDisplayForHost(currentText, sizeof(currentText));
+	}
+	else
+	{
+		pControl->GetTextForUserInput(currentText, sizeof(currentText));
+	}
 
 	WCHAR buf[kMaxParamLen];
 	if (!MultiByteToWideChar(CP_UTF8, 0, currentText, -1, buf, kMaxParamLen))
