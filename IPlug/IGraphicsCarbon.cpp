@@ -423,10 +423,17 @@ static const int PARAM_EDIT_H = 14;
 
 void IGraphicsCarbon::PromptUserInput(IControl* const pControl, IParam* const pParam, const IRECT* pR, int fontSize)
 {
-	if (mParamEditView || !pControl || !pParam) return;
+	if (mParamEditView || !pControl) return;
 
 	char currentText[IGraphics::kMaxParamLen];
-	pParam->GetDisplayForHost(currentText, sizeof(currentText));
+	if (pParam)
+	{
+		pParam->GetDisplayForHost(currentText, sizeof(currentText));
+	}
+	else
+	{
+		pControl->GetTextForUserInput(currentText, sizeof(currentText));
+	}
 
 	static const int kPromptCustomHeight = IGraphics::kPromptCustomRect ^ IGraphics::kPromptCustomWidth;
 	static const int w = PARAM_EDIT_W, h = PARAM_EDIT_H;
