@@ -312,6 +312,17 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 			return 0;
 		}
 
+		case WM_CTLCOLOREDIT:
+		{
+			HBRUSH const brush = pGraphics->mEdBkBrush;
+			if (!brush) break;
+
+			HDC const dc = (HDC)wParam;
+			SetTextColor(dc, pGraphics->mEdTextColor);
+			SetBkColor(dc, pGraphics->mEdBkColor);
+			return (INT_PTR)brush;
+		}
+
 		case WM_CLOSE:
 		{
 			pGraphics->CloseWindow();
@@ -384,6 +395,9 @@ IGraphicsWin::IGraphicsWin(
 	mParamEditWnd = NULL;
 	mEdControl = NULL;
 	mEdParam = NULL;
+	mEdBkBrush = NULL;
+	mEdTextColor = 0;
+	mEdBkColor = 0;
 	mDefEditProc = NULL;
 	mTooltipIdx = -1;
 	mParamChangeTimer = 0;
@@ -708,6 +722,8 @@ void IGraphicsWin::CloseWindow()
 
 		if (mParamEditWnd)
 		{
+			DeleteObject(mEdBkBrush);
+			mEdBkBrush = NULL;
 			mParamEditWnd = NULL;
 			mEdParam = NULL;
 			mEdControl = NULL;
@@ -724,9 +740,9 @@ void IGraphicsWin::CloseWindow()
 static const int PARAM_EDIT_W = 40 * 2;
 static const int PARAM_EDIT_H = 16 * 2;
 
-void IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pParam, const IRECT* pR, int fontSize)
+bool IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pParam, const IRECT* pR, const int flags, IText* const pTxt, const IColor bg, const int x, const int y)
 {
-	if (mParamEditWnd || !pControl) return;
+	if (mParamEditWnd || !pControl) return false;
 
 	char currentText[kMaxParamLen];
 	if (pParam)
@@ -749,8 +765,8 @@ void IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pPara
 
 	if (!pR) pR = pControl->GetTargetRECT();
 
-	int r[5];
-	if (!(fontSize & kPromptCustomWidth))
+	int r[7];
+	if (!(flags & kPromptCustomWidth))
 	{
 		r[0] = (pR->L + pR->R - w) / 2;
 		r[2] = w;
@@ -761,7 +777,7 @@ void IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pPara
 		r[2] = pR->W();
 	}
 
-	if (!(fontSize & kPromptCustomHeight))
+	if (!(flags & kPromptCustomHeight))
 	{
 		r[1] = (pR->T + pR->B - h) / 2;
 		r[3] = h;
@@ -772,31 +788,72 @@ void IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pPara
 		r[3] = pR->H();
 	}
 
-	fontSize &= ~kPromptCustomRect;
+	static const IText kDefaultFont(0, IColor(0));
+	const IText* const pFont = pTxt ? pTxt :&kDefaultFont;
+
+	const int fontSize = pFont->mSize;
 	r[4] = fontSize ? fontSize : (h * 14) / 16;
+
+	r[5] = x;
+	r[6] = y;
 
 	if (mDPI != IPLUG_DEFAULT_DPI)
 	{
-		for (int i = 0; i < 5; ++i)
+		const int n = (flags & kPromptMouseClick) ? 7 : 5;
+		for (int i = 0; i < n; ++i)
 		{
 			r[i] = MulDiv(r[i], mDPI, IPLUG_DEFAULT_DPI);
 		}
 	}
 
-	mParamEditWnd = CreateWindowW(L"EDIT", buf, WS_CHILD | WS_VISIBLE | ES_CENTER | ES_MULTILINE,
+	const IColor fg = pFont->mColor;
+	if (!fg.Empty() || !bg.Empty())
+	{
+		mEdTextColor = fg.Empty() ? GetSysColor(COLOR_WINDOWTEXT) : RGB(fg.R, fg.G, fg.B);
+		mEdBkColor = bg.Empty() ? GetSysColor(COLOR_WINDOW) : RGB(bg.R, bg.G, bg.B);
+		mEdBkBrush = CreateSolidBrush(mEdBkColor);
+	}
+
+	mAutoCommitDelay = delay;
+
+	static const DWORD align[3] = { ES_LEFT, ES_CENTER, ES_RIGHT };
+	assert(pFont->mAlign >= 0 && pFont->mAlign < 3);
+
+	mParamEditWnd = CreateWindowW(L"EDIT", buf,
+		align[pFont->mAlign] | WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOHSCROLL,
 		r[0], r[1], r[2], r[3], mPlugWnd, (HMENU)(INT_PTR)PARAM_EDIT_ID, mHInstance, NULL);
-	SendMessageW(mParamEditWnd, EM_SETSEL, 0, -1);
 
 	SetFocus(mParamEditWnd);
 
 	mDefEditProc = (WNDPROC)SetWindowLongPtrW(mParamEditWnd, GWLP_WNDPROC, (LONG_PTR)ParamEditProc);
 	SetWindowLongPtrW(mParamEditWnd, GWLP_USERDATA, 0xdeadf00b);
 
-	HFONT const font = CreateFont(r[4], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, IText::kDefaultFont);
+	const char* face = pFont->mFont;
+	face = face ? face : IText::kDefaultFont;
+
+	HFONT const font = CreateFont(r[4], 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE,
+		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, face);
 	SendMessageW(mParamEditWnd, WM_SETFONT, (WPARAM)font, FALSE);
+
+	if (flags & kPromptNoMargins)
+	{
+		SendMessageW(mParamEditWnd, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELPARAM(0, 0));
+	}
+
+	if (flags & kPromptMouseClick)
+	{
+		ReleaseCapture();
+		SendMessageW(mParamEditWnd, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(r[5], r[6]));
+	}
+	else
+	{
+		SendMessageW(mParamEditWnd, EM_SETSEL, 0, -1);
+	}
 
 	mEdControl = pControl;
 	mEdParam = pParam;
+
+	return true;
 }
 
 void IGraphicsWin::CommitParamEdit(const bool close)
@@ -818,6 +875,8 @@ void IGraphicsWin::CancelParamEdit()
 	DeleteParamEditFont(mParamEditWnd);
 	SetWindowLongPtrW(mParamEditWnd, GWLP_WNDPROC, (LPARAM)mDefEditProc);
 	DestroyWindow(mParamEditWnd);
+	DeleteObject(mEdBkBrush);
+	mEdBkBrush = NULL;
 	mParamEditWnd = NULL;
 	mEdParam = NULL;
 	mEdControl = NULL;
