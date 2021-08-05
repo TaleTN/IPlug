@@ -61,6 +61,9 @@ protected:
 	void ShowTooltip();
 	void HideTooltip();
 
+	void CommitParamEdit(bool close = true);
+	void CancelParamEdit();
+
 private:
 	HINSTANCE mHInstance;
 	HWND mParentWnd, mPlugWnd, mTooltipWnd, mParamEditWnd;
@@ -68,7 +71,6 @@ private:
 	IControl* mEdControl;
 	IParam* mEdParam;
 	WNDPROC mDefEditProc;
-	int mParamEditMsg;
 	int mTooltipIdx;
 	int mParamChangeTimer;
 	int mDPI;

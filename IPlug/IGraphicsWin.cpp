@@ -16,14 +16,6 @@ static const WCHAR* const wndClassName = L"IPlugWndClass";
 
 static const int PARAM_EDIT_ID = 99;
 
-enum EParamEditMsg
-{
-	kNone = 0,
-	kEditing,
-	kCancel,
-	kCommit
-};
-
 static const UINT_PTR IPLUG_TIMER_ID = 2;
 static const UINT IPLUG_DEFAULT_DPI = USER_DEFAULT_SCREEN_DPI * 2;
 
@@ -94,44 +86,6 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 		{
 			if (wParam == IPLUG_TIMER_ID)
 			{
-				if (pGraphics->mParamEditWnd)
-				{
-					switch (pGraphics->mParamEditMsg)
-					{
-						case kNone: break;
-
-						case kCommit:
-						{
-							WCHAR buf[kMaxEditLen];
-							SendMessageW(pGraphics->mParamEditWnd, WM_GETTEXT, kMaxEditLen, (LPARAM)buf);
-
-							char txt[kMaxEditLen];
-							if (WideCharToMultiByte(CP_UTF8, 0, buf, -1, txt, sizeof(txt), NULL, NULL))
-							{
-								pGraphics->SetFromStringAfterPrompt(pGraphics->mEdControl, pGraphics->mEdParam, txt);
-							}
-							// Fall through.
-						}
-						case kCancel:
-						{
-							DeleteParamEditFont(pGraphics->mParamEditWnd);
-							SetWindowLongPtrW(pGraphics->mParamEditWnd, GWLP_WNDPROC, (LPARAM)pGraphics->mDefEditProc);
-							DestroyWindow(pGraphics->mParamEditWnd);
-							pGraphics->mParamEditWnd = NULL;
-							pGraphics->mEdParam = NULL;
-							pGraphics->mEdControl = NULL;
-							pGraphics->mDefEditProc = NULL;
-							// Fall through.
-						}
-						default:
-						{
-							pGraphics->mParamEditMsg = kNone;
-							break;
-						}
-					}
-					// return 0;
-				}
-
 				IRECT dirtyR;
 				if (pGraphics->IsDirty(&dirtyR))
 				{
@@ -185,7 +139,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 		{
 			if (pGraphics->mParamEditWnd)
 			{
-				pGraphics->mParamEditMsg = kCancel;
+				pGraphics->CancelParamEdit();
 				return 0;
 			}
 			// Else fall through.
@@ -193,7 +147,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 		case WM_LBUTTONDOWN:
 		{
 			pGraphics->HideTooltip();
-			if (pGraphics->mParamEditWnd) pGraphics->mParamEditMsg = kCommit;
+			if (pGraphics->mParamEditWnd) pGraphics->CommitParamEdit();
 			SetCapture(hWnd);
 
 			POINT p;
@@ -386,20 +340,9 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND const hWnd, const UINT msg, co
 					// Deselect, because in some hosts (FL Studio, VSTHost)
 					// selected text gets deleted when processing VK_RETURN.
 					SendMessageW(hWnd, EM_SETSEL, -1, 0);
-					pGraphics->mParamEditMsg = kCommit;
+					pGraphics->CommitParamEdit();
 					return 0;
 				}
-				// Fall through.
-			}
-			case WM_SETFOCUS:
-			{
-				pGraphics->mParamEditMsg = kEditing;
-				break;
-			}
-
-			case WM_KILLFOCUS:
-			{
-				pGraphics->mParamEditMsg = kNone;
 				break;
 			}
 
@@ -417,16 +360,6 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND const hWnd, const UINT msg, co
 					lres |= DLGC_WANTMESSAGE;
 				}
 				return lres;
-			}
-
-			case WM_COMMAND:
-			{
-				if (HIWORD(wParam) == CBN_SELCHANGE)
-				{
-					pGraphics->mParamEditMsg = kCommit;
-					return 0;
-				}
-				break; // Else let the default proc handle it.
 			}
 		}
 
@@ -452,7 +385,6 @@ IGraphicsWin::IGraphicsWin(
 	mEdControl = NULL;
 	mEdParam = NULL;
 	mDefEditProc = NULL;
-	mParamEditMsg = kNone;
 	mTooltipIdx = -1;
 	mParamChangeTimer = 0;
 	mDPI = USER_DEFAULT_SCREEN_DPI;
@@ -865,6 +797,31 @@ void IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pPara
 
 	mEdControl = pControl;
 	mEdParam = pParam;
+}
+
+void IGraphicsWin::CommitParamEdit(const bool close)
+{
+	WCHAR buf[kMaxEditLen];
+	SendMessageW(mParamEditWnd, WM_GETTEXT, kMaxEditLen, (LPARAM)buf);
+
+	char txt[kMaxEditLen];
+	if (WideCharToMultiByte(CP_UTF8, 0, buf, -1, txt, sizeof(txt), NULL, NULL))
+	{
+		SetFromStringAfterPrompt(mEdControl, mEdParam, txt);
+	}
+
+	if (close) CancelParamEdit();
+}
+
+void IGraphicsWin::CancelParamEdit()
+{
+	DeleteParamEditFont(mParamEditWnd);
+	SetWindowLongPtrW(mParamEditWnd, GWLP_WNDPROC, (LPARAM)mDefEditProc);
+	DestroyWindow(mParamEditWnd);
+	mParamEditWnd = NULL;
+	mEdParam = NULL;
+	mEdControl = NULL;
+	mDefEditProc = NULL;
 }
 
 static bool GetModulePath(HMODULE const hModule, WDL_String* const pPath)
