@@ -942,7 +942,7 @@ bool IGraphicsWin::UserDataPath(WDL_String* const pPath)
 
 bool IGraphicsWin::PromptForFile(WDL_String* const pFilename, const int action, const char* dir, const char* const extensions)
 {
-	if (!WindowIsOpen())
+	if (!WindowIsOpen() || !pFilename->SetLen(MAX_PATH))
 	{
 		pFilename->Set("");
 		return false;
