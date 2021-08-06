@@ -239,8 +239,16 @@ public:
 	#endif
 
 	// For controls that need to interface directly with LICE.
-	LICE_pixel* GetBits() { return mDrawBitmap.getBits(); }
-	inline LICE_SysBitmap* GetDrawBitmap() { return &mDrawBitmap; }
+	LICE_pixel* GetBits() { return mDrawBitmap->getBits(); }
+	inline LICE_SysBitmap* GetDrawBitmap() const { return mDrawBitmap; }
+
+	// Returns previous backbuffer. SetDrawBitmap(NULL) restores main backbuffer.
+	LICE_SysBitmap* SetDrawBitmap(LICE_SysBitmap* const pBackbuf)
+	{
+		LICE_SysBitmap* const pOldBuf = mDrawBitmap;
+		mDrawBitmap = pBackbuf ? pBackbuf : &mBackBuf;
+		return pOldBuf;
+	}
 
 protected:
 	WDL_IntKeyedArray<IControl*> mControlIDs;
@@ -250,7 +258,8 @@ protected:
 	virtual LICE_IBitmap* OSLoadBitmap(int ID, const char* name) = 0;
 	virtual bool OSLoadFont(int ID, const char* name) = 0;
 
-	LICE_SysBitmap mDrawBitmap;
+	LICE_SysBitmap mBackBuf;
+	LICE_SysBitmap* mDrawBitmap;
 
 	static LICE_CachedFont* CacheFont(IText* pTxt, int scale = 0);
 

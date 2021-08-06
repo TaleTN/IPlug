@@ -140,6 +140,7 @@ IGraphics::IGraphics(
 	const int refreshFPS
 ):
 	mPlug(pPlug),
+	mDrawBitmap(&mBackBuf),
 	// mTmpBitmap(NULL),
 	mWidth(w),
 	mHeight(h),
@@ -389,7 +390,7 @@ void IGraphics::Rescale(const int scale)
 	const int h = mHeight >> scale;
 	mScale = scale;
 
-	mDrawBitmap.resize(w, h);
+	mBackBuf.resize(w, h);
 }
 
 bool IGraphics::PrepDraw(const int wantScale)
@@ -404,7 +405,7 @@ bool IGraphics::PrepDraw(const int wantScale)
 			pControl->Rescale(this);
 		}
 	}
-	return !!mDrawBitmap.getBits();
+	return !!mBackBuf.getBits();
 }
 
 void IGraphics::DrawBitmap(const IBitmap* const pIBitmap, const IRECT* const pDest, int srcX, int srcY, const float weight)
@@ -415,7 +416,7 @@ void IGraphics::DrawBitmap(const IBitmap* const pIBitmap, const IRECT* const pDe
 	const int scale = Scale();
 	if (scale) { r.Downscale(scale); srcX >>= scale; srcY >>= scale; }
 
-	LICE_Blit(&mDrawBitmap, pLB, r.L, r.T, srcX, srcY, r.W(), r.H(), weight, IChannelBlend::kBlendNone);
+	LICE_Blit(mDrawBitmap, pLB, r.L, r.T, srcX, srcY, r.W(), r.H(), weight, IChannelBlend::kBlendNone);
 }
 
 void IGraphics::DrawRotatedBitmap(const IBitmap* const pIBitmap, const int destCtrX, const int destCtrY, const double angle,
@@ -439,7 +440,7 @@ void IGraphics::DrawRotatedBitmap(const IBitmap* const pIBitmap, const int destC
 	const int destX = (destCtrX >> scale) - W / 2;
 	const int destY = (destCtrY >> scale) - H / 2;
 
-	LICE_RotatedBlit(&mDrawBitmap, pLB, destX, destY, W, H, 0.0f, 0.0f, (float)W, (float)H, (float)angle,
+	LICE_RotatedBlit(mDrawBitmap, pLB, destX, destY, W, H, 0.0f, 0.0f, (float)W, (float)H, (float)angle,
 		false, weight, IChannelBlend::kBlendNone | LICE_BLIT_FILTER_BILINEAR, 0.0f, (float)(yOffsetZeroDeg >> scale));
 }
 
@@ -465,7 +466,7 @@ void IGraphics::DrawRotatedBitmap(const IBitmap* const pIBitmap, const int destC
 		true, 1.0f, LICE_BLIT_MODE_COPY | LICE_BLIT_FILTER_BILINEAR | LICE_BLIT_USE_ALPHA, xOffs, 0.0f);
 
 	const int scale = Scale();
-	LICE_Blit(&mDrawBitmap, mTmpBitmap, x >> scale, y >> scale, 0, 0, W, H, weight, IChannelBlend::kBlendNone);
+	LICE_Blit(mDrawBitmap, mTmpBitmap, x >> scale, y >> scale, 0, 0, W, H, weight, IChannelBlend::kBlendNone);
 } */
 
 void IGraphics::DrawPoint(const IColor color, float x, float y, const float weight)
@@ -477,14 +478,14 @@ void IGraphics::DrawPoint(const IColor color, float x, float y, const float weig
 		assert(scale == 1); static const float mul = 0.5f;
 		x *= mul; y *= mul;
 	}
-	LICE_PutPixel(&mDrawBitmap, (int)(x + 0.5f), (int)(y + 0.5f), color.Get(), weight, IChannelBlend::kBlendNone);
+	LICE_PutPixel(mDrawBitmap, (int)(x + 0.5f), (int)(y + 0.5f), color.Get(), weight, IChannelBlend::kBlendNone);
 }
 
 void IGraphics::ForcePixel(const IColor color, const int x, const int y)
 {
 	const int scale = Scale();
-	LICE_pixel* px = mDrawBitmap.getBits();
-	px += (x >> scale) + (y >> scale) * mDrawBitmap.getRowSpan();
+	LICE_pixel* px = mDrawBitmap->getBits();
+	px += (x >> scale) + (y >> scale) * mDrawBitmap->getRowSpan();
 	*px = color.Get();
 }
 
@@ -492,7 +493,7 @@ void IGraphics::DrawLine(const IColor color, const int x1, const int y1, const i
 	const float weight, const bool antiAlias)
 {
 	const int scale = Scale();
-	LICE_Line(&mDrawBitmap, x1 >> scale, y1 >> scale, x2 >> scale, y2 >> scale, color.Get(), weight,
+	LICE_Line(mDrawBitmap, x1 >> scale, y1 >> scale, x2 >> scale, y2 >> scale, color.Get(), weight,
 		IChannelBlend::kBlendNone, antiAlias);
 }
 
@@ -506,7 +507,7 @@ void IGraphics::DrawArc(const IColor color, float cx, float cy, float r, const f
 		assert(scale == 1); static const float mul = 0.5f;
 		cx *= mul; cy *= mul; r *= mul;
 	}
-	LICE_Arc(&mDrawBitmap, cx, cy, r, minAngle, maxAngle, color.Get(), weight, IChannelBlend::kBlendNone, antiAlias);
+	LICE_Arc(mDrawBitmap, cx, cy, r, minAngle, maxAngle, color.Get(), weight, IChannelBlend::kBlendNone, antiAlias);
 }
 
 void IGraphics::DrawCircle(const IColor color, float cx, float cy, float r, const float weight, const bool antiAlias)
@@ -518,7 +519,7 @@ void IGraphics::DrawCircle(const IColor color, float cx, float cy, float r, cons
 		assert(scale == 1); static const float mul = 0.5f;
 		cx *= mul; cy *= mul; r *= mul;
 	}
-	LICE_Circle(&mDrawBitmap, cx, cy, r, color.Get(), weight, IChannelBlend::kBlendNone, antiAlias);
+	LICE_Circle(mDrawBitmap, cx, cy, r, color.Get(), weight, IChannelBlend::kBlendNone, antiAlias);
 }
 
 void IGraphics::RoundRect(const IColor color, const IRECT* const pR, const float weight, int cornerradius,
@@ -528,7 +529,7 @@ void IGraphics::RoundRect(const IColor color, const IRECT* const pR, const float
 	const int scale = Scale();
 	if (scale) { r.Downscale(scale); cornerradius >>= scale; }
 
-	LICE_RoundRect(&mDrawBitmap, (float)r.L, (float)r.T, (float)r.W(), (float)r.H(), cornerradius,
+	LICE_RoundRect(mDrawBitmap, (float)r.L, (float)r.T, (float)r.W(), (float)r.H(), cornerradius,
 		color.Get(), weight, IChannelBlend::kBlendNone, aa);
 }
 
@@ -549,14 +550,14 @@ void IGraphics::FillRoundRect(const IColor color, const IRECT* const pR, const f
 	static const int mode = IChannelBlend::kBlendNone;
 	const LICE_pixel col = color.Get();
 
-	LICE_FillRect(&mDrawBitmap, x1 + cornerradius, y1, w - 2 * cornerradius, h, col, weight, mode);
-	LICE_FillRect(&mDrawBitmap, x1, y1 + cornerradius, cornerradius, h - 2 * cornerradius, col, weight, mode);
-	LICE_FillRect(&mDrawBitmap, x1 + w - cornerradius, y1 + cornerradius, cornerradius, h - 2 * cornerradius, col, weight, mode);
+	LICE_FillRect(mDrawBitmap, x1 + cornerradius, y1, w - 2 * cornerradius, h, col, weight, mode);
+	LICE_FillRect(mDrawBitmap, x1, y1 + cornerradius, cornerradius, h - 2 * cornerradius, col, weight, mode);
+	LICE_FillRect(mDrawBitmap, x1 + w - cornerradius, y1 + cornerradius, cornerradius, h - 2 * cornerradius, col, weight, mode);
 
-	LICE_FillCircle(&mDrawBitmap, (float)(x1 + cornerradius), (float)(y1 + cornerradius), (float)cornerradius, col, weight, mode, aa);
-	LICE_FillCircle(&mDrawBitmap, (float)(x1 + w - cornerradius - 1), (float)(y1 + h - cornerradius - 1), (float)cornerradius, col, weight, mode, aa);
-	LICE_FillCircle(&mDrawBitmap, (float)(x1 + w - cornerradius - 1), (float)(y1 + cornerradius), (float)cornerradius, col, weight, mode, aa);
-	LICE_FillCircle(&mDrawBitmap, (float)(x1 + cornerradius), (float)(y1 + h - cornerradius - 1), (float)cornerradius, col, weight, mode, aa);
+	LICE_FillCircle(mDrawBitmap, (float)(x1 + cornerradius), (float)(y1 + cornerradius), (float)cornerradius, col, weight, mode, aa);
+	LICE_FillCircle(mDrawBitmap, (float)(x1 + w - cornerradius - 1), (float)(y1 + h - cornerradius - 1), (float)cornerradius, col, weight, mode, aa);
+	LICE_FillCircle(mDrawBitmap, (float)(x1 + w - cornerradius - 1), (float)(y1 + cornerradius), (float)cornerradius, col, weight, mode, aa);
+	LICE_FillCircle(mDrawBitmap, (float)(x1 + cornerradius), (float)(y1 + h - cornerradius - 1), (float)cornerradius, col, weight, mode, aa);
 }
 
 void IGraphics::FillIRect(const IColor color, const IRECT* const pR, const float weight)
@@ -565,7 +566,7 @@ void IGraphics::FillIRect(const IColor color, const IRECT* const pR, const float
 	const int scale = Scale();
 	if (scale) r.Downscale(scale);
 
-	LICE_FillRect(&mDrawBitmap, r.L, r.T, r.W(), r.H(), color.Get(), weight, IChannelBlend::kBlendNone);
+	LICE_FillRect(mDrawBitmap, r.L, r.T, r.W(), r.H(), color.Get(), weight, IChannelBlend::kBlendNone);
 }
 
 void IGraphics::FillCircle(const IColor color, float cx, float cy, float r, const float weight, const bool antiAlias)
@@ -577,7 +578,7 @@ void IGraphics::FillCircle(const IColor color, float cx, float cy, float r, cons
 		assert(scale == 1); static const float mul = 0.5f;
 		cx *= mul; cy *= mul; r *= mul;
 	}
-	LICE_FillCircle(&mDrawBitmap, cx, cy, r, color.Get(), weight, IChannelBlend::kBlendNone, antiAlias);
+	LICE_FillCircle(mDrawBitmap, cx, cy, r, color.Get(), weight, IChannelBlend::kBlendNone, antiAlias);
 }
 
 int IGraphics::DrawIText(IText* const pTxt, const char* const str, const IRECT* const pR, const int clip)
@@ -612,7 +613,7 @@ int IGraphics::DrawIText(IText* const pTxt, const char* const str, const IRECT* 
 		R.bottom >>= scale;
 	}
  
-	const int h = font->DrawText(&mDrawBitmap, str, -1, &R, fmt) << scale;
+	const int h = font->DrawText(mDrawBitmap, str, -1, &R, fmt) << scale;
 
 	return h;
 }
@@ -640,7 +641,7 @@ int IGraphics::MeasureIText(IText* const pTxt, const char* const str, IRECT* con
 	// if (LICE_GETA(color) < 255) fmt |= LICE_DT_USEFGALPHA;
 
 	RECT R = { 0 };
-	int h = font->DrawText(&mDrawBitmap, str, -1, &R, fmt);
+	int h = font->DrawText(mDrawBitmap, str, -1, &R, fmt);
 
 	if (scale)
 	{
@@ -734,7 +735,7 @@ LICE_CachedFont* IGraphics::CacheFont(IText* const pTxt, const int scale)
 IColor IGraphics::GetPoint(const int x, const int y)
 {
 	const int scale = Scale();
-	const LICE_pixel pix = LICE_GetPixel(&mDrawBitmap, x >> scale, y >> scale);
+	const LICE_pixel pix = LICE_GetPixel(mDrawBitmap, x >> scale, y >> scale);
 	return IColor(LICE_GETA(pix), LICE_GETR(pix), LICE_GETG(pix), LICE_GETB(pix));
 }
 
@@ -743,7 +744,7 @@ void IGraphics::DrawVerticalLine(const IColor color, int xi, int yLo, int yHi)
 	const int scale = Scale();
 	if (scale) { xi >>= scale; yLo >>= scale; yHi >>= scale; }
 
-	LICE_Line(&mDrawBitmap, xi, yLo, xi, yHi, color.Get(), 1.0f, LICE_BLIT_MODE_COPY, false);
+	LICE_Line(mDrawBitmap, xi, yLo, xi, yHi, color.Get(), 1.0f, LICE_BLIT_MODE_COPY, false);
 }
 
 void IGraphics::DrawHorizontalLine(const IColor color, int yi, int xLo, int xHi)
@@ -751,7 +752,7 @@ void IGraphics::DrawHorizontalLine(const IColor color, int yi, int xLo, int xHi)
 	const int scale = Scale();
 	if (scale) { yi >>= scale; xLo >>= scale; xHi >>= scale; }
 
-	LICE_Line(&mDrawBitmap, xLo, yi, xHi, yi, color.Get(), 1.0f, LICE_BLIT_MODE_COPY, false);
+	LICE_Line(mDrawBitmap, xLo, yi, xHi, yi, color.Get(), 1.0f, LICE_BLIT_MODE_COPY, false);
 }
 
 void IGraphics::DrawBitmap(const IBitmap* const pBitmap, const IRECT* const pR, const int bmpState, const float weight)
@@ -763,7 +764,7 @@ void IGraphics::DrawBitmap(const IBitmap* const pBitmap, const IRECT* const pR, 
 	const int scale = Scale();
 	if (scale) r.Downscale(scale);
 
-	LICE_Blit(&mDrawBitmap, pLB, r.L, r.T, 0, srcY, r.W(), r.H(), weight, IChannelBlend::kBlendNone);
+	LICE_Blit(mDrawBitmap, pLB, r.L, r.T, 0, srcY, r.W(), r.H(), weight, IChannelBlend::kBlendNone);
 }
 
 void IGraphics::DrawRect(const IColor color, const IRECT* const pR)

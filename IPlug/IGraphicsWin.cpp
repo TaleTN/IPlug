@@ -492,7 +492,7 @@ void IGraphicsWin::Resize(int w, int h)
 {
 	const int dw = w - Width(), dh = h - Height();
 	IGraphics::Resize(w, h);
-	mDrawBitmap.resize(w, h);
+	mBackBuf.resize(w, h);
 	if (WindowIsOpen())
 	{
 		HWND pParent = NULL, pGrandparent = NULL;
@@ -533,7 +533,7 @@ void IGraphicsWin::DrawScreen(const IRECT* const pR)
 	RECT r;
 	GetClientRect(hWnd, &r);
 
-	HDC const dcSrc = mDrawBitmap.getDC();
+	HDC const dcSrc = mBackBuf.getDC();
 	const int scale = Scale();
 
 	const int wDiv = Width() >> scale;

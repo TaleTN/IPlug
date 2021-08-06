@@ -111,17 +111,17 @@ void IGraphicsMac::DrawScreen(const IRECT* /* pR */)
 	#endif
 	if (!pCGC) return;
 
-	CGContextRef const srcCtx = (CGContextRef)SWELL_GetCtxGC(mDrawBitmap.getDC());
+	CGContextRef const srcCtx = (CGContextRef)SWELL_GetCtxGC(mBackBuf.getDC());
 	CGImageRef img = srcCtx ? CGBitmapContextCreateImage(srcCtx) : NULL;
 
 	// TN: If GUI width is multiple of 8, then getRowSpan() == getWidth() at
 	// both kScaleFull and kScaleHalf, so clipping isn't necessary. Do note
 	// that after downsizing GUI clipping will always be necessary, because
 	// LICE_SysBitmap doesn't actually resize down.
-	const int w = mDrawBitmap.getWidth();
-	if (mDrawBitmap.getRowSpan() > w)
+	const int w = mBackBuf.getWidth();
+	if (mBackBuf.getRowSpan() > w)
 	{
-		const int h = mDrawBitmap.getHeight();
+		const int h = mBackBuf.getHeight();
 		const int scale = kScaleOS - Scale();
 		const CGRect clip = CGRectMake(0.0f, 0.0f, (CGFloat)(w >> scale), (CGFloat)(h >> scale));
 		if (img)
@@ -225,7 +225,7 @@ bool IGraphicsMac::WindowIsOpen() const
 /* void IGraphicsMac::Resize(const int w, const int h)
 {
 	IGraphics::Resize(w, h);
-    mDrawBitmap.resize(w, h);
+	mBackBuf.resize(w, h);
 
 	#ifndef IPLUG_NO_CARBON_SUPPORT
 	if (mGraphicsCarbon)
