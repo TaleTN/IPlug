@@ -337,6 +337,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND const hWnd, const UINT msg, const WPARAM wParam, const LPARAM lParam)
 {
 	IGraphicsWin* const pGraphics = (IGraphicsWin*)GetWindowLongPtrW(GetParent(hWnd), GWLP_USERDATA);
+	static const UINT_PTR timerID = 1;
 
 	if (pGraphics && pGraphics->mParamEditWnd == hWnd)
 	{
@@ -344,6 +345,16 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND const hWnd, const UINT msg, co
 
 		switch (msg)
 		{
+			case WM_TIMER:
+			{
+				if (wParam == timerID)
+				{
+					pGraphics->CommitParamEdit(false);
+					KillTimer(hWnd, wParam);
+				}
+				break;
+			}
+
 			case WM_KEYDOWN:
 			{
 				if (wParam == VK_RETURN)
@@ -354,6 +365,9 @@ LRESULT CALLBACK IGraphicsWin::ParamEditProc(HWND const hWnd, const UINT msg, co
 					pGraphics->CommitParamEdit();
 					return 0;
 				}
+
+				const int delay = pGraphics->mAutoCommitDelay;
+				if (delay) SetTimer(hWnd, timerID, delay, NULL);
 				break;
 			}
 
@@ -401,6 +415,7 @@ IGraphicsWin::IGraphicsWin(
 	mDefEditProc = NULL;
 	mTooltipIdx = -1;
 	mParamChangeTimer = 0;
+	mAutoCommitDelay = 0;
 	mDPI = USER_DEFAULT_SCREEN_DPI;
 
 	mUser32DLL = LoadLibrary("USER32.dll");
@@ -740,7 +755,7 @@ void IGraphicsWin::CloseWindow()
 static const int PARAM_EDIT_W = 40 * 2;
 static const int PARAM_EDIT_H = 16 * 2;
 
-bool IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pParam, const IRECT* pR, const int flags, IText* const pTxt, const IColor bg, const int x, const int y)
+bool IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pParam, const IRECT* pR, const int flags, IText* const pTxt, const IColor bg, const int delay, const int x, const int y)
 {
 	if (mParamEditWnd || !pControl) return false;
 
