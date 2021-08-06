@@ -67,7 +67,7 @@ public:
 	// virtual void Resize(int w, int h);
 	virtual bool WindowIsOpen() const { return !!GetWindow(); }
 	enum EPromptFlags { kPromptCustomWidth = 1, kPromptCustomRect = 3, kPromptNoMargins = 4, kPromptMouseClick = 8 };
-	virtual bool PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int flags = 0, IText* pTxt = NULL, IColor bg = IColor(0), int x = 0, int y = 0) = 0;
+	virtual bool PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int flags = 0, IText* pTxt = NULL, IColor bg = IColor(0), int delay = 0, int x = 0, int y = 0) = 0;
 	void SetFromStringAfterPrompt(IControl* pControl, const IParam* pParam, const char* txt);
 
 	virtual bool HostPath(WDL_String* pPath) = 0; // Full path to host executable.
