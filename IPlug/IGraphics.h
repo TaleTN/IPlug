@@ -157,6 +157,12 @@ public:
 		return AttachControl(pControl);
 	}
 
+	// Returns control index, or -1 if not found.
+	int FindControl(const IControl* const pControl) const
+	{
+		return mControls.Find(pControl);
+	}
+
 	IControl* LookupControl(const int ID) const
 	{
 		return mControlIDs.Get(ID, NULL);
