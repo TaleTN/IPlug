@@ -215,6 +215,16 @@ public:
 	void OnMouseOver(int x, int y, IMouseMod mod);
 	void OnMouseOut();
 
+	inline void SetMouseCapture(const int controlIdx)
+	{
+		mMouseCapture = controlIdx;
+	}
+
+	void SetMouseCapture(const IControl* const pControl)
+	{
+		SetMouseCapture(FindControl(pControl));
+	}
+
 	// Some controls may not need to capture the mouse for dragging, they can call ReleaseCapture when the mouse leaves.
 	void ReleaseMouseCapture() { mMouseY = mMouseX = mMouseCapture = -1; }
 
