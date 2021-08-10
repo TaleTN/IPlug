@@ -143,6 +143,8 @@ public:
 	bool RestorePreset(int idx = -1);
 	bool RestorePreset(const char* name);
 
+	inline int GetPresetChunkSize() const { return mPresetChunkSize; }
+
 	inline IGraphics* GetGUI() const { return mGraphics; }
 
 	const char* GetEffectName() const { return mEffectName.Get(); }
