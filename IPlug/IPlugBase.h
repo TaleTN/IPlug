@@ -167,6 +167,9 @@ public:
 
 	void SetParameterFromGUI(int idx, double normalizedValue);
 
+	void OnParamReset(); // Calls OnParamChange(each param).
+	void RedrawParamControls(); // Called after restoring state.
+
 	// If a parameter change comes from the GUI, midi, or external input,
 	// the host needs to be informed in case the changes are being automated.
 	virtual void BeginInformHostOfParamChange(int idx) = 0;
@@ -341,12 +344,8 @@ protected:
 	// Returns the new chunk position (endPos).
 	int UnserializeParams(int fromIdx, int toIdx, const ByteChunk* pChunk, int startPos);
 
-	void RedrawParamControls(); // Called after restoring state.
-
 	// ----------------------------------------
 	// Internal IPlug stuff (but API classes need to get at it).
-
-	void OnParamReset(); // Calls OnParamChange(each param).
 
 	void InitPresetChunk(IPreset* pPreset, const char* name = NULL);
 	void PruneUninitializedPresets();
