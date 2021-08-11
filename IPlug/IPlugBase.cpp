@@ -693,7 +693,7 @@ bool IPlugBase::SerializePresets(const int fromIdx, const int toIdx, ByteChunk* 
 	return savedOK;
 }
 
-int IPlugBase::UnserializePresets(const int fromIdx, const int toIdx, const ByteChunk* const pChunk, int pos)
+int IPlugBase::UnserializePresets(const int fromIdx, const int toIdx, const ByteChunk* const pChunk, int pos, const int version)
 {
 	for (int i = fromIdx; i < toIdx && pos >= 0; ++i)
 	{
@@ -702,7 +702,7 @@ int IPlugBase::UnserializePresets(const int fromIdx, const int toIdx, const Byte
 		pos = pChunk->GetBool(&pPreset->mInitialized, pos);
 		if (pPreset->mInitialized)
 		{
-			pos = UnserializePreset(pChunk, pos);
+			pos = UnserializePreset(pChunk, pos, version);
 			OnParamReset();
 			if (pos >= 0)
 			{
@@ -749,7 +749,7 @@ bool IPlugBase::SerializePreset(ByteChunk* const pChunk)
 	return savedOK;
 }
 
-int IPlugBase::UnserializePreset(const ByteChunk* const pChunk, int pos)
+int IPlugBase::UnserializePreset(const ByteChunk* const pChunk, int pos, int /* version */)
 {
 	const int n = mParams.GetSize();
 	for (int i = 0; i < n && pos >= 0; ++i)

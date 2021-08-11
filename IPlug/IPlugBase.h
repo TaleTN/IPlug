@@ -96,7 +96,7 @@ public:
 	// Mutex is already locked.
 	virtual bool SerializePreset(ByteChunk* pChunk);
 	// Returns the new chunk position (endPos).
-	virtual int UnserializePreset(const ByteChunk* pChunk, int startPos);
+	virtual int UnserializePreset(const ByteChunk* pChunk, int startPos, int version = 0);
 
 	// By default serializes all (global + preset) parameters.
 	virtual bool SerializeState(ByteChunk* pChunk);
@@ -353,7 +353,7 @@ protected:
 
 	bool SerializePresets(int fromIdx, int toIdx /* up to but *not* including */, ByteChunk* pChunk) const;
 	// Returns the new chunk position (endPos).
-	int UnserializePresets(int fromIdx, int toIdx, const ByteChunk* pChunk, int startPos);
+	int UnserializePresets(int fromIdx, int toIdx, const ByteChunk* pChunk, int startPos, int version = 0);
 
 	#ifndef NDEBUG
 	// Dump the current state as source code for a call to MakePresetFromNamedParams().
