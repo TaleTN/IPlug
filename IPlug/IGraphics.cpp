@@ -592,7 +592,11 @@ int IGraphics::DrawIText(IText* const pTxt, const char* const str, const IRECT* 
 		if (!font) return 0;
 	}
 
-	if (!str || !*str) return font->GetLineHeight();
+	if (!str || !*str)
+	{
+		const int lh = font->GetLineHeight() << scale;
+		return lh;
+	}
 
 	const LICE_pixel color = pTxt->mColor.Get();
 	font->SetTextColor(color);
