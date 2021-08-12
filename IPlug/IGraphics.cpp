@@ -819,6 +819,7 @@ bool IGraphics::IsDirty(IRECT* const pR)
 		IControl* const pControl = ppControl[i];
 		if (pControl->IsDirty())
 		{
+			pControl->SetClean();
 			*pR = pR->Union(pControl->GetRECT());
 			dirty = true;
 		}
@@ -865,11 +866,10 @@ void IGraphics::Draw(const IRECT* const pR)
 	for (int i = 0; i < n; ++i)
 	{
 		IControl* const pControl = ppControl[i];
-		if (!(pControl->IsHidden()) && pR->Intersects(pControl->GetRECT()))
+		if (!pControl->IsHidden() && pR->Intersects(pControl->GetRECT()))
 		{
 			pControl->Draw(this);
 		}
-		pControl->SetClean();
 	}
 
 	DrawScreen(pR);
