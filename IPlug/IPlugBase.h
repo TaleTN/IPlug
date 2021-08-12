@@ -145,6 +145,7 @@ public:
 
 	inline int GetPresetChunkSize() const { return mPresetChunkSize; }
 
+	inline WDL_Mutex* GetMutex() { return &mMutex; }
 	inline IGraphics* GetGUI() const { return mGraphics; }
 
 	const char* GetEffectName() const { return mEffectName.Get(); }
