@@ -104,8 +104,8 @@ public:
 	virtual bool IsHit(int x, int y);
 
 	virtual void SetDirty(bool pushParamToPlug = true);
-	virtual void SetClean() { mDirty = mRedraw; mRedraw = 0; }
-	inline bool IsDirty() const { return mDirty; }
+	virtual void SetClean() { mDirty = mRedraw = 0; }
+	inline bool IsDirty() const { return mDirty | mRedraw; }
 	virtual void Clamp(double lo = 0.0, double hi = 1.0) {}
 
 	// Disables the right-click manual value entry.
@@ -116,8 +116,7 @@ public:
 	virtual const char* GetTooltip() { return NULL; }
 
 	// Sometimes a control changes its state as part of its Draw method.
-	// Redraw() prevents the control from being cleaned immediately after drawing.
-	inline void Redraw() { mRedraw = 1; }
+	inline void Redraw() { mDirty = mRedraw = 1; }
 
 	// This is an idle call from the GUI thread, as opposed to
 	// IPlugBase::OnIdle which is called from the audio processing thread.

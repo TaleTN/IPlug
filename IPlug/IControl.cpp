@@ -10,7 +10,6 @@ void IControl::SetValueFromPlug(const double value)
 	{
 		SetValue(value);
 		SetDirty(false);
-		Redraw();
 	}
 }
 
@@ -22,7 +21,6 @@ void IControl::SetValueFromUserInput(const double value)
 	{
 		SetValue(value);
 		SetDirty();
-		Redraw();
 	}
 }
 
@@ -48,7 +46,6 @@ void IControl::SetDirty(const bool pushParamToPlug)
 
 void IControl::Hide(const bool hide)
 {
-	mRedraw = 1;
 	mHide = hide;
 	SetDirty(false);
 }
