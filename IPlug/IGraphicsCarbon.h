@@ -23,7 +23,7 @@ public:
 	}
 
 	// bool Resize(int w, int h);
-	void PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int fontSize = 0);
+	bool PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int flags = 0, int fontSize = 0);
 
 protected:
 	void InstallParamEditHandler(ControlRef control);

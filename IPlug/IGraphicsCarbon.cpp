@@ -421,11 +421,11 @@ IGraphicsCarbon::~IGraphicsCarbon()
 static const int PARAM_EDIT_W = 32;
 static const int PARAM_EDIT_H = 14;
 
-void IGraphicsCarbon::PromptUserInput(IControl* const pControl, IParam* const pParam, const IRECT* pR, int fontSize)
+bool IGraphicsCarbon::PromptUserInput(IControl* const pControl, IParam* const pParam, const IRECT* pR, const int flags, int fontSize)
 {
-	if (mParamEditView || !pControl) return;
+	if (mParamEditView || !pControl) return false;
 
-	char currentText[IGraphics::kMaxParamLen];
+	char currentText[IGraphics::kMaxEditLen];
 	if (pParam)
 	{
 		pParam->GetDisplayForHost(currentText, sizeof(currentText));
@@ -441,7 +441,7 @@ void IGraphicsCarbon::PromptUserInput(IControl* const pControl, IParam* const pP
 	if (!pR) pR = pControl->GetTargetRECT();
 
 	Rect r;
-	if (!(fontSize & kPromptCustomHeight))
+	if (!(flags & kPromptCustomHeight))
 	{
 		const int cY = (pR->T + pR->B) >> kScaleFixed;
 		r.top = (cY - h) / 2;
@@ -453,7 +453,7 @@ void IGraphicsCarbon::PromptUserInput(IControl* const pControl, IParam* const pP
 		r.bottom = pR->B >> kScaleFixed;
 	}
 
-	if (!(fontSize & IGraphics::kPromptCustomWidth))
+	if (!(flags & IGraphics::kPromptCustomWidth))
 	{
 		const int cX = (pR->L + pR->R) >> kScaleFixed;
 		r.left = (cX - w) / 2;
@@ -465,11 +465,10 @@ void IGraphicsCarbon::PromptUserInput(IControl* const pControl, IParam* const pP
 		r.right = pR->R >> kScaleFixed;
 	}
 
-	fontSize &= ~IGraphics::kPromptCustomRect;
 	fontSize = fontSize ? fontSize >> kScaleFixed : (PARAM_EDIT_H * 11) / 14;
 
 	ControlRef control = NULL;
-	if (CreateEditUnicodeTextControl(NULL, &r, NULL, false, NULL, &control) != noErr) return;
+	if (CreateEditUnicodeTextControl(NULL, &r, NULL, false, NULL, &control) != noErr) return false;
 
 	HIViewAddSubview(mView, control);
 
@@ -484,6 +483,8 @@ void IGraphicsCarbon::PromptUserInput(IControl* const pControl, IParam* const pP
 	ShowParamEditView();
 	mEdControl = pControl;
 	mEdParam = pParam;
+
+	return true;
 }
 
 void IGraphicsCarbon::InstallParamEditHandler(ControlRef control)
