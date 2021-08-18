@@ -25,16 +25,16 @@ static NSString* ToNSString(const char* const cStr)
 	return [NSString stringWithCString: cStr encoding: NSUTF8StringEncoding];
 }
 
-static IMouseMod GetMouseMod(const NSEvent* const pEvent, const bool wheel = false)
+static IMouseMod GetMouseMod(const NSEvent* const pEvent, const bool left)
 {
 	const int mods = [pEvent modifierFlags], cmd = !!(mods & NSCommandKeyMask);
-	return IMouseMod(!cmd, cmd, !!(mods & NSShiftKeyMask), !!(mods & NSControlKeyMask), !!(mods & NSAlternateKeyMask), wheel);
+	return IMouseMod(!cmd ? left : false, cmd ? left : false, !!(mods & NSShiftKeyMask), !!(mods & NSControlKeyMask), !!(mods & NSAlternateKeyMask));
 }
 
-static IMouseMod GetRightMouseMod(const NSEvent* const pEvent)
+static IMouseMod GetRightMouseMod(const NSEvent* const pEvent, const bool right, const bool wheel = false)
 {
 	const int mods = [pEvent modifierFlags];
-	return IMouseMod(false, true, !!(mods & NSShiftKeyMask), !!(mods & NSControlKeyMask), !!(mods & NSAlternateKeyMask));
+	return IMouseMod(false, right, !!(mods & NSShiftKeyMask), !!(mods & NSControlKeyMask), !!(mods & NSAlternateKeyMask), wheel);
 }
 
 @implementation IGRAPHICS_COCOA
@@ -144,13 +144,14 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent)
 		if (mParamEditView) [self endUserInput];
 		int x, y;
 		[self getMouseXY: pEvent x: &x y: &y];
+		const IMouseMod mod = GetMouseMod(pEvent, true);
 		if ([pEvent clickCount] > 1)
 		{
-			mGraphics->OnMouseDblClick(x, y, GetMouseMod(pEvent));
+			mGraphics->OnMouseDblClick(x, y, mod);
 		}
 		else
 		{
-			mGraphics->OnMouseDown(x, y, GetMouseMod(pEvent));
+			mGraphics->OnMouseDown(x, y, mod);
 		}
 	}
 }
@@ -161,7 +162,7 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent)
 	{
 		int x, y;
 		[self getMouseXY: pEvent x: &x y: &y];
-		mGraphics->OnMouseUp(x, y, GetMouseMod(pEvent));
+		mGraphics->OnMouseUp(x, y, GetMouseMod(pEvent, false));
 	}
 }
 
@@ -171,7 +172,7 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent)
 	{
 		int x, y;
 		[self getMouseXY: pEvent x: &x y: &y];
-		mGraphics->OnMouseDrag(x, y, GetMouseMod(pEvent));
+		mGraphics->OnMouseDrag(x, y, GetMouseMod(pEvent, true));
 	}
 }
 
@@ -186,7 +187,7 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent)
 		}
 		int x, y;
 		[self getMouseXY: pEvent x: &x y: &y];
-		mGraphics->OnMouseDown(x, y, GetRightMouseMod(pEvent));
+		mGraphics->OnMouseDown(x, y, GetRightMouseMod(pEvent, true));
 	}
 }
 
@@ -196,7 +197,7 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent)
 	{
 		int x, y;
 		[self getMouseXY: pEvent x: &x y: &y];
-		mGraphics->OnMouseUp(x, y, GetRightMouseMod(pEvent));
+		mGraphics->OnMouseUp(x, y, GetRightMouseMod(pEvent, false));
 	}
 }
 
@@ -206,7 +207,7 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent)
 	{
 		int x, y;
 		[self getMouseXY: pEvent x: &x y: &y];
-		mGraphics->OnMouseDrag(x, y, GetRightMouseMod(pEvent));
+		mGraphics->OnMouseDrag(x, y, GetRightMouseMod(pEvent, true));
 	}
 }
 
@@ -216,7 +217,7 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent)
 	{
 		int x, y;
 		[self getMouseXY: pEvent x: &x y: &y];
-		mGraphics->OnMouseOver(x, y, GetMouseMod(pEvent));
+		mGraphics->OnMouseOver(x, y, GetRightMouseMod(pEvent, false));
 	}
 }
 
@@ -225,7 +226,7 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent)
 	int canHandle;
 	if (mGraphics && (canHandle = mGraphics->CanHandleMouseWheel()))
 	{
-		const IMouseMod mod = GetMouseMod(pEvent, canHandle >= 0);
+		const IMouseMod mod = GetRightMouseMod(pEvent, false, canHandle >= 0);
 		const IMouseMod mask(false, false, true, true, true, true);
 
 		if (mod.Get() & mask.Get())
