@@ -46,7 +46,7 @@ public:
 
 	bool PromptForFile(WDL_String* pFilename, int action = kFileOpen, const char* dir = NULL, const char* extensions = NULL);
 	// bool PromptForColor(IColor* pColor, const char* prompt = NULL) { return false; }
-	void PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int fontSize = 0);
+	bool PromptUserInput(IControl* pControl, IParam* pParam, const IRECT* pR = NULL, int flags = 0, IText* pTxt = NULL, IColor bg = IColor(0), int delay = 0, int x = 0, int y = 0);
 
 	bool OpenURL(const char* url, const char* windowTitle = NULL, const char* confirmMsg = NULL, const char* errMsg = NULL);
 
