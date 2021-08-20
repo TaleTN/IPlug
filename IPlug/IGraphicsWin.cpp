@@ -759,7 +759,7 @@ bool IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pPara
 {
 	if (mParamEditWnd || !pControl) return false;
 
-	char currentText[kMaxParamLen];
+	char currentText[kMaxEditLen];
 	if (pParam)
 	{
 		pParam->GetDisplayForHost(currentText, sizeof(currentText));
@@ -769,8 +769,8 @@ bool IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pPara
 		pControl->GetTextForUserInput(currentText, sizeof(currentText));
 	}
 
-	WCHAR buf[kMaxParamLen];
-	if (!MultiByteToWideChar(CP_UTF8, 0, currentText, -1, buf, kMaxParamLen))
+	WCHAR buf[kMaxEditLen];
+	if (!MultiByteToWideChar(CP_UTF8, 0, currentText, -1, buf, kMaxEditLen))
 	{
 		buf[0] = 0;
 	}
@@ -804,7 +804,7 @@ bool IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pPara
 	}
 
 	static const IText kDefaultFont(0, IColor(0));
-	const IText* const pFont = pTxt ? pTxt :&kDefaultFont;
+	const IText* const pFont = pTxt ? pTxt : &kDefaultFont;
 
 	const int fontSize = pFont->mSize;
 	r[4] = fontSize ? fontSize : (h * 14) / 16;
@@ -843,14 +843,11 @@ bool IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pPara
 	mDefEditProc = (WNDPROC)SetWindowLongPtrW(mParamEditWnd, GWLP_WNDPROC, (LONG_PTR)ParamEditProc);
 	SetWindowLongPtrW(mParamEditWnd, GWLP_USERDATA, 0xdeadf00b);
 
-	const char* face = pFont->mFont;
-	face = face ? face : IText::kDefaultFont;
-
 	HFONT const font = CreateFont(r[4], 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE,
-		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, face);
+		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, pFont->mFont);
 	SendMessageW(mParamEditWnd, WM_SETFONT, (WPARAM)font, FALSE);
 
-	if (flags & kPromptNoMargins)
+	if (flags & kPromptInline)
 	{
 		SendMessageW(mParamEditWnd, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELPARAM(0, 0));
 	}
@@ -858,7 +855,7 @@ bool IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pPara
 	if (flags & kPromptMouseClick)
 	{
 		ReleaseCapture();
-		SendMessageW(mParamEditWnd, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(r[5], r[6]));
+		SendMessageW(mParamEditWnd, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(r[5] - r[0], r[6] - r[1]));
 	}
 	else
 	{
