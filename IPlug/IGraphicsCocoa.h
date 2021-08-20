@@ -45,10 +45,15 @@
 - (void) killTimer;
 - (void) removeFromSuperview;
 - (void) controlTextDidEndEditing: (NSNotification*)aNotification;
-- (void) promptUserInput: (IControl*)pControl param: (IParam*)pParam rect: (const IRECT*)pR size: (int)fontSize;
+- (BOOL) promptUserInput: (IControl*)pControl param: (IParam*)pParam rect: (const IRECT*)pR flags: (int)flags font: (IText*)pTxt background: (IColor)bg delay: (int)delay x: (int)x y: (int)y;
 - (void) endUserInput;
 - (NSString*) view: (NSView*)pView stringForToolTip: (NSToolTipTag)tag point: (NSPoint)point userData: (void*)pData;
 - (void) registerToolTip: (int)controlIdx rect: (const IRECT*)pRECT;
 - (void) setParamChangeTimer: (int)ticks;
 - (void) cancelParamChangeTimer;
+@end
+
+@interface ColoredTextField: NSTextField
+{}
+- (BOOL) becomeFirstResponder;
 @end

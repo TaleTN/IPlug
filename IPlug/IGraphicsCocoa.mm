@@ -25,6 +25,18 @@ static NSString* ToNSString(const char* const cStr)
 	return [NSString stringWithCString: cStr encoding: NSUTF8StringEncoding];
 }
 
+static NSColor* ToNSColor(const IColor color)
+{
+	const CGFloat div = 1.0f / 255.0f;
+
+	const CGFloat r = (CGFloat)color.R * div;
+	const CGFloat g = (CGFloat)color.G * div;
+	const CGFloat b = (CGFloat)color.B * div;
+	const CGFloat a = (CGFloat)color.A * div;
+
+	return [NSColor colorWithRed: r green: g blue: b alpha: a];
+}
+
 static IMouseMod GetMouseMod(const NSEvent* const pEvent, const bool left)
 {
 	const int mods = [pEvent modifierFlags], cmd = !!(mods & NSCommandKeyMask);
@@ -269,11 +281,13 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent, const bool right,
 static const int PARAM_EDIT_W = 42;
 static const int PARAM_EDIT_H = 21;
 
-- (void) promptUserInput: (IControl*)pControl param: (IParam*)pParam rect: (const IRECT*)pR size: (int)fontSize
+- (BOOL) promptUserInput: (IControl*)pControl param: (IParam*)pParam rect: (const IRECT*)pR flags: (int)flags font: (IText*)pTxt background: (IColor)bg delay: (int)delay x: (int)mouseX y: (int)mouseY
 {
-	if (mParamEditView || !pControl) return;
+	// To-do: Implement kPromptInline, kPromptMouseClick (see IGraphicsWin.cpp).
 
-	char currentText[IGraphics::kMaxParamLen];
+	if (mParamEditView || !pControl) return NO;
+
+	char currentText[IGraphics::kMaxEditLen];
 	if (pParam)
 	{
 		pParam->GetDisplayForHost(currentText, sizeof(currentText));
@@ -290,7 +304,7 @@ static const int PARAM_EDIT_H = 21;
 	if (!pR) pR = pControl->GetTargetRECT();
 
 	int x, y, w, h;
-	if (!(fontSize & IGraphics::kPromptCustomWidth))
+	if (!(flags & IGraphics::kPromptCustomWidth))
 	{
 		const int cX = (pR->L + pR->R) >> scale;
 		w = PARAM_EDIT_W;
@@ -302,7 +316,7 @@ static const int PARAM_EDIT_H = 21;
 		x = pR->L >> scale;
 	}
 
-	if (!(fontSize & kPromptCustomHeight))
+	if (!(flags  & kPromptCustomHeight))
 	{
 		const int cY = (pR->T + pR->B) >> scale;
 		h = PARAM_EDIT_H;
@@ -310,20 +324,53 @@ static const int PARAM_EDIT_H = 21;
 	}
 	else
 	{
-		h = pR->W() >> scale;
+		h = pR->H() >> scale;
 		y = (pR->T >> scale) + h;
 	}
 
-	fontSize &= ~IGraphics::kPromptCustomRect;
-	const CGFloat sz = fontSize ? (CGFloat)(fontSize >> scale) : (CGFloat)PARAM_EDIT_H * (11.0f / 21.0f);
+	static const IText kDefaultFont(0, IColor(0));
+	const IText* const pFont = pTxt ? pTxt : &kDefaultFont;
 
+	int fontSize = pFont->mSize >> scale;
+	const CGFloat sz = fontSize ? (CGFloat)fontSize : (CGFloat)PARAM_EDIT_H * (11.0f / 21.0f);
+
+	NSFont* font = [NSFont fontWithName: ToNSString(pFont->mFont) size: sz];
+	if (fontSize)
+	{
+		// See DrawText() in WDL/swell/swell-gdi.mm.
+		int lineHeight = (int)([font ascender] - [font descender] + [font leading] + 1.5f);
+		if (lineHeight && ++lineHeight != fontSize)
+		{
+			// See IGraphics::CacheFont().
+			fontSize = (int)((double)(fontSize * fontSize) / (double)lineHeight + 0.5);
+			font = [NSFont fontWithDescriptor: [font fontDescriptor] size: (CGFloat)fontSize];
+		}
+	}
+
+	static const NSTextAlignment align[3] = { NSLeftTextAlignment, NSCenterTextAlignment, NSRightTextAlignment };
+	assert(pFont->mAlign >= 0 && pFont->mAlign < 3);
+
+	const IColor fg = pFont->mColor;
 	const NSRect r = NSMakeRect((CGFloat)x, (CGFloat)(gh - y), (CGFloat)w, (CGFloat)h);
 
-	mParamEditView = [[NSTextField alloc] initWithFrame: r];
-	[mParamEditView setFont: [NSFont fontWithName: @"Arial" size: sz]];
-	[mParamEditView setAlignment: NSCenterTextAlignment];
+	NSTextField* const textField = fg.Empty() ? [NSTextField alloc] : [ColoredTextField alloc];
+	mParamEditView = [textField initWithFrame: r];
+
+	[mParamEditView setFont: font];
+	[mParamEditView setAlignment: align[pFont->mAlign]];
 	[[mParamEditView cell] setLineBreakMode: NSLineBreakByTruncatingTail];
 	[mParamEditView setStringValue: ToNSString(currentText)];
+
+	if (!fg.Empty())
+	{
+		[mParamEditView setTextColor: ToNSColor(fg)];
+	}
+
+	if (!bg.Empty())
+	{
+		[mParamEditView setBackgroundColor: ToNSColor(bg)];
+		[mParamEditView setDrawsBackground: YES];
+	}
 
 	[mParamEditView setDelegate: self];
 	[self addSubview: mParamEditView];
@@ -333,6 +380,8 @@ static const int PARAM_EDIT_H = 21;
 
 	mEdControl = pControl;
 	mEdParam = pParam;
+
+	return YES;
 }
 
 - (void) endUserInput
@@ -367,6 +416,24 @@ static const int PARAM_EDIT_H = 21;
 - (void) cancelParamChangeTimer
 {
 	mParamChangeTimer = 0;
+}
+
+@end
+
+@implementation ColoredTextField
+
+// Source: https://stackoverflow.com/questions/2258300/nstextfield-white-text-on-black-background-but-black-cursor
+- (BOOL) becomeFirstResponder
+{
+	if (![super becomeFirstResponder]) return NO;
+
+	NSTextView* const textField = (NSTextView*)[self currentEditor];
+	if ([textField respondsToSelector: @selector(setInsertionPointColor:)])
+	{
+		[textField setInsertionPointColor: [self textColor]];
+	}
+
+	return YES;
 }
 
 @end
