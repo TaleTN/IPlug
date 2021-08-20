@@ -56,6 +56,8 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent, const bool right,
 	mGraphics = NULL;
 	mTimer = nil;
 	mParamChangeTimer = 0;
+	mAutoCommitTimer = 0;
+	mAutoCommitDelay = 0;
 	return self;
 }
 
@@ -133,10 +135,16 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent, const bool right,
 			[self setNeedsDisplayInRect: ToNSRect(mGraphics, &r)];
 		}
 
-		const int timer = mParamChangeTimer;
+		int timer = mParamChangeTimer;
 		if (timer && !(mParamChangeTimer = timer - 1))
 		{
 			mGraphics->GetPlug()->EndDelayedInformHostOfParamChange();
+		}
+
+		timer = mAutoCommitTimer;
+		if (timer && !(mAutoCommitTimer = timer - 1))
+		{
+			if (mParamEditView) [self commitUserInput];
 		}
 	}
 }
@@ -268,11 +276,14 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent, const bool right,
 	}
 }
 
+- (void) controlTextDidChange: (NSNotification*)aNotification
+{
+	if (mAutoCommitDelay) mAutoCommitTimer = mAutoCommitDelay;
+}
+
 - (void) controlTextDidEndEditing: (NSNotification*)aNotification
 {
-	const char* const txt = (const char*)[[mParamEditView stringValue] UTF8String];
-	mGraphics->SetFromStringAfterPrompt(mEdControl, mEdParam, txt);
-
+	[self commitUserInput];
 	[self endUserInput];
 	[self viewDidMoveToWindow];
 	[self setNeedsDisplay: YES];
@@ -347,6 +358,9 @@ static const int PARAM_EDIT_H = 21;
 		}
 	}
 
+	mAutoCommitTimer = 0;
+	mAutoCommitDelay = (int)((double)(mGraphics->FPS() * delay) * 0.001);
+
 	static const NSTextAlignment align[3] = { NSLeftTextAlignment, NSCenterTextAlignment, NSRightTextAlignment };
 	assert(pFont->mAlign >= 0 && pFont->mAlign < 3);
 
@@ -384,6 +398,12 @@ static const int PARAM_EDIT_H = 21;
 	return YES;
 }
 
+- (void) commitUserInput
+{
+	const char* const txt = (const char*)[[mParamEditView stringValue] UTF8String];
+	mGraphics->SetFromStringAfterPrompt(mEdControl, mEdParam, txt);
+}
+
 - (void) endUserInput
 {
 	[mParamEditView setDelegate: nil];
@@ -391,6 +411,8 @@ static const int PARAM_EDIT_H = 21;
 	mParamEditView = nil;
 	mEdControl = NULL;
 	mEdParam = NULL;
+	mAutoCommitTimer = 0;
+	mAutoCommitDelay = 0;
 }
 
 - (NSString*) view: (NSView*)pView stringForToolTip: (NSToolTipTag)tag point: (NSPoint)point userData: (void*)pData

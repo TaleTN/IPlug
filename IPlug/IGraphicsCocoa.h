@@ -24,6 +24,7 @@
 	IControl* mEdControl;
 	IParam* mEdParam;
 	int mParamChangeTimer;
+	int mAutoCommitTimer, mAutoCommitDelay;
 }
 - (id) init;
 - (id) initWithIGraphics: (IGraphicsMac*)pGraphics;
@@ -44,8 +45,10 @@
 - (void) scrollWheel: (NSEvent*)pEvent;
 - (void) killTimer;
 - (void) removeFromSuperview;
+- (void) controlTextDidChange: (NSNotification*)aNotification;
 - (void) controlTextDidEndEditing: (NSNotification*)aNotification;
 - (BOOL) promptUserInput: (IControl*)pControl param: (IParam*)pParam rect: (const IRECT*)pR flags: (int)flags font: (IText*)pTxt background: (IColor)bg delay: (int)delay x: (int)x y: (int)y;
+- (void) commitUserInput;
 - (void) endUserInput;
 - (NSString*) view: (NSView*)pView stringForToolTip: (NSToolTipTag)tag point: (NSPoint)point userData: (void*)pData;
 - (void) registerToolTip: (int)controlIdx rect: (const IRECT*)pRECT;
