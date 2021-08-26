@@ -655,8 +655,9 @@ bool IPlugBase::RestorePreset(const char* const name)
 	return false;
 }
 
-const char* IPlugBase::GetPresetName(const int idx) const
+const char* IPlugBase::GetPresetName(int idx) const
 {
+	if (idx < 0) idx = mCurrentPresetIdx;
 	const IPreset* const pPreset = mPresets.Get(idx);
 	return pPreset ? pPreset->mName.Get() : "";
 }

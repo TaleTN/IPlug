@@ -136,7 +136,7 @@ public:
 	bool NPresets(const int idx) const { return (unsigned int)idx < (unsigned int)NPresets(); }
 
 	inline int GetCurrentPresetIdx() const { return mCurrentPresetIdx; }
-	const char* GetPresetName(int idx) const;
+	const char* GetPresetName(int idx = -1) const;
 
 	bool MakeDefaultPreset(const char* name = NULL, int nPresets = 1);
 
