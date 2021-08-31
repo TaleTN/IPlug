@@ -157,6 +157,13 @@ bool IPlugVST2::AllocBankChunk(int chunkSize)
 	return mBankState.Alloc(chunkSize) == chunkSize;
 }
 
+void IPlugVST2::SetPresetName(int idx, const char* const name)
+{
+	if (idx < 0) idx = GetCurrentPresetIdx();
+	IPreset* const pPreset = mPresets.Get(idx);
+	if (pPreset) pPreset->SetName(name);
+}
+
 void IPlugVST2::BeginInformHostOfParamChange(const int idx)
 {
 	EndDelayedInformHostOfParamChange();

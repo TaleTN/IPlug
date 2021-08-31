@@ -31,6 +31,8 @@ public:
 	bool AllocStateChunk(int chunkSize = -1);
 	bool AllocBankChunk(int chunkSize = -1);
 
+	void SetPresetName(int idx, const char* name);
+
 	void BeginInformHostOfParamChange(int idx);
 	void InformHostOfParamChange(int idx, double normalizedValue);
 	void EndInformHostOfParamChange(int idx);
