@@ -616,7 +616,13 @@ int IGraphics::DrawIText(IText* const pTxt, const char* const str, const IRECT* 
 		R.right >>= scale;
 		R.bottom >>= scale;
 	}
- 
+
+	// TN: Quick patch to fix vertical offset.
+	#ifdef __APPLE__
+	R.top--;
+	R.top = wdl_max(R.top, 0);
+	#endif
+
 	const int h = font->DrawText(mDrawBitmap, str, -1, &R, fmt) << scale;
 
 	return h;
