@@ -80,7 +80,7 @@ namespace IChannelBlend
 
 struct IText
 {
-	static const int kDefaultSize = 14;
+	static const int kDefaultSize = 28;
 	static const IColor kDefaultColor;
 	static const char* const kDefaultFont;
 
