@@ -364,10 +364,16 @@ static const int PARAM_EDIT_H = 21;
 	static const NSTextAlignment align[3] = { NSLeftTextAlignment, NSCenterTextAlignment, NSRightTextAlignment };
 	assert(pFont->mAlign >= 0 && pFont->mAlign < 3);
 
-	const IColor fg = pFont->mColor;
+	IColor fg = pFont->mColor;
+
+	// TN: Force default black on white, or else Logic Pro X/GarageBand 10
+	// will use transparent background instead of default system colors.
+	fg = fg.Empty() ? IColor(255, 0, 0, 0) : fg;
+	bg = bg.Empty() ? IColor(255, 255, 255, 255) : bg;
+
 	const NSRect r = NSMakeRect((CGFloat)x, (CGFloat)(gh - y), (CGFloat)w, (CGFloat)h);
 
-	NSTextField* const textField = fg.Empty() ? [NSTextField alloc] : [ColoredTextField alloc];
+	NSTextField* const textField = /* fg.Empty() ? [NSTextField alloc] : */ [ColoredTextField alloc];
 	mParamEditView = [textField initWithFrame: r];
 
 	[mParamEditView setFont: font];
@@ -375,12 +381,12 @@ static const int PARAM_EDIT_H = 21;
 	[[mParamEditView cell] setLineBreakMode: NSLineBreakByTruncatingTail];
 	[mParamEditView setStringValue: ToNSString(currentText)];
 
-	if (!fg.Empty())
+	// if (!fg.Empty())
 	{
 		[mParamEditView setTextColor: ToNSColor(fg)];
 	}
 
-	if (!bg.Empty())
+	// if (!bg.Empty())
 	{
 		[mParamEditView setBackgroundColor: ToNSColor(bg)];
 		[mParamEditView setDrawsBackground: YES];
