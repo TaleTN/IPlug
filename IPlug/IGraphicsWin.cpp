@@ -10,6 +10,7 @@
 
 #include <string.h>
 #include "WDL/wdlcstring.h"
+#include "WDL/wdlutf8.h"
 
 static int nWndClassReg = 0;
 static const WCHAR* const wndClassName = L"IPlugWndClass";
@@ -939,27 +940,41 @@ bool IGraphicsWin::UserDataPath(WDL_String* const pPath)
 
 bool IGraphicsWin::PromptForFile(WDL_String* const pFilename, const int action, const char* dir, const char* const extensions)
 {
-	if (!WindowIsOpen() || !pFilename->SetLen(MAX_PATH))
+	if (!WindowIsOpen())
 	{
 		pFilename->Set("");
 		return false;
 	}
 
-	OPENFILENAME ofn;
-	memset(&ofn, 0, sizeof(OPENFILENAME));
+	WCHAR fnStr[MAX_PATH], dirStr[MAX_PATH];
+	const char* const fn = pFilename->Get();
+	if (!(*fn && MultiByteToWideChar(CP_UTF8, 0, fn, -1, fnStr, MAX_PATH)))
+	{
+		fnStr[0] = 0;
+	}
+	if (dir && !(*dir && MultiByteToWideChar(CP_UTF8, 0, dir, -1, dirStr, MAX_PATH)))
+	{
+		dir = NULL;
+	}
 
-	ofn.lStructSize = sizeof(OPENFILENAME);
+	OPENFILENAMEW ofn;
+	memset(&ofn, 0, sizeof(OPENFILENAMEW));
+
+	ofn.lStructSize = sizeof(OPENFILENAMEW);
 	ofn.hwndOwner = mPlugWnd;
-	ofn.lpstrFile = pFilename->Get();
+	ofn.lpstrFile = fnStr;
 	ofn.nMaxFile = MAX_PATH;
-	ofn.lpstrInitialDir = dir;
+	ofn.lpstrInitialDir = dir ? dirStr : NULL;
 	ofn.Flags = OFN_PATHMUSTEXIST;
 
-	char extStr[256];
-	char defExtStr[16];
+	WCHAR extStr[256];
+	WCHAR defExtStr[16];
 
 	if (extensions && *extensions)
 	{
+		// Extensions should be ANSI.
+		assert(WDL_DetectUTF8(extensions) <= 0);
+
 		int p;
 
 		bool seperator = true;
@@ -983,7 +998,7 @@ bool IGraphicsWin::PromptForFile(WDL_String* const pFilename, const int action, 
 		}
 		extStr[p++] = 0;
 
-		strcpy(&extStr[p], extStr);
+		wcscpy(&extStr[p], extStr);
 		extStr[p + p] = 0;
 		ofn.lpstrFilter = extStr;
 
@@ -1000,16 +1015,21 @@ bool IGraphicsWin::PromptForFile(WDL_String* const pFilename, const int action, 
 	{
 		case kFileSave:
 			ofn.Flags |= OFN_OVERWRITEPROMPT;
-			rc = GetSaveFileName(&ofn);
+			rc = GetSaveFileNameW(&ofn);
 			break;
 
 		case kFileOpen:
 			ofn.Flags |= OFN_FILEMUSTEXIST;
-			rc = GetOpenFileName(&ofn);
+			rc = GetOpenFileNameW(&ofn);
 			break;
 	}
 
-	pFilename->Set(rc ? ofn.lpstrFile : "");
+	if (rc && pFilename->SetLen(MAX_PATH - 1))
+	{
+		rc = !!WideCharToMultiByte(CP_UTF8, 0, ofn.lpstrFile, -1, pFilename->Get(), MAX_PATH, NULL, NULL);
+	}
+
+	if (!rc) pFilename->Set("");
 	return rc;
 }
 
