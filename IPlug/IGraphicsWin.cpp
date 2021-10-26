@@ -929,13 +929,17 @@ bool IGraphicsWin::PluginPath(WDL_String* const pPath)
 
 bool IGraphicsWin::UserDataPath(WDL_String* const pPath)
 {
-	if (!pPath->SetLen(MAX_PATH))
+	WCHAR pathStr[MAX_PATH];
+
+	if (!(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, 0, pathStr)) &&
+		pPath->SetLen(MAX_PATH - 1) &&
+		WideCharToMultiByte(CP_UTF8, 0, pathStr, -1, pPath->Get(), MAX_PATH, NULL, NULL)))
 	{
 		pPath->Set("");
 		return false;
 	}
 
-	return SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, pPath->Get()));
+	return true;
 }
 
 bool IGraphicsWin::PromptForFile(WDL_String* const pFilename, const int action, const char* dir, const char* const extensions)
