@@ -898,23 +898,25 @@ void IGraphicsWin::CancelParamEdit()
 
 static bool GetModulePath(HMODULE const hModule, WDL_String* const pPath)
 {
-	if (!pPath->SetLen(MAX_PATH)) // Allocates MAX_PATH+1
+	WCHAR pathStr[MAX_PATH];
+	int s = GetModuleFileNameW(hModule, pathStr, MAX_PATH - 1);
+
+	// Windows XP: String is truncated to nSize chars and is not
+	// null-terminated.
+	// pathStr[MAX_PATH - 1] = 0;
+
+	while (--s >= 0 && pathStr[s] != '\\');
+	pathStr[s + 1] = 0;
+
+	if (!(pPath->SetLen(MAX_PATH - 1) &&
+		WideCharToMultiByte(CP_UTF8, 0, pathStr, -1, pPath->Get(), MAX_PATH, NULL, NULL)))
 	{
 		pPath->Set("");
 		return false;
 	}
 
-	char* const pathCStr = pPath->Get();
-	int s = GetModuleFileName(hModule, pathCStr, MAX_PATH);
-
-	// Windows XP: String is truncated to nSize chars and is not
-	// null-terminated.
-	// pathCStr[MAX_PATH] = 0;
-
-	while (--s >= 0 && pathCStr[s] != '\\');
-	pathCStr[s + 1] = 0;
-
 	return true;
+
 }
 
 bool IGraphicsWin::HostPath(WDL_String* const pPath)
