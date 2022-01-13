@@ -204,10 +204,10 @@ void IGraphicsMac::CloseWindow()
 		mGraphicsCocoa = NULL;
 
 		IGraphicsMac* pGraphicsMac;
-		object_getInstanceVariable(graphicscocoa, "_mGraphics", (void**)&pGraphicsMac);
+		object_getInstanceVariable(graphicscocoa, "mGraphics", (void**)&pGraphicsMac);
 		if (pGraphicsMac)
 		{
-			object_setInstanceVariable(graphicscocoa, "_mGraphics", NULL);
+			object_setInstanceVariable(graphicscocoa, "mGraphics", NULL);
 			[graphicscocoa removeFromSuperview]; // Releases.
 		}
 	}
