@@ -494,3 +494,30 @@ void IPlugDebugLog(const char* const str)
 	NSLog(@"%s", str);
 }
 #endif
+
+// TN: Fixes undefined symbols in Xcode debug build.
+#ifndef IPLUG_FULL_SWELL_SUPPORT
+
+HWND GetDlgItem(HWND, int) { return NULL; }
+void ShowWindow(HWND, int) {}
+HWND GetFocus() { return NULL; }
+void GetClientRect(HWND, RECT*) {}
+void SetWindowPos(HWND, HWND, int, int, int, int, int) {}
+LONG_PTR GetWindowLong(HWND, int) { return 0; }
+LONG_PTR SetWindowLong(HWND, int, LONG_PTR) { return 0; }
+void DestroyMenu(HMENU) {}
+HMENU SWELL_DuplicateMenu(HMENU) { return NULL; }
+HMENU GetMenu(HWND) { return NULL; }
+HMENU SWELL_GetDefaultWindowMenu() { return NULL; }
+HMENU SWELL_GetDefaultModalWindowMenu() { return NULL; }
+void SWELL_SetCurrentMenu(HMENU) {}
+HWND SWELL_CreateDialog(struct SWELL_DialogResourceIndex*, const char*, HWND, DLGPROC, LPARAM) { return NULL; }
+LRESULT DefWindowProc(HWND, UINT, WPARAM, LPARAM) { return 0; }
+LRESULT SendMessage(HWND, UINT, WPARAM, LPARAM) { return 0; }
+void SetOpaque(HWND, bool) {}
+void SWELL_MakeSetCurParms(float, float, float, float, HWND, bool, bool) {}
+HWND SWELL_MakeButton(int, const char*, int, int, int, int, int, int) { return NULL; }
+HWND SWELL_MakeLabel(int, const char*, int, int, int, int, int, int) { return NULL; }
+HWND SWELL_MakeCombo(int, int, int, int, int, int) { return NULL; }
+
+#endif
