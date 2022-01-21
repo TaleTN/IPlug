@@ -530,12 +530,12 @@ ComponentResult IPlugAU::GetProperty(const AudioUnitPropertyID propID, const Aud
 	{
 		case kAudioUnitProperty_ClassInfo:                      // 0,
 		{
-			*pDataSize = sizeof(CFPropertyListRef);
+			*pDataSize = sizeof(CFDictionaryRef);
 			*pWriteable = true;
 			if (pData)
 			{
-				CFPropertyListRef* const pList = (CFPropertyListRef*)pData;
-				return GetState(pList);
+				CFDictionaryRef* const pDict = (CFDictionaryRef*)pData;
+				return GetState(pDict);
 			}
 			return noErr;
 		}
@@ -1044,7 +1044,7 @@ ComponentResult IPlugAU::SetProperty(const AudioUnitPropertyID propID, const Aud
 	{
 		case kAudioUnitProperty_ClassInfo:                      // 0,
 		{
-			return SetState(*(CFPropertyListRef*)pData);
+			return SetState(*(CFDictionaryRef*)pData);
 		}
 
 		case kAudioUnitProperty_MakeConnection:                 // 1,
@@ -1423,7 +1423,7 @@ static bool GetDataFromDict(CFDictionaryRef const pDict, const char* const key, 
 	return false;
 }
 
-ComponentResult IPlugAU::GetState(CFPropertyListRef* const ppPropList)
+ComponentResult IPlugAU::GetState(CFDictionaryRef* const ppDict)
 {
 	ComponentDescription cd;
 	const ComponentResult r = GetComponentInfo((Component)mCI, &cd, NULL, NULL, NULL);
@@ -1449,17 +1449,16 @@ ComponentResult IPlugAU::GetState(CFPropertyListRef* const ppPropList)
 		PutDataInDict(pDict, kAUPresetDataKey, &mState);
 	}
 
-	*ppPropList = pDict;
+	*ppDict = pDict;
 	return noErr;
 }
 
-ComponentResult IPlugAU::SetState(CFPropertyListRef const pPropList)
+ComponentResult IPlugAU::SetState(CFDictionaryRef const pDict)
 {
 	ComponentDescription cd;
 	const ComponentResult r = GetComponentInfo((Component)mCI, &cd, NULL, NULL, NULL);
 	if (r != noErr) return r;
 
-	CFDictionaryRef const pDict = (CFDictionaryRef)pPropList;
 	int version, type, subtype, mfr;
 	char presetName[64];
 	if (!GetNumberFromDict(pDict, kAUPresetVersionKey, &version, kCFNumberSInt32Type) ||
