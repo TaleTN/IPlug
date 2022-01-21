@@ -31,13 +31,18 @@ struct IBitmap
 	inline int Scale() const { return mID & 1; }
 };
 
-struct IColor
+union IColor
 {
-	#if LICE_PIXEL_B == 0 && LICE_PIXEL_G == 1 && LICE_PIXEL_R == 2 && LICE_PIXEL_A == 3
-	LICE_pixel_chan B, G, R, A;
-	#elif LICE_PIXEL_A == 0 && LICE_PIXEL_R == 1 && LICE_PIXEL_G == 2 && LICE_PIXEL_B == 3
-	LICE_pixel_chan A, R, G, B;
-	#endif
+	LICE_pixel mColor;
+
+	struct
+	{
+		#if LICE_PIXEL_B == 0 && LICE_PIXEL_G == 1 && LICE_PIXEL_R == 2 && LICE_PIXEL_A == 3
+		LICE_pixel_chan B, G, R, A;
+		#elif LICE_PIXEL_A == 0 && LICE_PIXEL_R == 1 && LICE_PIXEL_G == 2 && LICE_PIXEL_B == 3
+		LICE_pixel_chan A, R, G, B;
+		#endif
+	};
 
 	IColor(const int a = 255, const int r = 0, const int g = 0, const int b = 0)
 	{
@@ -46,18 +51,10 @@ struct IColor
 
 	inline IColor(const IColor& rhs) { Set(rhs.Get()); }
 
-	inline void Set(const LICE_pixel color) { *Ptr() = color; }
-	inline LICE_pixel Get() const { return *Ptr(); }
+	inline void Set(const LICE_pixel color) { mColor = color; }
+	inline LICE_pixel Get() const { return mColor; }
 
-	inline LICE_pixel* Ptr() const
-	{
-		return (LICE_pixel*)
-		#if LICE_PIXEL_B == 0
-		&B;
-		#elif LICE_PIXEL_A == 0
-		&A;
-		#endif
-	}
+	inline LICE_pixel* Ptr() const { return (LICE_pixel*)&mColor; }
 
 	inline bool operator ==(const IColor& rhs) const { return Get() == rhs.Get(); }
 	inline bool operator !=(const IColor& rhs) const { return !operator==(rhs); }
@@ -146,7 +143,11 @@ struct IRECT
 	bool Empty() const
 	{
 		#if defined(_WIN64) || defined(__LP64__)
-		const WDL_UINT64* const p = Ptr();
+		WDL_UINT64 p[2];
+
+		memcpy(&p[0], &L, sizeof(WDL_UINT64));
+		memcpy(&p[1], &R, sizeof(WDL_UINT64));
+
 		return !(p[0] || p[1]);
 		#else
 		return !(L || T || R || B);
@@ -163,7 +164,14 @@ struct IRECT
 	bool operator ==(const IRECT& rhs) const
 	{
 		#if defined(_WIN64) || defined(__LP64__)
-		const WDL_UINT64* const p = Ptr(), *const q = rhs.Ptr();
+		WDL_UINT64 p[2], q[2];
+
+		memcpy(&p[0], &L, sizeof(WDL_UINT64));
+		memcpy(&p[1], &R, sizeof(WDL_UINT64));
+
+		memcpy(&q[0], &rhs.L, sizeof(WDL_UINT64));
+		memcpy(&q[1], &rhs.R, sizeof(WDL_UINT64));
+
 		return p[0] == q[0] && p[1] == q[1];
 		#else
 		return L == rhs.L && T == rhs.T && R == rhs.R && B == rhs.B;
@@ -377,7 +385,7 @@ struct IMidiMsg
 	IMidiMsg(const int offs, const void* const buf)
 	{
 		mOffset = offs;
-		*(unsigned int*)&mStatus = *(const unsigned int*)buf;
+		memcpy(&mStatus, buf, 4 * sizeof(unsigned char));
 	}
 
 	void Clear()
