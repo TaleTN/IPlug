@@ -1356,7 +1356,7 @@ void IPlugAU::UpdateBlockSize(const int blockSize)
 	}
 }
 
-static void PutNumberInDict(CFMutableDictionaryRef const pDict, const char* const key, void* const pNumber, const CFNumberType type)
+static void PutNumberInDict(CFMutableDictionaryRef const pDict, const char* const key, const void* const pNumber, const CFNumberType type)
 {
 	const CFStrLocal cfKey(key);
 	CFNumberRef const pValue = CFNumberCreate(NULL, type, pNumber);
@@ -1430,7 +1430,7 @@ ComponentResult IPlugAU::GetState(CFDictionaryRef* const ppDict)
 	if (r != noErr) return r;
 
 	CFMutableDictionaryRef const pDict = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-	int version = GetEffectVersion(false);
+	const int version = GetEffectVersion(false);
 	PutNumberInDict(pDict, kAUPresetVersionKey, &version, kCFNumberSInt32Type);
 	PutNumberInDict(pDict, kAUPresetTypeKey, &cd.componentType, kCFNumberSInt32Type);
 	PutNumberInDict(pDict, kAUPresetSubtypeKey, &cd.componentSubType, kCFNumberSInt32Type);
