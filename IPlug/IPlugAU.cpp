@@ -1296,7 +1296,7 @@ ComponentResult IPlugAU::GetProperty(const AudioUnitPropertyID propID, const Aud
 
 		#endif
 
-		case kMusicDeviceProperty_InstrumentCount:              // 1000
+		case kMusicDeviceProperty_InstrumentCount:              // 1000,
 		{
 			ASSERT_SCOPE(kAudioUnitScope_Global);
 			if (IsInst())
@@ -1306,6 +1306,18 @@ ComponentResult IPlugAU::GetProperty(const AudioUnitPropertyID propID, const Aud
 				return noErr;
 			}
 			return kAudioUnitErr_InvalidProperty;
+		}
+
+		case IGraphicsMac::kAudioUnitProperty_PlugInObject:     // 0x1a45ffe9
+		{
+			ASSERT_SCOPE(kAudioUnitScope_Global);
+			*pDataSize = 2 * sizeof(void*);
+			if (pData)
+			{
+				void* const ptrs[2] = { this, NULL };
+				memcpy(pData, ptrs, sizeof(ptrs));
+			}
+			return noErr;
 		}
 	}
 

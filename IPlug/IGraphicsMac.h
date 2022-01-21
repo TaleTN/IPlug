@@ -59,6 +59,8 @@ public:
 	static int GetUserOSVersion(); // Returns a number like 0x1050 (10.5).
 	static double GetUserFoundationVersion(); // Returns a number like 677.00 (10.5).
 
+	static const int kAudioUnitProperty_PlugInObject = 0x1a45ffe9;
+
 protected:
 	LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
 	bool OSLoadFont(int ID, const char* name);
