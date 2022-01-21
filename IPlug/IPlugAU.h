@@ -130,6 +130,7 @@ private:
 	void UpdateBlockSize(int blockSize);
 
 	ByteChunk mState; // Persistent storage if the host asks for plugin state.
+	int mComponentType;
 
 	struct PropertyListener
 	{
@@ -148,7 +149,42 @@ private:
 	ComponentResult SetState(CFDictionaryRef pDict);
 	void InformListeners(AudioUnitPropertyID propID, AudioUnitScope scope);
 
+	static OSStatus AP_Open(void* pInstance, AudioComponentInstance compInstance);
+	static OSStatus AP_Close(void* pInstance);
+
+	static AudioComponentMethod AUBaseLookup(SInt16 selector);
+	static AudioComponentMethod AUMIDILookup(SInt16 selector);
+
+	static OSStatus AUMethodInitialize(void* pInstance);
+	static OSStatus AUMethodUninitialize(void* pInstance);
+	static OSStatus AUMethodGetPropertyInfo(void* pInstance, AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
+		UInt32* pDataSize, Boolean* pWriteable);
+	static OSStatus AUMethodGetProperty(void* pInstance, AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
+		void* pData, UInt32* pDataSize);
+	static OSStatus AUMethodSetProperty(void* pInstance, AudioUnitPropertyID propID, AudioUnitScope scope, AudioUnitElement element,
+		const void* pData, UInt32 pDataSize);
+	static OSStatus AUMethodGetParameter(void* pInstance, AudioUnitParameterID paramID, AudioUnitScope scope, AudioUnitElement element,
+		AudioUnitParameterValue* pValue);
+	static OSStatus AUMethodSetParameter(void* pInstance, AudioUnitParameterID paramID, AudioUnitScope scope, AudioUnitElement element,
+		AudioUnitParameterValue value, UInt32 offsetFrames);
+	static OSStatus AUMethodReset(void* pInstance, AudioUnitScope scope, AudioUnitElement element);
+	static OSStatus AUMethodAddPropertyListener(void* pInstance, AudioUnitPropertyID propID,
+		AudioUnitPropertyListenerProc listenerProc, void* pProcArgs);
+	static OSStatus AUMethodRemovePropertyListener(void* pInstance, AudioUnitPropertyID propID,
+		AudioUnitPropertyListenerProc listenerProc);
+	static OSStatus AUMethodRender(void* pInstance, AudioUnitRenderActionFlags* pFlags, const AudioTimeStamp* pTimestamp,
+		UInt32 outputBusIdx, UInt32 nFrames, AudioBufferList* pBufferList);
+	static OSStatus AUMethodAddRenderNotify(void* pInstance, AURenderCallback renderProc, void* pRefCon);
+	static OSStatus AUMethodRemoveRenderNotify(void* pInstance, AURenderCallback renderProc, void* pRefCon);
+	static OSStatus AUMethodScheduleParameters(void* pInstance, const AudioUnitParameterEvent* pEvent, UInt32 nEvents);
+	static OSStatus AUMethodRemovePropertyListenerWithUserData(void* pInstance, AudioUnitPropertyID propID,
+		AudioUnitPropertyListenerProc listenerProc, void* pProcArgs);
+
+	static OSStatus AUMethodMIDIEvent(void* pInstance, UInt32 status, UInt32 data1, UInt32 data2, UInt32 offsetFrames);
+	static OSStatus AUMethodSysEx(void* pInstance, const UInt8* pData, UInt32 dataSize);
+
 public:
+	static void* IPlugAUFactory(const AudioComponentDescription* pDesc);
 	static ComponentResult IPlugAUEntry(ComponentParameters *params, void* pVPlug);
 
 	#ifndef IPLUG_NO_CARBON_SUPPORT

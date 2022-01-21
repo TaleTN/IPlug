@@ -102,6 +102,11 @@ ComponentResult PLUG_VIEW_ENTRY(ComponentParameters* const params, void* const p
 }
 #endif
 
+void* PLUG_FACTORY(const AudioComponentDescription* const pDesc)
+{
+	return IPlugAU::IPlugAUFactory(pDesc);
+}
+
 } // extern "C"
 
 #else

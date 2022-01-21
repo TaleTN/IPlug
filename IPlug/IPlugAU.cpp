@@ -89,11 +89,286 @@ static int PtrListInitialize(WDL_PtrList<C>* const pList, int const size)
 	return size;
 }
 
+template <class C>
+static inline void SetCompParam(long* const pParam, const C value)
+{
+	*(C*)pParam = value;
+}
+
+#define INIT_COMP_PARAMS(WHAT, NUM) \
+	union { long alloc[1 + NUM + 1]; ComponentParameters params; }; \
+	params.what = WHAT
+
 #ifdef __LP64__
 	#define GET_COMP_PARAM(TYPE, IDX, NUM) *((TYPE*)&(params->params[NUM - IDX]))
+	#define SET_COMP_PARAM(VALUE, IDX, NUM) SetCompParam(&params.params[NUM - IDX], VALUE)
 #else
 	#define GET_COMP_PARAM(TYPE, IDX, NUM) *((TYPE*)&(params->params[IDX]))
+	#define SET_COMP_PARAM(VALUE, IDX, NUM) SetCompParam(&params.params[IDX], VALUE)
 #endif
+
+#define BASE_LOOKUP(method) case kAudioUnit##method##Select: return (AudioComponentMethod)AUMethod##method
+#define MIDI_LOOKUP(method) case kMusicDevice##method##Select: return (AudioComponentMethod)AUMethod##method
+
+struct IPlugAUInstance
+{
+	AudioComponentPlugInInterface mInterface;
+	IPlugAU* mPlug;
+};
+
+static inline void* GetPlug(void* const pInstance)
+{
+	return ((IPlugAUInstance*)pInstance)->mPlug;
+}
+
+// static
+void* IPlugAU::IPlugAUFactory(const AudioComponentDescription* const pDesc)
+{
+	const int type = pDesc->componentType;
+
+	IPlugAUInstance* const pInstance = new IPlugAUInstance;
+	pInstance->mInterface.Open = AP_Open;
+	pInstance->mInterface.Close = AP_Close;
+	pInstance->mInterface.Lookup = type == kAudioUnitType_MusicDevice || type == kAudioUnitType_MusicEffect ? AUMIDILookup : AUBaseLookup;
+	pInstance->mInterface.reserved = NULL;
+	pInstance->mPlug = NULL;
+	return pInstance;
+}
+
+// static
+OSStatus IPlugAU::AP_Open(void* const pInstance, AudioComponentInstance const compInstance)
+{
+	IPlugAU* const _this = MakeIPlugAU();
+	_this->HostSpecificInit();
+	_this->PruneUninitializedPresets();
+	_this->mCI = compInstance;
+	((IPlugAUInstance*)pInstance)->mPlug = _this;
+	return noErr;
+}
+
+// static
+OSStatus IPlugAU::AP_Close(void* const pInstance)
+{
+	IPlugAU* const _this = (IPlugAU*)GetPlug(pInstance);
+	_this->ClearConnections();
+	delete _this;
+	delete (IPlugAUInstance*)pInstance;
+	return noErr;
+}
+
+// static
+AudioComponentMethod IPlugAU::AUBaseLookup(const SInt16 selector)
+{
+	switch (selector)
+	{
+		BASE_LOOKUP(Initialize);
+		BASE_LOOKUP(Uninitialize);
+		BASE_LOOKUP(GetPropertyInfo);
+		BASE_LOOKUP(GetProperty);
+		BASE_LOOKUP(SetProperty);
+		BASE_LOOKUP(GetParameter);
+		BASE_LOOKUP(SetParameter);
+		BASE_LOOKUP(Reset);
+		BASE_LOOKUP(AddPropertyListener);
+		BASE_LOOKUP(RemovePropertyListener);
+		BASE_LOOKUP(Render);
+		BASE_LOOKUP(AddRenderNotify);
+		BASE_LOOKUP(RemoveRenderNotify);
+		BASE_LOOKUP(ScheduleParameters);
+		BASE_LOOKUP(RemovePropertyListenerWithUserData);
+	}
+	return NULL;
+}
+
+// static
+AudioComponentMethod IPlugAU::AUMIDILookup(const SInt16 selector)
+{
+	switch (selector)
+	{
+		MIDI_LOOKUP(MIDIEvent);
+		MIDI_LOOKUP(SysEx);
+	}
+	return AUBaseLookup(selector);
+}
+
+// static
+OSStatus IPlugAU::AUMethodInitialize(void* const pInstance)
+{
+	INIT_COMP_PARAMS(kAudioUnitInitializeSelect, 0);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodUninitialize(void* const pInstance)
+{
+	INIT_COMP_PARAMS(kAudioUnitUninitializeSelect, 0);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodGetPropertyInfo(void* const pInstance, const AudioUnitPropertyID propID, const AudioUnitScope scope,
+	const AudioUnitElement element, UInt32* const pDataSize, Boolean* const pWriteable)
+{
+	INIT_COMP_PARAMS(kAudioUnitGetPropertyInfoSelect, 5);
+	SET_COMP_PARAM(propID, 4, 5);
+	SET_COMP_PARAM(scope, 3, 5);
+	SET_COMP_PARAM(element, 2, 5);
+	SET_COMP_PARAM(pDataSize, 1, 5);
+	SET_COMP_PARAM(pWriteable, 0, 5);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodGetProperty(void* const pInstance, const AudioUnitPropertyID propID, const AudioUnitScope scope,
+	const AudioUnitElement element, void* const pData, UInt32* const pDataSize)
+{
+	INIT_COMP_PARAMS(kAudioUnitGetPropertySelect, 5);
+	SET_COMP_PARAM(propID, 4, 5);
+	SET_COMP_PARAM(scope, 3, 5);
+	SET_COMP_PARAM(element, 2, 5);
+	SET_COMP_PARAM((INT_PTR)pData, 1, 5);
+	SET_COMP_PARAM((INT_PTR)pDataSize, 0, 5);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodSetProperty(void* const pInstance, const AudioUnitPropertyID propID, const AudioUnitScope scope,
+	const AudioUnitElement element, const void* const pData, const UInt32 pDataSize)
+{
+	INIT_COMP_PARAMS(kAudioUnitSetPropertySelect, 5);
+	SET_COMP_PARAM(propID, 4, 5);
+	SET_COMP_PARAM(scope, 3, 5);
+	SET_COMP_PARAM(element, 2, 5);
+	SET_COMP_PARAM(pData, 1, 5);
+	SET_COMP_PARAM(pDataSize, 0, 5);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodGetParameter(void* const pInstance, const AudioUnitParameterID paramID, const AudioUnitScope scope,
+	const AudioUnitElement element, AudioUnitParameterValue* const pValue)
+{
+	INIT_COMP_PARAMS(kAudioUnitGetParameterSelect, 4);
+	SET_COMP_PARAM(paramID, 3, 4);
+	SET_COMP_PARAM(scope, 2, 4);
+	SET_COMP_PARAM(element, 1, 4);
+	SET_COMP_PARAM(pValue, 0, 4);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodSetParameter(void* const pInstance, const AudioUnitParameterID paramID, const AudioUnitScope scope,
+	const AudioUnitElement element, const AudioUnitParameterValue value, const UInt32 offset)
+{
+	INIT_COMP_PARAMS(kAudioUnitSetParameterSelect, 5);
+	SET_COMP_PARAM(paramID, 4, 5);
+	SET_COMP_PARAM(scope, 3, 5);
+	SET_COMP_PARAM(element, 2, 5);
+	SET_COMP_PARAM(value, 1, 5);
+	SET_COMP_PARAM(offset, 0, 5);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodReset(void* const pInstance, AudioUnitScope /* scope */, AudioUnitElement /* element */)
+{
+	INIT_COMP_PARAMS(kAudioUnitResetSelect, /* 2 */ 0);
+	/* SET_COMP_PARAM(scope, 1, 2);
+	SET_COMP_PARAM(element, 0, 2); */
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodAddPropertyListener(void* const pInstance, const AudioUnitPropertyID propID,
+	AudioUnitPropertyListenerProc const listenerProc, void* const pProcArgs)
+{
+	INIT_COMP_PARAMS(kAudioUnitAddPropertyListenerSelect, 3);
+	SET_COMP_PARAM(propID, 2, 3);
+	SET_COMP_PARAM(listenerProc, 1, 3);
+	SET_COMP_PARAM(pProcArgs, 0, 3);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodRemovePropertyListener(void* const pInstance, const AudioUnitPropertyID propID,
+	AudioUnitPropertyListenerProc const listenerProc)
+{
+	INIT_COMP_PARAMS(kAudioUnitRemovePropertyListenerSelect, 2);
+	SET_COMP_PARAM(propID, 1, 2);
+	SET_COMP_PARAM(listenerProc, 0, 2);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodRender(void* const pInstance, AudioUnitRenderActionFlags* const pFlags, const AudioTimeStamp* const pTimestamp,
+	const UInt32 outputBusIdx, const UInt32 nFrames, AudioBufferList* const pBufferList)
+{
+	INIT_COMP_PARAMS(kAudioUnitRenderSelect, 5);
+	SET_COMP_PARAM(pFlags, 4, 5);
+	SET_COMP_PARAM(pTimestamp, 3, 5);
+	SET_COMP_PARAM(outputBusIdx, 2, 5);
+	SET_COMP_PARAM(nFrames, 1, 5);
+	SET_COMP_PARAM(pBufferList, 0, 5);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodAddRenderNotify(void* const pInstance, AURenderCallback const renderProc, void* const pRefCon)
+{
+	INIT_COMP_PARAMS(kAudioUnitAddRenderNotifySelect, 2);
+	SET_COMP_PARAM(renderProc, 1, 2);
+	SET_COMP_PARAM(pRefCon, 0, 2);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodRemoveRenderNotify(void* const pInstance, AURenderCallback const renderProc, void* const pRefCon)
+{
+	INIT_COMP_PARAMS(kAudioUnitRemoveRenderNotifySelect, 2);
+	SET_COMP_PARAM(renderProc, 1, 2);
+	SET_COMP_PARAM(pRefCon, 0, 2);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodScheduleParameters(void* const pInstance, const AudioUnitParameterEvent* const pEvent, const UInt32 nEvents)
+{
+	INIT_COMP_PARAMS(kAudioUnitScheduleParametersSelect, 2);
+	SET_COMP_PARAM(pEvent, 1, 2);
+	SET_COMP_PARAM(nEvents, 0, 2);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodRemovePropertyListenerWithUserData(void* const pInstance, const AudioUnitPropertyID propID,
+	AudioUnitPropertyListenerProc const listenerProc, void* const pProcArgs)
+{
+	INIT_COMP_PARAMS(kAudioUnitRemovePropertyListenerWithUserDataSelect, 3);
+	SET_COMP_PARAM(propID, 2, 3);
+	SET_COMP_PARAM(listenerProc, 1, 3);
+	SET_COMP_PARAM(pProcArgs, 0, 3);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodMIDIEvent(void* const pInstance, const UInt32 status, const UInt32 data1, const UInt32 data2, const UInt32 offset)
+{
+	INIT_COMP_PARAMS(kMusicDeviceMIDIEventSelect, 4);
+	SET_COMP_PARAM(status, 3, 4);
+	SET_COMP_PARAM(data1, 2, 4);
+	SET_COMP_PARAM(data2, 1, 4);
+	SET_COMP_PARAM(offset, 0, 4);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
+
+// static
+OSStatus IPlugAU::AUMethodSysEx(void* pInstance, const UInt8* pData, const UInt32 size)
+{
+	INIT_COMP_PARAMS(kMusicDeviceSysExSelect, 2);
+	SET_COMP_PARAM(pData, 1, 2);
+	SET_COMP_PARAM(size, 0, 2);
+	return IPlugAUEntry(&params, GetPlug(pInstance));
+}
 
 // static
 ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters* const params, void* const pPlug)
@@ -1430,16 +1705,14 @@ static bool GetDataFromDict(CFDictionaryRef const pDict, const char* const key, 
 
 ComponentResult IPlugAU::GetState(CFDictionaryRef* const ppDict)
 {
-	ComponentDescription cd;
-	const ComponentResult r = GetComponentInfo((Component)mCI, &cd, NULL, NULL, NULL);
-	if (r != noErr) return r;
+	const int subtype = GetUniqueID(), mfr = GetMfrID();
+	const int version = GetEffectVersion(false);
 
 	CFMutableDictionaryRef const pDict = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-	const int version = GetEffectVersion(false);
 	PutNumberInDict(pDict, kAUPresetVersionKey, &version, kCFNumberSInt32Type);
-	PutNumberInDict(pDict, kAUPresetTypeKey, &cd.componentType, kCFNumberSInt32Type);
-	PutNumberInDict(pDict, kAUPresetSubtypeKey, &cd.componentSubType, kCFNumberSInt32Type);
-	PutNumberInDict(pDict, kAUPresetManufacturerKey, &cd.componentManufacturer, kCFNumberSInt32Type);
+	PutNumberInDict(pDict, kAUPresetTypeKey, &mComponentType, kCFNumberSInt32Type);
+	PutNumberInDict(pDict, kAUPresetSubtypeKey, &subtype, kCFNumberSInt32Type);
+	PutNumberInDict(pDict, kAUPresetManufacturerKey, &mfr, kCFNumberSInt32Type);
 	PutStrInDict(pDict, kAUPresetNameKey, GetPresetName(GetCurrentPresetIdx()));
 
 	if (!mState.Size()) AllocStateChunk();
@@ -1460,10 +1733,6 @@ ComponentResult IPlugAU::GetState(CFDictionaryRef* const ppDict)
 
 ComponentResult IPlugAU::SetState(CFDictionaryRef const pDict)
 {
-	ComponentDescription cd;
-	const ComponentResult r = GetComponentInfo((Component)mCI, &cd, NULL, NULL, NULL);
-	if (r != noErr) return r;
-
 	int version, type, subtype, mfr;
 	char presetName[64];
 	if (!GetNumberFromDict(pDict, kAUPresetVersionKey, &version, kCFNumberSInt32Type) ||
@@ -1472,9 +1741,9 @@ ComponentResult IPlugAU::SetState(CFDictionaryRef const pDict)
 		!GetNumberFromDict(pDict, kAUPresetManufacturerKey, &mfr, kCFNumberSInt32Type) ||
 		!GetStrFromDict(pDict, kAUPresetNameKey, presetName, sizeof(presetName)) ||
 		// version != GetEffectVersion(false) ||
-		type != cd.componentType ||
-		subtype != cd.componentSubType ||
-		mfr != cd.componentManufacturer)
+		type != mComponentType ||
+		subtype != GetUniqueID() ||
+		mfr != GetMfrID())
 	{
 		return kAudioUnitErr_InvalidPropertyValue;
 	}
@@ -1821,6 +2090,13 @@ IPlugBase(
 {
 	memset(&mHostCallbacks, 0, sizeof(HostCallbackInfo));
 	// memset(&mMidiCallback, 0, sizeof(AUMIDIOutputCallbackStruct));
+
+	if (IsInst())
+		mComponentType = kAudioUnitType_MusicDevice;
+	else if (DoesMIDI())
+		mComponentType = kAudioUnitType_MusicEffect;
+	else
+		mComponentType = kAudioUnitType_Effect;
 
 	const char* const* const pID = (const char* const*)instanceInfo;
 	mOSXBundleID.Set(pID[0]);
