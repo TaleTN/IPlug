@@ -95,8 +95,6 @@ static int PtrListInitialize(WDL_PtrList<C>* const pList, int const size)
 	#define GET_COMP_PARAM(TYPE, IDX, NUM) *((TYPE*)&(params->params[IDX]))
 #endif
 
-#define NO_OP(select) case select: return badComponentSelector;
-
 // static
 ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters* const params, void* const pPlug)
 {
@@ -510,15 +508,15 @@ ComponentResult IPlugAU::IPlugAUCarbonViewEntry(ComponentParameters* const param
 
 #endif // IPLUG_NO_CARBON_SUPPORT
 
-#define ASSERT_SCOPE(reqScope) if (scope != reqScope) return kAudioUnitErr_InvalidProperty;
-#define ASSERT_ELEMENT_NPARAMS if (!NParams(element)) return kAudioUnitErr_InvalidElement;
+#define ASSERT_SCOPE(reqScope) if (scope != reqScope) return kAudioUnitErr_InvalidProperty
+#define ASSERT_ELEMENT_NPARAMS if (!NParams(element)) return kAudioUnitErr_InvalidElement
 #define ASSERT_INPUT_OR_GLOBAL_SCOPE \
 	if (scope != kAudioUnitScope_Input && scope != kAudioUnitScope_Global) \
 	{ \
 		return kAudioUnitErr_InvalidProperty; \
 	}
-#undef NO_OP
-#define NO_OP(propID) case propID: return kAudioUnitErr_InvalidProperty;
+
+#define NO_OP(propID) case propID: return kAudioUnitErr_InvalidProperty
 
 // pData == NULL means return property info only.
 ComponentResult IPlugAU::GetProperty(const AudioUnitPropertyID propID, const AudioUnitScope scope, const AudioUnitElement element,
@@ -1243,13 +1241,15 @@ ComponentResult IPlugAU::SetProperty(const AudioUnitPropertyID propID, const Aud
 		}
 */
 		NO_OP(kAudioUnitProperty_InputSamplesInOutput);         // 49,
-		NO_OP(kAudioUnitProperty_ClassInfoFromDocument)         // 50
+		NO_OP(kAudioUnitProperty_ClassInfoFromDocument);        // 50
 
 		#endif
 	}
 
 	return kAudioUnitErr_InvalidProperty;
 }
+
+#undef NO_OP
 
 /* static const char* AUInputTypeStr(int type)
 {
