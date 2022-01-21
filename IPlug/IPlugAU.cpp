@@ -880,7 +880,11 @@ ComponentResult IPlugAU::GetProperty(const AudioUnitPropertyID propID, const Aud
 
 		case kAudioUnitProperty_CocoaUI:                        // 31,
 		{
-			if (GetGUI() && IGraphicsMac::GetUserFoundationVersion() >= 677.00) // OS X v10.5
+			if (GetGUI()
+			#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+			&& IGraphicsMac::GetUserFoundationVersion() >= 677.00 // OS X v10.5
+			#endif
+			)
 			{
 				*pDataSize = sizeof(AudioUnitCocoaViewInfo); // Just one view.
 				if (pData)
