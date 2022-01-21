@@ -150,7 +150,11 @@ private:
 
 public:
 	static ComponentResult IPlugAUEntry(ComponentParameters *params, void* pVPlug);
+
+	#ifndef IPLUG_NO_CARBON_SUPPORT
 	static ComponentResult IPlugAUCarbonViewEntry(ComponentParameters *params, void* pView);
+	#endif
+
 	static ComponentResult GetParamProc(void* pPlug, AudioUnitParameterID paramID, AudioUnitScope scope, AudioUnitElement element,
 		AudioUnitParameterValue* pValue);
 	static ComponentResult SetParamProc(void* pPlug, AudioUnitParameterID paramID, AudioUnitScope scope, AudioUnitElement element,

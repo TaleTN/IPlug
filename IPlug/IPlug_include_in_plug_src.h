@@ -95,10 +95,12 @@ ComponentResult PLUG_ENTRY(ComponentParameters* const params, void* const pPlug)
 	return IPlugAU::IPlugAUEntry(params, pPlug);
 }
 
+#ifndef IPLUG_NO_CARBON_SUPPORT
 ComponentResult PLUG_VIEW_ENTRY(ComponentParameters* const params, void* const pView)
 {
 	return IPlugAU::IPlugAUCarbonViewEntry(params, pView);
 }
+#endif
 
 } // extern "C"
 

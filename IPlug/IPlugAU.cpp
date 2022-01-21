@@ -5,7 +5,10 @@
 #include "dfx/dfx-au-utilities.h"
 
 #include <AudioUnit/AudioUnit.h>
-#include <AudioUnit/AudioUnitCarbonView.h>
+
+#ifndef IPLUG_NO_CARBON_SUPPORT
+	#include <AudioUnit/AudioUnitCarbonView.h>
+#endif
 
 #define kAudioUnitRemovePropertyListenerWithUserDataSelect 0x0012
 
@@ -435,6 +438,8 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters* const params, void* c
 	return ret;
 }
 
+#ifndef IPLUG_NO_CARBON_SUPPORT
+
 struct AudioUnitCarbonViewCreateGluePB
 {
 	unsigned char componentFlags;
@@ -490,20 +495,20 @@ ComponentResult IPlugAU::IPlugAUCarbonViewEntry(ComponentParameters* const param
 			AudioUnitCarbonViewCreateGluePB* const pb = (AudioUnitCarbonViewCreateGluePB*)params;
 			IPlugAU* const _this = (IPlugAU*)GetComponentInstanceStorage(pb->inAudioUnit);
 			pCVI->mPlug = _this;
-			#ifndef IPLUG_NO_CARBON_SUPPORT
 			IGraphicsMac* pGraphics;
 			if (_this && (pGraphics = (IGraphicsMac*)_this->GetGUI()))
 			{
 				*pb->outControl = (ControlRef)pGraphics->OpenCarbonWindow(pb->inWindow, pb->inParentControl);
 				return noErr;
 			}
-			#endif
 			return badComponentSelector;
 		}
 	}
 
 	return badComponentSelector;
 }
+
+#endif // IPLUG_NO_CARBON_SUPPORT
 
 #define ASSERT_SCOPE(reqScope) if (scope != reqScope) return kAudioUnitErr_InvalidProperty;
 #define ASSERT_ELEMENT_NPARAMS if (!NParams(element)) return kAudioUnitErr_InvalidElement;
@@ -785,6 +790,7 @@ ComponentResult IPlugAU::GetProperty(const AudioUnitPropertyID propID, const Aud
 
 		case kAudioUnitProperty_GetUIComponentList:             // 18,
 		{
+			#ifndef IPLUG_NO_CARBON_SUPPORT
 			if (GetGUI())
 			{
 				*pDataSize = sizeof(ComponentDescription);
@@ -799,6 +805,7 @@ ComponentResult IPlugAU::GetProperty(const AudioUnitPropertyID propID, const Aud
 				}
 				return noErr;
 			}
+			#endif
 			return kAudioUnitErr_InvalidProperty;
 		}
 
