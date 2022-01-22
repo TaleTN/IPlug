@@ -426,7 +426,9 @@ int IDoubleParam::ToIntKey(const double normalizedValue)
 	assert(normalizedValue >= 0.0 && normalizedValue <= 1.0);
 
 	const double x = normalizedValue + 1.0;
-	const WDL_UINT64 i = *(const WDL_UINT64*)&x;
+
+	WDL_UINT64 i;
+	memcpy(&i, &x, sizeof(WDL_UINT64));
 
 	const int y = (int)(i >> 20) + (int)((i >> 19) & 1);
 	return (int)(i >> 62) ? 0xFFFFFFFF : y;
@@ -437,7 +439,11 @@ double IDoubleParam::FromIntKey(const int key)
 	WDL_UINT64 i = ((WDL_UINT64)(unsigned int)key << 20) | WDL_UINT64_CONST(0x3FF0000000000000);
 	i = key == 0xFFFFFFFF ? WDL_UINT64_CONST(0x4000000000000000) : i;
 
-	const double normalizedValue = *(const double*)&i - 1.0;
+	double x;
+	memcpy(&x, &i, sizeof(double));
+
+	const double normalizedValue = x - 1.0;
+
 	return normalizedValue;
 }
 
