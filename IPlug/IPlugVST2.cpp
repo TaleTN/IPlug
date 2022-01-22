@@ -295,18 +295,27 @@ bool IPlugVST2::SendVSTEvent(VstEvent* const pEvent)
 	return mHostCallback(&mAEffect, audioMasterProcessEvents, 0, 0, &events, 0.0f) == 1;
 }
 
+static inline void SetMidiEventData(void* const ptr, const WDL_UINT64 data)
+{
+	memcpy(ptr, &data, sizeof(WDL_UINT64));
+}
+
 bool IPlugVST2::SendMidiMsg(const IMidiMsg* const pMsg)
 {
 	VstMidiEvent midiEvent;
 
 	#if defined(_WIN64) || (defined(__LP64__) && __LITTLE_ENDIAN__)
 	{
-		assert(pMsg->_padding == 0);
+		const unsigned int ofs = pMsg->mOffset;
+		unsigned int data;
 
-		*(WDL_UINT64*)&midiEvent.type = ((WDL_UINT64)sizeof(VstMidiEvent) << 32) | kVstMidiType;
-		*(WDL_UINT64*)&midiEvent.deltaFrames = (unsigned int)pMsg->mOffset;
-		*(WDL_UINT64*)&midiEvent.noteLength = 0;
-		*(WDL_UINT64*)&midiEvent.midiData = *(const unsigned int*)&pMsg->mStatus;
+		assert(pMsg->_padding == 0);
+		memcpy(&data, &pMsg->mStatus, sizeof(data));
+
+		SetMidiEventData(&midiEvent.type, ((WDL_UINT64)sizeof(VstMidiEvent) << 32) | kVstMidiType);
+		SetMidiEventData(&midiEvent.deltaFrames, ofs);
+		SetMidiEventData(&midiEvent.noteLength, 0);
+		SetMidiEventData(&midiEvent.midiData, data);
 	}
 	#else
 	{
