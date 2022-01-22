@@ -58,7 +58,7 @@ public:
 
 	// Handle endian conversion for integer and floating point data types.
 	// Data is always stored in the chunk in little endian format, so nothing needs
-	// changing on Intel x86 platforms.
+	// changing on Intel x86 or Apple arm64 platforms.
 
 	inline int Put(const bool* const pVal) { return PutByte(*pVal); }
 	inline int Put(const unsigned char* const pVal) { return PutByte(*pVal); }
@@ -108,7 +108,7 @@ public:
 			mSize = newSize;
 			char* const pBytes = (char*)mBytes.GetFast() + oldSize;
 
-			*(int*)pBytes = bswap_if_be(slen);
+			PutStrLen(pBytes, slen);
 			memcpy(pBytes + sizeof(int), str, slen);
 		}
 
@@ -127,7 +127,7 @@ public:
 		if (startPos >= 0 && strStartPos <= mBytes.GetSize())
 		{
 			const char* const pBytes = (const char*)mBytes.GetFast();
-			const int len = bswap_if_be(*(const int*)(pBytes + startPos));
+			const int len = GetStrLen(pBytes + startPos);
 
 			const int strEndPos = strStartPos + len;
 			if (strEndPos <= mBytes.GetSize() && len < bufSize)
@@ -150,7 +150,7 @@ public:
 		if (startPos >= 0 && strStartPos <= mBytes.GetSize())
 		{
 			const char* const pBytes = (const char*)mBytes.GetFast();
-			const int len = bswap_if_be(*(const int*)(pBytes + startPos));
+			const int len = GetStrLen(pBytes + startPos);
 
 			const int strEndPos = strStartPos + len;
 			if (strEndPos <= mBytes.GetSize() && pStr->SetLen(len))
@@ -171,7 +171,7 @@ public:
 		if (startPos >= 0 && strStartPos <= mBytes.GetSize())
 		{
 			const char* const pBytes = (const char*)mBytes.GetFast();
-			const int len = bswap_if_be(*(const int*)(pBytes + startPos));
+			const int len = GetStrLen(pBytes + startPos);
 
 			const int strEndPos = strStartPos + len;
 			if (strEndPos <= mBytes.GetSize())
@@ -201,7 +201,7 @@ public:
 		return delta;
 	}
 
-	template <class T> int PutInt(const T n)
+	template <class T> int PutInt(T n)
 	{
 		int delta = (int)sizeof(T);
 
@@ -215,7 +215,12 @@ public:
 		if (delta)
 		{
 			mSize = newSize;
-			*(T*)((char*)mBytes.GetFast() + oldSize) = bswap_if_be(n);
+
+			#ifdef WDL_BIG_ENDIAN
+			n = WDL_bswap_if_be(n);
+			#endif
+
+			memcpy((char*)mBytes.GetFast() + oldSize, &n, sizeof(T));
 		}
 
 		return delta;
@@ -241,7 +246,7 @@ public:
 		if (delta)
 		{
 			mSize = newSize;
-			*(T*)((char*)mBytes.GetFast() + oldSize) = x;
+			memcpy((char*)mBytes.GetFast() + oldSize, &x, sizeof(T));
 		}
 
 		return delta;
@@ -249,8 +254,19 @@ public:
 
 	#else
 
-	inline int PutFloat(const float x) { return PutInt(*(const int*)&x); }
-	inline int PutFloat(const double x) { return PutInt(*(const WDL_INT64*)&x); }
+	int PutFloat(const float x)
+	{
+		int n;
+		memcpy(&n, &x, sizeof(int));
+		return PutInt(n);
+	}
+
+	int PutFloat(const double x)
+	{
+		WDL_INT64 n;
+		memcpy(&n, &x, sizeof(WDL_INT64));
+		return PutInt(n);
+	}
 
 	#endif
 
@@ -282,9 +298,20 @@ public:
 	{
 		int endPos = startPos + (int)sizeof(T);
 		if (startPos >= 0 && endPos <= mBytes.GetSize())
-			*pVal = bswap_if_be(*(const T*)((const char*)mBytes.GetFast() + startPos));
+		{
+			T n;
+			memcpy(&n, (const char*)mBytes.GetFast() + startPos, sizeof(T));
+
+			#ifdef WDL_BIG_ENDIAN
+			n = WDL_bswap_if_be(n);
+			#endif
+
+			*pVal = n;
+		}
 		else
+		{
 			endPos = -1;
+		}
 
 		return endPos;
 	}
@@ -299,7 +326,7 @@ public:
 	{
 		int endPos = startPos + (int)sizeof(T);
 		if (startPos >= 0 && endPos <= mBytes.GetSize())
-			*pVal = *(const T*)((const char*)mBytes.GetFast() + startPos);
+			memcpy(pVal, (const char*)mBytes.GetFast() + startPos, sizeof(T));
 		else
 			endPos = -1;
 
@@ -308,8 +335,21 @@ public:
 
 	#else
 
-	inline int GetFloat(float* const pVal, const int startPos) const { return GetInt((int*)pVal, startPos); }
-	inline int GetFloat(double* const pVal, const int startPos) const { return GetInt((WDL_INT64*)pVal, startPos); }
+	int GetFloat(float* const pVal, int pos) const
+	{
+		int n;
+		pos = GetInt(&n, pos);
+		if (pos >= 0) memcpy(pVal, &n, sizeof(float));
+		return pos;
+	}
+
+	int GetFloat(double* const pVal, int pos) const
+	{
+		WDL_INT64 n;
+		pos = GetInt(&n, pos);
+		if (pos >= 0) memcpy(pVal, &n, sizeof(double));
+		return pos;
+	}
 
 	#endif
 
@@ -384,13 +424,25 @@ public:
 	}
 
 protected:
-	template <class T> static inline T bswap_if_be(const T i)
+	static void PutStrLen(char* const pBytes, int len)
 	{
 		#ifdef WDL_BIG_ENDIAN
-		return WDL_bswap_if_be(i);
-		#else
-		return i;
+		len = WDL_bswap32(len);
 		#endif
+
+		memcpy(pBytes, &len, sizeof(int));
+	}
+
+	static int GetStrLen(const char* const pBytes)
+	{
+		int len;
+		memcpy(&len, pBytes, sizeof(int));
+
+		#ifdef WDL_BIG_ENDIAN
+		len = WDL_bswap32(len);
+		#endif
+
+		return len;
 	}
 
 	#ifndef NDEBUG
