@@ -1391,17 +1391,18 @@ static bool GetNumberFromDict(CFDictionaryRef const pDict, const char* const key
 	return false;
 }
 
-static bool GetStrFromDict(CFDictionaryRef const pDict, const char* const key, char* const value)
+static bool GetStrFromDict(CFDictionaryRef const pDict, const char* const key, char* const buf, const int bufSize = 128)
 {
+	assert(bufSize > 0);
 	const CFStrLocal cfKey(key);
 	CFStringRef const pValue = (CFStringRef)CFDictionaryGetValue(pDict, cfKey.mCFStr);
 	if (pValue)
 	{
 		const CStrLocal cStr(pValue);
-		strcpy(value, cStr.mCStr);
+		lstrcpyn_safe(buf, cStr.mCStr, bufSize);
 		return true;
 	}
-	*value = 0;
+	*buf = 0;
 	return false;
 }
 
@@ -1465,7 +1466,7 @@ ComponentResult IPlugAU::SetState(CFDictionaryRef const pDict)
 		!GetNumberFromDict(pDict, kAUPresetTypeKey, &type, kCFNumberSInt32Type) ||
 		!GetNumberFromDict(pDict, kAUPresetSubtypeKey, &subtype, kCFNumberSInt32Type) ||
 		!GetNumberFromDict(pDict, kAUPresetManufacturerKey, &mfr, kCFNumberSInt32Type) ||
-		!GetStrFromDict(pDict, kAUPresetNameKey, presetName) ||
+		!GetStrFromDict(pDict, kAUPresetNameKey, presetName, sizeof(presetName)) ||
 		// version != GetEffectVersion(false) ||
 		type != cd.componentType ||
 		subtype != cd.componentSubType ||
