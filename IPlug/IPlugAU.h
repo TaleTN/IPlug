@@ -132,6 +132,8 @@ private:
 	ByteChunk mState; // Persistent storage if the host asks for plugin state.
 	int mComponentType;
 
+	bool mFactory;
+
 	struct PropertyListener
 	{
 		AudioUnitPropertyID mPropID;

@@ -142,6 +142,7 @@ OSStatus IPlugAU::AP_Open(void* const pInstance, AudioComponentInstance const co
 	_this->HostSpecificInit();
 	_this->PruneUninitializedPresets();
 	_this->mCI = compInstance;
+	_this->mFactory = true;
 	((IPlugAUInstance*)pInstance)->mPlug = _this;
 	return noErr;
 }
@@ -953,6 +954,7 @@ ComponentResult IPlugAU::GetProperty(const AudioUnitPropertyID propID, const Aud
 
 		case kAudioUnitProperty_FastDispatch:                   // 5,
 		{
+			if (mFactory) return kAudioUnitErr_InvalidProperty;
 			return GetProc(element, pDataSize, pData);
 		}
 
@@ -2109,6 +2111,8 @@ IPlugBase(
 		mComponentType = kAudioUnitType_MusicEffect;
 	else
 		mComponentType = kAudioUnitType_Effect;
+
+	mFactory = false;
 
 	const char* const* const pID = (const char* const*)instanceInfo;
 	mOSXBundleID.Set(pID[0]);
