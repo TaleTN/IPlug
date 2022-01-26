@@ -55,8 +55,3 @@
 - (void) setParamChangeTimer: (int)ticks;
 - (void) cancelParamChangeTimer;
 @end
-
-@interface ColoredTextField: NSTextField
-{}
-- (BOOL) becomeFirstResponder;
-@end

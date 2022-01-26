@@ -1,5 +1,17 @@
 #include "IGraphicsCocoa.h"
 
+// thnx swell-internal.h
+#define PREFIX_CLASSNAME3(a, b) a##b
+#define PREFIX_CLASSNAME2(a, b) PREFIX_CLASSNAME3(a, b)
+#define PREFIX_CLASSNAME(cname) PREFIX_CLASSNAME2(IGRAPHICS_COCOA, cname)
+
+#define ColoredTextField PREFIX_CLASSNAME(_ColoredTextField)
+
+@interface ColoredTextField: NSTextField
+{}
+- (BOOL) becomeFirstResponder;
+@end
+
 static NSRect ToNSRect(const IGraphics* const pGraphics, const IRECT* const pR)
 {
 	static const int scale = IGraphicsMac::kScaleOS;
