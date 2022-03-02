@@ -286,7 +286,7 @@ private:
 	int GetMouseControlIdx(int x, int y);
 	int mMouseCapture, mMouseOver, mMouseX, mMouseY;
 	bool mHandleMouseOver, mEnableTooltips;
-	char mHandleMouseWheel;
+	signed char mHandleMouseWheel;
 
 	#ifdef IPLUG_USE_IDLE_CALLS
 	int mIdleTicks;
