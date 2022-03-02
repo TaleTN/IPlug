@@ -50,6 +50,9 @@ public:
 	// IRECT GetWindowRECT();
 	void SetWindowTitle(const char* str);
 
+	// Defaults to 0, which means auto detect via GetDpiForWindow().
+	inline void ForceDPI(const int dpi) { mForceDPI = dpi; }
+
 protected:
 	LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
 	bool OSLoadFont(int ID, const char* name);
@@ -89,6 +92,7 @@ private:
 	static const int kMaxTooltipLen = 80;
 	WCHAR mTooltipBuf[kMaxTooltipLen];
 
+	int mForceDPI;
 	bool mCoInit;
 
 public:

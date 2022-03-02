@@ -426,6 +426,7 @@ IGraphicsWin::IGraphicsWin(
 	// mMainWnd = NULL;
 
 	mTooltipBuf[0] = 0;
+	mForceDPI = 0;
 	mCoInit = false;
 }
 
@@ -575,12 +576,15 @@ void* IGraphicsWin::OpenWindow(void* const pParentWnd)
 	int x = 0, y = 0, w = Width(), h = Height();
 	mParentWnd = (HWND)pParentWnd;
 
-	mDPI = mGetDpiForWindow ? mGetDpiForWindow(mParentWnd) : USER_DEFAULT_SCREEN_DPI;
-	const int scale = mDPI > USER_DEFAULT_SCREEN_DPI ? kScaleFull : kScaleHalf;
+	int dpi = mForceDPI;
+	if (!dpi) dpi = mGetDpiForWindow ? mGetDpiForWindow(mParentWnd) : USER_DEFAULT_SCREEN_DPI;
+	mDPI = dpi;
+
+	const int scale = dpi > USER_DEFAULT_SCREEN_DPI ? kScaleFull : kScaleHalf;
 	if (!PrepDraw(scale)) return NULL;
 
-	w = MulDiv(w, mDPI, IPLUG_DEFAULT_DPI);
-	h = MulDiv(h, mDPI, IPLUG_DEFAULT_DPI);
+	w = MulDiv(w, dpi, IPLUG_DEFAULT_DPI);
+	h = MulDiv(h, dpi, IPLUG_DEFAULT_DPI);
 	GetPlug()->ResizeGraphics(w, h);
 
 	if (mPlugWnd)
