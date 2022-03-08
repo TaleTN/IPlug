@@ -236,7 +236,22 @@ public:
 	inline bool TooltipsEnabled() const { return mEnableTooltips; }
 	inline int CanHandleMouseWheel() const { return mHandleMouseWheel; }
 
-	void OnKeyDown(int x, int y, int key);
+	bool OnKeyDown(int x, int y, IMouseMod mod, int key);
+	bool OnKeyUp(int x, int y, IMouseMod mod, int key);
+
+	// Sets index of control that will receive OnKeyDown(). If -1, then
+	// OnKeyDown() is disabled.
+	virtual void SetKeyboardFocus(const int controlIdx)
+	{
+		mKeyboardFocus = controlIdx;
+	}
+
+	void SetKeyboardFocus(const IControl* const pControl)
+	{
+		SetKeyboardFocus(FindControl(pControl));
+	}
+
+	inline int GetKeyboardFocus() const { return mKeyboardFocus; }
 
 	// Enables/disables tooltips; also enables mouseovers/mouseouts if necessary.
 	void EnableTooltips(const bool enable)
@@ -285,6 +300,7 @@ private:
 	int mWidth, mHeight, mScale, mFPS;
 	int GetMouseControlIdx(int x, int y);
 	int mMouseCapture, mMouseOver, mMouseX, mMouseY;
+	int mKeyboardFocus;
 	bool mHandleMouseOver, mEnableTooltips;
 	signed char mHandleMouseWheel;
 

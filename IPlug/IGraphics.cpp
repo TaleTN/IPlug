@@ -150,6 +150,7 @@ IGraphics::IGraphics(
 	mMouseOver(-1),
 	mMouseX(0),
 	mMouseY(0),
+	mKeyboardFocus(-1),
 	mHandleMouseOver(false),
 	mEnableTooltips(false),
 	mHandleMouseWheel(kMouseWheelEnable)
@@ -1011,13 +1012,16 @@ void IGraphics::OnMouseWheel(const int x, const int y, const IMouseMod mod, cons
 	}
 }
 
-void IGraphics::OnKeyDown(const int x, const int y, const int key)
+bool IGraphics::OnKeyDown(const int x, const int y, const IMouseMod mod, const int key)
 {
-	const int c = GetMouseControlIdx(x, y);
-	if (c >= 0)
-	{
-		mControls.Get(c)->OnKeyDown(x, y, key);
-	}
+	const int c = mKeyboardFocus;
+	return c >= 0 ? mControls.Get(c)->OnKeyDown(x, y, mod, key) : false;
+}
+
+bool IGraphics::OnKeyUp(const int x, const int y, const IMouseMod mod, const int key)
+{
+	const int c = mKeyboardFocus;
+	return c >= 0 ? mControls.Get(c)->OnKeyUp(x, y, mod, key) : false;
 }
 
 int IGraphics::GetMouseControlIdx(const int x, const int y)
