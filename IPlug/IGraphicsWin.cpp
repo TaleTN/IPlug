@@ -33,9 +33,9 @@ static void ScaleLParamXY(LPPOINT const lpPoint, const LPARAM lParam, const int 
 	ScalePoint(lpPoint, dpi);
 }
 
-static void SetMouseWheelFocus(HWND const hWnd, IGraphicsWin* const pGraphics)
+static bool WantFocus(IGraphicsWin* const pGraphics)
 {
-	if (pGraphics->GetPlug()->GetHost() == kHostMixcraft) SetFocus(hWnd);
+	return pGraphics->GetKeyboardFocus() >= 0 || pGraphics->GetPlug()->GetHost() == kHostMixcraft;
 }
 
 static IMouseMod GetMouseMod(const WPARAM wParam, const bool bWheel = false)
@@ -50,6 +50,11 @@ static IMouseMod GetMouseMod(const WPARAM wParam, const bool bWheel = false)
 	mod.Set(bitfield);
 
 	return mod;
+}
+
+static IMouseMod GetKeyMod(const bool bWheel = false)
+{
+	return IMouseMod(false, false, GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_MENU) < 0, bWheel);
 }
 
 static void DeleteParamEditFont(HWND const hWnd)
@@ -74,7 +79,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 		const int mSec = (int)(1000.0 / pGraphics->FPS());
 		SetTimer(hWnd, IPLUG_TIMER_ID, mSec, NULL);
 
-		SetMouseWheelFocus(hWnd, pGraphics);
+		if (WantFocus(pGraphics)) SetFocus(hWnd);
 		return 0;
 	}
 
@@ -245,7 +250,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 
 		case WM_MOUSEACTIVATE:
 		{
-			SetMouseWheelFocus(hWnd, pGraphics);
+			if (WantFocus(pGraphics)) SetFocus(hWnd);
 			return MA_ACTIVATE;
 		}
 
@@ -269,24 +274,35 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 			return 0;
 		}
 
-		case WM_KEYDOWN:
+		case WM_GETDLGCODE:
 		{
-			bool ok;
-			int key = (int)wParam;
+			return pGraphics->GetKeyboardFocus() >= 0 ? DLGC_WANTALLKEYS : 0;
+		}
 
-			if (key >= 0x41) ok = key <= 0x5A; // A..Z
-			else if (key >= 0x30) ok = key <= 0x39; // 0..9
-			else if (key >= VK_LEFT) ok = key <= VK_DOWN;
-			else ok = key == VK_SPACE;
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		{
+			static const unsigned char vk[12] =
+			{
+				0, 0, 0, 0, 0xFF, 0x01, // VK_SPACE - VK_DOWN
+				0xFF, 0x03,             // 0-9
+				0xFE, 0xFF, 0xFF, 0x07  // A-Z
+			};
 
-			if (ok)
+			const int key = (int)wParam;
+			if ((unsigned int)key < 96 && !!(vk[(unsigned int)key >> 3] & (1 << (key & 7))))
 			{
 				POINT p;
 				GetCursorPos(&p);
 				ScreenToClient(hWnd, &p);
 				ScalePoint(&p, pGraphics->mDPI);
-				pGraphics->OnKeyDown(p.x, p.y, key);
+				const IMouseMod mod = GetKeyMod();
+				const bool ret = msg == WM_KEYDOWN ? pGraphics->OnKeyDown(p.x, p.y, mod, key) : pGraphics->OnKeyUp(p.x, p.y, mod, key);
+				if (ret) return 0;
 			}
+
+			HWND const hRoot = GetAncestor(hWnd, GA_ROOT);
+			if (hRoot) SendNotifyMessageW(hRoot, msg, wParam, lParam);
 			return 0;
 		}
 
@@ -1124,7 +1140,7 @@ int IGraphicsWin::ProcessMouseWheel(const float delta)
 		{
 			HideTooltip();
 
-			const IMouseMod mod(false, false, GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_MENU) < 0, canHandle >= 0);
+			const IMouseMod mod = GetKeyMod(canHandle >= 0);
 			const IMouseMod mask(false, false, true, true, true, true);
 
 			if (mod.Get() & mask.Get())
@@ -1149,6 +1165,12 @@ void IGraphicsWin::ScaleMouseWheel(HWND const hWnd, const POINT* const pPoint, c
 	ScalePoint((LPPOINT)&r, mDPI);
 
 	OnMouseWheel(r.left, r.top, mod, delta);
+}
+
+void IGraphicsWin::SetKeyboardFocus(const int controlIdx)
+{
+	IGraphics::SetKeyboardFocus(controlIdx);
+	if (controlIdx >= 0 && mPlugWnd) SetFocus(mPlugWnd);
 }
 
 const char* IGraphicsWin::GetTooltip(const int controlIdx)

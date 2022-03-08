@@ -38,6 +38,8 @@ public:
 	// Return 1 if mouse wheel is processed.
 	int ProcessMouseWheel(float delta);
 
+	void SetKeyboardFocus(int controlIdx);
+
 	void SetParamChangeTimer(const int ticks) { mParamChangeTimer = ticks; }
 	void CancelParamChangeTimer() { mParamChangeTimer = 0; }
 
