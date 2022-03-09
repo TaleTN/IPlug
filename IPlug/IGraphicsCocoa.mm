@@ -1,5 +1,8 @@
 #include "IGraphicsCocoa.h"
 
+#include "WDL/wdltypes.h"
+#include "WDL/swell/swell.h"
+
 // thnx swell-internal.h
 #define PREFIX_CLASSNAME3(a, b) a##b
 #define PREFIX_CLASSNAME2(a, b) PREFIX_CLASSNAME3(a, b)
@@ -269,6 +272,56 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent, const bool right,
 			mGraphics->OnMouseWheel(x, y, mod, (float)d);
 		}
 	}
+}
+
+- (void) processKey: (NSEvent*)pEvent state: (BOOL)state
+{
+	static const char vk[64] =
+	{
+		// A-Z, 0-9
+		0x41, 0x53, 0x44, 0x46, 0x48, 0x47, 0x5A, 0x58, 0x43, 0x56, 0,    0x42, 0x51, 0x57, 0x45, 0x52,
+		0x59, 0x54, 0x31, 0x32, 0x33, 0x34, 0x36, 0x35, 0,    0x39, 0x37, 0,    0x38, 0x30, 0,    0x4F,
+		0x55, 0,    0x49, 0x50, 0,    0x4C, 0x4A, 0,    0x4B, 0,    0,    0,    0,    0x4E, 0x4D, 0,
+		0, VK_SPACE,
+
+		0, VK_HOME, VK_PRIOR, 0, 0, VK_END, 0, VK_NEXT, 0, VK_LEFT, VK_RIGHT, VK_DOWN, VK_UP, 0
+	};
+
+	if (mGraphics && mGraphics->GetKeyboardFocus() >= 0)
+	{
+		int key = [pEvent keyCode];
+		if (key >= 50)
+		{
+			key -= 0x72 - 50;
+			key = wdl_max(key, 50);
+			key = wdl_min(key, 63);
+		}
+		key = vk[key];
+
+		if (key)
+		{
+			int x, y;
+			[self getMouseXY: pEvent x: &x y: &y];
+			const IMouseMod mod = GetMouseMod(pEvent, false);
+			const bool ret = state ? mGraphics->OnKeyDown(x, y, mod, key) : mGraphics->OnKeyUp(x, y, mod, key);
+			if (ret) return;
+		}
+	}
+
+	if (state)
+		[super keyDown: pEvent];
+	else
+		[super keyUp: pEvent];
+}
+
+- (void) keyDown: (NSEvent*)pEvent
+{
+	[self processKey: pEvent state: YES];
+}
+
+- (void) keyUp: (NSEvent*)pEvent
+{
+	[self processKey: pEvent state: NO];
 }
 
 - (void) killTimer

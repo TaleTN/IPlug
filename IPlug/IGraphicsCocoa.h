@@ -43,6 +43,9 @@
 - (void) rightMouseDragged: (NSEvent*)pEvent;
 - (void) mouseMoved: (NSEvent*)pEvent;
 - (void) scrollWheel: (NSEvent*)pEvent;
+- (void) processKey: (NSEvent*)pEvent state: (BOOL)state;
+- (void) keyDown: (NSEvent*)pEvent;
+- (void) keyUp: (NSEvent*)pEvent;
 - (void) killTimer;
 - (void) removeFromSuperview;
 - (void) controlTextDidChange: (NSNotification*)aNotification;
