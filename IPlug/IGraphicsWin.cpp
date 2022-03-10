@@ -1167,6 +1167,15 @@ void IGraphicsWin::ScaleMouseWheel(HWND const hWnd, const POINT* const pPoint, c
 	OnMouseWheel(r.left, r.top, mod, delta);
 }
 
+int IGraphicsWin::ProcessKey(const bool state, const IMouseMod mod, const int key)
+{
+	POINT p;
+	GetCursorPos(&p);
+	ScreenToClient(mPlugWnd, &p);
+	ScalePoint(&p, mDPI);
+	return state ? OnKeyDown(p.x, p.y, mod, key) : OnKeyUp(p.x, p.y, mod, key);
+}
+
 void IGraphicsWin::SetKeyboardFocus(const int controlIdx)
 {
 	IGraphics::SetKeyboardFocus(controlIdx);

@@ -35,8 +35,9 @@ public:
 
 	bool OpenURL(const char* url, const char* windowTitle = NULL, const char* confirmMsg = NULL, const char* errMsg = NULL);
 
-	// Return 1 if mouse wheel is processed.
+	// Return 1 if key/mouse wheel is processed.
 	int ProcessMouseWheel(float delta);
+	int ProcessKey(bool state, IMouseMod mod, int key);
 
 	void SetKeyboardFocus(int controlIdx);
 
