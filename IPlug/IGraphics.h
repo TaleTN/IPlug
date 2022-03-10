@@ -83,8 +83,9 @@ public:
 
 	virtual bool OpenURL(const char* url, const char* windowTitle = NULL, const char* confirmMsg = NULL, const char* errMsg = NULL) = 0;
 
-	// Return 1 if mouse wheel is possessed... er, I mean processed.
-	virtual int ProcessMouseWheel(float /* delta */) { return 0; }
+	// Return 1 if key/mouse wheel is possessed... er, I mean processed.
+	virtual int ProcessMouseWheel(float delta) { return 0; }
+	virtual int ProcessKey(bool state, IMouseMod mod, int key) { return 0; }
 
 	// Delays mPlug->EndInformHostOfParamChange().
 	virtual void SetParamChangeTimer(int ticks) = 0;
