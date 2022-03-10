@@ -874,6 +874,39 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			break;
 		}
 
+		case effEditKeyDown:
+		case effEditKeyUp:
+		{
+			IGraphics* const pGraphics = _this->GetGUI();
+			if (!(pGraphics && pGraphics->GetKeyboardFocus() >= 0)) break;
+
+			const int flags = (int)opt;
+			IMouseMod mod(false, false, !!(flags & MODIFIER_SHIFT), !!(flags & MODIFIER_CONTROL), !!(flags & MODIFIER_ALTERNATE));
+
+			int key = (int)value;
+			if (key--)
+			{
+				static const char vk[16] = { 0, 0, 0, 0, 0, 0, VK_SPACE, 0, VK_END, VK_HOME, VK_LEFT, VK_UP, VK_RIGHT, VK_DOWN, VK_PRIOR, VK_NEXT };
+				key = (unsigned int)key < 16 ? vk[key] : 0;
+			}
+			else
+			{
+				if ((unsigned int)(key - 'a') < 26)
+				{
+					static const int toUpper = 'a' - 'A';
+					key -= toUpper;
+					mod.S = 1;
+				}
+				static const unsigned char ascii[12] = { 0, 0, 0, 0, 0, 0, 0xFF, 0x03, 0xFE, 0xFF, 0xFF, 0x07 };
+				key = (unsigned int)key < 96 && !!(ascii[key >> 3] & (1 << (key & 7))) ? key : 0;
+			}
+			if (!key) break;
+
+			const bool state = opCode == effEditKeyDown;
+			ret = pGraphics->ProcessKey(state, mod, key);
+			break;
+		}
+
 		case effGetMidiKeyName:
 		{
 			MidiKeyName* const pMKN = (MidiKeyName*)ptr;
