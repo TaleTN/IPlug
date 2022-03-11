@@ -61,7 +61,7 @@ public:
 	// Mutex is already locked.
 	virtual void ProcessDoubleReplacing(const double* const* inputs, double* const* outputs, int nFrames);
 
-	// Call GetGUI()->SetScale(wantScale) to set scale, then load bitmaps
+	// Call GetGUI()->Rescale(wantScale) to set scale, then load bitmaps
 	// that depend on GUI size. Return true to notify controls of rescale.
 	virtual bool OnGUIRescale(int wantScale); // See IGraphics::EGUIScale.
 
