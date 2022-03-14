@@ -145,6 +145,7 @@ IGraphics::IGraphics(
 	mWidth(w),
 	mHeight(h),
 	mScale(-1),
+	mDefaultScale(kScaleFull),
 	mFPS(refreshFPS > 0 ? refreshFPS : kDefaultFPS),
 	mMouseCapture(-1),
 	mMouseOver(-1),

@@ -2,6 +2,8 @@
 
 #include "IPlugStructs.h"
 
+#include <assert.h>
+
 #include "WDL/lice/lice.h"
 #include "WDL/lice/lice_text.h"
 
@@ -102,10 +104,17 @@ public:
 
 	inline int Width() const { return mWidth; }
 	inline int Height() const { return mHeight; }
-	inline int Scale() const { return mScale < 0 ? kScaleFull : mScale; }
+	inline int Scale() const { return mScale < 0 ? mDefaultScale : mScale; }
 	inline int FPS() const { return mFPS; }
 
 	bool PreloadScale(const int scale) { return mScale < 0 ? PrepDraw(scale) : true; }
+
+	inline void SetDefaultScale(const int scale)
+	{
+		assert(scale == kScaleFull || scale == kScaleHalf);
+		mDefaultScale = scale;
+	}
+
 	void Rescale(int scale);
 
 	// Resource wrapper for constructing tables with bitmap resources at
@@ -298,7 +307,7 @@ protected:
 private:
 	// LICE_MemBitmap* mTmpBitmap;
 
-	int mWidth, mHeight, mScale, mFPS;
+	int mWidth, mHeight, mScale, mDefaultScale, mFPS;
 	int GetMouseControlIdx(int x, int y);
 	int mMouseCapture, mMouseOver, mMouseX, mMouseY;
 	int mKeyboardFocus;
