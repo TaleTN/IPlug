@@ -267,9 +267,16 @@ void IPlugVST2::ResizeGraphics(const int w, const int h)
 {
 	if (GetGUI())
 	{
+		const int oldW = mEditRect.right - mEditRect.left;
+		const int oldH = mEditRect.bottom - mEditRect.top;
+
+		if (w == oldW && h == oldH) return;
+
 		mEditRect.left = mEditRect.top = 0;
 		mEditRect.right = w;
 		mEditRect.bottom = h;
+
+		mHostCallback(&mAEffect, audioMasterSizeWindow, w, h, NULL, 0.0f);
 	}
 }
 
