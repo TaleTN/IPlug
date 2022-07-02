@@ -586,8 +586,10 @@ void IGraphicsWin::DrawScreen(const IRECT* const pR)
 	}
 	else
 	{
-		SetStretchBltMode(dc, HALFTONE);
-		SetBrushOrgEx(dc, 0, 0, NULL);
+		const int mode = (wDest % wSrc) || (hDest % hSrc) ? HALFTONE : COLORONCOLOR;
+
+		SetStretchBltMode(dc, mode);
+		if (mode == HALFTONE) SetBrushOrgEx(dc, 0, 0, NULL);
 
 		StretchBlt(dc, r.left, r.top, wDest, hDest, dcSrc, 0, 0, wSrc, hSrc, SRCCOPY);
 	}
