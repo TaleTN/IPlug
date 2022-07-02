@@ -100,26 +100,34 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 
 					const int scale = pGraphics->Scale();
 
-					int mul = cR.right - cR.left;
-					int div = pGraphics->Width();
-					bool stretch = (div >> scale) != mul;
+					const int wMul = cR.right - cR.left;
+					const int hMul = cR.bottom - cR.top;
+					const int wDiv = pGraphics->Width();
+					const int hDiv = pGraphics->Height();
 
-					r.left = MulDiv(dirtyR.L, mul, div);
-					r.right = MulDiv(dirtyR.R, mul, div);
-
-					mul = cR.bottom - cR.top;
-					div = pGraphics->Height();
-					stretch |= (div >> scale) != mul;
-
-					r.top = MulDiv(dirtyR.T, mul, div);
-					r.bottom = MulDiv(dirtyR.B, mul, div);
-
-					if (stretch)
+					if ((wDiv >> scale) == wMul && (hDiv >> scale) == hMul)
 					{
-						r.left--; r.left = wdl_max(r.left, cR.left);
-						r.top--; r.top = wdl_max(r.top, cR.top);
-						r.right++; r.right = wdl_min(r.right, cR.right);
-						r.bottom++; r.bottom = wdl_min(r.bottom, cR.bottom);
+						r.left = dirtyR.L >> scale;
+						r.top = dirtyR.T >> scale;
+						r.right = dirtyR.R >> scale;
+						r.bottom = dirtyR.B >> scale;
+					}
+					else
+					{
+						const int x = MulDiv(dirtyR.L, wMul, wDiv);
+						const int y = MulDiv(dirtyR.T, hMul, hDiv);
+						const int w = MulDiv(dirtyR.R - dirtyR.L, wMul, wDiv);
+						const int h = MulDiv(dirtyR.B - dirtyR.T, hMul, hDiv);
+
+						r.left = x - 1;
+						r.top = y - 1;
+						r.right = x + w + 1;
+						r.bottom = y + h + 1;
+
+						r.left = wdl_max(r.left, cR.left);
+						r.top = wdl_max(r.top, cR.top);
+						r.right = wdl_min(r.right, cR.right);
+						r.bottom = wdl_min(r.bottom, cR.bottom);
 					}
 					InvalidateRect(hWnd, &r, FALSE);
 
@@ -314,15 +322,23 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 				IRECT ir(r.left, r.top, r.right, r.bottom);
 				GetClientRect(hWnd, &r);
 
-				int mul = pGraphics->Width();
-				int div = r.right - r.left;
-				ir.L = MulDiv(ir.L, mul, div);
-				ir.R = MulDiv(ir.R, mul, div);
+				const int wMul = pGraphics->Width();
+				const int hMul = pGraphics->Height();
+				const int wDiv = r.right - r.left;
+				const int hDiv = r.bottom - r.top;
 
-				mul = pGraphics->Height();
-				div = r.bottom - r.top;
-				ir.T = MulDiv(ir.T, mul, div);
-				ir.B = MulDiv(ir.B, mul, div);
+				if (wMul != wDiv || hMul != hDiv)
+				{
+					const int x = MulDiv(ir.L, wMul, wDiv);
+					const int y = MulDiv(ir.T, hMul, hDiv);
+					const int w = MulDiv(ir.R - ir.L, wMul, wDiv);
+					const int h = MulDiv(ir.B - ir.T, hMul, hDiv);
+
+					ir.L = x;
+					ir.T = y;
+					ir.R = x + w;
+					ir.B = y + h;
+				}
 
 				pGraphics->Draw(&ir);
 			}
@@ -554,12 +570,12 @@ void IGraphicsWin::DrawScreen(const IRECT* const pR)
 	HDC const dcSrc = mBackBuf.getDC();
 	const int scale = Scale();
 
-	const int wDiv = Width() >> scale;
-	const int hDiv = Height() >> scale;
-	const int wMul = r.right - r.left;
-	const int hMul = r.bottom - r.top;
+	const int wSrc = Width() >> scale;
+	const int hSrc = Height() >> scale;
+	const int wDest = r.right - r.left;
+	const int hDest = r.bottom - r.top;
 
-	if (wMul == wDiv && hMul == hDiv)
+	if (wDest == wSrc && hDest == hSrc)
 	{
 		const int x = pR->L >> scale;
 		const int cx = pR->W() >> scale;
@@ -573,15 +589,7 @@ void IGraphicsWin::DrawScreen(const IRECT* const pR)
 		SetStretchBltMode(dc, HALFTONE);
 		SetBrushOrgEx(dc, 0, 0, NULL);
 
-		const int wSrc = pR->W();
-		const int xDest = MulDiv(pR->L, wMul, wDiv);
-		const int wDest = MulDiv(wSrc, wMul, wDiv);
-
-		const int hSrc = pR->H();
-		const int yDest = MulDiv(pR->T, hMul, hDiv);
-		const int hDest = MulDiv(hSrc, hMul, hDiv);
-
-		StretchBlt(dc, xDest, yDest, wDest, hDest, dcSrc, pR->L, pR->T, wSrc, hSrc, SRCCOPY);
+		StretchBlt(dc, r.left, r.top, wDest, hDest, dcSrc, 0, 0, wSrc, hSrc, SRCCOPY);
 	}
 
 	EndPaint(hWnd, &ps);
