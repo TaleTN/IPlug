@@ -219,13 +219,13 @@ void IIntParam::SetNormalized(const double normalizedValue)
 
 double IIntParam::GetNormalized() const
 {
-	return ToNormalized(mIntVal);
+	return Normalized(mIntVal, mMin, mMax);
 }
 
 double IIntParam::GetNormalized(const double nonNormalizedValue) const
 {
 	const int intVal = (int)floor(nonNormalizedValue + 0.5);
-	return ToNormalized(Bounded(intVal));
+	return Normalized(intVal, mMin, mMax);
 }
 
 char* IIntParam::ToString(const int intVal, char* const buf, const int bufSize) const
@@ -367,12 +367,12 @@ void IDoubleParam::SetNormalized(const double normalizedValue)
 
 double IDoubleParam::GetNormalized() const
 {
-	return ToNormalized(mValue);
+	return Normalize(mValue, mMin, mMax);
 }
 
 double IDoubleParam::GetNormalized(const double nonNormalizedValue) const
 {
-	return ToNormalized(Bounded(nonNormalizedValue));
+	return Normalize(nonNormalizedValue, mMin, mMax);
 }
 
 char* IDoubleParam::ToString(const double nonNormalizedValue, char* const buf, const int bufSize, const double* const pNormalizedValue) const
@@ -522,12 +522,12 @@ void IDoublePowParam::SetNormalized(const double normalizedValue)
 
 double IDoublePowParam::GetNormalized() const
 {
-	return ToNormalized(mValue);
+	return Normalize(mValue, mMin, mMax, mShape);
 }
 
 double IDoublePowParam::GetNormalized(const double nonNormalizedValue) const
 {
-	return ToNormalized(Bounded(nonNormalizedValue));
+	return Normalize(nonNormalizedValue, mMin, mMax, mShape);
 }
 
 char* IDoublePowParam::GetDisplayForHost(const double normalizedValue, char* const buf, const int bufSize)
@@ -563,12 +563,12 @@ void IDoubleExpParam::SetNormalized(const double normalizedValue)
 
 double IDoubleExpParam::GetNormalized() const
 {
-	return ToNormalized(mValue);
+	return Normalize(mValue, mMin, mMax, mShape, mExpMin1);
 }
 
 double IDoubleExpParam::GetNormalized(const double nonNormalizedValue) const
 {
-	return ToNormalized(Bounded(nonNormalizedValue));
+	return Normalize(nonNormalizedValue, mMin, mMax, mShape, mExpMin1);
 }
 
 char* IDoubleExpParam::GetDisplayForHost(const double normalizedValue, char* const buf, const int bufSize)

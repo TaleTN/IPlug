@@ -84,6 +84,13 @@ public:
 	}
 
 protected:
+	static double Clamped(double normalizedValue)
+	{
+		normalizedValue = wdl_max(normalizedValue, 0.0);
+		normalizedValue = wdl_min(normalizedValue, 1.0);
+		return normalizedValue;
+	}
+
 	static void Delete(WDL_FastString* const str) { delete str; }
 
 	char mType, mDisplayPrecision;
@@ -231,7 +238,7 @@ public:
 		AssertInt(intVal);
 		#endif
 
-		return fabs((double)(intVal - mMin) / (double)(mMax - mMin));
+		return Normalized(intVal, mMin, mMax);
 	}
 
 	int Bounded(int intVal) const
@@ -266,6 +273,11 @@ protected:
 	#ifndef NDEBUG
 	void AssertInt(int intVal) const;
 	#endif
+
+	static double Normalized(const int intVal, const int minVal, const int maxVal)
+	{
+		return Clamped((double)(intVal - minVal) / (double)(maxVal - minVal));
+	}
 
 	int mIntVal, mMin, mMax;
 
@@ -315,7 +327,7 @@ public:
 		AssertValue(nonNormalizedValue);
 		#endif
 
-		return fabs((nonNormalizedValue - mMin) / (mMax - mMin));
+		return Normalize(nonNormalizedValue, mMin, mMax);
 	}
 
 	double Bounded(double nonNormalizedValue) const
@@ -360,6 +372,11 @@ protected:
 	void AssertValue(double nonNormalizedValue) const;
 	#endif
 
+	static double Normalize(const double nonNormalizedValue, const double minVal, const double maxVal)
+	{
+		return Clamped((nonNormalizedValue - minVal) / (maxVal - minVal));
+	}
+
 	// All we store is the readable values.
 	// SetNormalized() and GetNormalized() handle conversion from/to [0, 1].
 	double WDL_FIXALIGN mValue, mMin, mMax;
@@ -400,7 +417,11 @@ public:
 
 	double ToNormalized(const double nonNormalizedValue) const
 	{
-		return pow(IDoubleParam::ToNormalized(nonNormalizedValue), 1.0 / mShape);
+		#ifndef NDEBUG
+		AssertValue(nonNormalizedValue);
+		#endif
+
+		return Normalize(nonNormalizedValue, mMin, mMax, mShape);
 	}
 
 	void SetNormalized(double normalizedValue);
@@ -409,6 +430,17 @@ public:
 	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
 
 protected:
+	static double Normalize(const double nonNormalizedValue, const double minVal, const double maxVal, const double shape)
+	{
+		double normalizedValue = (nonNormalizedValue - minVal) / (maxVal - minVal);
+		normalizedValue = wdl_max(normalizedValue, 0.0);
+
+		normalizedValue = pow(normalizedValue, 1.0 / shape);
+		normalizedValue = wdl_min(normalizedValue, 1.0);
+
+		return normalizedValue;
+	}
+
 	double WDL_FIXALIGN mShape;
 }
 WDL_FIXALIGN;
@@ -441,12 +473,16 @@ public:
 
 	double FromNormalized(const double normalizedValue) const
 	{
-		return IDoubleParam::FromNormalized(fabs((exp(normalizedValue * mShape) - 1.0) / mExpMin1));
+		return IDoubleParam::FromNormalized((exp(normalizedValue * mShape) - 1.0) / mExpMin1);
 	}
 
 	double ToNormalized(const double nonNormalizedValue) const
 	{
-		return fabs(log(IDoubleParam::ToNormalized(nonNormalizedValue) * mExpMin1 + 1.0) / mShape);
+		#ifndef NDEBUG
+		AssertValue(nonNormalizedValue);
+		#endif
+
+		return Normalize(nonNormalizedValue, mMin, mMax, mShape, mExpMin1);
 	}
 
 	void SetNormalized(double normalizedValue);
@@ -455,6 +491,17 @@ public:
 	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
 
 protected:
+	static double Normalize(const double nonNormalizedValue, const double minVal, const double maxVal, const double shape, const double expMin1)
+	{
+		double normalizedValue = (nonNormalizedValue - minVal) / (maxVal - minVal);
+		normalizedValue = wdl_max(normalizedValue, 0.0);
+
+		normalizedValue = log(normalizedValue * expMin1 + 1.0) / shape;
+		normalizedValue = wdl_min(normalizedValue, 1.0);
+
+		return normalizedValue;
+	}
+
 	double WDL_FIXALIGN mShape, mExpMin1;
 }
 WDL_FIXALIGN;
@@ -472,11 +519,9 @@ public:
 
 	inline double Value() const { return mValue; }
 
-	static double Bounded(double normalizedValue)
+	static double Bounded(const double normalizedValue)
 	{
-		normalizedValue = wdl_max(normalizedValue, 0.0);
-		normalizedValue = wdl_min(normalizedValue, 1.0);
-		return normalizedValue;
+		return Clamped(normalizedValue);
 	}
 
 	void SetNormalized(double normalizedValue);
