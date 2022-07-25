@@ -370,6 +370,11 @@ public:
 		return mBytes.GetSize();
 	}
 
+	inline int AllocSize() const
+	{
+		return mBytes.GetSize();
+	}
+
 	inline void Clear()
 	{
 		mSize = 0;
