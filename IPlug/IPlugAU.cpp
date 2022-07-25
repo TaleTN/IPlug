@@ -1729,7 +1729,7 @@ ComponentResult IPlugAU::GetState(CFDictionaryRef* const ppDict)
 	PutNumberInDict(pDict, kAUPresetManufacturerKey, &mfr, kCFNumberSInt32Type);
 	PutStrInDict(pDict, kAUPresetNameKey, GetPresetName(GetCurrentPresetIdx()));
 
-	if (!mState.Size()) AllocStateChunk();
+	if (!mState.AllocSize()) AllocStateChunk();
 	mState.Clear();
 
 	#ifdef IPLUG_NO_STATE_CHUNKS
