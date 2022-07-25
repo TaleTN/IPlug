@@ -605,7 +605,7 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			{
 				const bool isBank = !idx;
 				ByteChunk* const pChunk = isBank ? &_this->mBankState : &_this->mState;
-				if (!pChunk->Size())
+				if (!pChunk->AllocSize())
 				{
 					const bool allocOK = isBank ? _this->AllocBankChunk() : _this->AllocStateChunk();
 					if (!allocOK) break;
