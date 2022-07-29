@@ -1633,8 +1633,8 @@ void IPlugAU::UpdateSampleRate(const double sampleRate)
 	if (sampleRate != GetSampleRate() || !(flags & kPlugInitSampleRate))
 	{
 		SetSampleRate(sampleRate);
-		if (flags & kPlugInitBlockSize) Reset();
 		mPlugFlags = flags | kPlugInitSampleRate;
+		if (flags & kPlugInitBlockSize) Reset();
 	}
 }
 
@@ -1644,8 +1644,8 @@ void IPlugAU::UpdateBlockSize(const int blockSize)
 	if (blockSize != GetBlockSize() || !(flags & kPlugInitBlockSize))
 	{
 		SetBlockSize(blockSize);
-		if (flags & kPlugInitSampleRate) Reset();
 		mPlugFlags = flags | kPlugInitBlockSize;
+		if (flags & kPlugInitSampleRate) Reset();
 	}
 }
 
