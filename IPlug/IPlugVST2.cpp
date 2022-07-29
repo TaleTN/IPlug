@@ -506,8 +506,8 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			if (sampleRate != _this->GetSampleRate() || !(flags & kPlugInitSampleRate))
 			{
 				_this->SetSampleRate(sampleRate);
-				if (flags & kPlugInitBlockSize) _this->Reset();
 				_this->mPlugFlags = flags | kPlugInitSampleRate;
+				if (flags & kPlugInitBlockSize) _this->Reset();
 			}
 			break;
 		}
@@ -519,8 +519,8 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			if (blockSize != _this->GetBlockSize() || !(flags & kPlugInitBlockSize))
 			{
 				_this->SetBlockSize(blockSize);
-				if (flags & kPlugInitSampleRate) _this->Reset();
 				_this->mPlugFlags = flags | kPlugInitBlockSize;
+				if (flags & kPlugInitSampleRate) _this->Reset();
 			}
 			break;
 		}
