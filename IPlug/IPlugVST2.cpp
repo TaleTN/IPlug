@@ -788,12 +788,13 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 
 		case effSetBypass:
 		{
-			const bool bypassed = !!value;
-			if (_this->IsBypassed() != bypassed)
+			const bool bypass = !!value;
+			if (_this->IsBypassed() != bypass)
 			{
-				_this->OnBypass(bypassed);
+				_this->OnBypass(bypass);
 				_this->mPlugFlags ^= IPlugBase::kPlugFlagsBypass;
 			}
+			ret = 1;
 			break;
 		}
 
