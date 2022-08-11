@@ -80,7 +80,7 @@ public:
 	// Not usually needed... Also different hosts have different interpretations of "activate".
 	// Not all hosts will notify plugin on bypass. Mutex is already locked.
 	virtual void OnActivate(bool active) {}
-	virtual void OnBypass(bool bypassed) {}
+	virtual void OnBypass(bool bypass) {}
     
 	virtual void ProcessMidiMsg(const IMidiMsg* pMsg) {}
 	virtual void ProcessSysEx(const ISysEx* pSysEx) {}

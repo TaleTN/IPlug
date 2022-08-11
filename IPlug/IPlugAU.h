@@ -43,7 +43,7 @@ public:
 	// See IPlugBase for the full list of methods that your plugin class can implement.
 
 	// Default implementation to mimic original IPlug AU behavior.
-	void OnBypass(bool /* bypassed */) { Reset(); }
+	void OnBypass(bool /* bypass */) { Reset(); }
 
 	bool AllocStateChunk(int chunkSize = -1);
 	bool AllocBankChunk(int chunkSize = -1);
