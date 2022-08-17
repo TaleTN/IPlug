@@ -416,8 +416,8 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters* const params, void* c
 			if (!_this->IsActive())
 			{
 				_this->OnParamReset();
-				_this->OnActivate(true);
 				_this->mPlugFlags |= kPlugFlagsActive;
+				_this->OnActivate(true);
 			}
 			break;
 		}
@@ -426,8 +426,8 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters* const params, void* c
 		{
 			if (_this->IsActive())
 			{
-				_this->OnActivate(false);
 				_this->mPlugFlags &= ~kPlugFlagsActive;
+				_this->OnActivate(false);
 			}
 			break;
 		}
@@ -1443,8 +1443,8 @@ ComponentResult IPlugAU::SetProperty(const AudioUnitPropertyID propID, const Aud
 			const bool bypass = !!*(UInt32*)pData;
 			if (IsBypassed() != bypass)
 			{
-				OnBypass(bypass);
 				mPlugFlags ^= kPlugFlagsBypass;
+				OnBypass(bypass);
 			}
 			return noErr;
 		}
