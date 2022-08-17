@@ -530,8 +530,8 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			const bool active = !!value;
 			if (_this->IsActive() != active)
 			{
-				_this->OnActivate(active);
 				_this->mPlugFlags ^= IPlugBase::kPlugFlagsActive;
+				_this->OnActivate(active);
 			}
 			break;
 		}
@@ -791,8 +791,8 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			const bool bypass = !!value;
 			if (_this->IsBypassed() != bypass)
 			{
-				_this->OnBypass(bypass);
 				_this->mPlugFlags ^= IPlugBase::kPlugFlagsBypass;
+				_this->OnBypass(bypass);
 			}
 			ret = 1;
 			break;
