@@ -50,6 +50,12 @@ static const CanDoTbl sPlugCanDos[] =
 	{ kHasCockosViewAsConfig, "hasCockosViewAsConfig" }
 };
 
+enum EPinPropFlags
+{
+	kPinNotStereo = kVstPinIsActive | kVstPinUseSpeaker,
+	kPinIsStereo = kVstPinIsActive | kVstPinIsStereo | kVstPinUseSpeaker
+};
+
 static int VSTSpkrArrType(const int nchan)
 {
 	const int type = nchan - 1;
@@ -741,7 +747,9 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 				VstPinProperties* const pp = (VstPinProperties*)ptr;
 				const int i = idx + 1;
 				sprintf(pp->label, "Input %d", i);
-				pp->flags = ((i & 1) & (i < _this->NInChannels())) ? kVstPinIsActive | kVstPinIsStereo : kVstPinIsActive;
+				pp->flags = ((i & 1) & (i < _this->NInChannels())) ? kPinIsStereo : kPinNotStereo;
+				pp->arrangementType = _this->mInputSpkrArr.type;
+				sprintf(pp->shortLabel, "In%d", i);
 				ret = 1;
 			}
 			break;
@@ -754,7 +762,9 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 				VstPinProperties* const pp = (VstPinProperties*)ptr;
 				const int i = idx + 1;
 				sprintf(pp->label, "Output %d", i);
-				pp->flags = ((i & 1) & (i < _this->NOutChannels())) ? kVstPinIsActive | kVstPinIsStereo : kVstPinIsActive;
+				pp->flags = ((i & 1) & (i < _this->NOutChannels())) ? kPinIsStereo : kPinNotStereo;
+				pp->arrangementType = _this->mOutputSpkrArr.type;
+				sprintf(pp->shortLabel, "Out%d", i);
 				ret = 1;
 			}
 			break;
