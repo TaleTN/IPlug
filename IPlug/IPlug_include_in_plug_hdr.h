@@ -23,6 +23,9 @@
 #if PLUG_DOES_MIDI
 	#define PLUG_DOES_MIDI_IN  1
 	#define PLUG_DOES_MIDI_OUT 1
+#elif defined PLUG_DOES_MIDI
+	#define PLUG_DOES_MIDI_IN  0
+	#define PLUG_DOES_MIDI_OUT 0
 #endif
 
 #define IPLUG_CTOR(nParams, nPresets, instanceInfo) IPlug( \
