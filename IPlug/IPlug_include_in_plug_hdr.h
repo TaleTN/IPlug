@@ -12,6 +12,10 @@
 	#include "IPlugAU.h"
 	typedef IPlugAU IPlug;
 	#define API_EXT "audiounit"
+#elif defined CLAP_API
+	#include "IPlugCLAP.h"
+	typedef IPlugCLAP IPlug;
+	#define API_EXT "clap"
 #else
 	#error "No API defined!"
 #endif

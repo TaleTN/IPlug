@@ -109,6 +109,79 @@ void* PLUG_FACTORY(const AudioComponentDescription* const pDesc)
 
 } // extern "C"
 
+#elif defined(CLAP_API)
+
+#include <string.h>
+
+extern "C" {
+
+static const char* const sClapPlugID = BUNDLE_DOMAIN ".clap." BUNDLE_NAME;
+
+uint32_t CLAP_ABI ClapFactoryGetPluginCount(const clap_plugin_factory* /* pFactory */)
+{
+	return 1;
+}
+
+const clap_plugin_descriptor* CLAP_ABI ClapFactoryGetPluginDescriptor(const clap_plugin_factory* /* pFactory */, const uint32_t index)
+{
+	if (index != 0) return NULL;
+
+	static const char* const features[] =
+	{
+		#if PLUG_IS_INST
+		CLAP_PLUGIN_FEATURE_INSTRUMENT,
+		#else
+		CLAP_PLUGIN_FEATURE_AUDIO_EFFECT,
+		#endif
+
+		CLAP_PLUGIN_FEATURE_STEREO,
+		NULL
+	};
+
+	static const clap_plugin_descriptor desc =
+	{
+		CLAP_VERSION,
+		sClapPlugID,
+		PLUG_NAME,
+		PLUG_MFR,
+		NULL,
+		NULL,
+		NULL,
+		VERSIONINFO_STR,
+		NULL,
+		(const char**)features
+	};
+
+	return &desc;
+}
+
+const clap_plugin* CLAP_ABI ClapFactoryCreatePlugin(const clap_plugin_factory* /* pFactory */, const clap_host* const pHost, const char* const id)
+{
+	clap_plugin* pClap = NULL;
+
+	if (clap_version_is_compatible(pHost->clap_version) && !strcmp(id, sClapPlugID))
+	{
+		IPlugCLAP* const pPlug = new PLUG_CLASS_NAME((void*)pHost);
+		if (pPlug)
+		{
+			pPlug->EnsureDefaultPreset();
+			pClap = pPlug->GetTheClap();
+		}
+	}
+
+	return pClap;
+}
+
+CLAP_EXPORT const clap_plugin_entry clap_entry =
+{
+	CLAP_VERSION,
+	IPlugCLAP::ClapEntryInit,
+	IPlugCLAP::ClapEntryDeinit,
+	IPlugCLAP::ClapEntryGetFactory
+};
+
+} // extern "C"
+
 #else
 	#error "No API defined!"
 #endif
