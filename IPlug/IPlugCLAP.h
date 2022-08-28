@@ -50,7 +50,7 @@ public:
 
 	// Tell the host that the graphics resized.
 	// Should be called only by the graphics object when it resizes itself.
-	void ResizeGraphics(int w, int h) {}
+	void ResizeGraphics(int w, int h);
 
 protected:
 	void HostSpecificInit() {}
@@ -66,6 +66,11 @@ private:
 
 	clap_plugin mClapPlug;
 	const clap_host* mClapHost;
+
+	bool (*mRequestResize)(const clap_host* host, uint32_t width, uint32_t height);
+
+	void* mGUIParent;
+	int mGUIWidth, mGUIHeight;
 
 public:
 	inline clap_plugin* GetTheClap() { return &mClapPlug; }
@@ -99,4 +104,20 @@ public:
 
 	static uint32_t CLAP_ABI ClapNotePortsCount(const clap_plugin* pPlug, bool isInput);
 	static bool CLAP_ABI ClapNotePortsGet(const clap_plugin* pPlug, uint32_t idx, bool isInput, clap_note_port_info* pInfo);
+
+	static bool CLAP_ABI ClapGUIIsAPISupported(const clap_plugin* pPlug, const char* id, bool isFloating);
+	static bool CLAP_ABI ClapGUIGetPreferredAPI(const clap_plugin* pPlug, const char** pID, bool* pIsFloating);
+	static bool CLAP_ABI ClapGUICreate(const clap_plugin* pPlug, const char* id, bool isFloating);
+	static void CLAP_ABI ClapGUIDestroy(const clap_plugin* pPlug);
+	static bool CLAP_ABI ClapGUISetScale(const clap_plugin* pPlug, double scale) { return false; }
+	static bool CLAP_ABI ClapGUIGetSize(const clap_plugin* pPlug, uint32_t* pWidth, uint32_t* pHeight);
+	static bool CLAP_ABI ClapGUICanResize(const clap_plugin* pPlug) { return false; }
+	static bool CLAP_ABI ClapGUIGetResizeHints(const clap_plugin* pPlug, clap_gui_resize_hints* pHints) { return false; }
+	static bool CLAP_ABI ClapGUIAdjustSize(const clap_plugin* pPlug, uint32_t* pWidth, uint32_t* pHeight) { return false; }
+	static bool CLAP_ABI ClapGUISetSize(const clap_plugin* pPlug, uint32_t width, uint32_t height) { return false; }
+	static bool CLAP_ABI ClapGUISetParent(const clap_plugin* pPlug, const clap_window* pWindow);
+	static bool CLAP_ABI ClapGUISetTransient(const clap_plugin* pPlug, const clap_window* pWindow) { return false; }
+	static void CLAP_ABI ClapGUISuggestTitle(const clap_plugin* pPlug, const char* title) {}
+	static bool CLAP_ABI ClapGUIShow(const clap_plugin* pPlug);
+	static bool CLAP_ABI ClapGUIHide(const clap_plugin* pPlug);
 };

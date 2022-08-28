@@ -1,4 +1,9 @@
 #include "IPlugCLAP.h"
+#include "IGraphics.h"
+
+#ifdef __APPLE__
+	#include "IGraphicsMac.h"
+#endif
 
 #include <stdlib.h>
 #include <string.h>
@@ -13,6 +18,13 @@ const clap_plugin_descriptor* CLAP_ABI ClapFactoryGetPluginDescriptor(const clap
 const clap_plugin* CLAP_ABI ClapFactoryCreatePlugin(const clap_plugin_factory* pFactory, const clap_host* pHost, const char* id);
 
 } // extern "C"
+
+static const char* const sClapWindowAPI =
+#ifdef _WIN32
+	CLAP_WINDOW_API_WIN32;
+#elif defined(__APPLE__)
+	CLAP_WINDOW_API_COCOA;
+#endif
 
 static double GetParamValue(const IParam* const pParam)
 {
@@ -91,9 +103,22 @@ IPlugBase(
 
 	// The plugin is not allowed to use the host callbacks in the create method.
 	mClapHost = NULL;
+	mRequestResize = NULL;
+
+	mGUIParent = NULL;
+	mGUIWidth = mGUIHeight = 0;
 
 	SetBlockSize(kDefaultBlockSize);
 	mClapHost = (const clap_host*)instanceInfo;
+}
+
+void IPlugCLAP::ResizeGraphics(const int w, const int h)
+{
+	if (mRequestResize && mRequestResize(mClapHost, w, h))
+	{
+		mGUIWidth = w;
+		mGUIHeight = h;
+	}
 }
 
 void IPlugCLAP::ProcessInputEvents(const clap_input_events* const pInEvents, const uint32_t nEvents, const uint32_t nFrames)
@@ -202,6 +227,8 @@ void IPlugCLAP::ProcessParamEvent(const clap_event_param_value* const pEvent)
 		}
 	}
 
+	IGraphics* const pGraphics = GetGUI();
+	if (pGraphics) pGraphics->SetParameterFromPlug(idx, v, true);
 	OnParamChange(idx);
 }
 
@@ -417,6 +444,33 @@ const void* CLAP_ABI IPlugCLAP::ClapGetExtension(const clap_plugin* const pPlug,
 		};
 
 		return &notePorts;
+	}
+
+	if (!strcmp(id, CLAP_EXT_GUI))
+	{
+		const IPlugCLAP* const _this = (const IPlugCLAP*)pPlug->plugin_data;
+		if (!_this->GetGUI()) return NULL;
+
+		static const clap_plugin_gui gui =
+		{
+			ClapGUIIsAPISupported,
+			ClapGUIGetPreferredAPI,
+			ClapGUICreate,
+			ClapGUIDestroy,
+			ClapGUISetScale,
+			ClapGUIGetSize,
+			ClapGUICanResize,
+			ClapGUIGetResizeHints,
+			ClapGUIAdjustSize,
+			ClapGUISetSize,
+			ClapGUISetParent,
+			ClapGUISetTransient,
+			ClapGUISuggestTitle,
+			ClapGUIShow,
+			ClapGUIHide
+		};
+
+		return &gui;
 	}
 
 	return NULL;
@@ -642,4 +696,120 @@ bool CLAP_ABI IPlugCLAP::ClapNotePortsGet(const clap_plugin* const pPlug, const 
 	GetInOutName(isInput, pInfo->name, sizeof(pInfo->name));
 
 	return true;
+}
+
+bool CLAP_ABI IPlugCLAP::ClapGUIIsAPISupported(const clap_plugin* /* pPlug */, const char* const id, const bool isFloating)
+{
+	return !isFloating && !strcmp(id, sClapWindowAPI);
+}
+
+bool CLAP_ABI IPlugCLAP::ClapGUIGetPreferredAPI(const clap_plugin* /* pPlug */, const char** const pID, bool* const pIsFloating)
+{
+	*pID = sClapWindowAPI;
+	*pIsFloating = false;
+	return true;
+}
+
+bool CLAP_ABI IPlugCLAP::ClapGUICreate(const clap_plugin* const pPlug, const char* const id, const bool isFloating)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	bool ret = false;
+
+	if (_this->GetGUI() && ClapGUIIsAPISupported(pPlug, id, isFloating))
+	{
+		const clap_host* const pHost = _this->mClapHost;
+		const clap_host_gui* const pHostGUI = (const clap_host_gui*)pHost->get_extension(pHost, CLAP_EXT_GUI);
+		_this->mRequestResize = pHostGUI ? pHostGUI->request_resize : NULL;
+		ret = true;
+	}
+
+	return ret;
+}
+
+void CLAP_ABI IPlugCLAP::ClapGUIDestroy(const clap_plugin* const pPlug)
+{
+	ClapGUIHide(pPlug);
+
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+
+	_this->mGUIParent = NULL;
+	_this->mGUIWidth = _this->mGUIHeight = 0;
+}
+
+bool CLAP_ABI IPlugCLAP::ClapGUIGetSize(const clap_plugin* const pPlug, uint32_t* const pWidth, uint32_t* const pHeight)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	_this->mMutex.Enter();
+
+	const IGraphics* const pGraphics = _this->GetGUI();
+	bool ret = false;
+
+	if (pGraphics)
+	{
+		int w = _this->mGUIWidth, h = _this->mGUIHeight;
+
+		if (!(w & h))
+		{
+			#ifdef __APPLE__
+			static const int scale = IGraphicsMac::kScaleOS;
+			#else
+			const int scale = pGraphics->Scale();
+			#endif
+
+			w = pGraphics->Width() >> scale;
+			h = pGraphics->Height() >> scale;
+		}
+
+		*pWidth = w;
+		*pHeight = h;
+
+		ret = true;
+	}
+
+	_this->mMutex.Leave();
+	return ret;
+}
+
+bool CLAP_ABI IPlugCLAP::ClapGUISetParent(const clap_plugin* const pPlug, const clap_window* const pWindow)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	_this->mGUIParent = pWindow->ptr;
+	return true;
+}
+
+bool CLAP_ABI IPlugCLAP::ClapGUIShow(const clap_plugin* const pPlug)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	_this->mMutex.Enter();
+
+	IGraphics* const pGraphics = _this->GetGUI();
+	bool ret = false;
+
+	if (pGraphics && (pGraphics->WindowIsOpen() || pGraphics->OpenWindow(_this->mGUIParent)))
+	{
+		_this->OnGUIOpen();
+		ret = true;
+	}
+
+	_this->mMutex.Leave();
+	return ret;
+}
+
+bool CLAP_ABI IPlugCLAP::ClapGUIHide(const clap_plugin* const pPlug)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	_this->mMutex.Enter();
+
+	IGraphics* const pGraphics = _this->GetGUI();
+	bool ret = false;
+
+	if (pGraphics && pGraphics->WindowIsOpen())
+	{
+		_this->OnGUIClose();
+		pGraphics->CloseWindow();
+		ret = true;
+	}
+
+	_this->mMutex.Leave();
+	return ret;
 }
