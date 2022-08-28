@@ -92,4 +92,6 @@ public:
 
 	static uint32_t CLAP_ABI ClapAudioPortsCount(const clap_plugin* pPlug, bool isInput);
 	static bool CLAP_ABI ClapAudioPortsGet(const clap_plugin* pPlug, uint32_t idx, bool isInput, clap_audio_port_info* pInfo);
+
+	static uint32_t CLAP_ABI ClapLatencyGet(const clap_plugin* pPlug);
 };

@@ -343,6 +343,16 @@ const void* CLAP_ABI IPlugCLAP::ClapGetExtension(const clap_plugin* const pPlug,
 		return &audioPorts;
 	}
 
+	if (!strcmp(id, CLAP_EXT_LATENCY))
+	{
+		static const clap_plugin_latency latency =
+		{
+			ClapLatencyGet
+		};
+
+		return &latency;
+	}
+
 	return NULL;
 }
 
@@ -534,4 +544,15 @@ bool CLAP_ABI IPlugCLAP::ClapAudioPortsGet(const clap_plugin* const pPlug, const
 	pInfo->in_place_pair = CLAP_INVALID_ID;
 
 	return true;
+}
+
+uint32_t CLAP_ABI IPlugCLAP::ClapLatencyGet(const clap_plugin* const pPlug)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	_this->mMutex.Enter();
+
+	const uint32_t latency = _this->GetLatency();
+
+	_this->mMutex.Leave();
+	return latency;
 }
