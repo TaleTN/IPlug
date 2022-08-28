@@ -29,6 +29,16 @@ static double GetParamValue(const IParam* const pParam)
 	return pParam->GetNormalized();
 }
 
+static int NInOutChannels(const IPlugCLAP* const pPlug, const bool isInput)
+{
+	return isInput ? pPlug->NInChannels() : pPlug->NOutChannels();
+}
+
+static void GetInOutName(const bool isInput, char* const buf, const int bufSize)
+{
+	lstrcpyn_safe(buf, isInput ? "Input" : "Output", bufSize);
+}
+
 IPlugCLAP::IPlugCLAP(
 	void* const instanceInfo,
 	const int nParams,
@@ -322,6 +332,17 @@ const void* CLAP_ABI IPlugCLAP::ClapGetExtension(const clap_plugin* const pPlug,
 		return &params;
 	}
 
+	if (!strcmp(id, CLAP_EXT_AUDIO_PORTS))
+	{
+		static const clap_plugin_audio_ports audioPorts =
+		{
+			ClapAudioPortsCount,
+			ClapAudioPortsGet
+		};
+
+		return &audioPorts;
+	}
+
 	return NULL;
 }
 
@@ -479,4 +500,38 @@ void CLAP_ABI IPlugCLAP::ClapParamsFlush(const clap_plugin* const pPlug, const c
 	}
 
 	_this->mMutex.Leave();
+}
+
+uint32_t CLAP_ABI IPlugCLAP::ClapAudioPortsCount(const clap_plugin* const pPlug, const bool isInput)
+{
+	const IPlugCLAP* const _this = (const IPlugCLAP*)pPlug->plugin_data;
+	return !!NInOutChannels(_this, isInput);
+}
+
+bool CLAP_ABI IPlugCLAP::ClapAudioPortsGet(const clap_plugin* const pPlug, const uint32_t idx, const bool isInput, clap_audio_port_info* const pInfo)
+{
+	const IPlugCLAP* const _this = (const IPlugCLAP*)pPlug->plugin_data;
+	const char* type;
+
+	const int nChannels = NInOutChannels(_this, isInput);
+	const uint32_t nPorts = !!nChannels;
+
+	if (!(idx < nPorts)) return false;
+
+	switch (nChannels)
+	{
+		case 1: type = CLAP_PORT_MONO; break;
+		case 2: type = CLAP_PORT_STEREO; break;
+		default: type = NULL; break;
+	}
+
+	pInfo->id = 0;
+	GetInOutName(isInput, pInfo->name, sizeof(pInfo->name));
+
+	pInfo->flags = CLAP_AUDIO_PORT_IS_MAIN | CLAP_AUDIO_PORT_SUPPORTS_64BITS | CLAP_AUDIO_PORT_PREFERS_64BITS | CLAP_AUDIO_PORT_REQUIRES_COMMON_SAMPLE_SIZE;
+	pInfo->channel_count = nChannels;
+	pInfo->port_type = type;
+	pInfo->in_place_pair = CLAP_INVALID_ID;
+
+	return true;
 }

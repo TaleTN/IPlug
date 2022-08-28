@@ -89,4 +89,7 @@ public:
 	static bool CLAP_ABI ClapParamsValueToText(const clap_plugin* pPlug, clap_id idx, double value, char* buf, uint32_t bufSize);
 	static bool CLAP_ABI ClapParamsTextToValue(const clap_plugin* pPlug, clap_id idx, const char* str, double* pValue);
 	static void CLAP_ABI ClapParamsFlush(const clap_plugin* pPlug, const clap_input_events* pInEvents, const clap_output_events* pOutEvents);
+
+	static uint32_t CLAP_ABI ClapAudioPortsCount(const clap_plugin* pPlug, bool isInput);
+	static bool CLAP_ABI ClapAudioPortsGet(const clap_plugin* pPlug, uint32_t idx, bool isInput, clap_audio_port_info* pInfo);
 };
