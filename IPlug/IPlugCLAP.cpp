@@ -14,6 +14,21 @@ const clap_plugin* CLAP_ABI ClapFactoryCreatePlugin(const clap_plugin_factory* p
 
 } // extern "C"
 
+static double GetParamValue(const IParam* const pParam)
+{
+	switch (pParam->Type())
+	{
+		case IParam::kTypeBool:
+			return (double)((const IBoolParam*)pParam)->Bool();
+		case IParam::kTypeEnum:
+			return (double)((const IEnumParam*)pParam)->Int();
+		default:
+			break;
+	}
+
+	return pParam->GetNormalized();
+}
+
 IPlugCLAP::IPlugCLAP(
 	void* const instanceInfo,
 	const int nParams,
@@ -64,6 +79,68 @@ IPlugBase(
 
 	SetBlockSize(kDefaultBlockSize);
 	mClapHost = (const clap_host*)instanceInfo;
+}
+
+void IPlugCLAP::ProcessInputEvents(const clap_input_events* const pInEvents, const uint32_t nEvents, const uint32_t nFrames)
+{
+	for (uint32_t i = 0; i < nEvents; ++i)
+	{
+		const clap_event_header* const pEvent = pInEvents->get(pInEvents, i);
+
+		const uint32_t ofs = pEvent->time;
+		if (ofs >= nFrames) break;
+
+		if (pEvent->space_id != CLAP_CORE_EVENT_SPACE_ID) continue;
+
+		switch (pEvent->type)
+		{
+			case CLAP_EVENT_PARAM_VALUE:
+			{
+				ProcessParamEvent((const clap_event_param_value*)pEvent);
+				break;
+			}
+		}
+	}
+}
+
+void IPlugCLAP::ProcessParamEvent(const clap_event_param_value* const pEvent)
+{
+	const int idx = pEvent->param_id;
+	if (!NParams(idx)) return;
+
+	IParam* const pParam = GetParam(idx);
+	double v = pEvent->value;
+
+	// TN: Why is order in IPlugVST2::VSTSetParameter() different?
+
+	switch (pParam->Type())
+	{
+		case IParam::kTypeBool:
+		{
+			IBoolParam* const pBool = (IBoolParam*)pParam;
+			const int boolVal = (int)v;
+			pBool->Set(boolVal);
+			v = (double)boolVal;
+			break;
+		}
+
+		case IParam::kTypeEnum:
+		{
+			IEnumParam* const pEnum = (IEnumParam*)pParam;
+			const int intVal = (int)v;
+			pEnum->Set(intVal);
+			v = pEnum->ToNormalized(intVal);
+			break;
+		}
+
+		default:
+		{
+			pParam->SetNormalized(v);
+			break;
+		}
+	}
+
+	OnParamChange(idx);
 }
 
 const void* CLAP_ABI IPlugCLAP::ClapEntryGetFactory(const char* const id)
@@ -176,6 +253,11 @@ clap_process_status CLAP_ABI IPlugCLAP::ClapProcess(const clap_plugin* const pPl
 
 	const uint32_t nFrames = pProcess->frames_count;
 
+	const clap_input_events* const pInEvents = pProcess->in_events;
+	const uint32_t nEvents = pInEvents->size(pInEvents);
+
+	if (nEvents) _this->ProcessInputEvents(pInEvents, nEvents, nFrames);
+
 	const void* const* inputs = NULL;
 	void* const* outputs = NULL;
 
@@ -225,5 +307,176 @@ clap_process_status CLAP_ABI IPlugCLAP::ClapProcess(const clap_plugin* const pPl
 
 const void* CLAP_ABI IPlugCLAP::ClapGetExtension(const clap_plugin* const pPlug, const char* const id)
 {
+	if (!strcmp(id, CLAP_EXT_PARAMS))
+	{
+		static const clap_plugin_params params =
+		{
+			ClapParamsCount,
+			ClapParamsGetInfo,
+			ClapParamsGetValue,
+			ClapParamsValueToText,
+			ClapParamsTextToValue,
+			ClapParamsFlush
+		};
+
+		return &params;
+	}
+
 	return NULL;
+}
+
+uint32_t CLAP_ABI IPlugCLAP::ClapParamsCount(const clap_plugin* const pPlug)
+{
+	const IPlugCLAP* const _this = (const IPlugCLAP*)pPlug->plugin_data;
+	return _this->NParams();
+}
+
+bool CLAP_ABI IPlugCLAP::ClapParamsGetInfo(const clap_plugin* const pPlug, const uint32_t idx, clap_param_info* const pInfo)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	if (!_this->NParams(idx)) return false;
+
+	_this->mMutex.Enter();
+
+	const IParam* const pParam = _this->GetParam(idx);
+	const int type = pParam->Type();
+
+	pInfo->id = idx;
+	pInfo->flags = CLAP_PARAM_IS_AUTOMATABLE | CLAP_PARAM_REQUIRES_PROCESS;
+	pInfo->cookie = NULL;
+
+	lstrcpyn_safe(pInfo->name, pParam->GetNameForHost(), sizeof(pInfo->name));
+	pInfo->module[0] = 0;
+
+	pInfo->min_value = 0.0;
+
+	switch (type)
+	{
+		case IParam::kTypeEnum:
+		{
+			pInfo->flags |= CLAP_PARAM_IS_STEPPED;
+
+			const IEnumParam* const pEnum = (const IEnumParam*)pParam;
+			pInfo->max_value = (double)(pEnum->NEnums() - 1);
+			pInfo->default_value = (double)pEnum->Int();
+			break;
+		}
+
+		case IParam::kTypeBool:
+		{
+			pInfo->flags |= CLAP_PARAM_IS_STEPPED;
+			// [[fallthrough]];
+		}
+		default:
+		{
+			pInfo->max_value = 1.0;
+			pInfo->default_value = pParam->GetNormalized();
+			break;
+		}
+	}
+
+	_this->mMutex.Leave();
+	return true;
+}
+
+bool CLAP_ABI IPlugCLAP::ClapParamsGetValue(const clap_plugin* const pPlug, const clap_id idx, double* const pValue)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	if (!_this->NParams(idx)) return false;
+
+	_this->mMutex.Enter();
+
+	*pValue = GetParamValue(_this->GetParam(idx));
+
+	_this->mMutex.Leave();
+	return true;
+}
+
+bool CLAP_ABI IPlugCLAP::ClapParamsValueToText(const clap_plugin* const pPlug, const clap_id idx, const double value, char* const buf, const uint32_t bufSize)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	if (!_this->NParams(idx)) return false;
+
+	_this->mMutex.Enter();
+
+	IParam* const pParam = _this->GetParam(idx);
+	double v = value;
+
+	switch (pParam->Type())
+	{
+		case IParam::kTypeBool:
+		{
+			v = (double)(int)v;
+			break;
+		}
+
+		case IParam::kTypeEnum:
+		{
+			v = ((IEnumParam*)pParam)->ToNormalized((int)v);
+			break;
+		}
+	}
+
+	pParam->GetDisplayForHost(v, buf, bufSize);
+	const char* const label = pParam->GetLabelForHost();
+
+	if (label && *label)
+	{
+		lstrcatn(buf, " ", bufSize);
+		lstrcatn(buf, label, bufSize);
+	}
+
+	_this->mMutex.Leave();
+	return true;
+}
+
+bool CLAP_ABI IPlugCLAP::ClapParamsTextToValue(const clap_plugin* const pPlug, const clap_id idx, const char* const str, double* const pValue)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	if (!_this->NParams(idx)) return false;
+
+	_this->mMutex.Enter();
+
+	const IParam* const pParam = _this->GetParam(idx);
+	double v;
+
+	const int type = pParam->Type();
+	const bool mapped = pParam->MapDisplayText(str, &v);
+
+	if (!mapped)
+	{
+		v = strtod(str, NULL);
+		if (pParam->DisplayIsNegated()) v = -v;
+		v = pParam->GetNormalized(v);
+	}
+
+	if (type == IParam::kTypeEnum)
+	{
+		v = (double)((const IEnumParam*)pParam)->FromNormalized(v);
+	}
+
+	*pValue = v;
+
+	_this->mMutex.Leave();
+	return true;
+}
+
+void CLAP_ABI IPlugCLAP::ClapParamsFlush(const clap_plugin* const pPlug, const clap_input_events* const pInEvents, const clap_output_events* /* pOutEvents */)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	_this->mMutex.Enter();
+
+	const uint32_t nEvents = pInEvents->size(pInEvents);
+
+	for (uint32_t i = 0; i < nEvents; ++i)
+	{
+		const clap_event_header* const pEvent = pInEvents->get(pInEvents, i);
+
+		if (pEvent->space_id == CLAP_CORE_EVENT_SPACE_ID && pEvent->type == CLAP_EVENT_PARAM_VALUE)
+		{
+			_this->ProcessParamEvent((const clap_event_param_value*)pEvent);
+		}
+	}
+
+	_this->mMutex.Leave();
 }

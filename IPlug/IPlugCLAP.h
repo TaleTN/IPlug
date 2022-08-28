@@ -59,6 +59,9 @@ protected:
 	bool SendSysEx(const ISysEx* pSysEx) { return false; }
 
 private:
+	void ProcessInputEvents(const clap_input_events* pInEvents, uint32_t nEvents, uint32_t nFrames);
+	void ProcessParamEvent(const clap_event_param_value* pEvent);
+
 	clap_plugin mClapPlug;
 	const clap_host* mClapHost;
 
@@ -79,4 +82,11 @@ public:
 	static clap_process_status CLAP_ABI ClapProcess(const clap_plugin* pPlug, const clap_process* pProcess);
 	static const void* CLAP_ABI ClapGetExtension(const clap_plugin* pPlug, const char* id);
 	static void CLAP_ABI ClapOnMainThread(const clap_plugin* pPlug) {}
+
+	static uint32_t CLAP_ABI ClapParamsCount(const clap_plugin* pPlug);
+	static bool CLAP_ABI ClapParamsGetInfo(const clap_plugin* pPlug, uint32_t idx, clap_param_info* pInfo);
+	static bool CLAP_ABI ClapParamsGetValue(const clap_plugin* pPlug, clap_id idx, double* pValue);
+	static bool CLAP_ABI ClapParamsValueToText(const clap_plugin* pPlug, clap_id idx, double value, char* buf, uint32_t bufSize);
+	static bool CLAP_ABI ClapParamsTextToValue(const clap_plugin* pPlug, clap_id idx, const char* str, double* pValue);
+	static void CLAP_ABI ClapParamsFlush(const clap_plugin* pPlug, const clap_input_events* pInEvents, const clap_output_events* pOutEvents);
 };
