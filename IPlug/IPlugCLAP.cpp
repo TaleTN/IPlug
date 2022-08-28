@@ -39,6 +39,11 @@ static void GetInOutName(const bool isInput, char* const buf, const int bufSize)
 	lstrcpyn_safe(buf, isInput ? "Input" : "Output", bufSize);
 }
 
+bool IPlugCLAP::DoesMIDIInOut(const IPlugCLAP* const pPlug, const bool isInput)
+{
+	return pPlug->DoesMIDI(isInput ? kPlugDoesMidiIn : kPlugDoesMidiOut);
+}
+
 IPlugCLAP::IPlugCLAP(
 	void* const instanceInfo,
 	const int nParams,
@@ -104,9 +109,46 @@ void IPlugCLAP::ProcessInputEvents(const clap_input_events* const pInEvents, con
 
 		switch (pEvent->type)
 		{
+			case CLAP_EVENT_NOTE_ON:
+			{
+				const clap_event_note* const pNoteOn = (const clap_event_note*)pEvent;
+				if (pNoteOn->port_index != 0) break;
+
+				int velocity = (int)(pNoteOn->velocity * 127.0 + 0.5);
+				velocity = wdl_max(velocity, 1);
+
+				const IMidiMsg msg(ofs, 0x90 | pNoteOn->channel, pNoteOn->key, velocity);
+				ProcessMidiMsg(&msg);
+				break;
+			}
+
+			case CLAP_EVENT_NOTE_OFF:
+			{
+				const clap_event_note* const pNoteOff = (const clap_event_note*)pEvent;
+				if (pNoteOff->port_index != 0) break;
+
+				const int velocity = (int)(pNoteOff->velocity * 127.0 + 0.5);
+
+				const IMidiMsg msg(ofs, 0x80 | pNoteOff->channel, pNoteOff->key, velocity);
+				ProcessMidiMsg(&msg);
+				break;
+			}
+
 			case CLAP_EVENT_PARAM_VALUE:
 			{
 				ProcessParamEvent((const clap_event_param_value*)pEvent);
+				break;
+			}
+
+			case CLAP_EVENT_MIDI:
+			{
+				const clap_event_midi* const pMidiEvent = (const clap_event_midi*)pEvent;
+				if (pMidiEvent->port_index) break;
+
+				const uint8_t* const data = pMidiEvent->data;
+
+				const IMidiMsg msg(ofs, data[0], data[1], data[2]);
+				ProcessMidiMsg(&msg);
 				break;
 			}
 		}
@@ -353,6 +395,20 @@ const void* CLAP_ABI IPlugCLAP::ClapGetExtension(const clap_plugin* const pPlug,
 		return &latency;
 	}
 
+	if (!strcmp(id, CLAP_EXT_NOTE_PORTS))
+	{
+		const IPlugCLAP* const _this = (const IPlugCLAP*)pPlug->plugin_data;
+		if (!_this->DoesMIDI()) return NULL;
+
+		static const clap_plugin_note_ports notePorts =
+		{
+			ClapNotePortsCount,
+			ClapNotePortsGet
+		};
+
+		return &notePorts;
+	}
+
 	return NULL;
 }
 
@@ -555,4 +611,25 @@ uint32_t CLAP_ABI IPlugCLAP::ClapLatencyGet(const clap_plugin* const pPlug)
 
 	_this->mMutex.Leave();
 	return latency;
+}
+
+uint32_t CLAP_ABI IPlugCLAP::ClapNotePortsCount(const clap_plugin* const pPlug, const bool isInput)
+{
+	const IPlugCLAP* const _this = (const IPlugCLAP*)pPlug->plugin_data;
+	return DoesMIDIInOut(_this, isInput);
+}
+
+bool CLAP_ABI IPlugCLAP::ClapNotePortsGet(const clap_plugin* const pPlug, const uint32_t idx, const bool isInput, clap_note_port_info* const pInfo)
+{
+	const IPlugCLAP* const _this = (const IPlugCLAP*)pPlug->plugin_data;
+
+	const uint32_t nPorts = DoesMIDIInOut(_this, isInput);
+	if (!(idx < nPorts)) return false;
+
+	pInfo->id = 0;
+	pInfo->supported_dialects = CLAP_NOTE_DIALECT_CLAP | CLAP_NOTE_DIALECT_MIDI;
+	pInfo->preferred_dialect = CLAP_NOTE_DIALECT_MIDI;
+	GetInOutName(isInput, pInfo->name, sizeof(pInfo->name));
+
+	return true;
 }

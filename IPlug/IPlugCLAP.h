@@ -62,6 +62,8 @@ private:
 	void ProcessInputEvents(const clap_input_events* pInEvents, uint32_t nEvents, uint32_t nFrames);
 	void ProcessParamEvent(const clap_event_param_value* pEvent);
 
+	static bool DoesMIDIInOut(const IPlugCLAP* pPlug, bool isInput);
+
 	clap_plugin mClapPlug;
 	const clap_host* mClapHost;
 
@@ -94,4 +96,7 @@ public:
 	static bool CLAP_ABI ClapAudioPortsGet(const clap_plugin* pPlug, uint32_t idx, bool isInput, clap_audio_port_info* pInfo);
 
 	static uint32_t CLAP_ABI ClapLatencyGet(const clap_plugin* pPlug);
+
+	static uint32_t CLAP_ABI ClapNotePortsCount(const clap_plugin* pPlug, bool isInput);
+	static bool CLAP_ABI ClapNotePortsGet(const clap_plugin* pPlug, uint32_t idx, bool isInput, clap_note_port_info* pInfo);
 };
