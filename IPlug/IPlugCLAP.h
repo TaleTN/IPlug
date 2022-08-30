@@ -32,8 +32,8 @@ public:
 	// Default implementation to mimic original IPlug VST2 behavior.
 	void OnActivate(const bool active) { if (!active) Reset(); }
 
-	bool AllocStateChunk(int chunkSize = -1) { return false; }
-	bool AllocBankChunk(int chunkSize = -1) { return false; }
+	bool AllocStateChunk(int chunkSize = -1);
+	bool AllocBankChunk(int chunkSize = -1);
 
 	void BeginInformHostOfParamChange(int idx) {}
 	void InformHostOfParamChange(int idx, double normalizedValue) {}
@@ -63,6 +63,8 @@ private:
 	void ProcessParamEvent(const clap_event_param_value* pEvent);
 
 	static bool DoesMIDIInOut(const IPlugCLAP* pPlug, bool isInput);
+
+	ByteChunk mState; // Persistent storage if the host asks for plugin state.
 
 	clap_plugin mClapPlug;
 	const clap_host* mClapHost;
@@ -96,6 +98,9 @@ public:
 	static bool CLAP_ABI ClapParamsValueToText(const clap_plugin* pPlug, clap_id idx, double value, char* buf, uint32_t bufSize);
 	static bool CLAP_ABI ClapParamsTextToValue(const clap_plugin* pPlug, clap_id idx, const char* str, double* pValue);
 	static void CLAP_ABI ClapParamsFlush(const clap_plugin* pPlug, const clap_input_events* pInEvents, const clap_output_events* pOutEvents);
+
+	static bool CLAP_ABI ClapStateSave(const clap_plugin* pPlug, const clap_ostream* pStream);
+	static bool CLAP_ABI ClapStateLoad(const clap_plugin* pPlug, const clap_istream* pStream);
 
 	static uint32_t CLAP_ABI ClapAudioPortsCount(const clap_plugin* pPlug, bool isInput);
 	static bool CLAP_ABI ClapAudioPortsGet(const clap_plugin* pPlug, uint32_t idx, bool isInput, clap_audio_port_info* pInfo);

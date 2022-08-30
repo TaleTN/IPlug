@@ -112,6 +112,18 @@ IPlugBase(
 	mClapHost = (const clap_host*)instanceInfo;
 }
 
+bool IPlugCLAP::AllocStateChunk(int chunkSize)
+{
+	if (chunkSize < 0) chunkSize = GetParamsChunkSize(0, NParams());
+	return mState.Alloc(chunkSize) == chunkSize;
+}
+
+bool IPlugCLAP::AllocBankChunk(const int chunkSize)
+{
+	if (chunkSize < 0 && mPresetChunkSize < 0) AllocPresetChunk();
+	return true;
+}
+
 void IPlugCLAP::ResizeGraphics(const int w, const int h)
 {
 	if (mRequestResize && mRequestResize(mClapHost, w, h))
@@ -411,6 +423,17 @@ const void* CLAP_ABI IPlugCLAP::ClapGetExtension(const clap_plugin* const pPlug,
 		return &params;
 	}
 
+	if (!strcmp(id, CLAP_EXT_STATE))
+	{
+		static const clap_plugin_state state =
+		{
+			ClapStateSave,
+			ClapStateLoad
+		};
+
+		return &state;
+	}
+
 	if (!strcmp(id, CLAP_EXT_AUDIO_PORTS))
 	{
 		static const clap_plugin_audio_ports audioPorts =
@@ -630,6 +653,71 @@ void CLAP_ABI IPlugCLAP::ClapParamsFlush(const clap_plugin* const pPlug, const c
 	}
 
 	_this->mMutex.Leave();
+}
+
+bool CLAP_ABI IPlugCLAP::ClapStateSave(const clap_plugin* const pPlug, const clap_ostream* const pStream)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	_this->mMutex.Enter();
+
+	ByteChunk* const pChunk = &_this->mState;
+	bool ok = pChunk->AllocSize() || _this->AllocStateChunk();
+
+	if (ok)
+	{
+		pChunk->Clear();
+		ok = _this->SerializeState(pChunk);
+
+		const void* const pData = pChunk->GetBytes();
+		const int64_t size = pChunk->Size();
+
+		if (ok) ok = pStream->write(pStream, pData, size) == size;
+	}
+
+	_this->mMutex.Leave();
+	return ok;
+}
+
+bool CLAP_ABI IPlugCLAP::ClapStateLoad(const clap_plugin* const pPlug, const clap_istream* const pStream)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	_this->mMutex.Enter();
+
+	ByteChunk* const pChunk = &_this->mState;
+
+	const int maxSize = pChunk->AllocSize();
+	bool ok = true;
+
+	if (pChunk->Size() < maxSize)
+	{
+		pChunk->Resize(maxSize);
+		ok = pChunk->Size() == maxSize;
+	}
+
+	if (ok)
+	{
+		const int64_t size = pStream->read(pStream, pChunk->GetBytes(), maxSize);
+		ok = size >= 0;
+
+		if (ok)
+		{
+			pChunk->Resize((int)size);
+			ok = pChunk->Size() == size;
+		}
+	}
+
+	if (ok)
+	{
+		const int pos = _this->UnserializeState(pChunk, 0);
+		ok = pos >= 0;
+
+		_this->OnParamReset();
+	}
+
+	if (ok) _this->RedrawParamControls();
+
+	_this->mMutex.Leave();
+	return ok;
 }
 
 uint32_t CLAP_ABI IPlugCLAP::ClapAudioPortsCount(const clap_plugin* const pPlug, const bool isInput)
