@@ -455,6 +455,17 @@ const void* CLAP_ABI IPlugCLAP::ClapGetExtension(const clap_plugin* const pPlug,
 		return &latency;
 	}
 
+	if (!strcmp(id, CLAP_EXT_RENDER))
+	{
+		static const clap_plugin_render render =
+		{
+			ClapRenderHasHardRealtimeRequirement,
+			ClapRenderSet
+		};
+
+		return &render;
+	}
+
 	if (!strcmp(id, CLAP_EXT_NOTE_PORTS))
 	{
 		const IPlugCLAP* const _this = (const IPlugCLAP*)pPlug->plugin_data;
@@ -763,6 +774,34 @@ uint32_t CLAP_ABI IPlugCLAP::ClapLatencyGet(const clap_plugin* const pPlug)
 
 	_this->mMutex.Leave();
 	return latency;
+}
+
+bool CLAP_ABI IPlugCLAP::ClapRenderSet(const clap_plugin* const pPlug, const clap_plugin_render_mode mode)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	_this->mMutex.Enter();
+
+	bool ret = false;
+
+	switch (mode)
+	{
+		case CLAP_RENDER_REALTIME:
+		{
+			_this->mPlugFlags &= ~kPlugFlagsOffline;
+			ret = true;
+			break;
+		}
+
+		case CLAP_RENDER_OFFLINE:
+		{
+			_this->mPlugFlags |= kPlugFlagsOffline;
+			ret = true;
+			break;
+		}
+	}
+
+	_this->mMutex.Leave();
+	return ret;
 }
 
 uint32_t CLAP_ABI IPlugCLAP::ClapNotePortsCount(const clap_plugin* const pPlug, const bool isInput)

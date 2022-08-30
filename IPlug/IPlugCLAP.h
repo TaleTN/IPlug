@@ -46,7 +46,7 @@ public:
 	void GetTimeSig(int* pNum, int* pDenom) { *pNum = *pDenom = 0; }
 
 	// Whether the plugin is being used for offline rendering.
-	bool IsRenderingOffline() { return false; }
+	bool IsRenderingOffline() { return IsOffline(); }
 
 	// Tell the host that the graphics resized.
 	// Should be called only by the graphics object when it resizes itself.
@@ -106,6 +106,9 @@ public:
 	static bool CLAP_ABI ClapAudioPortsGet(const clap_plugin* pPlug, uint32_t idx, bool isInput, clap_audio_port_info* pInfo);
 
 	static uint32_t CLAP_ABI ClapLatencyGet(const clap_plugin* pPlug);
+
+	static bool CLAP_ABI ClapRenderHasHardRealtimeRequirement(const clap_plugin* pPlug) { return false; }
+	static bool CLAP_ABI ClapRenderSet(const clap_plugin* pPlug, clap_plugin_render_mode mode);
 
 	static uint32_t CLAP_ABI ClapNotePortsCount(const clap_plugin* pPlug, bool isInput);
 	static bool CLAP_ABI ClapNotePortsGet(const clap_plugin* pPlug, uint32_t idx, bool isInput, clap_note_port_info* pInfo);
