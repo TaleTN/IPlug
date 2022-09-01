@@ -88,6 +88,11 @@ IPlugBase(
 	SetInputChannelConnections(0, nInputs, true);
 	SetOutputChannelConnections(0, nOutputs, true);
 
+	mTransportFlags = 0;
+	mSongPos = 0;
+	mTempo = 0.0;
+	memset(mTimeSig, 0, sizeof(mTimeSig));
+
 	mClapPlug.desc = ClapFactoryGetPluginDescriptor(NULL, 0);
 	mClapPlug.plugin_data = this;
 	mClapPlug.init = ClapInit;
@@ -122,6 +127,49 @@ bool IPlugCLAP::AllocBankChunk(const int chunkSize)
 {
 	if (chunkSize < 0 && mPresetChunkSize < 0) AllocPresetChunk();
 	return true;
+}
+
+double IPlugCLAP::GetSamplePos()
+{
+	double samplePos = 0.0;
+
+	if (mTransportFlags & CLAP_TRANSPORT_HAS_SECONDS_TIMELINE)
+	{
+		static const double secTimeFactor = 1.0 / (double)CLAP_SECTIME_FACTOR;
+		samplePos = (double)mSongPos * secTimeFactor * mSampleRate;
+	}
+
+	return samplePos;
+}
+
+double IPlugCLAP::GetTempo()
+{
+	double tempo = 0.0;
+
+	if (mTransportFlags & CLAP_TRANSPORT_HAS_TEMPO)
+	{
+		tempo = wdl_max(mTempo, 0.0);
+	}
+
+	return tempo;
+}
+
+void IPlugCLAP::GetTimeSig(int* const pNum, int* const pDenom)
+{
+	int num, denom;
+
+	if (mTransportFlags & CLAP_TRANSPORT_HAS_TIME_SIGNATURE)
+	{
+		num = mTimeSig[0];
+		denom = mTimeSig[1];
+	}
+	else
+	{
+		denom = num = 0;
+	}
+
+	*pNum = num;
+	*pDenom = denom;
 }
 
 void IPlugCLAP::ResizeGraphics(const int w, const int h)
@@ -353,6 +401,19 @@ clap_process_status CLAP_ABI IPlugCLAP::ClapProcess(const clap_plugin* const pPl
 	_this->mMutex.Enter();
 
 	const uint32_t nFrames = pProcess->frames_count;
+	const clap_event_transport* const pTransport = pProcess->transport;
+
+	if (pTransport)
+	{
+		_this->mTransportFlags = pTransport->flags;
+		_this->mSongPos = pTransport->song_pos_seconds;
+
+		WDL_UINT64 tempo;
+		memcpy(&tempo, &pTransport->tempo, sizeof(double));
+		memcpy(&_this->mTempo, &tempo, sizeof(double));
+
+		memcpy(_this->mTimeSig, &pTransport->tsig_num, 2 * sizeof(uint16_t));
+	}
 
 	const clap_input_events* const pInEvents = pProcess->in_events;
 	const uint32_t nEvents = pInEvents->size(pInEvents);

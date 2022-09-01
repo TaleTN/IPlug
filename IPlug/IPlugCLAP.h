@@ -3,6 +3,8 @@
 #include "IPlugBase.h"
 #include "clap/clap.h"
 
+#include "WDL/wdltypes.h"
+
 #ifndef CLAP_ABI
 	#define CLAP_ABI
 #endif
@@ -41,9 +43,9 @@ public:
 
 	void InformHostOfProgramChange() {}
 
-	double GetSamplePos() { return 0.0; } // Samples since start of project.
-	double GetTempo() { return 0.0; }
-	void GetTimeSig(int* pNum, int* pDenom) { *pNum = *pDenom = 0; }
+	double GetSamplePos(); // Samples since start of project.
+	double GetTempo();
+	void GetTimeSig(int* pNum, int* pDenom);
 
 	// Whether the plugin is being used for offline rendering.
 	bool IsRenderingOffline() { return IsOffline(); }
@@ -65,6 +67,11 @@ private:
 	static bool DoesMIDIInOut(const IPlugCLAP* pPlug, bool isInput);
 
 	ByteChunk mState; // Persistent storage if the host asks for plugin state.
+
+	uint32_t mTransportFlags;
+	clap_sectime mSongPos;
+	double WDL_FIXALIGN mTempo;
+	uint16_t mTimeSig[2];
 
 	clap_plugin mClapPlug;
 	const clap_host* mClapHost;
@@ -128,4 +135,5 @@ public:
 	static void CLAP_ABI ClapGUISuggestTitle(const clap_plugin* pPlug, const char* title) {}
 	static bool CLAP_ABI ClapGUIShow(const clap_plugin* pPlug);
 	static bool CLAP_ABI ClapGUIHide(const clap_plugin* pPlug);
-};
+}
+WDL_FIXALIGN;
