@@ -93,6 +93,8 @@ IPlugBase(
 	mTempo = 0.0;
 	memset(mTimeSig, 0, sizeof(mTimeSig));
 
+	mPushIt = false;
+
 	mClapPlug.desc = ClapFactoryGetPluginDescriptor(NULL, 0);
 	mClapPlug.plugin_data = this;
 	mClapPlug.init = ClapInit;
@@ -108,6 +110,7 @@ IPlugBase(
 
 	// The plugin is not allowed to use the host callbacks in the create method.
 	mClapHost = NULL;
+	mRequestFlush = NULL;
 	mRequestResize = NULL;
 
 	mGUIParent = NULL;
@@ -127,6 +130,34 @@ bool IPlugCLAP::AllocBankChunk(const int chunkSize)
 {
 	if (chunkSize < 0 && mPresetChunkSize < 0) AllocPresetChunk();
 	return true;
+}
+
+void IPlugCLAP::BeginInformHostOfParamChange(const int idx, const bool lockMutex)
+{
+	if (lockMutex) mMutex.Enter();
+
+	EndDelayedInformHostOfParamChange(false);
+	AddParamChange(kParamChangeBegin, idx);
+
+	if (lockMutex) mMutex.Leave();
+}
+
+void IPlugCLAP::InformHostOfParamChange(const int idx, double /* normalizedValue */, const bool lockMutex)
+{
+	if (lockMutex) mMutex.Enter();
+
+	AddParamChange(kParamChangeValue, idx);
+
+	if (lockMutex) mMutex.Leave();
+}
+
+void IPlugCLAP::EndInformHostOfParamChange(const int idx, const bool lockMutex)
+{
+	if (lockMutex) mMutex.Enter();
+
+	AddParamChange(kParamChangeEnd, idx);
+
+	if (lockMutex) mMutex.Leave();
 }
 
 double IPlugCLAP::GetSamplePos()
@@ -292,6 +323,70 @@ void IPlugCLAP::ProcessParamEvent(const clap_event_param_value* const pEvent)
 	OnParamChange(idx);
 }
 
+void IPlugCLAP::AddParamChange(const int change, const int idx)
+{
+	mPushIt = true;
+
+	const unsigned int packed = (idx << 2) | change;
+	mParamChanges.Add(packed);
+
+	if (mRequestFlush) mRequestFlush(mClapHost);
+}
+
+void IPlugCLAP::PushOutputEvents(const clap_output_events* const pOutEvents)
+{
+	const unsigned int* const pParamChanges = mParamChanges.GetFast();
+	const int nChanges = mParamChanges.GetSize();
+
+	if (nChanges)
+	{
+		PushParamChanges(pOutEvents, pParamChanges, nChanges);
+		mParamChanges.Resize(0, false);
+	}
+}
+
+void IPlugCLAP::PushParamChanges(const clap_output_events* const pOutEvents, const unsigned int* const pParamChanges, const int nChanges) const
+{
+	clap_event_param_value paramValue =
+	{
+		sizeof(clap_event_param_value), 0, CLAP_CORE_EVENT_SPACE_ID, CLAP_EVENT_PARAM_VALUE, 0,
+		0, NULL, -1, -1, -1, -1, 0.0
+	};
+
+	clap_event_param_gesture paramGesture =
+	{
+		sizeof(clap_event_param_gesture), 0, CLAP_CORE_EVENT_SPACE_ID, 0, 0,
+		0
+	};
+
+	for (int i = 0; i < nChanges; ++i)
+	{
+		const unsigned int packed = pParamChanges[i];
+
+		const int change = packed & 3;
+		const int idx = packed >> 2;
+
+		const clap_event_header* pEvent;
+
+		if (!change)
+		{
+			paramValue.param_id = idx;
+			paramValue.value = GetParamValue(GetParam(idx));
+			pEvent = &paramValue.header;
+		}
+		else
+		{
+			static const int toType = CLAP_EVENT_PARAM_GESTURE_BEGIN - kParamChangeBegin;
+
+			paramGesture.header.type = change + toType;
+			paramGesture.param_id = idx;
+			pEvent = &paramGesture.header;
+		}
+
+		pOutEvents->try_push(pOutEvents, pEvent);
+	}
+}
+
 const void* CLAP_ABI IPlugCLAP::ClapEntryGetFactory(const char* const id)
 {
 	static const clap_plugin_factory factory =
@@ -308,6 +403,15 @@ bool CLAP_ABI IPlugCLAP::ClapInit(const clap_plugin* const pPlug)
 {
 	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
 	_this->mMutex.Enter();
+
+	for (int prealloc = 1; prealloc >= 0; --prealloc)
+	{
+		_this->mParamChanges.Resize(prealloc, false);
+	}
+
+	const clap_host* const pHost = _this->mClapHost;
+	const clap_host_params* const pHostParams = (const clap_host_params*)pHost->get_extension(pHost, CLAP_EXT_PARAMS);
+	_this->mRequestFlush = pHostParams ? pHostParams->request_flush : NULL;
 
 	_this->HostSpecificInit();
 	_this->OnParamReset();
@@ -413,6 +517,12 @@ clap_process_status CLAP_ABI IPlugCLAP::ClapProcess(const clap_plugin* const pPl
 		memcpy(&_this->mTempo, &tempo, sizeof(double));
 
 		memcpy(_this->mTimeSig, &pTransport->tsig_num, 2 * sizeof(uint16_t));
+	}
+
+	if (_this->mPushIt)
+	{
+		_this->mPushIt = false;
+		_this->PushOutputEvents(pProcess->out_events);
 	}
 
 	const clap_input_events* const pInEvents = pProcess->in_events;
@@ -707,7 +817,7 @@ bool CLAP_ABI IPlugCLAP::ClapParamsTextToValue(const clap_plugin* const pPlug, c
 	return true;
 }
 
-void CLAP_ABI IPlugCLAP::ClapParamsFlush(const clap_plugin* const pPlug, const clap_input_events* const pInEvents, const clap_output_events* /* pOutEvents */)
+void CLAP_ABI IPlugCLAP::ClapParamsFlush(const clap_plugin* const pPlug, const clap_input_events* const pInEvents, const clap_output_events* const pOutEvents)
 {
 	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
 	_this->mMutex.Enter();
@@ -724,6 +834,7 @@ void CLAP_ABI IPlugCLAP::ClapParamsFlush(const clap_plugin* const pPlug, const c
 		}
 	}
 
+	_this->PushOutputEvents(pOutEvents);
 	_this->mMutex.Leave();
 }
 

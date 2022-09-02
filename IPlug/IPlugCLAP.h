@@ -3,6 +3,7 @@
 #include "IPlugBase.h"
 #include "clap/clap.h"
 
+#include "WDL/heapbuf.h"
 #include "WDL/wdltypes.h"
 
 #ifndef CLAP_ABI
@@ -37,9 +38,9 @@ public:
 	bool AllocStateChunk(int chunkSize = -1);
 	bool AllocBankChunk(int chunkSize = -1);
 
-	void BeginInformHostOfParamChange(int idx) {}
-	void InformHostOfParamChange(int idx, double normalizedValue) {}
-	void EndInformHostOfParamChange(int idx) {}
+	void BeginInformHostOfParamChange(int idx, bool lockMutex = true);
+	void InformHostOfParamChange(int idx, double normalizedValue, bool lockMutex = true);
+	void EndInformHostOfParamChange(int idx, bool lockMutex = true);
 
 	void InformHostOfProgramChange() {}
 
@@ -64,6 +65,18 @@ private:
 	void ProcessInputEvents(const clap_input_events* pInEvents, uint32_t nEvents, uint32_t nFrames);
 	void ProcessParamEvent(const clap_event_param_value* pEvent);
 
+	enum EParamChange
+	{
+		kParamChangeValue = 0,
+		kParamChangeBegin,
+		kParamChangeEnd
+	};
+
+	void AddParamChange(int change, int idx);
+
+	void PushOutputEvents(const clap_output_events* pOutEvents);
+	void PushParamChanges(const clap_output_events* pOutEvents, const unsigned int* pParamChanges, int nChanges) const;
+
 	static bool DoesMIDIInOut(const IPlugCLAP* pPlug, bool isInput);
 
 	ByteChunk mState; // Persistent storage if the host asks for plugin state.
@@ -73,9 +86,14 @@ private:
 	double WDL_FIXALIGN mTempo;
 	uint16_t mTimeSig[2];
 
+	bool mPushIt; // Push it real good.
+
+	WDL_TypedBuf<unsigned int> mParamChanges;
+
 	clap_plugin mClapPlug;
 	const clap_host* mClapHost;
 
+	void (*mRequestFlush)(const clap_host* host);
 	bool (*mRequestResize)(const clap_host* host, uint32_t width, uint32_t height);
 
 	void* mGUIParent;
