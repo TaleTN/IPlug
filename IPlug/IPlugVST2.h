@@ -33,9 +33,9 @@ public:
 
 	void SetPresetName(int idx, const char* name);
 
-	void BeginInformHostOfParamChange(int idx);
-	void InformHostOfParamChange(int idx, double normalizedValue);
-	void EndInformHostOfParamChange(int idx);
+	void BeginInformHostOfParamChange(int idx, bool lockMutex = true);
+	void InformHostOfParamChange(int idx, double normalizedValue, bool lockMutex = true);
+	void EndInformHostOfParamChange(int idx, bool lockMutex = true);
 
 	void InformHostOfProgramChange();
 

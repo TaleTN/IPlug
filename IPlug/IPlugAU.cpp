@@ -2182,18 +2182,18 @@ static void SendAUEvent(const AudioUnitEventType type, ComponentInstance const c
 	AUEventListenerNotify(NULL, NULL, &auEvent);
 }
 
-void IPlugAU::BeginInformHostOfParamChange(const int idx)
+void IPlugAU::BeginInformHostOfParamChange(const int idx, const bool lockMutex)
 {
-	EndDelayedInformHostOfParamChange();
+	EndDelayedInformHostOfParamChange(lockMutex);
 	SendAUEvent(kAudioUnitEvent_BeginParameterChangeGesture, mCI, idx);
 }
 
-void IPlugAU::InformHostOfParamChange(const int idx, double /* normalizedValue */)
+void IPlugAU::InformHostOfParamChange(const int idx, double /* normalizedValue */, bool /* lockMutex */)
 {
 	SendAUEvent(kAudioUnitEvent_ParameterValueChange, mCI, idx);
 }
 
-void IPlugAU::EndInformHostOfParamChange(const int idx)
+void IPlugAU::EndInformHostOfParamChange(const int idx, bool /* lockMutex */)
 {
 	SendAUEvent(kAudioUnitEvent_EndParameterChangeGesture, mCI, idx);
 }

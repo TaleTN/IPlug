@@ -176,12 +176,12 @@ public:
 
 	// If a parameter change comes from the GUI, midi, or external input,
 	// the host needs to be informed in case the changes are being automated.
-	virtual void BeginInformHostOfParamChange(int idx) = 0;
-	virtual void InformHostOfParamChange(int idx, double normalizedValue) = 0;
-	virtual void EndInformHostOfParamChange(int idx) = 0;
+	virtual void BeginInformHostOfParamChange(int idx, bool lockMutex = true) = 0;
+	virtual void InformHostOfParamChange(int idx, double normalizedValue, bool lockMutex = true) = 0;
+	virtual void EndInformHostOfParamChange(int idx, bool lockMutex = true) = 0;
 	void BeginDelayedInformHostOfParamChange(int idx);
 	void DelayEndInformHostOfParamChange(int idx);
-	void EndDelayedInformHostOfParamChange();
+	void EndDelayedInformHostOfParamChange(bool lockMutex = true);
 
 	virtual void InformHostOfProgramChange() = 0;
 

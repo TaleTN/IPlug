@@ -362,7 +362,7 @@ void IPlugBase::SetParameterFromGUI(const int idx, const double normalizedValue)
 	mMutex.Enter();
 
 	GetParam(idx)->SetNormalized(normalizedValue);
-	InformHostOfParamChange(idx, normalizedValue);
+	InformHostOfParamChange(idx, normalizedValue, false);
 	OnParamChange(idx);
 
 	mMutex.Leave();
@@ -383,8 +383,8 @@ void IPlugBase::BeginDelayedInformHostOfParamChange(const int idx)
 
 	if (idx != mParamChangeIdx)
 	{
-		EndDelayedInformHostOfParamChange();
-		BeginInformHostOfParamChange(idx);
+		EndDelayedInformHostOfParamChange(false);
+		BeginInformHostOfParamChange(idx, false);
 	}
 
 	mMutex.Leave();
@@ -404,26 +404,26 @@ void IPlugBase::DelayEndInformHostOfParamChange(const int idx)
 	}
 	else
 	{
-		EndInformHostOfParamChange(idx);
+		EndInformHostOfParamChange(idx, false);
 	}
 
 	mMutex.Leave();
 }
 
-void IPlugBase::EndDelayedInformHostOfParamChange()
+void IPlugBase::EndDelayedInformHostOfParamChange(const bool lockMutex)
 {
-	mMutex.Enter();
+	if (lockMutex) mMutex.Enter();
 
 	IGraphics* const pGraphics = GetGUI();
 	if (pGraphics) pGraphics->CancelParamChangeTimer();
 
 	if (mParamChangeIdx >= 0)
 	{
-		EndInformHostOfParamChange(mParamChangeIdx);
+		EndInformHostOfParamChange(mParamChangeIdx, false);
 		mParamChangeIdx = -1;
 	}
 
-	mMutex.Leave();
+	if (lockMutex) mMutex.Leave();
 }
 
 // Default passthrough.

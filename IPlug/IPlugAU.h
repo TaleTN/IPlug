@@ -48,9 +48,9 @@ public:
 	bool AllocStateChunk(int chunkSize = -1);
 	bool AllocBankChunk(int chunkSize = -1);
 
-	void BeginInformHostOfParamChange(int idx);
-	void InformHostOfParamChange(int idx, double normalizedValue);
-	void EndInformHostOfParamChange(int idx);
+	void BeginInformHostOfParamChange(int idx, bool lockMutex = true);
+	void InformHostOfParamChange(int idx, double normalizedValue, bool lockMutex = true);
+	void EndInformHostOfParamChange(int idx, bool lockMutex = true);
 
 	// TN: Implemented in IPlugAU.cpp, but commented out for reasons unknown.
 	void InformHostOfProgramChange() {}

@@ -170,18 +170,18 @@ void IPlugVST2::SetPresetName(int idx, const char* const name)
 	if (pPreset) pPreset->SetName(name);
 }
 
-void IPlugVST2::BeginInformHostOfParamChange(const int idx)
+void IPlugVST2::BeginInformHostOfParamChange(const int idx, const bool lockMutex)
 {
-	EndDelayedInformHostOfParamChange();
+	EndDelayedInformHostOfParamChange(lockMutex);
 	mHostCallback(&mAEffect, audioMasterBeginEdit, idx, 0, NULL, 0.0f);
 }
 
-void IPlugVST2::InformHostOfParamChange(const int idx, const double normalizedValue)
+void IPlugVST2::InformHostOfParamChange(const int idx, const double normalizedValue, bool /* lockMutex */)
 {
 	mHostCallback(&mAEffect, audioMasterAutomate, idx, 0, NULL, (float)normalizedValue);
 }
 
-void IPlugVST2::EndInformHostOfParamChange(const int idx)
+void IPlugVST2::EndInformHostOfParamChange(const int idx, bool /* lockMutex */)
 {
 	mHostCallback(&mAEffect, audioMasterEndEdit, idx, 0, NULL, 0.0f);
 }
