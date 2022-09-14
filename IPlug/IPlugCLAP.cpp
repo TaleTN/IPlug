@@ -151,6 +151,16 @@ void IPlugCLAP::ProcessInputEvents(const clap_input_events* const pInEvents, con
 				ProcessMidiMsg(&msg);
 				break;
 			}
+
+			case CLAP_EVENT_MIDI_SYSEX:
+			{
+				const clap_event_midi_sysex* const pSysExEvent = (const clap_event_midi_sysex*)pEvent;
+				if (pSysExEvent->port_index) break;
+
+				const ISysEx sysex(ofs, pSysExEvent->buffer, pSysExEvent->size);
+				if (sysex.mSize >= 0) ProcessSysEx(&sysex);
+				break;
+			}
 		}
 	}
 }
