@@ -212,6 +212,21 @@ void IPlugCLAP::ResizeGraphics(const int w, const int h)
 	}
 }
 
+bool IPlugCLAP::SendMidiMsg(const IMidiMsg* const pMsg)
+{
+	mMutex.Enter();
+	bool ret = false;
+
+	if (mMidiOut.Add(*pMsg))
+	{
+		mPushIt = ret = true;
+		mClapHost->request_process(mClapHost);
+	}
+
+	mMutex.Leave();
+	return ret;
+}
+
 void IPlugCLAP::ProcessInputEvents(const clap_input_events* const pInEvents, const uint32_t nEvents, const uint32_t nFrames)
 {
 	for (uint32_t i = 0; i < nEvents; ++i)
@@ -343,6 +358,15 @@ void IPlugCLAP::PushOutputEvents(const clap_output_events* const pOutEvents)
 		PushParamChanges(pOutEvents, pParamChanges, nChanges);
 		mParamChanges.Resize(0, false);
 	}
+
+	const IMidiMsg* const pMidiOut = mMidiOut.GetFast();
+	const int nMidiMsgs = mMidiOut.GetSize();
+
+	if (nMidiMsgs)
+	{
+		PushMidiMsgs(pOutEvents, pMidiOut, nMidiMsgs);
+		mMidiOut.Resize(0, false);
+	}
 }
 
 void IPlugCLAP::PushParamChanges(const clap_output_events* const pOutEvents, const unsigned int* const pParamChanges, const int nChanges) const
@@ -387,6 +411,25 @@ void IPlugCLAP::PushParamChanges(const clap_output_events* const pOutEvents, con
 	}
 }
 
+void IPlugCLAP::PushMidiMsgs(const clap_output_events* const pOutEvents, const IMidiMsg* const pMidiOut, const int nMidiMsgs)
+{
+	clap_event_midi midiEvent =
+	{
+		sizeof(clap_event_midi), 0, CLAP_CORE_EVENT_SPACE_ID, CLAP_EVENT_MIDI, 0,
+		0, { 0, 0, 0 }
+	};
+
+	for (int i = 0; i < nMidiMsgs; ++i)
+	{
+		const IMidiMsg* const pMsg = &pMidiOut[i];
+
+		midiEvent.header.time = pMsg->mOffset;
+		memcpy(midiEvent.data, &pMsg->mStatus, 3);
+
+		pOutEvents->try_push(pOutEvents, &midiEvent.header);
+	}
+}
+
 const void* CLAP_ABI IPlugCLAP::ClapEntryGetFactory(const char* const id)
 {
 	static const clap_plugin_factory factory =
@@ -404,9 +447,11 @@ bool CLAP_ABI IPlugCLAP::ClapInit(const clap_plugin* const pPlug)
 	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
 	_this->mMutex.Enter();
 
+	const bool doesMidiOut = _this->DoesMIDI(kPlugDoesMidiOut);
 	for (int prealloc = 1; prealloc >= 0; --prealloc)
 	{
 		_this->mParamChanges.Resize(prealloc, false);
+		if (doesMidiOut) _this->mMidiOut.Resize(prealloc, false);
 	}
 
 	const clap_host* const pHost = _this->mClapHost;

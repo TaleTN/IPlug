@@ -58,7 +58,7 @@ public:
 protected:
 	void HostSpecificInit() {}
 
-	bool SendMidiMsg(const IMidiMsg* pMsg) { return false; }
+	bool SendMidiMsg(const IMidiMsg* pMsg);
 	bool SendSysEx(const ISysEx* pSysEx) { return false; }
 
 private:
@@ -73,9 +73,10 @@ private:
 	};
 
 	void AddParamChange(int change, int idx);
-
 	void PushOutputEvents(const clap_output_events* pOutEvents);
+
 	void PushParamChanges(const clap_output_events* pOutEvents, const unsigned int* pParamChanges, int nChanges) const;
+	static void PushMidiMsgs(const clap_output_events* pOutEvents, const IMidiMsg* pMidiOut, int nMidiMsgs);
 
 	static bool DoesMIDIInOut(const IPlugCLAP* pPlug, bool isInput);
 
@@ -89,6 +90,7 @@ private:
 	bool mPushIt; // Push it real good.
 
 	WDL_TypedBuf<unsigned int> mParamChanges;
+	WDL_TypedBuf<IMidiMsg> mMidiOut;
 
 	clap_plugin mClapPlug;
 	const clap_host* mClapHost;
