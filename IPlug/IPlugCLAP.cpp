@@ -229,6 +229,38 @@ bool IPlugCLAP::SendMidiMsg(const IMidiMsg* const pMsg)
 	return ret;
 }
 
+bool IPlugCLAP::SendSysEx(const ISysEx* const pSysEx)
+{
+	mMutex.Enter();
+	bool ret = false;
+
+	static const int isSysEx = 0x80000000;
+
+	const int ofs = pSysEx->mOffset, size = pSysEx->mSize;
+	const IMidiMsg msg(ofs | isSysEx, (const void*)&size);
+
+	if (mMidiOut.Add(msg))
+	{
+		const int bufSize = mSysExBuf.GetSize();
+		void* const buf = mSysExBuf.ResizeOK(bufSize + size, false);
+
+		if (buf)
+		{
+			memcpy((unsigned char*)buf + bufSize, pSysEx->mData, size);
+
+			mPushIt = ret = true;
+			mClapHost->request_process(mClapHost);
+		}
+		else
+		{
+			mMidiOut.Resize(mMidiOut.GetSize() - 1, false);
+		}
+	}
+
+	mMutex.Leave();
+	return ret;
+}
+
 void IPlugCLAP::ProcessInputEvents(const clap_input_events* const pInEvents, const uint32_t nEvents, const uint32_t nFrames)
 {
 	for (uint32_t i = 0; i < nEvents; ++i)
@@ -366,8 +398,12 @@ void IPlugCLAP::PushOutputEvents(const clap_output_events* const pOutEvents)
 
 	if (nMidiMsgs)
 	{
-		PushMidiMsgs(pOutEvents, pMidiOut, nMidiMsgs);
+		const unsigned char* const pSysExBuf = (const unsigned char*)mSysExBuf.Get();
+
+		PushMidiMsgs(pOutEvents, pMidiOut, nMidiMsgs, pSysExBuf);
 		mMidiOut.Resize(0, false);
+
+		if (pSysExBuf) mSysExBuf.Resize(0, false);
 	}
 }
 
@@ -413,7 +449,7 @@ void IPlugCLAP::PushParamChanges(const clap_output_events* const pOutEvents, con
 	}
 }
 
-void IPlugCLAP::PushMidiMsgs(const clap_output_events* const pOutEvents, const IMidiMsg* const pMidiOut, const int nMidiMsgs)
+void IPlugCLAP::PushMidiMsgs(const clap_output_events* const pOutEvents, const IMidiMsg* const pMidiOut, const int nMidiMsgs, const unsigned char* pSysExBuf)
 {
 	clap_event_midi midiEvent =
 	{
@@ -421,14 +457,40 @@ void IPlugCLAP::PushMidiMsgs(const clap_output_events* const pOutEvents, const I
 		0, { 0, 0, 0 }
 	};
 
+	clap_event_midi_sysex sysExEvent =
+	{
+		sizeof(clap_event_midi_sysex), 0, CLAP_CORE_EVENT_SPACE_ID, CLAP_EVENT_MIDI_SYSEX, 0,
+		0, NULL, 0
+	};
+
 	for (int i = 0; i < nMidiMsgs; ++i)
 	{
 		const IMidiMsg* const pMsg = &pMidiOut[i];
 
-		midiEvent.header.time = pMsg->mOffset;
-		memcpy(midiEvent.data, &pMsg->mStatus, 3);
+		const int ofs = pMsg->mOffset;
+		const int isSysEx = ofs & 0x80000000;
 
-		pOutEvents->try_push(pOutEvents, &midiEvent.header);
+		const clap_event_header* pEvent;
+
+		if (!isSysEx)
+		{
+			midiEvent.header.time = ofs;
+			memcpy(midiEvent.data, &pMsg->mStatus, 3);
+
+			pEvent = &midiEvent.header;
+		}
+		else
+		{
+			sysExEvent.header.time = ofs ^ 0x80000000;
+			sysExEvent.buffer = pSysExBuf;
+
+			memcpy(&sysExEvent.size, &pMsg->mStatus, sizeof(uint32_t));
+			pSysExBuf += sysExEvent.size;
+
+			pEvent = &sysExEvent.header;
+		}
+
+		pOutEvents->try_push(pOutEvents, pEvent);
 	}
 }
 
@@ -453,7 +515,10 @@ bool CLAP_ABI IPlugCLAP::ClapInit(const clap_plugin* const pPlug)
 	for (int prealloc = 1; prealloc >= 0; --prealloc)
 	{
 		_this->mParamChanges.Resize(prealloc, false);
-		if (doesMidiOut) _this->mMidiOut.Resize(prealloc, false);
+		if (!doesMidiOut) continue;
+
+		_this->mMidiOut.Resize(prealloc, false);
+		_this->mSysExBuf.Resize(prealloc, false);
 	}
 
 	const clap_host* const pHost = _this->mClapHost;

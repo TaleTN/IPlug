@@ -59,7 +59,7 @@ protected:
 	void HostSpecificInit() {}
 
 	bool SendMidiMsg(const IMidiMsg* pMsg);
-	bool SendSysEx(const ISysEx* pSysEx) { return false; }
+	bool SendSysEx(const ISysEx* pSysEx);
 
 private:
 	void ProcessInputEvents(const clap_input_events* pInEvents, uint32_t nEvents, uint32_t nFrames);
@@ -76,7 +76,7 @@ private:
 	void PushOutputEvents(const clap_output_events* pOutEvents);
 
 	void PushParamChanges(const clap_output_events* pOutEvents, const unsigned int* pParamChanges, int nChanges) const;
-	static void PushMidiMsgs(const clap_output_events* pOutEvents, const IMidiMsg* pMidiOut, int nMidiMsgs);
+	static void PushMidiMsgs(const clap_output_events* pOutEvents, const IMidiMsg* pMidiOut, int nMidiMsgs, const unsigned char* pSysExBuf);
 
 	static bool DoesMIDIInOut(const IPlugCLAP* pPlug, bool isInput);
 
@@ -91,6 +91,7 @@ private:
 
 	WDL_TypedBuf<unsigned int> mParamChanges;
 	WDL_TypedBuf<IMidiMsg> mMidiOut;
+	WDL_HeapBuf mSysExBuf;
 
 	clap_plugin mClapPlug;
 	const clap_host* mClapHost;
