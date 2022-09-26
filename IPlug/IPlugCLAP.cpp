@@ -116,6 +116,8 @@ IPlugBase(
 	mGUIParent = NULL;
 	mGUIWidth = mGUIHeight = 0;
 
+	mNoteNameCount = 0;
+
 	SetBlockSize(kDefaultBlockSize);
 	mClapHost = (const clap_host*)instanceInfo;
 }
@@ -696,6 +698,17 @@ const void* CLAP_ABI IPlugCLAP::ClapGetExtension(const clap_plugin* const pPlug,
 		return &notePorts;
 	}
 
+	if (!strcmp(id, CLAP_EXT_NOTE_NAME))
+	{
+		static const clap_plugin_note_name noteName =
+		{
+			ClapNoteNameCount,
+			ClapNoteNameGet
+		};
+
+		return &noteName;
+	}
+
 	if (!strcmp(id, CLAP_EXT_GUI))
 	{
 		const IPlugCLAP* const _this = (const IPlugCLAP*)pPlug->plugin_data;
@@ -1040,6 +1053,51 @@ bool CLAP_ABI IPlugCLAP::ClapNotePortsGet(const clap_plugin* const pPlug, const 
 	GetInOutName(isInput, pInfo->name, sizeof(pInfo->name));
 
 	return true;
+}
+
+uint32_t CLAP_ABI IPlugCLAP::ClapNoteNameCount(const clap_plugin* const pPlug)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	_this->mMutex.Enter();
+
+	char* const tbl = _this->mNoteNameTbl;
+	int n = 0;
+
+	for (int note = 0; note < 128; ++note)
+	{
+		char dummy;
+		if (_this->MidiNoteName(note, &dummy, 1)) tbl[n++] = note;
+	}
+
+	_this->mNoteNameCount = n;
+	_this->mMutex.Leave();
+
+	return n;
+}
+
+bool CLAP_ABI IPlugCLAP::ClapNoteNameGet(const clap_plugin* const pPlug, const uint32_t idx, clap_note_name* const pName)
+{
+	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
+	_this->mMutex.Enter();
+
+	int note;
+	bool ret = false;
+
+	if (idx < _this->mNoteNameCount)
+	{
+		note = _this->mNoteNameTbl[idx];
+		ret = _this->MidiNoteName(note, pName->name, CLAP_NAME_SIZE);
+
+		if (ret)
+		{
+			pName->port = -1;
+			pName->key = note;
+			pName->channel = -1;
+		}
+	}
+
+	_this->mMutex.Leave();
+	return ret;
 }
 
 bool CLAP_ABI IPlugCLAP::ClapGUIIsAPISupported(const clap_plugin* /* pPlug */, const char* const id, const bool isFloating)

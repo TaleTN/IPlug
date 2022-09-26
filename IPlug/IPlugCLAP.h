@@ -101,6 +101,9 @@ private:
 	void* mGUIParent;
 	int mGUIWidth, mGUIHeight;
 
+	uint32_t mNoteNameCount;
+	char mNoteNameTbl[128];
+
 public:
 	inline clap_plugin* GetTheClap() { return &mClapPlug; }
 
@@ -139,6 +142,9 @@ public:
 
 	static uint32_t CLAP_ABI ClapNotePortsCount(const clap_plugin* pPlug, bool isInput);
 	static bool CLAP_ABI ClapNotePortsGet(const clap_plugin* pPlug, uint32_t idx, bool isInput, clap_note_port_info* pInfo);
+
+	static uint32_t CLAP_ABI ClapNoteNameCount(const clap_plugin* pPlug);
+	static bool CLAP_ABI ClapNoteNameGet(const clap_plugin* pPlug, uint32_t idx, clap_note_name* pName);
 
 	static bool CLAP_ABI ClapGUIIsAPISupported(const clap_plugin* pPlug, const char* id, bool isFloating);
 	static bool CLAP_ABI ClapGUIGetPreferredAPI(const clap_plugin* pPlug, const char** pID, bool* pIsFloating);
