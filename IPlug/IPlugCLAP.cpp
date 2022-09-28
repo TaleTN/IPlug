@@ -333,9 +333,14 @@ void IPlugCLAP::ProcessInputEvents(const clap_input_events* const pInEvents, con
 void IPlugCLAP::ProcessParamEvent(const clap_event_param_value* const pEvent)
 {
 	const int idx = pEvent->param_id;
-	if (!NParams(idx)) return;
+	IParam* pParam = (IParam*)pEvent->cookie;
 
-	IParam* const pParam = GetParam(idx);
+	if (!pParam)
+	{
+		pParam = GetParam(idx);
+		if (!pParam) return;
+	}
+
 	double v = pEvent->value;
 
 	// TN: Why is order in IPlugVST2::VSTSetParameter() different?
@@ -822,7 +827,7 @@ bool CLAP_ABI IPlugCLAP::ClapParamsGetInfo(const clap_plugin* const pPlug, const
 
 	pInfo->id = idx;
 	pInfo->flags = CLAP_PARAM_IS_AUTOMATABLE | CLAP_PARAM_REQUIRES_PROCESS;
-	pInfo->cookie = NULL;
+	pInfo->cookie = (void*)pParam;
 
 	lstrcpyn_safe(pInfo->name, pParam->GetNameForHost(), sizeof(pInfo->name));
 	pInfo->module[0] = 0;
