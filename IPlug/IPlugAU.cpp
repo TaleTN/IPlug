@@ -758,6 +758,7 @@ ComponentResult IPlugAU::IPlugAUCarbonViewEntry(ComponentParameters* const param
 			IGraphics* pGraphics;
 			if (_this && (pGraphics = _this->GetGUI()))
 			{
+				_this->OnGUIClose();
 				pGraphics->CloseWindow();
 			}
 			delete pCVI;
@@ -773,6 +774,7 @@ ComponentResult IPlugAU::IPlugAUCarbonViewEntry(ComponentParameters* const param
 			if (_this && (pGraphics = (IGraphicsMac*)_this->GetGUI()))
 			{
 				*pb->outControl = (ControlRef)pGraphics->OpenCarbonWindow(pb->inWindow, pb->inParentControl);
+				_this->OnGUIOpen();
 				return noErr;
 			}
 			return badComponentSelector;

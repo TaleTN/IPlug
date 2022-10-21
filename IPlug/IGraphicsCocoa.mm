@@ -336,6 +336,7 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent, const bool right,
 	if (mGraphics)
 	{
 		IGraphics* const graphics = mGraphics;
+		graphics->GetPlug()->OnGUIClose();
 		mGraphics = NULL;
 		graphics->CloseWindow();
 	}

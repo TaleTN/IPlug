@@ -47,6 +47,7 @@ static NSString* ToNSString(const char* const cStr)
 		if (pGraphics)
 		{
 			IGRAPHICS_COCOA* const pView = (IGRAPHICS_COCOA*)pGraphics->OpenWindow(NULL);
+			if (pView) mPlug->OnGUIOpen();
 			return pView;
 		}
 	}
