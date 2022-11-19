@@ -161,9 +161,9 @@ public:
 		return decimal ? GetDecimalVersion(mVersion) : mVersion;
 	}
 
-	char* GetEffectVersionStr(char* const str) const
+	char* GetEffectVersionStr(char* const buf, int bufSize = 14) const
 	{
-		return GetVersionStr(str, mVersion);
+		return GetVersionStr(mVersion, buf, bufSize);
 	}
 
 	inline int GetUniqueID() const { return mUniqueID; }
@@ -229,7 +229,7 @@ public:
 
 	virtual int GetHost() { return mHost; } // See EHost in Hosts.h.
 	int GetHostVersion(bool decimal); // Decimal = VVVVRRMM, otherwise 0xVVVVRRMM.
-	char* GetHostVersionStr(char* str);
+	char* GetHostVersionStr(char* buf, int bufSize = 14);
   
 	// Tell the host that the graphics resized.
 	// Should be called only by the graphics object when it resizes itself.
@@ -264,7 +264,7 @@ protected:
 	void LimitToStereoIO();
 
 	static int GetDecimalVersion(int version);
-	static char* GetVersionStr(char* str, int version);
+	static char* GetVersionStr(int version, char* buf, int bufSize = 14);
 
 	void SetHost(const char* host, int version); // Version = 0xVVVVRRMM.
 	virtual void HostSpecificInit() = 0;

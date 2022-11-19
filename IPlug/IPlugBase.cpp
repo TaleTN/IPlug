@@ -3,9 +3,8 @@
 #include "Hosts.h"
 
 #include <stdarg.h>
-#include <stdio.h>
-
 #include <string.h>
+
 #include "WDL/wdlcstring.h"
 
 template <class SRC, class DEST>
@@ -44,13 +43,13 @@ int IPlugBase::GetDecimalVersion(const int version)
 	return ((parts[0] * 100) + parts[1]) * 100 + parts[2];
 }
 
-char* IPlugBase::GetVersionStr(char* const str, const int version)
+char* IPlugBase::GetVersionStr(const int version, char* const buf, const int bufSize)
 {
 	int parts[3];
 	GetVersionParts(version, parts);
 
-	sprintf(str, "%d.%d.%d", parts[0], parts[1], parts[2]);
-	return str;
+	snprintf(buf, bufSize, "%d.%d.%d", parts[0], parts[1], parts[2]);
+	return buf;
 }
 
 IPlugBase::IPlugBase(
@@ -137,10 +136,10 @@ int IPlugBase::GetHostVersion(const bool decimal)
 	return decimal ? GetDecimalVersion(mHostVersion) : mHostVersion;
 }
 
-char* IPlugBase::GetHostVersionStr(char* const str)
+char* IPlugBase::GetHostVersionStr(char* const buf, const int bufSize)
 {
 	GetHost();
-	return GetVersionStr(str, mHostVersion);
+	return GetVersionStr(mHostVersion, buf, bufSize);
 }
 
 bool IPlugBase::LegalIO(const int nIn, const int nOut) const
