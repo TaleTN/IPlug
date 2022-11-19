@@ -7,7 +7,6 @@
 #endif
 
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -746,10 +745,10 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			{
 				VstPinProperties* const pp = (VstPinProperties*)ptr;
 				const int i = idx + 1;
-				sprintf(pp->label, "Input %d", i);
+				snprintf(pp->label, kVstMaxLabelLen, "Input %d", i);
 				pp->flags = ((i & 1) & (i < _this->NInChannels())) ? kPinIsStereo : kPinNotStereo;
 				pp->arrangementType = _this->mInputSpkrArr.type;
-				sprintf(pp->shortLabel, "In%d", i);
+				snprintf(pp->shortLabel, kVstMaxShortLabelLen, "In%d", i);
 				ret = 1;
 			}
 			break;
@@ -761,10 +760,10 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 			{
 				VstPinProperties* const pp = (VstPinProperties*)ptr;
 				const int i = idx + 1;
-				sprintf(pp->label, "Output %d", i);
+				snprintf(pp->label, kVstMaxLabelLen, "Output %d", i);
 				pp->flags = ((i & 1) & (i < _this->NOutChannels())) ? kPinIsStereo : kPinNotStereo;
 				pp->arrangementType = _this->mOutputSpkrArr.type;
-				sprintf(pp->shortLabel, "Out%d", i);
+				snprintf(pp->shortLabel, kVstMaxShortLabelLen, "Out%d", i);
 				ret = 1;
 			}
 			break;
@@ -987,7 +986,8 @@ VstIntPtr IPlugVST2::VSTVendorSpecific(const VstInt32 idx, const VstIntPtr value
 				char* const buf = (char*)ptr;
 				if (*buf)
 				{
-					sprintf(buf, "%.17f", VSTString2Parameter(GetParam(paramIdx), buf));
+					const double v = VSTString2Parameter(GetParam(paramIdx), buf);
+					snprintf(buf, 20, "%.17f", v);
 				}
 				return 0xbeef;
 			}
