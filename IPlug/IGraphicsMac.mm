@@ -12,6 +12,10 @@
 #include <string.h>
 #import <objc/runtime.h>
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_10
+	#define NSOKButton NSModalResponseOK
+#endif
+
 // TN: Would like to use SWELL_AutoReleaseHelper instead, but can't because
 // that would require much more than just SWELL GDI...
 struct CocoaAutoReleasePool
@@ -366,7 +370,7 @@ bool IGraphicsMac::PromptForFile(WDL_String* const pFilename, const int action, 
 	// runModal instead, which are available in v10.6 and later.
 	// http://developer.apple.com/library/mac/documentation/Cocoa/Reference/ApplicationKit/Classes/nssavepanel_Class/
 
-	int result;
+	NSInteger result;
 	#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6 && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
 	if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_6)
 	#endif
