@@ -8,6 +8,17 @@
 #define PREFIX_CLASSNAME2(a, b) PREFIX_CLASSNAME3(a, b)
 #define PREFIX_CLASSNAME(cname) PREFIX_CLASSNAME2(IGRAPHICS_COCOA, cname)
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
+	#define NSCommandKeyMask      NSEventModifierFlagCommand
+	#define NSShiftKeyMask        NSEventModifierFlagShift
+	#define NSControlKeyMask      NSEventModifierFlagControl
+	#define NSAlternateKeyMask    NSEventModifierFlagOption
+
+	#define NSLeftTextAlignment   NSTextAlignmentLeft
+	#define NSCenterTextAlignment NSTextAlignmentCenter
+	#define NSRightTextAlignment  NSTextAlignmentRight
+#endif
+
 #define ColoredTextField PREFIX_CLASSNAME(_ColoredTextField)
 
 @interface ColoredTextField: NSTextField
@@ -54,13 +65,13 @@ static NSColor* ToNSColor(const IColor color)
 
 static IMouseMod GetMouseMod(const NSEvent* const pEvent, const bool left)
 {
-	const int mods = [pEvent modifierFlags], cmd = !!(mods & NSCommandKeyMask);
+	const int mods = (int)[pEvent modifierFlags], cmd = !!(mods & NSCommandKeyMask);
 	return IMouseMod(!cmd ? left : false, cmd ? left : false, !!(mods & NSShiftKeyMask), !!(mods & NSControlKeyMask), !!(mods & NSAlternateKeyMask));
 }
 
 static IMouseMod GetRightMouseMod(const NSEvent* const pEvent, const bool right, const bool wheel = false)
 {
-	const int mods = [pEvent modifierFlags];
+	const int mods = (int)[pEvent modifierFlags];
 	return IMouseMod(false, right, !!(mods & NSShiftKeyMask), !!(mods & NSControlKeyMask), !!(mods & NSAlternateKeyMask), wheel);
 }
 
