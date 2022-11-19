@@ -1,6 +1,5 @@
 #include "IParam.h"
 
-#include <stdio.h>
 #include <string.h>
 
 #ifdef _MSC_VER
@@ -249,7 +248,7 @@ char* IIntParam::ToString(const int intVal, char* const buf, const int bufSize) 
 		const int displayValue = DisplayIsNegated() ? -intVal : intVal;
 
 		const bool sign = displayValue && (mMin >= 0) != (mMax >= 0);
-		sprintf(tmp, sign ? "%+d" : "%d", displayValue);
+		snprintf(tmp, sizeof(tmp), sign ? "%+d" : "%d", displayValue);
 	}
 
 	lstrcpyn_safe(buf, displayText, bufSize);
@@ -398,7 +397,7 @@ char* IDoubleParam::ToString(const double nonNormalizedValue, char* const buf, c
 		if (nz && DisplayIsNegated()) displayValue = -displayValue;
 
 		const bool sign = nz && (mMin >= 0.0) != (mMax >= 0.0);
-		sprintf(tmp, sign ? "%+.*f" : "%.*f", (int)mDisplayPrecision, displayValue);
+		snprintf(tmp, sizeof(tmp), sign ? "%+.*f" : "%.*f", (int)mDisplayPrecision, displayValue);
 	}
 
 	lstrcpyn_safe(buf, displayText, bufSize);
@@ -602,7 +601,7 @@ char* INormalizedParam::ToString(const double normalizedValue, char* const buf, 
 	assert(normalizedValue >= 0.0 && normalizedValue <= 1.0);
 
 	char tmp[12];
-	sprintf(tmp, "%.6g", normalizedValue);
+	snprintf(tmp, sizeof(tmp), "%.6g", normalizedValue);
 
 	if (tmp[0] && !tmp[1])
 	{
