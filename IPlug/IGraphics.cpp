@@ -142,6 +142,7 @@ IGraphics::IGraphics(
 	mPlug(pPlug),
 	mDrawBitmap(&mBackBuf),
 	// mTmpBitmap(NULL),
+	mDirtyRECT(NULL),
 	mWidth(w),
 	mHeight(h),
 	mScale(-1),
@@ -869,6 +870,8 @@ bool IGraphics::IsDirty(IRECT* const pR)
 // which may be a larger area than what is strictly dirty.
 void IGraphics::Draw(const IRECT* const pR)
 {
+	mDirtyRECT = pR;
+
 	const int n = mControls.GetSize();
 	IControl* const* const ppControl = mControls.GetList();
 	for (int i = 0; i < n; ++i)
@@ -880,6 +883,7 @@ void IGraphics::Draw(const IRECT* const pR)
 		}
 	}
 
+	mDirtyRECT = NULL;
 	DrawScreen(pR);
 }
 

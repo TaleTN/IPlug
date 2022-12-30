@@ -38,6 +38,10 @@ public:
 	void Draw(const IRECT* pR); // The system announces what needs to be redrawn. Ordering and drawing logic.
 	virtual void DrawScreen(const IRECT* pR) = 0; // Tells the OS class to put the final bitmap on the screen.
 
+	// So controls can draw only area that will actually be drawn to screen.
+	// Guaranteed to be valid in IControl::Draw().
+	inline const IRECT* GetDirtyRECT() const { return mDirtyRECT; }
+
 	// Methods for the drawing implementation class. Coordinates, offset,
 	// radius, font, etc. are full scale; bitmaps are actual scale.
 	void DrawBitmap(const IBitmap* pBitmap, const IRECT* pDest, int srcX, int srcY, float weight = 1.0f);
@@ -307,6 +311,7 @@ protected:
 private:
 	// LICE_MemBitmap* mTmpBitmap;
 
+	const IRECT* mDirtyRECT;
 	int mWidth, mHeight, mScale, mDefaultScale, mFPS;
 	int GetMouseControlIdx(int x, int y);
 	int mMouseCapture, mMouseOver, mMouseX, mMouseY;
