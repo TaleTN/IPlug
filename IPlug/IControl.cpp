@@ -26,7 +26,7 @@ void IControl::SetValueFromUserInput(const double value)
 
 void IControl::SetDirty(const bool pushParamToPlug)
 {
-	mDirty = 1;
+	if (!mHide) mDirty = 1;
 
 	if (pushParamToPlug && mParamIdx >= 0)
 	{
@@ -47,6 +47,7 @@ void IControl::SetDirty(const bool pushParamToPlug)
 void IControl::Hide(const bool hide)
 {
 	mHide = hide;
+	Redraw();
 	SetDirty(false);
 }
 
