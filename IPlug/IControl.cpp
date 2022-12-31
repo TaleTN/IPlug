@@ -93,13 +93,54 @@ void IBackgroundControl::Draw(IGraphics* const pGraphics)
 	LICE_IBitmap* const dest = pGraphics->GetDrawBitmap();
 
 	const int scale = pGraphics->Scale();
+	IRECT dirty = *pGraphics->GetDirtyRECT();
 
-	const int x = mRECT.L >> scale;
-	const int y = mRECT.T >> scale;
+	int x1 = mRECT.L;
+	int y1 = mRECT.T;
+
+	if (scale)
+	{
+		// const int mask = (1 << scale) - 1;
+
+		// dirty.L >>= scale;
+		// dirty.T >>= scale;
+		// dirty.R = (dirty.R >> scale) + !!(dirty.R & mask);
+		// dirty.B = (dirty.B >> scale) + !!(dirty.B & mask);
+
+		// x1 >>= scale;
+		// y1 >>= scale;
+
+		assert(scale == 1);
+
+		dirty.L >>= 1;
+		dirty.T >>= 1;
+		dirty.R = (dirty.R >> 1) + (dirty.R & 1);
+		dirty.B = (dirty.B >> 1) + (dirty.B & 1);
+
+		x1 >>= 1;
+		y1 >>= 1;
+	}
+
+	int x2 = x1 + mBitmap.W;
+	int y2 = y1 + mBitmap.H;
+
+	int xOfs = dirty.L - x1;
+	int yOfs = dirty.T - y1;
+
+	xOfs = wdl_max(xOfs, 0);
+	yOfs = wdl_max(yOfs, 0);
+
+	x1 += xOfs;
+	y1 += yOfs;
+
+	x2 = wdl_min(x2, dirty.R);
+	y2 = wdl_min(y2, dirty.B);
+
+	const int w = x2 - x1;
+	const int h = y2 - y1;
 
 	LICE_IBitmap* const src = (LICE_IBitmap*)mBitmap.mData;
-
-	LICE_Blit(dest, src, x, y, 0, 0, mBitmap.W, mBitmap.H, 1.0f, LICE_BLIT_MODE_COPY);
+	LICE_Blit(dest, src, x1, y1, xOfs, yOfs, w, h, 1.0f, LICE_BLIT_MODE_COPY);
 }
 
 void IBackgroundControl::Rescale(IGraphics* const pGraphics)
