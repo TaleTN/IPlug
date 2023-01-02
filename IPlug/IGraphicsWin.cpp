@@ -449,6 +449,7 @@ IGraphicsWin::IGraphicsWin(
 	mTooltipIdx = -1;
 	mParamChangeTimer = 0;
 	mAutoCommitDelay = 0;
+	mOldKeyboardFocus = -1;
 	mDPI = USER_DEFAULT_SCREEN_DPI;
 
 	mUser32DLL = LoadLibrary("USER32.dll");
@@ -862,6 +863,9 @@ bool IGraphicsWin::PromptUserInput(IControl* const pControl, IParam* const pPara
 
 	mAutoCommitDelay = delay;
 
+	mOldKeyboardFocus = GetKeyboardFocus();
+	if (mOldKeyboardFocus >= 0) SetKeyboardFocus(-1);
+
 	static const DWORD align[3] = { ES_LEFT, ES_CENTER, ES_RIGHT };
 	assert(pFont->mAlign >= 0 && pFont->mAlign < 3);
 
@@ -919,11 +923,14 @@ void IGraphicsWin::CancelParamEdit()
 	SetWindowLongPtrW(mParamEditWnd, GWLP_WNDPROC, (LPARAM)mDefEditProc);
 	DestroyWindow(mParamEditWnd);
 	DeleteObject(mEdBkBrush);
+	SetKeyboardFocus(mOldKeyboardFocus);
+
 	mEdBkBrush = NULL;
 	mParamEditWnd = NULL;
 	mEdParam = NULL;
 	mEdControl = NULL;
 	mDefEditProc = NULL;
+	mOldKeyboardFocus = -1;
 }
 
 static bool GetModulePath(HMODULE const hModule, WDL_String* const pPath)

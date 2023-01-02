@@ -82,6 +82,7 @@ private:
 	int mTooltipIdx;
 	int mParamChangeTimer;
 	int mAutoCommitDelay;
+	int mOldKeyboardFocus;
 	int mDPI;
 
 	HMODULE mUser32DLL;
