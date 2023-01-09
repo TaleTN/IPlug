@@ -932,7 +932,8 @@ void IGraphics::OnMouseOver(const int x, const int y, const IMouseMod mod)
 {
 	assert(mHandleMouseOver == true);
 
-	const int c = GetMouseControlIdx(x, y);
+	const int cap = mMouseCapture;
+	const int c = cap >= 0 ? cap : GetMouseControlIdx(x, y);
 	if (c >= 0)
 	{
 		mMouseX = x;
@@ -1010,7 +1011,8 @@ bool IGraphics::OnMouseDblClick(const int x, const int y, const IMouseMod mod)
 
 void IGraphics::OnMouseWheel(const int x, const int y, const IMouseMod mod, const float d)
 {
-	const int c = GetMouseControlIdx(x, y);
+	const int cap = mMouseCapture;
+	const int c = cap >= 0 ? cap : GetMouseControlIdx(x, y);
 	if (c >= 0)
 	{
 		IControl* const pControl = mControls.Get(c);
@@ -1041,8 +1043,6 @@ bool IGraphics::OnKeyUp(const int x, const int y, const IMouseMod mod, const int
 
 int IGraphics::GetMouseControlIdx(const int x, const int y)
 {
-	if (mMouseCapture >= 0) return mMouseCapture;
-
 	// The BG is a control and will catch everything, so assume the programmer
 	// attached the controls from back to front, and return the frontmost match.
 	IControl* const* const ppControl = mControls.GetList();
