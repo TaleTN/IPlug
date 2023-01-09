@@ -908,12 +908,18 @@ void IGraphics::OnMouseDown(const int x, const int y, const IMouseMod mod)
 
 void IGraphics::OnMouseUp(const int x, const int y, const IMouseMod mod)
 {
-	const int c = GetMouseControlIdx(x, y);
+	const int cap = mMouseCapture;
+	const int c = cap >= 0 ? cap : GetMouseControlIdx(x, y);
 	mMouseY = mMouseX = mMouseCapture = -1;
+	IControl* pControl;
 	if (c >= 0)
 	{
-		IControl* const pControl = mControls.Get(c);
+		pControl = mControls.Get(c);
 		pControl->OnMouseUp(x, y, mod);
+	}
+	if (cap >= 0)
+	{
+		if (cap != c) pControl = mControls.Get(cap);
 		const int paramIdx = pControl->ParamIdx();
 		if (paramIdx >= 0)
 		{
@@ -988,12 +994,16 @@ bool IGraphics::OnMouseDblClick(const int x, const int y, const IMouseMod mod)
 			mMouseY = y;
 			pControl->OnMouseDown(x, y, mod);
 			newCapture = true;
+			// OnMouseUp() will call EndInformHostOfParamChange().
 		}
 		else
 		{
 			pControl->OnMouseDblClick(x, y, mod);
+			if (paramIdx >= 0)
+			{
+				mPlug->EndInformHostOfParamChange(paramIdx);
+			}
 		}
-		// OnMouseUp() will call EndInformHostOfParamChange().
 	}
 	return newCapture;
 }
@@ -1045,6 +1055,15 @@ int IGraphics::GetMouseControlIdx(const int x, const int y)
 		}
 	}
 	return -1;
+}
+
+void IGraphics::EndInformHostOfParamChange(const int controlIdx)
+{
+	const int paramIdx = mControls.Get(controlIdx)->ParamIdx();
+	if (paramIdx >= 0)
+	{
+		mPlug->EndInformHostOfParamChange(paramIdx);
+	}
 }
 
 #ifdef IPLUG_USE_IDLE_CALLS

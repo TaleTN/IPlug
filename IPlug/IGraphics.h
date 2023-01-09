@@ -240,7 +240,12 @@ public:
 	}
 
 	// Some controls may not need to capture the mouse for dragging, they can call ReleaseCapture when the mouse leaves.
-	void ReleaseMouseCapture() { mMouseY = mMouseX = mMouseCapture = -1; }
+	void ReleaseMouseCapture()
+	{
+		const int c = mMouseCapture;
+		mMouseY = mMouseX = mMouseCapture = -1;
+		if (c >= 0) EndInformHostOfParamChange(c);
+	}
 
 	inline int GetMouseCapture() const { return mMouseCapture; }
 	inline int GetMouseOver() const { return mMouseOver; }
@@ -313,7 +318,10 @@ private:
 
 	const IRECT* mDirtyRECT;
 	int mWidth, mHeight, mScale, mDefaultScale, mFPS;
+
 	int GetMouseControlIdx(int x, int y);
+	void EndInformHostOfParamChange(int controlIdx);
+
 	int mMouseCapture, mMouseOver, mMouseX, mMouseY;
 	int mKeyboardFocus;
 	bool mHandleMouseOver, mEnableTooltips;
