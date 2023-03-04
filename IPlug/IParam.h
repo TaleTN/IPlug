@@ -367,6 +367,11 @@ public:
 	int Unserialize(const ByteChunk* pChunk, int startPos);
 	int Size() const { return (int)sizeof(double); }
 
+	inline void SetDisplayPrecision(const int displayPrecision)
+	{
+		mDisplayPrecision = displayPrecision;
+	}
+
 protected:
 	#ifndef NDEBUG
 	void AssertValue(double nonNormalizedValue) const;
