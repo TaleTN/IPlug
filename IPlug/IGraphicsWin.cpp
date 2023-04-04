@@ -259,7 +259,7 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 		case WM_MOUSEACTIVATE:
 		{
 			if (WantFocus(pGraphics)) SetFocus(hWnd);
-			return MA_ACTIVATE;
+			break;
 		}
 
 		case WM_MOUSEWHEEL:
