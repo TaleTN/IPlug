@@ -177,6 +177,72 @@ CLAP_EXPORT const clap_plugin_entry clap_entry =
 
 } // extern "C"
 
+#elif defined AAX_API
+
+static AAX_CEffectParameters* AAX_CALLBACK MakeIPlugAAX()
+{
+	static WDL_Mutex sMutex;
+	sMutex.Enter();
+
+	IPlugAAX* const pPlug = new PLUG_CLASS_NAME(NULL);
+	AAX_CEffectParameters* const pEffectParams = pPlug->AAXCreateParams(pPlug);
+
+	pPlug->EnsureDefaultPreset();
+
+	sMutex.Leave();
+	return pEffectParams;
+}
+
+AAX_Result GetEffectDescriptions(AAX_ICollection* pCollection)
+{
+	AAX_CheckedResult err;
+
+	#ifndef PLUG_SHORT_NAME
+
+	const char* shortName = NULL;
+	static const int maxLen = 16;
+
+	static const int bufSize = maxLen + 1;
+	char buf[bufSize];
+
+	if (strlen(PLUG_NAME) >= bufSize)
+	{
+		shortName = buf;
+		lstrcpyn_safe(buf, PLUG_NAME, bufSize);
+	}
+
+	#else
+
+	assert(strlen(PLUG_SHORT_NAME) <= 16); // maxLen
+	static const char* const shortName = PLUG_SHORT_NAME;
+
+	#endif
+
+	AAX_IEffectDescriptor* const pPlugDesc = pCollection->NewDescriptor();
+	if (pPlugDesc)
+	{
+		const int plugDoes =
+			(PLUG_IS_INST ? IPlugBase::kPlugIsInst : 0) |
+			(PLUG_DOES_MIDI_IN ? IPlugBase::kPlugDoesMidiIn : 0);
+
+		err = IPlugAAX::AAXDescribeEffect(pPlugDesc, PLUG_NAME, shortName,
+			PLUG_UNIQUE_ID, PLUG_MFR_ID, plugDoes, (void*)MakeIPlugAAX);
+
+		err = pCollection->AddEffect(BUNDLE_DOMAIN ".aaxplugin." BUNDLE_NAME, pPlugDesc);
+	}
+	else
+	{
+		err = AAX_ERROR_NULL_OBJECT;
+	}
+
+	err = pCollection->SetManufacturerName(PLUG_MFR);
+	err = pCollection->AddPackageName(PLUG_NAME);
+	if (shortName) err = pCollection->AddPackageName(shortName);
+	err = pCollection->SetPackageVersion(PLUG_VER);
+
+	return err;
+}
+
 #else
 	#error "No API defined!"
 #endif

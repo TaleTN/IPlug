@@ -16,6 +16,10 @@
 	#include "IPlugCLAP.h"
 	typedef IPlugCLAP IPlug;
 	#define API_EXT "clap"
+#elif defined AAX_API
+	#include "IPlugAAX.h"
+	typedef IPlugAAX IPlug;
+	#define API_EXT "aax"
 #else
 	#error "No API defined!"
 #endif
