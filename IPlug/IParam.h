@@ -42,6 +42,8 @@ public:
 	virtual void SetNormalized(double normalizedValue) = 0;
 	virtual double GetNormalized() const = 0;
 	virtual double GetNormalized(double nonNormalizedValue) const = 0;
+	virtual double GetNonNormalized(double normalizedValue) const = 0;
+
 	virtual char* GetDisplayForHost(char* buf, int bufSize = 128) = 0;
 	virtual char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128) = 0;
 	const char* GetNameForHost() const { return mName.Get(); }
@@ -120,6 +122,8 @@ public:
 	void SetNormalized(double normalizedValue);
 	double GetNormalized() const { return (double)mBoolVal; }
 	double GetNormalized(double nonNormalizedValue) const;
+	double GetNonNormalized(double normalizedValue) const;
+
 	char* GetDisplayForHost(char* buf, int bufSize = 128);
 	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
 
@@ -180,6 +184,8 @@ public:
 	void SetNormalized(double normalizedValue);
 	double GetNormalized() const;
 	double GetNormalized(double nonNormalizedValue) const;
+	double GetNonNormalized(double normalizedValue) const;
+
 	char* GetDisplayForHost(char* buf, int bufSize = 128);
 	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
 
@@ -255,6 +261,8 @@ public:
 	void SetNormalized(double normalizedValue);
 	double GetNormalized() const;
 	double GetNormalized(double nonNormalizedValue) const;
+	double GetNonNormalized(double normalizedValue) const;
+
 	char* GetDisplayForHost(char* buf, int bufSize = 128);
 	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
 	const char* GetLabelForHost() const;
@@ -344,6 +352,8 @@ public:
 	void SetNormalized(double normalizedValue);
 	double GetNormalized() const;
 	double GetNormalized(double nonNormalizedValue) const;
+	double GetNonNormalized(double normalizedValue) const;
+
 	char* GetDisplayForHost(char* buf, int bufSize = 128);
 	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
 	const char* GetLabelForHost() const;
@@ -432,6 +442,8 @@ public:
 	void SetNormalized(double normalizedValue);
 	double GetNormalized() const;
 	double GetNormalized(double nonNormalizedValue) const;
+	double GetNonNormalized(double normalizedValue) const;
+
 	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
 
 protected:
@@ -493,6 +505,8 @@ public:
 	void SetNormalized(double normalizedValue);
 	double GetNormalized() const;
 	double GetNormalized(double nonNormalizedValue) const;
+	double GetNonNormalized(double normalizedValue) const;
+
 	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
 
 protected:
@@ -532,6 +546,8 @@ public:
 	void SetNormalized(double normalizedValue);
 	double GetNormalized() const { return mValue; }
 	double GetNormalized(double nonNormalizedValue) const;
+	double GetNonNormalized(double normalizedValue) const;
+
 	char* GetDisplayForHost(char* buf, int bufSize = 128);
 	char* GetDisplayForHost(double normalizedValue, char* buf, int bufSize = 128);
 

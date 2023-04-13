@@ -67,6 +67,11 @@ double IBoolParam::GetNormalized(const double nonNormalizedValue) const
 	return nonNormalizedValue >= 0.5;
 }
 
+double IBoolParam::GetNonNormalized(const double normalizedValue) const
+{
+	return (double)(normalizedValue >= 0.5);
+}
+
 char* IBoolParam::ToString(const bool boolVal, char* const buf, const int bufSize) const
 {
 	lstrcpyn_safe(buf, mDisplayTexts[(int)boolVal].Get(), bufSize);
@@ -150,6 +155,11 @@ double IEnumParam::GetNormalized(const double nonNormalizedValue) const
 {
 	const int intVal = (int)(nonNormalizedValue + 0.5);
 	return ToNormalized(Bounded(intVal));
+}
+
+double IEnumParam::GetNonNormalized(const double normalizedValue) const
+{
+	return (double)FromNormalized(normalizedValue);
 }
 
 char* IEnumParam::ToString(const int intVal, char* const buf, const int bufSize) const
@@ -248,6 +258,11 @@ double IIntParam::GetNormalized(const double nonNormalizedValue) const
 {
 	const int intVal = (int)floor(nonNormalizedValue + 0.5);
 	return Normalized(intVal, mMin, mMax);
+}
+
+double IIntParam::GetNonNormalized(const double normalizedValue) const
+{
+	return (double)FromNormalized(normalizedValue);
 }
 
 char* IIntParam::ToString(const int intVal, char* const buf, const int bufSize) const
@@ -395,6 +410,11 @@ double IDoubleParam::GetNormalized() const
 double IDoubleParam::GetNormalized(const double nonNormalizedValue) const
 {
 	return Normalize(nonNormalizedValue, mMin, mMax);
+}
+
+double IDoubleParam::GetNonNormalized(const double normalizedValue) const
+{
+	return FromNormalized(normalizedValue);
 }
 
 char* IDoubleParam::ToString(const double nonNormalizedValue, char* const buf, const int bufSize, const double* const pNormalizedValue) const
@@ -552,6 +572,11 @@ double IDoublePowParam::GetNormalized(const double nonNormalizedValue) const
 	return Normalize(nonNormalizedValue, mMin, mMax, mShape);
 }
 
+double IDoublePowParam::GetNonNormalized(const double normalizedValue) const
+{
+	return FromNormalized(normalizedValue);
+}
+
 char* IDoublePowParam::GetDisplayForHost(const double normalizedValue, char* const buf, const int bufSize)
 {
 	const double nonNormalizedValue = FromNormalized(normalizedValue);
@@ -593,6 +618,11 @@ double IDoubleExpParam::GetNormalized(const double nonNormalizedValue) const
 	return Normalize(nonNormalizedValue, mMin, mMax, mShape, mExpMin1);
 }
 
+double IDoubleExpParam::GetNonNormalized(const double normalizedValue) const
+{
+	return FromNormalized(normalizedValue);
+}
+
 char* IDoubleExpParam::GetDisplayForHost(const double normalizedValue, char* const buf, const int bufSize)
 {
 	const double nonNormalizedValue = FromNormalized(normalizedValue);
@@ -617,6 +647,12 @@ void INormalizedParam::SetNormalized(const double normalizedValue)
 double INormalizedParam::GetNormalized(const double nonNormalizedValue) const
 {
 	return Bounded(nonNormalizedValue);
+}
+
+double INormalizedParam::GetNonNormalized(const double normalizedValue) const
+{
+	assert(normalizedValue >= 0.0 && normalizedValue <= 1.0);
+	return normalizedValue;
 }
 
 char* INormalizedParam::ToString(const double normalizedValue, char* const buf, const int bufSize) const
