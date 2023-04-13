@@ -9,6 +9,29 @@
 #include "WDL/db2val.h"
 #include "WDL/wdlcstring.h"
 
+static const char* RemoveSignFromZero(const char* str)
+{
+	int c = str[0];
+	if ((c == '+' || c == '-') && str[1] == '0')
+	{
+		c = str[2];
+		int remove = !c;
+
+		if (c == '.') for (int i = 3;; ++i)
+		{
+			c = str[i];
+			if (!c) break;
+
+			remove = c == '0';
+			if (!remove) break;
+		}
+
+		str += remove;
+	}
+
+	return str;
+}
+
 void IParam::SetShortName(const char* const name)
 {
 	assert(strlen(name) < 8);
@@ -390,14 +413,14 @@ char* IDoubleParam::ToString(const double nonNormalizedValue, char* const buf, c
 
 	if (!displayText)
 	{
-		displayText = tmp;
-
 		double displayValue = nonNormalizedValue;
 		const bool nz = displayValue != 0.0;
 		if (nz && DisplayIsNegated()) displayValue = -displayValue;
 
 		const bool sign = nz && (mMin >= 0.0) != (mMax >= 0.0);
 		snprintf(tmp, sizeof(tmp), sign ? "%+.*f" : "%.*f", (int)mDisplayPrecision, displayValue);
+
+		displayText = RemoveSignFromZero(tmp);
 	}
 
 	lstrcpyn_safe(buf, displayText, bufSize);
