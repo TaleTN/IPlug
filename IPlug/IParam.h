@@ -119,6 +119,21 @@ public:
 
 	inline bool Bool() const { return mBoolVal; }
 
+	static inline bool Min() { return false; }
+	static inline bool Max() { return true; }
+
+	static inline bool FromNormalized(const double normalizedValue)
+	{
+		return normalizedValue >= 0.5;
+	}
+
+	static inline double ToNormalized(const bool boolVal)
+	{
+		return (double)boolVal;
+	}
+
+	static inline bool Bounded(const bool boolVal) { return boolVal; }
+
 	void SetNormalized(double normalizedValue);
 	double GetNormalized() const { return (double)mBoolVal; }
 	double GetNormalized(double nonNormalizedValue) const;
@@ -160,6 +175,9 @@ public:
 
 	inline int Int() const { return mIntVal; }
 	inline int NEnums() const { return mEnums; }
+
+	static inline int Min() { return 0; }
+	inline int Max() const { return mEnums - 1; }
 
 	int FromNormalized(const double normalizedValue) const
 	{
@@ -537,6 +555,21 @@ public:
 	}
 
 	inline double Value() const { return mValue; }
+
+	static inline double Min() { return 0.0; }
+	static inline double Max() { return 1.0; }
+
+	static inline double FromNormalized(const double normalizedValue)
+	{
+		assert(normalizedValue >= 0.0 && normalizedValue <= 1.0);
+		return normalizedValue;
+	}
+
+	static inline double ToNormalized(const double nonNormalizedValue)
+	{
+		assert(nonNormalizedValue >= 0.0 && nonNormalizedValue <= 1.0);
+		return nonNormalizedValue;
+	}
 
 	static double Bounded(const double normalizedValue)
 	{
