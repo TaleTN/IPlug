@@ -3,7 +3,11 @@
 #include "aax-sdk/Interfaces/AAX_IComponentDescriptor.h"
 #include "aax-sdk/Interfaces/AAX_IPropertyMap.h"
 
+#include <assert.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include "WDL/wdlcstring.h"
 
 class IPlugAAX_EffectParams: public AAX_CEffectParameters
 {
@@ -40,6 +44,101 @@ protected:
 
 private:
 	IPlugAAX* const mPlug;
+};
+
+template <typename T, typename PARAMTYPE>
+class IPlugAAX_TaperDelegate: public AAX_ITaperDelegate<T>
+{
+public:
+	IPlugAAX_TaperDelegate(const PARAMTYPE* const pParam)
+	: AAX_ITaperDelegate<T>(), mParam(pParam) {}
+
+	IPlugAAX_TaperDelegate<T, PARAMTYPE>* Clone() const AAX_OVERRIDE
+	{
+		return new IPlugAAX_TaperDelegate(*this);
+	}
+
+	T GetMinimumValue() const AAX_OVERRIDE { return mParam->Min(); }
+	T GetMaximumValue() const AAX_OVERRIDE { return mParam->Max(); }
+
+	T ConstrainRealValue(const T value) const AAX_OVERRIDE
+	{
+		return mParam->Bounded(value);
+	}
+
+	T NormalizedToReal(const double normalizedValue) const AAX_OVERRIDE
+	{
+		return (T)mParam->GetNonNormalized(normalizedValue);
+	}
+
+	double RealToNormalized(const T realValue) const AAX_OVERRIDE
+	{
+		return mParam->GetNormalized(realValue);
+	}
+
+protected:
+	const PARAMTYPE* const mParam;
+};
+
+template <typename T, typename PARAMTYPE>
+class IPlugAAX_DisplayDelegate: public AAX_IDisplayDelegate<T>
+{
+public:
+	IPlugAAX_DisplayDelegate(PARAMTYPE* const pParam)
+	: AAX_IDisplayDelegate<T>(), mParam(pParam) {}
+
+	IPlugAAX_DisplayDelegate<T, PARAMTYPE>* Clone() const AAX_OVERRIDE
+	{
+		return new IPlugAAX_DisplayDelegate(*this);
+	}
+
+	bool ValueToString(const T value, AAX_CString* const valueString) const AAX_OVERRIDE
+	{
+		static const int bufSize = 128;
+		char buf[bufSize];
+
+		mParam->GetDisplayForHost(mParam->GetNormalized((double)value), buf, bufSize);
+		const char* const label = mParam->GetLabelForHost();
+
+		if (label && *label)
+		{
+			lstrcatn(buf, " ", bufSize);
+			lstrcatn(buf, label, bufSize);
+		}
+
+		valueString->Set(buf);
+		return true;
+	}
+
+	bool ValueToString(const T value, int32_t /* maxNumChars */, AAX_CString* const valueString) const AAX_OVERRIDE
+	{
+		return this->ValueToString(value, valueString);
+	}
+
+	bool StringToValue(const AAX_CString& valueString, T* const value) const AAX_OVERRIDE
+	{
+		const char* const cStr = valueString.Get();
+
+		double v;
+		const bool mapped = mParam->MapDisplayText(cStr, &v);
+
+		if (mapped)
+		{
+			v = mParam->GetNonNormalized(v);
+		}
+		else
+		{
+			v = strtod(cStr, NULL);
+			if (mParam->DisplayIsNegated()) v = -v;
+			v = (double)mParam->Bounded((T)v);
+		}
+
+		*value = (T)v;
+		return true;
+	}
+
+protected:
+	PARAMTYPE* const mParam;
 };
 
 IPlugAAX::IPlugAAX(
@@ -138,6 +237,101 @@ AAX_CEffectParameters* AAX_CALLBACK IPlugAAX::AAXCreateParams(IPlugAAX* const pP
 
 AAX_Result IPlugAAX::AAXEffectInit(AAX_CParameterManager* const pParamMgr, const AAX_IController* const pHost)
 {
+	char id[16];
+	memcpy(id, "Param\0\0", 8);
+
+	const int n = NParams();
+	for (int i = 0; i < n;)
+	{
+		IParam* const pParam = GetParam(i++);
+		const int type = pParam->Type();
+		const AAX_CString name(pParam->GetNameForHost());
+
+		AAX_IParameter* pAAXParam = NULL;
+		int nSteps = 0;
+
+		#ifdef _MSC_VER
+		_itoa(i, &id[5], 10);
+		#else
+		snprintf(&id[5], sizeof(id) - 5, "%d", i);
+		#endif
+
+		switch (type)
+		{
+			case IParam::kTypeBool:
+			{
+				IBoolParam* const pBoolParam = (IBoolParam*)pParam;
+				nSteps = 2;
+
+				pAAXParam = new AAX_CParameter<bool>(id, name, pBoolParam->Bool(),
+					IPlugAAX_TaperDelegate<bool, IBoolParam>(pBoolParam),
+					IPlugAAX_DisplayDelegate<bool, IBoolParam>(pBoolParam),
+					true);
+				break;
+			}
+
+			case IParam::kTypeInt:
+			{
+				IIntParam* const pIntParam = (IIntParam*)pParam;
+
+				pAAXParam = new AAX_CParameter<int32_t>(id, name, pIntParam->Int(),
+					IPlugAAX_TaperDelegate<int32_t, IIntParam>(pIntParam),
+					IPlugAAX_DisplayDelegate<int32_t, IIntParam>(pIntParam),
+					true);
+				break;
+			}
+
+			case IParam::kTypeEnum:
+			{
+				IEnumParam* const pEnumParam = (IEnumParam*)pParam;
+				nSteps = pEnumParam->NEnums();
+
+				pAAXParam = new AAX_CParameter<int32_t>(id, name, pEnumParam->Int(),
+					IPlugAAX_TaperDelegate<int32_t, IEnumParam>(pEnumParam),
+					IPlugAAX_DisplayDelegate<int32_t, IEnumParam>(pEnumParam),
+					true);
+				break;
+			}
+
+			case IParam::kTypeDouble:
+			{
+				IDoubleParam* const pDoubleParam = (IDoubleParam*)pParam;
+
+				pAAXParam = new AAX_CParameter<double>(id, name, pDoubleParam->Value(),
+					IPlugAAX_TaperDelegate<double, IDoubleParam>(pDoubleParam),
+					IPlugAAX_DisplayDelegate<double, IDoubleParam>(pDoubleParam),
+					true);
+				break;
+			}
+
+			case IParam::kTypeNormalized:
+			{
+				INormalizedParam* const pNormalizedParam = (INormalizedParam*)pParam;
+
+				pAAXParam = new AAX_CParameter<double>(id, name, pNormalizedParam->Value(),
+					IPlugAAX_TaperDelegate<double, INormalizedParam>(pNormalizedParam),
+					IPlugAAX_DisplayDelegate<double, INormalizedParam>(pNormalizedParam),
+					true);
+				break;
+			}
+
+			default:
+			{
+				static const bool unknownParamType = false;
+				assert(unknownParamType);
+				break;
+			}
+		}
+
+		if (pAAXParam)
+		{
+			pAAXParam->SetNumberOfSteps(nSteps ? nSteps : 128); // TN: Sensible default?
+			pAAXParam->SetType(nSteps ? AAX_eParameterType_Discrete : AAX_eParameterType_Continuous);
+
+			pParamMgr->AddParameter(pAAXParam);
+		}
+	}
+
 	AAX_CString hostName;
 	if (pHost->GetHostName(&hostName) == AAX_SUCCESS)
 	{
