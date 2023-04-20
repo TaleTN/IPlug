@@ -183,6 +183,9 @@ static void DescribeAlgorithmComponent(AAX_IComponentDescriptor* const pCompDesc
 
 	// See SIPlugAAX_Alg_Context.
 	err = pCompDesc->AddPrivateData(0, sizeof(IPlugAAX*), AAX_ePrivateDataOptions_External);
+	err = pCompDesc->AddAudioBufferLength(1);
+	err = pCompDesc->AddAudioIn(2);
+	err = pCompDesc->AddAudioOut(3);
 
 	AAX_IPropertyMap* const pPropMap = pCompDesc->NewPropertyMap();
 	if (!pPropMap) err = AAX_ERROR_NULL_OBJECT;
@@ -341,12 +344,29 @@ AAX_Result IPlugAAX::AAXEffectInit(AAX_CParameterManager* const pParamMgr, const
 	HostSpecificInit();
 	OnParamReset();
 
+	int flags = mPlugFlags;
+	AAX_CSampleRate sampleRate;
+
+	if (pHost->GetSampleRate(&sampleRate) == AAX_SUCCESS)
+	{
+		SetSampleRate(sampleRate);
+		flags |= kPlugInitSampleRate;
+	}
+
+	SetBlockSize(1 << AAX_eAudioBufferLength_Max);
+	mPlugFlags = flags | kPlugInitBlockSize;
+
+	if (flags & kPlugInitSampleRate) Reset();
+
 	return AAX_SUCCESS;
 }
 
 struct SIPlugAAX_Alg_Context
 {
 	IPlugAAX* const* mPlug;
+	const int32_t* mBufferSize;
+	const float* const* mInputs;
+	float* const* mOutputs;
 };
 
 void AAX_CALLBACK IPlugAAX::AAXAlgProcessFunc(void* const instBegin[], const void* const pInstEnd)
@@ -357,5 +377,17 @@ void AAX_CALLBACK IPlugAAX::AAXAlgProcessFunc(void* const instBegin[], const voi
 	{
 		instance = *walk;
 		IPlugAAX* const pPlug = *instance->mPlug;
+
+		pPlug->mMutex.Enter();
+
+		if (!pPlug->IsActive()) pPlug->OnActivate(true);
+		const int32_t nFrames = *instance->mBufferSize;
+
+		pPlug->AttachInputBuffers(0, pPlug->NInChannels(), instance->mInputs, nFrames);
+		pPlug->AttachOutputBuffers(0, pPlug->NOutChannels(), instance->mOutputs);
+
+		pPlug->ProcessBuffers((float)0.0f, nFrames);
+
+		pPlug->mMutex.Leave();
 	}
 }
