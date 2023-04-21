@@ -70,6 +70,10 @@ public:
 	virtual void OnGUIOpen() {}
 	virtual void OnGUIClose() {}
 
+	// Called from GUI thread, approximately at IGraphics::FPS(), and only
+	// if IGraphics::TimerEnabled().
+	virtual void OnGUITimer() {}
+
 	// This is an idle call from the audio processing thread, as opposed to
 	// IGraphics::OnGUIIdle which is called from the GUI thread.
 	// Only active if IPLUG_USE_IDLE_CALLS is defined.
