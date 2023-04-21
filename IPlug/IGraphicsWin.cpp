@@ -92,6 +92,11 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 		{
 			if (wParam == IPLUG_TIMER_ID)
 			{
+				if (pGraphics->TimerEnabled())
+				{
+					pGraphics->GetPlug()->OnGUITimer();
+				}
+
 				IRECT dirtyR;
 				if (pGraphics->IsDirty(&dirtyR))
 				{
