@@ -155,6 +155,11 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent, const bool right,
 			mGraphics->UpdateTooltips();
 		}
 
+		if (mGraphics->TimerEnabled())
+		{
+			mGraphics->GetPlug()->OnGUITimer();
+		}
+
 		IRECT r;
 		if (mGraphics->IsDirty(&r))
 		{
