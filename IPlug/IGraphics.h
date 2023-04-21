@@ -254,6 +254,7 @@ public:
 	inline bool CanHandleMouseOver() const { return mHandleMouseOver; }
 	inline bool TooltipsEnabled() const { return mEnableTooltips; }
 	inline int CanHandleMouseWheel() const { return mHandleMouseWheel; }
+	inline bool TimerEnabled() const { return mEnableTimer; }
 
 	bool OnKeyDown(int x, int y, IMouseMod mod, int key);
 	bool OnKeyUp(int x, int y, IMouseMod mod, int key);
@@ -281,6 +282,9 @@ public:
 
 	// Updates tooltips after (un)hiding controls.
 	virtual void UpdateTooltips() = 0;
+
+	// Enables/disables IPlugBase::OnGUITimer(); disabled by default.
+	void EnableTimer(const bool enable) { mEnableTimer = enable; }
 
 	// This is an idle call from the GUI thread, as opposed to
 	// IPlug::OnIdle which is called from the audio processing thread.
@@ -326,6 +330,7 @@ private:
 	int mKeyboardFocus;
 	bool mHandleMouseOver, mEnableTooltips;
 	signed char mHandleMouseWheel;
+	bool mEnableTimer;
 
 	#ifdef IPLUG_USE_IDLE_CALLS
 	int mIdleTicks;

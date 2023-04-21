@@ -155,7 +155,8 @@ IGraphics::IGraphics(
 	mKeyboardFocus(-1),
 	mHandleMouseOver(false),
 	mEnableTooltips(false),
-	mHandleMouseWheel(kMouseWheelEnable)
+	mHandleMouseWheel(kMouseWheelEnable),
+	mEnableTimer(false)
 
 	#ifdef IPLUG_USE_IDLE_CALLS
 	, mIdleTicks(0)
