@@ -70,4 +70,5 @@ public:
 	AAX_Result AAXEffectInit(AAX_CParameterManager* pParamMgr, const AAX_IController* pHost);
 
 	static void AAX_CALLBACK AAXAlgProcessFunc(void* const instBegin[], const void* const pInstEnd);
+	void AAXUpdateParam(AAX_CParamID id, double value, AAX_EUpdateSource src);
 };

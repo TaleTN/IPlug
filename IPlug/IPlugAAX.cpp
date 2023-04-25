@@ -1,4 +1,5 @@
 #include "IPlugAAX.h"
+#include "IGraphics.h"
 
 #include "aax-sdk/Interfaces/AAX_IComponentDescriptor.h"
 #include "aax-sdk/Interfaces/AAX_IPropertyMap.h"
@@ -20,6 +21,12 @@ public:
 	~IPlugAAX_EffectParams() AAX_OVERRIDE
 	{
 		delete mPlug;
+	}
+
+	AAX_Result UpdateParameterNormalizedValue(AAX_CParamID const id, const double value, const AAX_EUpdateSource src) AAX_OVERRIDE
+	{
+		mPlug->AAXUpdateParam(id, value, src);
+		return AAX_CEffectParameters::UpdateParameterNormalizedValue(id, value, src);
 	}
 
 	AAX_Result ResetFieldData(const AAX_CFieldIndex idx, void* const pData, uint32_t /* size */) const AAX_OVERRIDE
@@ -389,5 +396,26 @@ void AAX_CALLBACK IPlugAAX::AAXAlgProcessFunc(void* const instBegin[], const voi
 		pPlug->ProcessBuffers((float)0.0f, nFrames);
 
 		pPlug->mMutex.Leave();
+	}
+}
+
+void IPlugAAX::AAXUpdateParam(AAX_CParamID const id, const double value, AAX_EUpdateSource /* src */)
+{
+	if (!strncmp(id, "Param", 5) && id[5])
+	{
+		const unsigned long int idx = strtoul(&id[5], NULL, 10) - 1;
+
+		mMutex.Enter();
+
+		if (idx < (unsigned long int)NParams())
+		{
+			IGraphics* const pGraphics = GetGUI();
+			if (pGraphics) pGraphics->SetParameterFromPlug(idx, value, true);
+
+			GetParam(idx)->SetNormalized(value);
+			OnParamChange(idx);
+		}
+
+		mMutex.Leave();
 	}
 }
