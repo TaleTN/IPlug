@@ -52,14 +52,11 @@ EXPORT void* VSTPluginMain(audioMasterCallback const hostCallback)
 	static WDL_Mutex sMutex;
 	sMutex.Enter();
 
-	AEffect* pEffect = NULL;
 	IPlugVST2* const pPlug = new PLUG_CLASS_NAME((void*)hostCallback);
-	if (pPlug)
-	{
-		pPlug->EnsureDefaultPreset();
-		pEffect = pPlug->GetAEffect();
-		pEffect->numPrograms = wdl_max(pEffect->numPrograms, 1);
-	}
+
+	pPlug->EnsureDefaultPreset();
+	AEffect* const pEffect = pPlug->GetAEffect();
+	pEffect->numPrograms = wdl_max(pEffect->numPrograms, 1);
 
 	sMutex.Leave();
 	return pEffect;
@@ -162,11 +159,9 @@ const clap_plugin* CLAP_ABI ClapFactoryCreatePlugin(const clap_plugin_factory* /
 	if (clap_version_is_compatible(pHost->clap_version) && !strcmp(id, sClapPlugID))
 	{
 		IPlugCLAP* const pPlug = new PLUG_CLASS_NAME((void*)pHost);
-		if (pPlug)
-		{
-			pPlug->EnsureDefaultPreset();
-			pClap = pPlug->GetTheClap();
-		}
+
+		pPlug->EnsureDefaultPreset();
+		pClap = pPlug->GetTheClap();
 	}
 
 	return pClap;
