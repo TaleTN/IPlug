@@ -119,7 +119,13 @@ IPlugBase(
 	mNoteNameCount = 0;
 
 	SetBlockSize(kDefaultBlockSize);
-	mClapHost = (const clap_host*)instanceInfo;
+
+	const clap_host* const pHost = (const clap_host*)instanceInfo;
+	mClapHost = pHost;
+
+	// TN: CLAP host version format isn't standardized, so reliably
+	// extracting version info doesn't seem feasible.
+	SetHost(pHost->name, mHostVersion);
 }
 
 bool IPlugCLAP::AllocStateChunk(int chunkSize)
