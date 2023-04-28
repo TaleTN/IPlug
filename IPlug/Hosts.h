@@ -31,6 +31,10 @@ enum EHost
 	kHostMixcraft,
 	kHostGarageBand,
 	kHostArdour,
+	kHostBitwig,
+	kHostAudacity,
+	kHostSAVIHost,
+	kHostVSTHost
 
 	// These hosts don't report the host name:
 	// EnergyXT2
