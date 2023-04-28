@@ -1516,7 +1516,10 @@ ComponentResult IPlugAU::SetProperty(const AudioUnitPropertyID propID, const Aud
 		{
 			const AUHostIdentifier* const pHostID = (AUHostIdentifier*)pData;
 			CStrLocal hostStr(pHostID->hostName);
-			const int hostVer = (pHostID->hostVersion.majorRev << 16) | (pHostID->hostVersion.minorAndBugRev << 8);
+			const int rmaj = pHostID->hostVersion.majorRev;
+			const int rmin = pHostID->hostVersion.minorAndBugRev;
+			const int quot = rmaj & 0xF0, rem = rmaj & 0x0F;
+			const int hostVer = (quot * 40960 + (wdl_min(rem, 9) << 16)) | ((rmin & 0xF0) << 4) | (rmin & 0x0F);
 			SetHost(hostStr.mCStr, hostVer);
 			return noErr;
 		}
