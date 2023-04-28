@@ -238,8 +238,8 @@ int IPlugVST2::GetHost()
 		if (productStr[0])
 		{
 			int decVer = (int)mHostCallback(&mAEffect, audioMasterGetVendorVersion, 0, 0, NULL, 0.0f);
-			const int ver = decVer / 10000;
-			const int rmaj = (decVer -= 10000 * ver) / 100;
+			const int ver = decVer / 1000;
+			const int rmaj = (decVer -= 1000 * ver) / 100;
 			const int rmin = decVer - 100 * rmaj;
 			version = (((ver << 8) | rmaj) << 8) | rmin;
 		}
