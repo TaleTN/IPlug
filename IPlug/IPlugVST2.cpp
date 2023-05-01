@@ -61,6 +61,34 @@ static int VSTSpkrArrType(const int nchan)
 	return (unsigned int)nchan <= 2 ? type : kSpeakerArrUserDefined;
 }
 
+#ifndef IPLUG_LEGACY_PLUG_VER
+static int VSTEffectVersion(int version)
+{
+	if (version < /* 10.0.0 */ 0x0A0000)
+	{
+		const int ver = version >> 16;
+		const int rmaj = (version >> 8) & 0xFF;
+		const int rmin = version & 0xFF;
+
+		#ifndef NDEBUG
+		{
+			const bool plugVerInvalid = version > 0 && rmaj <= 9 && rmin <= 9;
+			assert(plugVerInvalid);
+		}
+		#endif
+
+		version = ((ver * 10 + rmaj) * 10 + rmin) * 10;
+	}
+	else
+	{
+		// TN: Tested in Cubase 12. Hopefully other hosts won't mind...
+		assert(version <= /* 100.255.255 */ 0x64FFFF);
+	}
+
+	return version;
+}
+#endif
+
 IPlugVST2::IPlugVST2(
 	void* const instanceInfo,
 	const int nParams,
@@ -127,7 +155,13 @@ IPlugBase(
 	mAEffect.DECLARE_VST_DEPRECATED(ioRatio) = 1.0f;
 	mAEffect.object = this;
 	mAEffect.uniqueID = uniqueID;
+
+	#ifdef IPLUG_LEGACY_PLUG_VER
 	mAEffect.version = GetEffectVersion(true);
+	#else
+	mAEffect.version = VSTEffectVersion(mVersion);
+	#endif
+
 	mAEffect.processReplacing = VSTProcessReplacing;
 	mAEffect.processDoubleReplacing = VSTProcessDoubleReplacing;
 
@@ -839,7 +873,11 @@ VstIntPtr VSTCALLBACK IPlugVST2::VSTDispatcher(AEffect* const pEffect, const Vst
 
 		case effGetVendorVersion:
 		{
+			#ifdef IPLUG_LEGACY_PLUG_VER
 			ret = _this->GetEffectVersion(true);
+			#else
+			ret = VSTEffectVersion(_this->mVersion);
+			#endif
 			break;
 		}
 
