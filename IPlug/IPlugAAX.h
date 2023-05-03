@@ -6,6 +6,9 @@
 #include "aax-sdk/Interfaces/AAX_Exception.h"
 #include "aax-sdk/Interfaces/AAX_ICollection.h"
 #include "aax-sdk/Interfaces/AAX_IEffectDescriptor.h"
+#include "aax-sdk/Interfaces/AAX_ITransport.h"
+
+#include "WDL/wdltypes.h"
 
 class IPlugAAX: public IPlugBase
 {
@@ -41,9 +44,9 @@ public:
 
 	void InformHostOfProgramChange() {}
 
-	double GetSamplePos() { return 0.0; } // Samples since start of project.
-	double GetTempo() { return 120.0; }
-	void GetTimeSig(int* pNum, int* pDenom) { *pNum = *pDenom = 0; }
+	double GetSamplePos(); // Samples since start of project.
+	double GetTempo();
+	void GetTimeSig(int* pNum, int* pDenom);
 
 	// Whether the plugin is being used for offline rendering.
 	bool IsRenderingOffline() { return false; }
@@ -62,6 +65,10 @@ protected:
 private:
 	AAX_CEffectParameters* mEffectParams;
 
+	int64_t mSamplePos;
+	double WDL_FIXALIGN mTempo;
+	int32_t mTimeSig[2];
+
 public:
 	static AAX_Result AAXDescribeEffect(AAX_IEffectDescriptor* pPlugDesc, const char* name, const char* shortName,
 		int uniqueID, int mfrID, int plugDoes, void* createProc);
@@ -71,4 +78,5 @@ public:
 
 	static void AAX_CALLBACK AAXAlgProcessFunc(void* const instBegin[], const void* const pInstEnd);
 	void AAXUpdateParam(AAX_CParamID id, double value, AAX_EUpdateSource src);
-};
+}
+WDL_FIXALIGN;

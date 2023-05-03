@@ -181,6 +181,27 @@ IPlugBase(
 	SetOutputChannelConnections(0, nOutputs, true);
 
 	mEffectParams = NULL;
+
+	mSamplePos = 0;
+	mTempo = 0.0;
+	memset(mTimeSig, 0, sizeof(mTimeSig));
+}
+
+double IPlugAAX::GetSamplePos()
+{
+	return (double)mSamplePos;
+}
+
+double IPlugAAX::GetTempo()
+{
+	assert(mTempo >= 0.0);
+	return mTempo;
+}
+
+void IPlugAAX::GetTimeSig(int* const pNum, int* const pDenom)
+{
+	*pNum = mTimeSig[0];
+	*pDenom = mTimeSig[1];
 }
 
 static void DescribeAlgorithmComponent(AAX_IComponentDescriptor* const pCompDesc,
@@ -236,6 +257,12 @@ AAX_Result IPlugAAX::AAXDescribeEffect(AAX_IEffectDescriptor* const pPlugDesc, c
 	err = pPlugDesc->AddComponent(pCompDesc);
 
 	err = pPlugDesc->AddProcPtr(createProc, kAAX_ProcPtrID_Create_EffectParameters);
+
+	AAX_IPropertyMap* const pPropMap = pPlugDesc->NewPropertyMap();
+	if (!pPropMap) err = AAX_ERROR_NULL_OBJECT;
+
+	err = pPropMap->AddProperty(AAX_eProperty_UsesTransport, true);
+	err = pPlugDesc->SetProperties(pPropMap);
 
 	return err;
 }
@@ -385,9 +412,32 @@ void AAX_CALLBACK IPlugAAX::AAXAlgProcessFunc(void* const instBegin[], const voi
 		instance = *walk;
 		IPlugAAX* const pPlug = *instance->mPlug;
 
+		const IPlugAAX_EffectParams* const pEffectParams = (const IPlugAAX_EffectParams*)pPlug->mEffectParams;
+		const AAX_ITransport* const pTransport = pEffectParams->Transport();
+
+		double tempo;
+		int32_t timeSig[2];
+		int64_t pos;
+		bool isPlaying;
+
+		const AAX_Result errTempo = pTransport->GetCurrentTempo(&tempo);
+		const AAX_Result errMeter = pTransport->GetCurrentMeter(&timeSig[0], &timeSig[1]);
+
+		AAX_Result errPos = pTransport->IsTransportPlaying(&isPlaying);
+		errPos = errPos == AAX_SUCCESS && isPlaying ? pTransport->GetCurrentNativeSampleLocation(&pos) : !AAX_SUCCESS;
+
 		pPlug->mMutex.Enter();
 
 		if (!pPlug->IsActive()) pPlug->OnActivate(true);
+
+		if (errPos == AAX_SUCCESS) pPlug->mSamplePos = pos;
+		if (errTempo == AAX_SUCCESS) pPlug->mTempo = tempo;
+
+		if (errMeter == AAX_SUCCESS)
+		{
+			memcpy(pPlug->mTimeSig, timeSig, 2 * sizeof(int32_t));
+		}
+
 		const int32_t nFrames = *instance->mBufferSize;
 
 		pPlug->AttachInputBuffers(0, pPlug->NInChannels(), instance->mInputs, nFrames);
