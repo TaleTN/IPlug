@@ -49,7 +49,7 @@ public:
 	void GetTimeSig(int* pNum, int* pDenom);
 
 	// Whether the plugin is being used for offline rendering.
-	bool IsRenderingOffline() { return false; }
+	bool IsRenderingOffline() { return IsOffline(); }
 
 	// Tell the host that the graphics resized.
 	// Should be called only by the graphics object when it resizes itself.
@@ -78,5 +78,6 @@ public:
 
 	static void AAX_CALLBACK AAXAlgProcessFunc(void* const instBegin[], const void* const pInstEnd);
 	void AAXUpdateParam(AAX_CParamID id, double value, AAX_EUpdateSource src);
+	void AAXNotificationReceived(AAX_CTypeID type, const void* pData, uint32_t size);
 }
 WDL_FIXALIGN;

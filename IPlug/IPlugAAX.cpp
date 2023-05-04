@@ -23,6 +23,12 @@ public:
 		delete mPlug;
 	}
 
+	AAX_Result NotificationReceived(const AAX_CTypeID type, const void* const pData, const uint32_t size) AAX_OVERRIDE
+	{
+		mPlug->AAXNotificationReceived(type, pData, size);
+		return AAX_CEffectParameters::NotificationReceived(type, pData, size);
+	}
+
 	AAX_Result UpdateParameterNormalizedValue(AAX_CParamID const id, const double value, const AAX_EUpdateSource src) AAX_OVERRIDE
 	{
 		mPlug->AAXUpdateParam(id, value, src);
@@ -468,4 +474,30 @@ void IPlugAAX::AAXUpdateParam(AAX_CParamID const id, const double value, AAX_EUp
 
 		mMutex.Leave();
 	}
+}
+
+void IPlugAAX::AAXNotificationReceived(const AAX_CTypeID type, const void* /* pData */, uint32_t/*  size */)
+{
+	int offline;
+
+	switch (type)
+	{
+		case AAX_eNotificationEvent_EnteringOfflineMode:
+		{
+			offline = kPlugFlagsOffline;
+			break;
+		}
+
+		case AAX_eNotificationEvent_ExitingOfflineMode:
+		{
+			offline = 0;
+			break;
+		}
+
+		default: return;
+	}
+
+	mMutex.Enter();
+	mPlugFlags = (mPlugFlags & ~kPlugFlagsOffline) | offline;
+	mMutex.Leave();
 }
