@@ -154,6 +154,51 @@ protected:
 	PARAMTYPE* const mParam;
 };
 
+class IPlugAAX_EffectGUI: public AAX_CEffectGUI
+{
+public:
+	IPlugAAX_EffectGUI(): AAX_CEffectGUI(), mGraphics(NULL) {}
+
+	AAX_Result GetViewSize(AAX_Point* const pViewSize) const AAX_OVERRIDE
+	{
+		if (mGraphics)
+		{
+			const IPlugAAX* const pPlug = (const IPlugAAX*)mGraphics->GetPlug();
+			*pViewSize = *pPlug->AAXGetViewSize();
+		}
+		return AAX_SUCCESS;
+	}
+
+	static AAX_IEffectGUI* AAX_CALLBACK Create() { return new IPlugAAX_EffectGUI(); }
+
+protected:
+	void CreateViewContents() AAX_OVERRIDE
+	{
+		const IPlugAAX_EffectParams* const pEffectParams = (const IPlugAAX_EffectParams*)GetEffectParameters();
+		mGraphics = pEffectParams->GetPlug()->GetGUI();
+	}
+
+	void CreateViewContainer() AAX_OVERRIDE
+	{
+		if (mGraphics && mGraphics->OpenWindow(GetViewContainerPtr()))
+		{
+			mGraphics->GetPlug()->OnGUIOpen();
+		}
+	}
+
+	void DeleteViewContainer() AAX_OVERRIDE
+	{
+		if (mGraphics)
+		{
+			mGraphics->GetPlug()->OnGUIClose();
+			mGraphics->CloseWindow();
+		}
+	}
+
+private:
+	IGraphics* mGraphics;
+};
+
 IPlugAAX::IPlugAAX(
 	void* /* instanceInfo */,
 	const int nParams,
@@ -210,6 +255,12 @@ void IPlugAAX::GetTimeSig(int* const pNum, int* const pDenom)
 	*pDenom = mTimeSig[1];
 }
 
+void IPlugAAX::ResizeGraphics(const int w, const int h)
+{
+	mViewSize.vert = (float)h;
+	mViewSize.horz = (float)w;
+}
+
 static void DescribeAlgorithmComponent(AAX_IComponentDescriptor* const pCompDesc,
 	const int plugID, const int mfrID, const int plugDoes)
 {
@@ -239,7 +290,10 @@ static void DescribeAlgorithmComponent(AAX_IComponentDescriptor* const pCompDesc
 	err = pPropMap->AddProperty(AAX_eProperty_OutputStemFormat, AAX_eStemFormat_Stereo);
 
 	err = pPropMap->AddProperty(AAX_eProperty_CanBypass, false);
+
+	#ifdef IPLUG_USE_CLIENT_GUI
 	err = pPropMap->AddProperty(AAX_eProperty_UsesClientGUI, true);
+	#endif
 
 	err = pCompDesc->AddProcessProc_Native(IPlugAAX::AAXAlgProcessFunc, pPropMap);
 }
@@ -263,6 +317,7 @@ AAX_Result IPlugAAX::AAXDescribeEffect(AAX_IEffectDescriptor* const pPlugDesc, c
 	err = pPlugDesc->AddComponent(pCompDesc);
 
 	err = pPlugDesc->AddProcPtr(createProc, kAAX_ProcPtrID_Create_EffectParameters);
+	err = pPlugDesc->AddProcPtr((void*)IPlugAAX_EffectGUI::Create, kAAX_ProcPtrID_Create_EffectGUI);
 
 	AAX_IPropertyMap* const pPropMap = pPlugDesc->NewPropertyMap();
 	if (!pPropMap) err = AAX_ERROR_NULL_OBJECT;
