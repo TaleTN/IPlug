@@ -10,6 +10,40 @@
 
 #include "WDL/wdlcstring.h"
 
+// TN: In default AAX_CParameter implementation SetNormalizedValue() calls
+// SetValue(), which converts to real and then back to normalized. This
+// rounds down stepped values in the process, which doesn't seem to work
+// well with IPlug.
+template <typename T> class IPlugAAX_CParam: public AAX_CParameter<T>
+{
+public:
+	IPlugAAX_CParam(
+		AAX_CParamID const id,
+		const AAX_IString& name,
+		const T defaultVal,
+		const AAX_ITaperDelegate<T>& taper,
+		const AAX_IDisplayDelegate<T>& display,
+		const bool automatable = false
+	):
+		AAX_CParameter<T>(id, name, defaultVal, taper, display, automatable)
+	{}
+
+	void SetNormalizedValue(const double normalizedValue) AAX_OVERRIDE
+	{
+		if (this->mAutomationDelegate)
+		{
+			this->Touch();
+			this->mAutomationDelegate->PostSetValueRequest(this->Identifier(), normalizedValue);
+			this->Release();
+		}
+		else
+		{
+			this->mNeedNotify = true;
+			this->UpdateNormalizedValue(normalizedValue);
+		}
+	}
+};
+
 class IPlugAAX_EffectParams: public AAX_CEffectParameters
 {
 public:
@@ -238,6 +272,43 @@ IPlugBase(
 	memset(mTimeSig, 0, sizeof(mTimeSig));
 }
 
+static void ParamIdxToID(int idx, char buf[16])
+{
+	memcpy(buf, "Param\0\0", 8);
+	idx++;
+
+	#ifdef _MSC_VER
+	_itoa(idx, &buf[5], 10);
+	#else
+	snprintf(&buf[5], 16 - 5, "%d", idx);
+	#endif
+}
+
+void IPlugAAX::BeginInformHostOfParamChange(const int idx, const bool lockMutex)
+{
+	char id[16];
+	ParamIdxToID(idx, id);
+
+	EndDelayedInformHostOfParamChange(lockMutex);
+	mEffectParams->TouchParameter(id);
+}
+
+void IPlugAAX::InformHostOfParamChange(const int idx, const double normalizedValue, bool /* lockMutex */)
+{
+	char id[16];
+	ParamIdxToID(idx, id);
+
+	mEffectParams->SetParameterNormalizedValue(id, normalizedValue);
+}
+
+void IPlugAAX::EndInformHostOfParamChange(const int idx, bool /* lockMutex */)
+{
+	char id[16];
+	ParamIdxToID(idx, id);
+
+	mEffectParams->ReleaseParameter(id);
+}
+
 double IPlugAAX::GetSamplePos()
 {
 	return (double)mSamplePos;
@@ -361,7 +432,7 @@ AAX_Result IPlugAAX::AAXEffectInit(AAX_CParameterManager* const pParamMgr, const
 				IBoolParam* const pBoolParam = (IBoolParam*)pParam;
 				nSteps = 2;
 
-				pAAXParam = new AAX_CParameter<bool>(id, name, pBoolParam->Bool(),
+				pAAXParam = new IPlugAAX_CParam<bool>(id, name, pBoolParam->Bool(),
 					IPlugAAX_TaperDelegate<bool, IBoolParam>(pBoolParam),
 					IPlugAAX_DisplayDelegate<bool, IBoolParam>(pBoolParam),
 					true);
@@ -372,7 +443,7 @@ AAX_Result IPlugAAX::AAXEffectInit(AAX_CParameterManager* const pParamMgr, const
 			{
 				IIntParam* const pIntParam = (IIntParam*)pParam;
 
-				pAAXParam = new AAX_CParameter<int32_t>(id, name, pIntParam->Int(),
+				pAAXParam = new IPlugAAX_CParam<int32_t>(id, name, pIntParam->Int(),
 					IPlugAAX_TaperDelegate<int32_t, IIntParam>(pIntParam),
 					IPlugAAX_DisplayDelegate<int32_t, IIntParam>(pIntParam),
 					true);
@@ -384,7 +455,7 @@ AAX_Result IPlugAAX::AAXEffectInit(AAX_CParameterManager* const pParamMgr, const
 				IEnumParam* const pEnumParam = (IEnumParam*)pParam;
 				nSteps = pEnumParam->NEnums();
 
-				pAAXParam = new AAX_CParameter<int32_t>(id, name, pEnumParam->Int(),
+				pAAXParam = new IPlugAAX_CParam<int32_t>(id, name, pEnumParam->Int(),
 					IPlugAAX_TaperDelegate<int32_t, IEnumParam>(pEnumParam),
 					IPlugAAX_DisplayDelegate<int32_t, IEnumParam>(pEnumParam),
 					true);
@@ -395,7 +466,7 @@ AAX_Result IPlugAAX::AAXEffectInit(AAX_CParameterManager* const pParamMgr, const
 			{
 				IDoubleParam* const pDoubleParam = (IDoubleParam*)pParam;
 
-				pAAXParam = new AAX_CParameter<double>(id, name, pDoubleParam->Value(),
+				pAAXParam = new IPlugAAX_CParam<double>(id, name, pDoubleParam->Value(),
 					IPlugAAX_TaperDelegate<double, IDoubleParam>(pDoubleParam),
 					IPlugAAX_DisplayDelegate<double, IDoubleParam>(pDoubleParam),
 					true);
@@ -406,7 +477,7 @@ AAX_Result IPlugAAX::AAXEffectInit(AAX_CParameterManager* const pParamMgr, const
 			{
 				INormalizedParam* const pNormalizedParam = (INormalizedParam*)pParam;
 
-				pAAXParam = new AAX_CParameter<double>(id, name, pNormalizedParam->Value(),
+				pAAXParam = new IPlugAAX_CParam<double>(id, name, pNormalizedParam->Value(),
 					IPlugAAX_TaperDelegate<double, INormalizedParam>(pNormalizedParam),
 					IPlugAAX_DisplayDelegate<double, INormalizedParam>(pNormalizedParam),
 					true);
@@ -510,7 +581,7 @@ void AAX_CALLBACK IPlugAAX::AAXAlgProcessFunc(void* const instBegin[], const voi
 	}
 }
 
-void IPlugAAX::AAXUpdateParam(AAX_CParamID const id, const double value, AAX_EUpdateSource /* src */)
+void IPlugAAX::AAXUpdateParam(AAX_CParamID const id, const double value, AAX_EUpdateSource src)
 {
 	if (!strncmp(id, "Param", 5) && id[5])
 	{

@@ -39,9 +39,9 @@ public:
 	bool AllocStateChunk(int chunkSize = -1) { return false; }
 	bool AllocBankChunk(int chunkSize = -1) { return false; }
 
-	void BeginInformHostOfParamChange(int idx, bool lockMutex = true) {}
-	void InformHostOfParamChange(int idx, double normalizedValue, bool lockMutex = true) {}
-	void EndInformHostOfParamChange(int idx, bool lockMutex = true) {}
+	void BeginInformHostOfParamChange(int idx, bool lockMutex = true);
+	void InformHostOfParamChange(int idx, double normalizedValue, bool lockMutex = true);
+	void EndInformHostOfParamChange(int idx, bool lockMutex = true);
 
 	void InformHostOfProgramChange() {}
 
