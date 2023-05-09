@@ -10,6 +10,8 @@
 
 #include "WDL/wdlcstring.h"
 
+static const int IPLUG_VERSION_MAGIC = 'pfft';
+
 // TN: In default AAX_CParameter implementation SetNormalizedValue() calls
 // SetValue(), which converts to real and then back to normalized. This
 // rounds down stepped values in the process, which doesn't seem to work
@@ -79,6 +81,73 @@ public:
 			err = AAX_ERROR_INVALID_FIELD_INDEX;
 
 		return err;
+	}
+
+	AAX_Result GetNumberOfChunks(int32_t* const pNumChunks) const AAX_OVERRIDE
+	{
+		*pNumChunks = 1;
+		return AAX_SUCCESS;
+	}
+
+	AAX_Result GetChunkIDFromIndex(const int32_t idx, AAX_CTypeID* const pID) const AAX_OVERRIDE
+	{
+		AAX_CTypeID id = IPLUG_VERSION_MAGIC;
+		AAX_Result err = AAX_SUCCESS;
+
+		if (idx != 0)
+		{
+			id = 0;
+			err = AAX_ERROR_INVALID_CHUNK_INDEX;
+		}
+
+		*pID = id;
+		return err;
+	}
+
+	AAX_Result GetChunkSize(const AAX_CTypeID id, uint32_t* const pSize) const AAX_OVERRIDE
+	{
+		return mPlug->AAXGetChunkSize(id, pSize);
+	}
+
+	AAX_Result GetChunk(const AAX_CTypeID id, AAX_SPlugInChunk* const pChunk) const AAX_OVERRIDE
+	{
+		return mPlug->AAXGetChunk(id, pChunk);
+	}
+
+	AAX_Result SetChunk(const AAX_CTypeID id, const AAX_SPlugInChunk* const pChunk) AAX_OVERRIDE
+	{
+		const AAX_Result err = mPlug->AAXSetChunk(id, pChunk);
+
+		if (err == AAX_SUCCESS)
+		{
+			char buf[16];
+			memcpy(buf, "Param\0\0", 8);
+
+			const int n = mPlug->NParams();
+			for (int i = 0; i < n;)
+			{
+				const IParam* const pParam = mPlug->GetParam(i++);
+
+				#ifdef _MSC_VER
+				_itoa(i, &buf[5], 10);
+				#else
+				snprintf(&buf[5], sizeof(buf) - 5, "%d", i);
+				#endif
+
+				SetParameterNormalizedValue(buf, pParam->GetNormalized());
+			}
+		}
+
+		return err;
+	}
+
+	// TN: Binary compare doesn't work (tested in Pro Tools 2023.3.0),
+	// making (generic) IPlug implementation unfeasible.
+	AAX_Result CompareActiveChunk(const AAX_SPlugInChunk* const pChunk, AAX_CBoolean* const pIsEqual) const AAX_OVERRIDE
+	{
+		const bool ok = pChunk->fChunkID == IPLUG_VERSION_MAGIC;
+		*pIsEqual = ok;
+		return ok ? AAX_SUCCESS : AAX_ERROR_INVALID_CHUNK_ID;
 	}
 
 	inline IPlugAAX* GetPlug() const { return mPlug; }
@@ -270,6 +339,18 @@ IPlugBase(
 	mSamplePos = 0;
 	mTempo = 0.0;
 	memset(mTimeSig, 0, sizeof(mTimeSig));
+}
+
+bool IPlugAAX::AllocStateChunk(int chunkSize)
+{
+	if (chunkSize < 0) chunkSize = GetParamsChunkSize(0, NParams());
+	return mState.Alloc(chunkSize) == chunkSize;
+}
+
+bool IPlugAAX::AllocBankChunk(const int chunkSize)
+{
+	if (chunkSize < 0 && mPresetChunkSize < 0) AllocPresetChunk();
+	return true;
 }
 
 static void ParamIdxToID(int idx, char buf[16])
@@ -626,4 +707,106 @@ void IPlugAAX::AAXNotificationReceived(const AAX_CTypeID type, const void* /* pD
 	mMutex.Enter();
 	mPlugFlags = (mPlugFlags & ~kPlugFlagsOffline) | offline;
 	mMutex.Leave();
+}
+
+AAX_Result IPlugAAX::AAXGetChunkSize(const AAX_CTypeID id, uint32_t* const pSize)
+{
+	int size = 0;
+	AAX_Result err;
+
+	if (id == IPLUG_VERSION_MAGIC)
+	{
+		err = AAX_ERROR_INCORRECT_CHUNK_SIZE;
+		mMutex.Enter();
+
+		if (mState.AllocSize() || AllocStateChunk())
+		{
+			mState.Clear();
+			if (SerializeState(&mState))
+			{
+				size = mState.Size();
+				err = AAX_SUCCESS;
+			}
+		}
+
+		mMutex.Leave();
+	}
+	else
+	{
+		err = AAX_ERROR_INVALID_CHUNK_ID;
+	}
+
+	*pSize = size;
+	return err;
+}
+
+AAX_Result IPlugAAX::AAXGetChunk(const AAX_CTypeID id, AAX_SPlugInChunk* const pChunk)
+{
+	if (id != IPLUG_VERSION_MAGIC) return AAX_ERROR_INVALID_CHUNK_ID;
+
+	AAX_Result err = AAX_SUCCESS;
+	mMutex.Enter();
+
+	mState.Clear();
+	if (SerializeState(&mState))
+	{
+		const void* const pData = mState.GetBytes();
+		const int size = mState.Size();
+
+		pChunk->fSize = size;
+		pChunk->fVersion = IPlugBase::kIPlugVersion;
+
+		memset(pChunk->fName, 0, sizeof(pChunk->fName));
+		lstrcpyn_safe((char*)pChunk->fName, GetPresetName(), sizeof(pChunk->fName));
+
+		memcpy(pChunk->fData, pData, size);
+	}
+	else
+	{
+		err = AAX_ERROR_INCORRECT_CHUNK_SIZE;
+	}
+
+	mMutex.Leave();
+	return err;
+}
+
+AAX_Result IPlugAAX::AAXSetChunk(const AAX_CTypeID id, const AAX_SPlugInChunk* const pChunk)
+{
+	if (id != IPLUG_VERSION_MAGIC) return AAX_ERROR_INVALID_CHUNK_ID;
+
+	AAX_Result err = AAX_SUCCESS;
+	mMutex.Enter();
+
+	const int size = pChunk->fSize;
+	if (mState.Size() != size)
+	{
+		mState.Resize(size);
+		if (mState.Size() != size) err = AAX_ERROR_INCORRECT_CHUNK_SIZE;
+	}
+
+	if (err == AAX_SUCCESS)
+	{
+		char name[sizeof(pChunk->fName)];
+		lstrcpyn_safe(name, (const char*)pChunk->fName, sizeof(name));
+
+		RestorePreset(name);
+
+		memcpy(mState.GetBytes(), pChunk->fData, size);
+		const int pos = UnserializeState(&mState, 0);
+
+		OnParamReset();
+
+		if (pos >= 0)
+		{
+			OnPresetChange(GetCurrentPresetIdx());
+			RedrawParamControls();
+		}
+		else
+		{
+			err = AAX_ERROR_INCORRECT_CHUNK_SIZE;
+		}
+	}
+
+	mMutex.Leave();
+	return err;
 }

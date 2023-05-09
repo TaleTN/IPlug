@@ -36,8 +36,8 @@ public:
 	// Default implementation to mimic original IPlug VST2 behavior.
 	void OnActivate(const bool active) { if (!active) Reset(); }
 
-	bool AllocStateChunk(int chunkSize = -1) { return false; }
-	bool AllocBankChunk(int chunkSize = -1) { return false; }
+	bool AllocStateChunk(int chunkSize = -1);
+	bool AllocBankChunk(int chunkSize = -1);
 
 	void BeginInformHostOfParamChange(int idx, bool lockMutex = true);
 	void InformHostOfParamChange(int idx, double normalizedValue, bool lockMutex = true);
@@ -64,6 +64,8 @@ protected:
 	bool SendSysEx(const ISysEx* pSysEx) { return false; }
 
 private:
+	ByteChunk mState; // Persistent storage if the host asks for plugin state.
+
 	AAX_CEffectParameters* mEffectParams;
 
 	int64_t mSamplePos;
@@ -82,6 +84,10 @@ public:
 	static void AAX_CALLBACK AAXAlgProcessFunc(void* const instBegin[], const void* const pInstEnd);
 	void AAXUpdateParam(AAX_CParamID id, double value, AAX_EUpdateSource src);
 	void AAXNotificationReceived(AAX_CTypeID type, const void* pData, uint32_t size);
+
+	AAX_Result AAXGetChunkSize(AAX_CTypeID id, uint32_t* pSize);
+	AAX_Result AAXGetChunk(AAX_CTypeID id, AAX_SPlugInChunk* pChunk);
+	AAX_Result AAXSetChunk(AAX_CTypeID id, const AAX_SPlugInChunk* pChunk);
 
 	inline const AAX_Point* AAXGetViewSize() const { return &mViewSize; }
 }
