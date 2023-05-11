@@ -810,3 +810,68 @@ AAX_Result IPlugAAX::AAXSetChunk(const AAX_CTypeID id, const AAX_SPlugInChunk* c
 	mMutex.Leave();
 	return err;
 }
+
+#ifndef NDEBUG
+
+#include "WDL/filename.h"
+#include "WDL/wdlendian.h"
+#include "WDL/wdlstring.h"
+
+int IPlugAAX::AAXExtractFactoryPresets(const char* const dir)
+{
+	WDL_String filename;
+	int n = 0;
+
+	const int m = NPresets();
+	const int idx = GetCurrentPresetIdx();
+
+	for (int i = 0; i < m; ++i)
+	{
+		if (!RestorePreset(i)) continue;
+		const char* const name = GetPresetName();
+
+		if (!(mState.AllocSize() || AllocStateChunk())) continue;
+
+		mState.Clear();
+		if (!SerializeState(&mState)) continue;
+
+		filename.Set(dir);
+		filename.remove_trailing_dirchars();
+		filename.Append(WDL_DIRCHAR_STR);
+		filename.AppendFormatted(12, "%d ", i + 1);
+
+		const int ofs = filename.GetLength();
+		filename.Append(name);
+		WDL_filename_filterstr(filename.Get() + ofs);
+		filename.Append(".tfx");
+
+		FILE* const fp = fopen(filename.Get(), "wb");
+		if (!fp) continue;
+
+		const int size = mState.Size();
+		AAX_SPlugInChunkHeader hdr;
+
+		hdr.fSize = WDL_bswap32_if_le(sizeof(AAX_SPlugInChunkHeader) + size);
+		hdr.fVersion = WDL_bswap32_if_le(IPlugBase::kIPlugVersion);
+		hdr.fManufacturerID = WDL_bswap32_if_le(GetMfrID());
+		hdr.fProductID = WDL_bswap32_if_le(GetUniqueID());
+		hdr.fPlugInID = WDL_bswap32_if_le('nate');
+		hdr.fChunkID = WDL_bswap32_if_le(IPLUG_VERSION_MAGIC);
+
+		memset(hdr.fName, 0, sizeof(hdr.fName));
+		lstrcpyn_safe((char*)hdr.fName, name, sizeof(hdr.fName));
+
+		if (fwrite(&hdr, 1, sizeof(AAX_SPlugInChunkHeader), fp) &&
+			fwrite(mState.GetBytes(), 1, size, fp))
+		{
+			n++;
+		}
+
+		fclose(fp);
+	}
+
+	RestorePreset(idx);
+	return n;
+}
+
+#endif // NDEBUG

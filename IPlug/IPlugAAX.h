@@ -90,5 +90,9 @@ public:
 	AAX_Result AAXSetChunk(AAX_CTypeID id, const AAX_SPlugInChunk* pChunk);
 
 	inline const AAX_Point* AAXGetViewSize() const { return &mViewSize; }
+
+	#ifndef NDEBUG
+	int AAXExtractFactoryPresets(const char* dir);
+	#endif
 }
 WDL_FIXALIGN;
