@@ -1,6 +1,8 @@
 #include "IPlugAAX.h"
 #include "IGraphics.h"
 
+#include "aax-sdk/Interfaces/AAX_CBinaryDisplayDelegate.h"
+#include "aax-sdk/Interfaces/AAX_CBinaryTaperDelegate.h"
 #include "aax-sdk/Interfaces/AAX_IComponentDescriptor.h"
 #include "aax-sdk/Interfaces/AAX_IPropertyMap.h"
 
@@ -441,7 +443,7 @@ static void DescribeAlgorithmComponent(AAX_IComponentDescriptor* const pCompDesc
 	err = pPropMap->AddProperty(AAX_eProperty_InputStemFormat, AAX_eStemFormat_Stereo);
 	err = pPropMap->AddProperty(AAX_eProperty_OutputStemFormat, AAX_eStemFormat_Stereo);
 
-	err = pPropMap->AddProperty(AAX_eProperty_CanBypass, false);
+	err = pPropMap->AddProperty(AAX_eProperty_CanBypass, true);
 
 	#ifdef IPLUG_USE_CLIENT_GUI
 	err = pPropMap->AddProperty(AAX_eProperty_UsesClientGUI, true);
@@ -487,6 +489,16 @@ AAX_CEffectParameters* AAX_CALLBACK IPlugAAX::AAXCreateParams(IPlugAAX* const pP
 
 AAX_Result IPlugAAX::AAXEffectInit(AAX_CParameterManager* const pParamMgr, const AAX_IController* const pHost)
 {
+	AAX_IParameter* const pBypass = new AAX_CParameter<bool>(cDefaultMasterBypassID, AAX_CString("Master Bypass"), false,
+		AAX_CBinaryTaperDelegate<bool>(),
+		AAX_CBinaryDisplayDelegate<bool>("bypass", "on"),
+		true);
+
+	pBypass->SetNumberOfSteps(2);
+	pBypass->SetType(AAX_eParameterType_Discrete);
+	pBypass->AddShortenedName(AAX_CString("Bypass"));
+	pParamMgr->AddParameter(pBypass);
+
 	char id[16];
 	memcpy(id, "Param\0\0", 8);
 
@@ -664,11 +676,11 @@ void AAX_CALLBACK IPlugAAX::AAXAlgProcessFunc(void* const instBegin[], const voi
 
 void IPlugAAX::AAXUpdateParam(AAX_CParamID const id, const double value, AAX_EUpdateSource src)
 {
+	mMutex.Enter();
+
 	if (!strncmp(id, "Param", 5) && id[5])
 	{
 		const unsigned long int idx = strtoul(&id[5], NULL, 10) - 1;
-
-		mMutex.Enter();
 
 		if (idx < (unsigned long int)NParams())
 		{
@@ -678,9 +690,18 @@ void IPlugAAX::AAXUpdateParam(AAX_CParamID const id, const double value, AAX_EUp
 			GetParam(idx)->SetNormalized(value);
 			OnParamChange(idx);
 		}
-
-		mMutex.Leave();
 	}
+	else if (!strcmp(id, cDefaultMasterBypassID))
+	{
+		const bool bypass = value > 0.0;
+		if (IsBypassed() != bypass)
+		{
+			mPlugFlags ^= IPlugBase::kPlugFlagsBypass;
+			OnBypass(bypass);
+		}
+	}
+
+	mMutex.Leave();
 }
 
 void IPlugAAX::AAXNotificationReceived(const AAX_CTypeID type, const void* /* pData */, uint32_t/*  size */)
