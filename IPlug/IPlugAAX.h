@@ -64,6 +64,8 @@ protected:
 	bool SendSysEx(const ISysEx* pSysEx) { return false; }
 
 private:
+	void ProcessMidiInNode(const AAX_CMidiPacket* pBuf, uint32_t nPackets);
+
 	ByteChunk mState; // Persistent storage if the host asks for plugin state.
 
 	AAX_CEffectParameters* mEffectParams;
@@ -71,6 +73,8 @@ private:
 	int64_t mSamplePos;
 	double WDL_FIXALIGN mTempo;
 	int32_t mTimeSig[2];
+
+	bool mSysExMode;
 
 	AAX_Point mViewSize;
 

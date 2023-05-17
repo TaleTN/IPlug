@@ -4,6 +4,7 @@
 #include "aax-sdk/Interfaces/AAX_CBinaryDisplayDelegate.h"
 #include "aax-sdk/Interfaces/AAX_CBinaryTaperDelegate.h"
 #include "aax-sdk/Interfaces/AAX_IComponentDescriptor.h"
+#include "aax-sdk/Interfaces/AAX_IMIDINode.h"
 #include "aax-sdk/Interfaces/AAX_IPropertyMap.h"
 
 #include <assert.h>
@@ -341,6 +342,8 @@ IPlugBase(
 	mSamplePos = 0;
 	mTempo = 0.0;
 	memset(mTimeSig, 0, sizeof(mTimeSig));
+
+	mSysExMode = false;
 }
 
 bool IPlugAAX::AllocStateChunk(int chunkSize)
@@ -415,16 +418,22 @@ void IPlugAAX::ResizeGraphics(const int w, const int h)
 	mViewSize.horz = (float)w;
 }
 
-static void DescribeAlgorithmComponent(AAX_IComponentDescriptor* const pCompDesc,
+static void DescribeAlgorithmComponent(AAX_IComponentDescriptor* const pCompDesc, const char* const name,
 	const int plugID, const int mfrID, const int plugDoes)
 {
 	AAX_CheckedResult err;
 
 	// See SIPlugAAX_Alg_Context.
 	err = pCompDesc->AddPrivateData(0, sizeof(IPlugAAX*), AAX_ePrivateDataOptions_External);
-	err = pCompDesc->AddAudioBufferLength(1);
-	err = pCompDesc->AddAudioIn(2);
-	err = pCompDesc->AddAudioOut(3);
+
+	if (plugDoes & IPlugBase::kPlugDoesMidiIn)
+	{
+		err = pCompDesc->AddMIDINode(1, AAX_eMIDINodeType_LocalInput, name, 0xFFFF);
+	}
+
+	err = pCompDesc->AddAudioBufferLength(2);
+	err = pCompDesc->AddAudioIn(3);
+	err = pCompDesc->AddAudioOut(4);
 
 	AAX_IPropertyMap* const pPropMap = pCompDesc->NewPropertyMap();
 	if (!pPropMap) err = AAX_ERROR_NULL_OBJECT;
@@ -467,7 +476,7 @@ AAX_Result IPlugAAX::AAXDescribeEffect(AAX_IEffectDescriptor* const pPlugDesc, c
 	err = pPlugDesc->AddCategory(category);
 
 	err = pCompDesc->Clear();
-	DescribeAlgorithmComponent(pCompDesc, uniqueID, mfrID, plugDoes);
+	DescribeAlgorithmComponent(pCompDesc, name, uniqueID, mfrID, plugDoes);
 	err = pPlugDesc->AddComponent(pCompDesc);
 
 	err = pPlugDesc->AddProcPtr(createProc, kAAX_ProcPtrID_Create_EffectParameters);
@@ -623,6 +632,7 @@ AAX_Result IPlugAAX::AAXEffectInit(AAX_CParameterManager* const pParamMgr, const
 struct SIPlugAAX_Alg_Context
 {
 	IPlugAAX* const* mPlug;
+	AAX_IMIDINode* mMidiInNode;
 	const int32_t* mBufferSize;
 	const float* const* mInputs;
 	float* const* mOutputs;
@@ -663,6 +673,18 @@ void AAX_CALLBACK IPlugAAX::AAXAlgProcessFunc(void* const instBegin[], const voi
 			memcpy(pPlug->mTimeSig, timeSig, 2 * sizeof(int32_t));
 		}
 
+		if (pPlug->DoesMIDI(kPlugDoesMidiIn))
+		{
+			AAX_IMIDINode* const pMidiInNode = instance->mMidiInNode;
+			AAX_CMidiStream* const pMidiInStream = pMidiInNode->GetNodeBuffer();
+			const uint32_t nMidiInPackets = pMidiInStream->mBufferSize;
+
+			if (nMidiInPackets)
+			{
+				pPlug->ProcessMidiInNode(pMidiInStream->mBuffer, nMidiInPackets);
+			}
+		}
+
 		const int32_t nFrames = *instance->mBufferSize;
 
 		pPlug->AttachInputBuffers(0, pPlug->NInChannels(), instance->mInputs, nFrames);
@@ -672,6 +694,43 @@ void AAX_CALLBACK IPlugAAX::AAXAlgProcessFunc(void* const instBegin[], const voi
 
 		pPlug->mMutex.Leave();
 	}
+}
+
+void IPlugAAX::ProcessMidiInNode(const AAX_CMidiPacket* const pBuf, const uint32_t nPackets)
+{
+	bool sysExMode = mSysExMode;
+
+	for (uint32_t i = 0; i < nPackets; ++i)
+	{
+		const AAX_CMidiPacket* const pPacket = &pBuf[i];
+
+		const int ofs = pPacket->mTimestamp;
+		const int len = pPacket->mLength;
+		const unsigned char* const pData = pPacket->mData;
+
+		assert(len > 0);
+		if (!len) continue;
+
+		sysExMode |= pData[0] == 0xF0;
+
+		if (!sysExMode)
+		{
+			// TN: Undefined behavior if host hasn't initialized
+			// AAX_CMidiPacket::mData, but should be fine.
+			const IMidiMsg msg(ofs, pData);
+
+			ProcessMidiMsg(&msg);
+		}
+		else
+		{
+			const ISysEx sysex(ofs, pData, len);
+			ProcessSysEx(&sysex);
+
+			sysExMode = pData[len - 1] != 0xF7;
+		}
+	}
+
+	mSysExMode = sysExMode;
 }
 
 void IPlugAAX::AAXUpdateParam(AAX_CParamID const id, const double value, AAX_EUpdateSource src)
