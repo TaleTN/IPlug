@@ -419,7 +419,7 @@ void IPlugAAX::ResizeGraphics(const int w, const int h)
 }
 
 static void DescribeAlgorithmComponent(AAX_IComponentDescriptor* const pCompDesc, const char* const name,
-	const int plugID, const int mfrID, const int plugDoes)
+	const int plugID, const int mfrID, const int latency, const int plugDoes)
 {
 	AAX_CheckedResult err;
 
@@ -452,6 +452,12 @@ static void DescribeAlgorithmComponent(AAX_IComponentDescriptor* const pCompDesc
 	err = pPropMap->AddProperty(AAX_eProperty_InputStemFormat, AAX_eStemFormat_Stereo);
 	err = pPropMap->AddProperty(AAX_eProperty_OutputStemFormat, AAX_eStemFormat_Stereo);
 
+	if (latency)
+	{
+		assert(latency <= 16383); // @ 44.1/48 kHz
+		err = pPropMap->AddProperty(AAX_eProperty_LatencyContribution, latency);
+	}
+
 	err = pPropMap->AddProperty(AAX_eProperty_CanBypass, true);
 
 	#ifdef IPLUG_USE_CLIENT_GUI
@@ -462,7 +468,7 @@ static void DescribeAlgorithmComponent(AAX_IComponentDescriptor* const pCompDesc
 }
 
 AAX_Result IPlugAAX::AAXDescribeEffect(AAX_IEffectDescriptor* const pPlugDesc, const char* const name, const char* const shortName,
-	const int uniqueID, const int mfrID, const int plugDoes, void* const createProc)
+	const int uniqueID, const int mfrID, const int latency, const int plugDoes, void* const createProc)
 {
 	AAX_CheckedResult err;
 
@@ -476,7 +482,7 @@ AAX_Result IPlugAAX::AAXDescribeEffect(AAX_IEffectDescriptor* const pPlugDesc, c
 	err = pPlugDesc->AddCategory(category);
 
 	err = pCompDesc->Clear();
-	DescribeAlgorithmComponent(pCompDesc, name, uniqueID, mfrID, plugDoes);
+	DescribeAlgorithmComponent(pCompDesc, name, uniqueID, mfrID, latency, plugDoes);
 	err = pPlugDesc->AddComponent(pCompDesc);
 
 	err = pPlugDesc->AddProcPtr(createProc, kAAX_ProcPtrID_Create_EffectParameters);

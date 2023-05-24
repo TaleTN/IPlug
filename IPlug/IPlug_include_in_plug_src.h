@@ -226,7 +226,7 @@ AAX_Result GetEffectDescriptions(AAX_ICollection* pCollection)
 			(PLUG_DOES_MIDI_IN ? IPlugBase::kPlugDoesMidiIn : 0);
 
 		err = IPlugAAX::AAXDescribeEffect(pPlugDesc, PLUG_NAME, shortName,
-			PLUG_UNIQUE_ID, PLUG_MFR_ID, plugDoes, (void*)MakeIPlugAAX);
+			PLUG_UNIQUE_ID, PLUG_MFR_ID, PLUG_LATENCY, plugDoes, (void*)MakeIPlugAAX);
 
 		err = pCollection->AddEffect(BUNDLE_DOMAIN ".aaxplugin." BUNDLE_NAME, pPlugDesc);
 	}

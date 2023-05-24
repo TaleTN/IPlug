@@ -80,7 +80,7 @@ private:
 
 public:
 	static AAX_Result AAXDescribeEffect(AAX_IEffectDescriptor* pPlugDesc, const char* name, const char* shortName,
-		int uniqueID, int mfrID, int plugDoes, void* createProc);
+		int uniqueID, int mfrID, int latency, int plugDoes, void* createProc);
 
 	AAX_CEffectParameters* AAX_CALLBACK AAXCreateParams(IPlugAAX* pPlug);
 	AAX_Result AAXEffectInit(AAX_CParameterManager* pParamMgr, const AAX_IController* pHost);
