@@ -1,6 +1,10 @@
 #include "IPlugAAX.h"
 #include "IGraphics.h"
 
+#ifdef __APPLE__
+	#include "IGraphicsMac.h"
+#endif
+
 #include "aax-sdk/Interfaces/AAX_CBinaryDisplayDelegate.h"
 #include "aax-sdk/Interfaces/AAX_CBinaryTaperDelegate.h"
 #include "aax-sdk/Interfaces/AAX_IComponentDescriptor.h"
@@ -281,7 +285,18 @@ protected:
 	void CreateViewContents() AAX_OVERRIDE
 	{
 		const IPlugAAX_EffectParams* const pEffectParams = (const IPlugAAX_EffectParams*)GetEffectParameters();
-		mGraphics = pEffectParams->GetPlug()->GetGUI();
+		IPlugAAX* const pPlug = pEffectParams->GetPlug();
+
+		IGraphics* const pGraphics = pPlug->GetGUI();
+		mGraphics = pGraphics;
+
+		#ifdef __APPLE__
+		if (pGraphics)
+		{
+			static const int scale = IGraphicsMac::kScaleOS;
+			pPlug->ResizeGraphics(pGraphics->Width() >> scale, pGraphics->Height() >> scale);
+		}
+		#endif
 	}
 
 	void CreateViewContainer() AAX_OVERRIDE
