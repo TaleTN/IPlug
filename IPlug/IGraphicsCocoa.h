@@ -5,14 +5,13 @@
 // so we need to make sure the C++ static lib code gets the
 // IGraphicsCocoa that it expects.
 #ifndef IGRAPHICS_COCOA
-	// You should add IGRAPHICS_COCOA=$(PRODUCT_NAME:identifier)_AU or VST
-	// to GCC_PREPROCESSOR_DEFINITIONS under buildSettings in Xcode project.
 	#error "IGRAPHICS_COCOA not defined!"
+#endif
 
 // TN: Dammit Jim, I'm a plugin not an app! so we really shouldn't need
 // SWELL_APP_PREFIX, but just to be sure...
-#elif !defined(SWELL_APP_PREFIX)
-	#define SWELL_APP_PREFIX IGRAPHICS_COCOA
+#ifndef SWELL_APP_PREFIX
+	#error "SWELL_APP_PREFIX not defined!"
 #endif
 
 @interface IGRAPHICS_COCOA: NSView <NSTextFieldDelegate>
