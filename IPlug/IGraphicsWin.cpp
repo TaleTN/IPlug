@@ -178,6 +178,8 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 
 		case WM_MOUSEMOVE:
 		{
+			if (!GetCursor()) SetCursor(LoadCursor(NULL, IDC_ARROW));
+
 			POINT p;
 			ScaleLParamXY(&p, lParam, pGraphics->mDPI);
 
