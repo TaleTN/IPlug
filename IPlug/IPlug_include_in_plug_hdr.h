@@ -8,6 +8,10 @@
 	#include "IPlugVST2.h"
 	typedef IPlugVST2 IPlug;
 	#define API_EXT "vst"
+#elif defined VST3_API
+	#include "IPlugVST3.h"
+	typedef IPlugVST3 IPlug;
+	#define API_EXT "vst3"
 #elif defined AU_API
 	#include "IPlugAU.h"
 	typedef IPlugAU IPlug;

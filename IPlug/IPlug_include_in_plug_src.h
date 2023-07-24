@@ -71,6 +71,103 @@ EXPORT int main(audioMasterCallback const hostCallback)
 
 } // extern "C"
 
+#elif defined(VST3_API)
+
+#include "VST3_SDK/public.sdk/source/main/pluginfactory.h"
+
+#include <assert.h>
+#include <string.h>
+
+extern "C" {
+
+#ifdef __APPLE__
+SMTG_EXPORT_SYMBOL bool bundleEntry(CFBundleRef) { return true; }
+SMTG_EXPORT_SYMBOL bool bundleExit(void) { return true; }
+#endif
+
+// BEGIN_FACTORY_DEF(PLUG_MFR, PLUG_MFR_URL, PLUG_MFR_EMAIL)
+SMTG_EXPORT_SYMBOL Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
+{
+	if (!Steinberg::gPluginFactory)
+	{
+		static Steinberg::PFactoryInfo factoryInfo
+		(
+			PLUG_MFR,
+
+			#ifdef PLUG_MFR_URL
+			PLUG_MFR_URL,
+			#else
+			"",
+			#endif
+
+			#ifdef PLUG_MFR_EMAIL
+			"mailto:" PLUG_MFR_EMAIL,
+			#else
+			"",
+			#endif
+
+			Steinberg::Vst::kDefaultFactoryFlags
+		);
+
+		Steinberg::gPluginFactory = new Steinberg::CPluginFactory(factoryInfo);
+
+		const Steinberg::FUID plugUID(PLUG_UNIQUE_GUID);
+		static const Steinberg::uint32 classFlags = 0;
+
+		/* DEF_CLASS2(
+			INLINE_UID_FROM_FUID(plugUID),
+			PClassInfo::kManyInstances,
+			kVstAudioEffectClass,
+			PLUG_NAME,
+			classFlags,
+			Vst::PlugType::kFx,
+			VERSIONINFO_STR,
+			kVstVersionString,
+			IPlugVST3::VSTCreateInstance
+		) */
+		Steinberg::TUID lcid = INLINE_UID_FROM_FUID(plugUID);
+
+		static Steinberg::PClassInfo2 componentClass
+		(
+			lcid,
+			Steinberg::PClassInfo::kManyInstances,
+			kVstAudioEffectClass,
+			PLUG_NAME,
+			classFlags,
+
+			#if PLUG_IS_INST
+			Steinberg::Vst::PlugType::kFxInstrument,
+			#else
+			Steinberg::Vst::PlugType::kFx,
+			#endif
+
+			NULL,
+			VERSIONINFO_STR,
+			kVstVersionString
+		);
+
+		Steinberg::gPluginFactory->registerClass(&componentClass, IPlugVST3::VSTCreateInstance);
+
+	// END_FACTORY
+	}
+	else Steinberg::gPluginFactory->addRef();
+
+	return Steinberg::gPluginFactory;
+}
+
+} // extern "C"
+
+IPlug* MakeIPlugVST3(void* const instanceInfo)
+{
+	static WDL_Mutex sMutex;
+	sMutex.Enter();
+
+	IPlugVST3* const pPlug = new PLUG_CLASS_NAME(instanceInfo);
+
+	sMutex.Leave();
+	return pPlug;
+}
+
 #elif defined(AU_API)
 
 IPlug* MakeIPlugAU()
