@@ -59,7 +59,9 @@ private:
 
 public:
 	static Steinberg::FUnknown* VSTCreateInstance(void* context);
+
 	Steinberg::tresult VSTInitialize(Steinberg::FUnknown* context);
+	Steinberg::tresult VSTSetActive(Steinberg::TBool state);
 
 	inline bool VSTDoesMidiIn() const { return DoesMIDI(kPlugDoesMidiIn); }
 };

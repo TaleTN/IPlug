@@ -34,6 +34,11 @@ public:
 		return mPlug->VSTInitialize(context);
 	}
 
+	tresult PLUGIN_API setActive(const TBool state) SMTG_OVERRIDE
+	{
+		return mPlug->VSTSetActive(state);
+	}
+
 	inline void setIPlugVST3(IPlugVST3* const pPlug) { mPlug = pPlug; }
 
 private:
@@ -83,6 +88,23 @@ tresult IPlugVST3::VSTInitialize(FUnknown* /* context */)
 
 	HostSpecificInit();
 	OnParamReset();
+
+	mMutex.Leave();
+	return kResultOk;
+}
+
+tresult IPlugVST3::VSTSetActive(const TBool state)
+{
+	mMutex.Enter();
+
+	const bool active = !!state;
+	const int flags = mPlugFlags;
+
+	if (!(flags & kPlugFlagsActive) == active)
+	{
+		mPlugFlags = flags ^ kPlugFlagsActive;
+		OnActivate(active);
+	}
 
 	mMutex.Leave();
 	return kResultOk;
