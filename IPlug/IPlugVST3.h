@@ -62,6 +62,8 @@ public:
 
 	Steinberg::tresult VSTInitialize(Steinberg::FUnknown* context);
 	Steinberg::tresult VSTSetActive(Steinberg::TBool state);
+	Steinberg::tresult VSTSetupProcessing(Steinberg::Vst::ProcessSetup& setup);
+	Steinberg::tresult VSTProcess(Steinberg::Vst::ProcessData& data);
 
 	inline bool VSTDoesMidiIn() const { return DoesMIDI(kPlugDoesMidiIn); }
 };
