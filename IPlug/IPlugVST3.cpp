@@ -177,6 +177,13 @@ tresult IPlugVST3::VSTProcess(Vst::ProcessData& data)
 	const Vst::AudioBusBuffers* const inBus = data.numInputs ? &data.inputs[0] : &emptyBus;
 	const Vst::AudioBusBuffers* const outBus = data.numOutputs ? &data.outputs[0] : &emptyBus;
 
+	Vst::IEventList* const pInputEvents = data.inputEvents;
+	if (pInputEvents)
+	{
+		const int32 nEvents = pInputEvents->getEventCount();
+		if (nEvents) ProcessInputEvents(pInputEvents, nEvents);
+	}
+
 	const int nInputs = NInChannels(), nOutputs = NOutChannels();
 
 	if (inBus->numChannels >= nInputs && outBus->numChannels >= nOutputs)
@@ -197,4 +204,47 @@ tresult IPlugVST3::VSTProcess(Vst::ProcessData& data)
 
 	mMutex.Leave();
 	return kResultOk;
+}
+
+void IPlugVST3::ProcessInputEvents(Vst::IEventList* const pInputEvents, const int32 nEvents)
+{
+	for (int32 i = 0; i < nEvents; ++i)
+	{
+		Vst::Event event;
+		if (pInputEvents->getEvent(i, event) != kResultOk) continue;
+
+		const int32 busIndex = event.busIndex, ofs = event.sampleOffset;
+		if (busIndex != 0) continue;
+
+		switch (event.type)
+		{
+			case Vst::Event::kNoteOnEvent:
+			{
+				int velocity = (int)(event.noteOn.velocity * 127.0f + 0.5f);
+				velocity = wdl_max(velocity, 1);
+
+				const IMidiMsg msg(ofs, 0x90 | event.noteOn.channel, event.noteOn.pitch, velocity);
+				ProcessMidiMsg(&msg);
+				break;
+			}
+
+			case Vst::Event::kNoteOffEvent:
+			{
+				const int velocity = (int)(event.noteOff.velocity * 127.0f + 0.5f);
+
+				const IMidiMsg msg(ofs, 0x80 | event.noteOff.channel, event.noteOff.pitch, velocity);
+				ProcessMidiMsg(&msg);
+				break;
+			}
+
+			case Vst::Event::kPolyPressureEvent:
+			{
+				const int pressure = (int)(event.polyPressure.pressure * 127.0f + 0.5f);
+
+				const IMidiMsg msg(ofs, 0xA0 | event.polyPressure.channel, event.polyPressure.pitch, pressure);
+				ProcessMidiMsg(&msg);
+				break;
+			}
+		}
+	}
 }
