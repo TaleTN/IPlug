@@ -55,6 +55,7 @@ protected:
 	bool SendSysEx(const ISysEx* pSysEx) { return false; }
 
 private:
+	void ProcessParamChanges(Steinberg::Vst::IParameterChanges* pParamChanges, Steinberg::int32 nChanges);
 	void ProcessInputEvents(Steinberg::Vst::IEventList* pInputEvents, Steinberg::int32 nEvents);
 
 	/* (IPlugVST3_Effect*) */ void* const mEffect;

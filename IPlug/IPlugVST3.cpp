@@ -1,12 +1,41 @@
 #include "IPlugVST3.h"
+
+#include "VST3_SDK/pluginterfaces/vst/ivstmidicontrollers.h"
 #include "VST3_SDK/public.sdk/source/vst/vstaudioprocessoralgo.h"
 
 #include <assert.h>
+#include "WDL/wdlcstring.h"
 
 using namespace Steinberg;
 
+static const Vst::ParamID kMidiCtrlParamID = 0x40000000;
+static const int kNumMidiCtrlParams = 16*256; // >= 16*(128 + 2)
+
+#ifndef IPLUG_NO_MIDI_CC_PARAMS
+
+static Vst::ParamID GetMidiCtrlParamID(const int ch, const int cc)
+{
+	return (ch << 8) | cc | kMidiCtrlParamID;
+}
+
+static inline int GetMidiCtrlParamIdx(const Vst::ParamID id)
+{
+	return id ^ kMidiCtrlParamID;
+}
+
+static inline int GetMidiCtrlNo(const Vst::ParamID id)
+{
+	return id & 0xFF;
+}
+
+#endif // IPLUG_NO_MIDI_CC_PARAMS
+
 class IPlugVST3_Effect:
 	public Vst::SingleComponentEffect
+
+	#ifndef IPLUG_NO_MIDI_CC_PARAMS
+	, public Vst::IMidiMapping
+	#endif
 {
 public:
 	IPlugVST3_Effect():
@@ -19,6 +48,13 @@ public:
 	}
 
 	OBJ_METHODS(IPlugVST3_Effect, Vst::SingleComponentEffect)
+
+	#ifndef IPLUG_NO_MIDI_CC_PARAMS
+	DEFINE_INTERFACES
+		DEF_INTERFACE(Vst::IMidiMapping)
+	END_DEFINE_INTERFACES(Vst::SingleComponentEffect)
+	#endif
+
 	REFCOUNT_METHODS(Vst::SingleComponentEffect)
 
 	tresult PLUGIN_API initialize(FUnknown* const context) SMTG_OVERRIDE
@@ -31,7 +67,14 @@ public:
 		if (mPlug->NInChannels()) addAudioInput(STR16("Stereo Input"), Vst::SpeakerArr::kStereo);
 		if (mPlug->NOutChannels()) addAudioOutput(STR16("Stereo Output"), Vst::SpeakerArr::kStereo);
 
-		if (doesMidiIn) addEventInput(STR16("MIDI Input"), 16);
+		if (doesMidiIn)
+		{
+			addEventInput(STR16("MIDI Input"), 16);
+
+			#ifndef IPLUG_NO_MIDI_CC_PARAMS
+			addMidiCCParams();
+			#endif
+		}
 
 		return mPlug->VSTInitialize(context);
 	}
@@ -57,9 +100,105 @@ public:
 		return mPlug->VSTProcess(data);
 	}
 
+	#ifndef IPLUG_NO_MIDI_CC_PARAMS
+
+	tresult PLUGIN_API getMidiControllerAssignment(const int32 busIndex, const int16 channel,
+		const Vst::CtrlNumber midiControllerNumber, Vst::ParamID& id) SMTG_OVERRIDE
+	{
+		tresult result = kResultFalse;
+
+		if (busIndex == 0 && (unsigned int)midiControllerNumber < Vst::kCountCtrlNumber && mPlug->VSTDoesMidiIn())
+		{
+			id = GetMidiCtrlParamID(channel, midiControllerNumber);
+			result = kResultTrue;
+		}
+
+		return result;
+	}
+
+	#endif // IPLUG_NO_MIDI_CC_PARAMS
+
 	inline void setIPlugVST3(IPlugVST3* const pPlug) { mPlug = pPlug; }
 
 private:
+	#ifndef IPLUG_NO_MIDI_CC_PARAMS
+
+	void addMidiCCParams()
+	{
+		static const Vst::TChar* const chModeStr[8] =
+		{
+			STR16("All Sound Off"),
+			STR16("Reset All Controllers"),
+			STR16("Local Control"),
+			STR16("All Notes Off"),
+			STR16("Omni Mode Off"),
+			STR16("Omni Mode On"),
+			STR16("Mono Mode On"),
+			STR16("Poly Mode On")
+		};
+
+		Vst::ParameterInfo info;
+
+		info.units[0] = 0;
+		info.stepCount = 0;
+		info.unitId = Vst::kRootUnitId;
+		info.flags = Vst::ParameterInfo::kNoFlags;
+
+		char str8[8];
+		Vst::TChar str16[sizeof(str8)];
+
+		for (int ch = 0; ch < 16; ++ch)
+		{
+			info.defaultNormalizedValue = 0.0;
+
+			for (int cc = 0; cc < Vst::kCountCtrlNumber; ++cc)
+			{
+				info.id = GetMidiCtrlParamID(ch, cc);
+
+				switch (cc)
+				{
+					case Vst::kAfterTouch:
+					{
+						strcpy16(info.title, STR16("Aftertouch"));
+						strcpy16(info.shortTitle, STR16("AT"));
+						break;
+					}
+
+					case Vst::kPitchBend:
+					{
+						strcpy16(info.title, STR16("Pitch Bend"));
+						strcpy16(info.shortTitle, STR16("PB"));
+
+						info.defaultNormalizedValue = 0.5;
+						break;
+					}
+
+					default:
+					{
+						snprintf(str8, sizeof(str8), "%d", cc);
+
+						strcpy16(info.shortTitle, STR16("CC#"));
+						str8ToStr16(&info.shortTitle[3], str8);
+
+						const unsigned int chMode = cc - Vst::kCtrlAllSoundsOff;
+						strcpy16(info.title, chMode >= 8 ? info.shortTitle : chModeStr[chMode]);
+						break;
+					}
+				}
+
+				snprintf(str8, sizeof(str8), " [%d]", ch + 1);
+				str8ToStr16(str16, str8);
+
+				strcat16(info.title, str16);
+				strcat16(info.shortTitle, str16);
+
+				parameters.addParameter(info);
+			}
+		}
+	}
+
+	#endif // IPLUG_NO_MIDI_CC_PARAMS
+
 	IPlugVST3* mPlug;
 };
 
@@ -177,6 +316,11 @@ tresult IPlugVST3::VSTProcess(Vst::ProcessData& data)
 	const Vst::AudioBusBuffers* const inBus = data.numInputs ? &data.inputs[0] : &emptyBus;
 	const Vst::AudioBusBuffers* const outBus = data.numOutputs ? &data.outputs[0] : &emptyBus;
 
+	Vst::IParameterChanges* const pParamChanges = data.inputParameterChanges;
+	const int32 nChanges = pParamChanges->getParameterCount();
+
+	if (nChanges) ProcessParamChanges(pParamChanges, nChanges);
+
 	Vst::IEventList* const pInputEvents = data.inputEvents;
 	if (pInputEvents)
 	{
@@ -204,6 +348,62 @@ tresult IPlugVST3::VSTProcess(Vst::ProcessData& data)
 
 	mMutex.Leave();
 	return kResultOk;
+}
+
+void IPlugVST3::ProcessParamChanges(Vst::IParameterChanges* const pParamChanges, const int32 nChanges)
+{
+	for (int32 i = 0; i < nChanges; ++i)
+	{
+		Vst::IParamValueQueue* const pParamQueue = pParamChanges->getParameterData(i);
+		if (!pParamQueue) continue;
+
+		const Vst::ParamID id = pParamQueue->getParameterId();
+		const int32 nPoints = pParamQueue->getPointCount();
+
+		Vst::ParamValue value;
+		int32 ofs;
+
+		#ifndef IPLUG_NO_MIDI_CC_PARAMS
+		const int idx = GetMidiCtrlParamIdx(id);
+		if (idx < kNumMidiCtrlParams)
+		{
+			const int ch = (unsigned int)idx >> 8;
+			const int cc = GetMidiCtrlNo(id);
+
+			for (int32 j = 0; j < nPoints; ++j)
+			{
+				if (pParamQueue->getPoint(j, ofs, value) != kResultOk) continue;
+
+				switch (cc)
+				{
+					case Vst::kAfterTouch:
+					{
+						const IMidiMsg msg(ofs, 0xD0 | ch, (int)(value * 127.0 + 0.5));
+						ProcessMidiMsg(&msg);
+						break;
+					}
+
+					case Vst::kPitchBend:
+					{
+						const int pb = (int)(value * 16383.0 + 0.5);
+						const IMidiMsg msg(ofs, 0xE0 | ch, pb & 127, (unsigned int)pb >> 7);
+						ProcessMidiMsg(&msg);
+						break;
+					}
+
+					default:
+					{
+						if (cc > 127) break;
+
+						const IMidiMsg msg(ofs, 0xB0 | ch, cc, (int)(value * 127.0 + 0.5));
+						ProcessMidiMsg(&msg);
+						break;
+					}
+				}
+			}
+		}
+		#endif // IPLUG_NO_MIDI_CC_PARAMS
+	}
 }
 
 void IPlugVST3::ProcessInputEvents(Vst::IEventList* const pInputEvents, const int32 nEvents)
