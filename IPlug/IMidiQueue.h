@@ -1,6 +1,6 @@
 /*
 	IPlug - IMidiQueue.h
-	Copyright (C) 2009-2020 Theo Niessink
+	Copyright (C) 2009-2023 Theo Niessink
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -108,19 +108,33 @@ public:
 		IMidiMsg* const buf = mBuf.GetFast();
 
 		#ifndef DONT_SORT_IMIDIQUEUE
+		unsigned int i = mFront, j = mBack;
+		const int ofs = pMsg->mOffset;
+
 		// Insert the MIDI message at the right offset.
-		if (mBack > mFront && pMsg->mOffset < buf[mBack - 1].mOffset)
+		if (mBack > mFront && ofs < buf[--j].mOffset)
 		{
-			int i = mBack - 2;
-			while (i >= mFront && pMsg->mOffset < buf[i].mOffset) --i;
-			i++;
+			if (ofs >= buf[i].mOffset)
+			{
+				// Binary search.
+				while (i < j)
+				{
+					const unsigned int sum = (unsigned int)i + j;
+					const unsigned int m0 = (sum >> 1) + (sum & 1);
+					const unsigned int m1 = m0 - 1;
+					const bool gt = buf[m0].mOffset > ofs;
+					i = gt ? i : m0;
+					j = gt ? m1 : j;
+				}
+				i++;
+			}
 			memmove(&buf[i + 1], &buf[i], (mBack - i) * sizeof(IMidiMsg));
 			buf[i] = *pMsg;
 		}
 		else
 		#endif
 		{
-			buf[mBack] = *pMsg;
+			buf[(unsigned int)mBack] = *pMsg;
 		}
 
 		++mBack;
@@ -142,7 +156,10 @@ public:
 
 	// Returns the "next" MIDI message (all the way in the front of the
 	// queue), but does *not* remove it from the queue.
-	inline const IMidiMsg* Peek() const { return &mBuf.GetFast()[mFront]; }
+	inline const IMidiMsg* Peek() const
+	{
+		return &mBuf.GetFast()[(unsigned int)mFront];
+	}
 
 	// Moves back MIDI messages all the way to the front of the queue, thus
 	// freeing up space at the back, and updates the sample offset of the
@@ -154,7 +171,8 @@ public:
 
 		// Update the sample offset.
 		IMidiMsg* const buf = mBuf.GetFast();
-		for (int i = 0; i < mBack; ++i) buf[i].mOffset -= nFrames;
+		const unsigned int j = mBack;
+		for (unsigned int i = 0; i < j; ++i) buf[i].mOffset -= nFrames;
 	}
 
 	// Clears the queue.
@@ -187,11 +205,11 @@ protected:
 	// Moves everything all the way to the front.
 	void Compact()
 	{
-		mBack -= mFront;
+		const unsigned int i = mFront, n = mBack -= mFront;
 		if (mBack > 0)
 		{
 			IMidiMsg* const buf = mBuf.GetFast();
-			memmove(&buf[0], &buf[mFront], mBack * sizeof(IMidiMsg));
+			memmove(&buf[0], &buf[i], n * sizeof(IMidiMsg));
 		}
 		mFront = 0;
 	}
