@@ -3,7 +3,7 @@
 	#define TARGET_OS_IOS 0
 #endif
 
-#include "aax-sdk/Interfaces/AAX_Assert.h"
+#include "AAX_SDK/Interfaces/AAX_Assert.h"
 
 // TN: Some AAX macros leak absolute (!) source filenames into the binary,
 // even with NDEBUG defined. For IPlug this happens only for

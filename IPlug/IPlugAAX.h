@@ -2,12 +2,12 @@
 
 #include "IPlugBase.h"
 
-#include "aax-sdk/Interfaces/AAX_CEffectGUI.h"
-#include "aax-sdk/Interfaces/AAX_CEffectParameters.h"
-#include "aax-sdk/Interfaces/AAX_Exception.h"
-#include "aax-sdk/Interfaces/AAX_ICollection.h"
-#include "aax-sdk/Interfaces/AAX_IEffectDescriptor.h"
-#include "aax-sdk/Interfaces/AAX_ITransport.h"
+#include "AAX_SDK/Interfaces/AAX_CEffectGUI.h"
+#include "AAX_SDK/Interfaces/AAX_CEffectParameters.h"
+#include "AAX_SDK/Interfaces/AAX_Exception.h"
+#include "AAX_SDK/Interfaces/AAX_ICollection.h"
+#include "AAX_SDK/Interfaces/AAX_IEffectDescriptor.h"
+#include "AAX_SDK/Interfaces/AAX_ITransport.h"
 
 #include "WDL/wdltypes.h"
 

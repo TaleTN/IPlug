@@ -5,11 +5,11 @@
 	#include "IGraphicsMac.h"
 #endif
 
-#include "aax-sdk/Interfaces/AAX_CBinaryDisplayDelegate.h"
-#include "aax-sdk/Interfaces/AAX_CBinaryTaperDelegate.h"
-#include "aax-sdk/Interfaces/AAX_IComponentDescriptor.h"
-#include "aax-sdk/Interfaces/AAX_IMIDINode.h"
-#include "aax-sdk/Interfaces/AAX_IPropertyMap.h"
+#include "AAX_SDK/Interfaces/AAX_CBinaryDisplayDelegate.h"
+#include "AAX_SDK/Interfaces/AAX_CBinaryTaperDelegate.h"
+#include "AAX_SDK/Interfaces/AAX_IComponentDescriptor.h"
+#include "AAX_SDK/Interfaces/AAX_IMIDINode.h"
+#include "AAX_SDK/Interfaces/AAX_IPropertyMap.h"
 
 #include <assert.h>
 #include <stdlib.h>
