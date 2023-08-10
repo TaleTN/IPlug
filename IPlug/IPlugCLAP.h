@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IPlugBase.h"
-#include "clap/clap.h"
+#include "CLAP_SDK/clap.h"
 
 #include "WDL/heapbuf.h"
 #include "WDL/wdltypes.h"
