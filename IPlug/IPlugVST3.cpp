@@ -9,7 +9,7 @@
 using namespace Steinberg;
 
 static const Vst::ParamID kMidiCtrlParamID = 0x40000000;
-static const int kNumMidiCtrlParams = 16*256; // >= 16*(128 + 2)
+static const int kNumMidiCtrlParams = 16*256; // >= 16*(128 + 3)
 
 #ifndef IPLUG_NO_MIDI_CC_PARAMS
 
@@ -26,6 +26,13 @@ static inline int GetMidiCtrlParamIdx(const Vst::ParamID id)
 static inline int GetMidiCtrlNo(const Vst::ParamID id)
 {
 	return id & 0xFF;
+}
+
+static int GetMidiChName(Vst::TChar* const name)
+{
+	strcpy16(name, STR16("MIDI Channel "));
+	static const int len = 13; // strlen16(name)
+	return len;
 }
 
 #endif // IPLUG_NO_MIDI_CC_PARAMS
@@ -72,6 +79,7 @@ public:
 			addEventInput(STR16("MIDI Input"), 16);
 
 			#ifndef IPLUG_NO_MIDI_CC_PARAMS
+			addMidiChUnits();
 			addMidiCCParams();
 			#endif
 		}
@@ -116,12 +124,92 @@ public:
 		return result;
 	}
 
+	int32 PLUGIN_API getProgramListCount() SMTG_OVERRIDE
+	{
+		return mPlug->VSTDoesMidiIn() ? 16 : 0;
+	}
+
+	tresult PLUGIN_API getProgramListInfo(int32 listIndex, Vst::ProgramListInfo& info) SMTG_OVERRIDE
+	{
+		tresult result = kResultFalse;
+
+		if ((unsigned int)listIndex < 16)
+		{
+			info.id = ++listIndex;
+
+			const int len = GetMidiChName(info.name);
+			char str8[4];
+
+			snprintf(str8, sizeof(str8), "%d", listIndex);
+			str8ToStr16(&info.name[len], str8);
+
+			info.programCount = 128;
+			result = kResultTrue;
+		}
+
+		return result;
+	}
+
+	tresult PLUGIN_API getProgramName(const Vst::ProgramListID listId, const int32 programIndex,
+		Vst::String128 name) SMTG_OVERRIDE
+	{
+		tresult result = kResultFalse;
+
+		if ((unsigned int)listId < 16 && (unsigned int)programIndex < 128)
+		{
+			strcpy16(name, STR16("Program "));
+			static const int len = 8; // strlen16("Program ")
+			char str8[4];
+
+			snprintf(str8, sizeof(str8), "%d", programIndex + 1);
+			str8ToStr16(&name[len], str8);
+
+			result = kResultTrue;
+		}
+
+		return result;
+	}
+
+	tresult PLUGIN_API getUnitByBus(const Vst::MediaType type, const Vst::BusDirection dir,
+		const int32 busIndex, const int32 channel, Vst::UnitID& unitId) SMTG_OVERRIDE
+	{
+		tresult result = kResultFalse;
+
+		if (type == Vst::kEvent && dir == Vst::kInput && busIndex == 0 && (unsigned int)channel < 16 && mPlug->VSTDoesMidiIn())
+		{
+			unitId = channel + 1;
+			result = kResultTrue;
+		}
+
+		return result;
+	}
+
 	#endif // IPLUG_NO_MIDI_CC_PARAMS
 
 	inline void setIPlugVST3(IPlugVST3* const pPlug) { mPlug = pPlug; }
 
 private:
 	#ifndef IPLUG_NO_MIDI_CC_PARAMS
+
+	void addMidiChUnits()
+	{
+		Vst::UnitInfo info;
+		info.parentUnitId = Vst::kRootUnitId;
+
+		const int len = GetMidiChName(info.name);
+		char str8[4];
+
+		for (int ch = 1; ch <= 16; ++ch)
+		{
+			info.id = ch;
+
+			snprintf(str8, sizeof(str8), "%d", ch);
+			str8ToStr16(&info.name[len], str8);
+
+			info.programListId = ch;
+			addUnit(new Vst::Unit(info));
+		}
+	}
 
 	void addMidiCCParams()
 	{
@@ -138,20 +226,19 @@ private:
 		};
 
 		Vst::ParameterInfo info;
-
 		info.units[0] = 0;
-		info.stepCount = 0;
-		info.unitId = Vst::kRootUnitId;
-		info.flags = Vst::ParameterInfo::kNoFlags;
 
 		char str8[8];
 		Vst::TChar str16[sizeof(str8)];
 
 		for (int ch = 0; ch < 16; ++ch)
 		{
+			info.stepCount = 0;
 			info.defaultNormalizedValue = 0.0;
+			info.unitId = Vst::kRootUnitId;
+			info.flags = Vst::ParameterInfo::kNoFlags;
 
-			for (int cc = 0; cc < Vst::kCountCtrlNumber; ++cc)
+			for (int cc = 0; cc <= Vst::kCountCtrlNumber; ++cc)
 			{
 				info.id = GetMidiCtrlParamID(ch, cc);
 
@@ -170,6 +257,18 @@ private:
 						strcpy16(info.shortTitle, STR16("PB"));
 
 						info.defaultNormalizedValue = 0.5;
+						break;
+					}
+
+					case Vst::kCtrlProgramChange:
+					{
+						strcpy16(info.title, STR16("Program Change"));
+						strcpy16(info.shortTitle, STR16("PC"));
+
+						info.stepCount = 127;
+						info.defaultNormalizedValue = 0.0;
+						info.unitId = ch + 1;
+						info.flags = Vst::ParameterInfo::kIsList | Vst::ParameterInfo::kIsProgramChange;
 						break;
 					}
 
@@ -387,6 +486,13 @@ void IPlugVST3::ProcessParamChanges(Vst::IParameterChanges* const pParamChanges,
 					{
 						const int pb = (int)(value * 16383.0 + 0.5);
 						const IMidiMsg msg(ofs, 0xE0 | ch, pb & 127, (unsigned int)pb >> 7);
+						ProcessMidiMsg(&msg);
+						break;
+					}
+
+					case Vst::kCtrlProgramChange:
+					{
+						const IMidiMsg msg(ofs, 0xC0 | ch, (int)(value * 127.0 + 0.5));
 						ProcessMidiMsg(&msg);
 						break;
 					}
