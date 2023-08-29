@@ -1,4 +1,5 @@
 #include "IPlugVST3.h"
+#include "IGraphics.h"
 
 #include "VST3_SDK/pluginterfaces/vst/ivstmidicontrollers.h"
 #include "VST3_SDK/public.sdk/source/vst/vstaudioprocessoralgo.h"
@@ -554,7 +555,15 @@ void IPlugVST3::ProcessParamChanges(Vst::IParameterChanges* const pParamChanges,
 
 void IPlugVST3::ProcessParamChange(const Vst::ParamID id, const Vst::ParamValue value)
 {
-	if (id == kBypassParamID)
+	if (NParams(id))
+	{
+		IGraphics* const pGraphics = GetGUI();
+		if (pGraphics) pGraphics->SetParameterFromPlug(id, value, true);
+
+		GetParam(id)->SetNormalized(value);
+		OnParamChange(id);
+	}
+	else if (id == kBypassParamID)
 	{
 		const bool bypass = value >= 0.5;
 		if (IsBypassed() != bypass)
