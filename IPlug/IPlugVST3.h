@@ -56,7 +56,9 @@ protected:
 
 private:
 	void ProcessParamChanges(Steinberg::Vst::IParameterChanges* pParamChanges, Steinberg::int32 nChanges);
+	void ProcessParamChange(Steinberg::Vst::ParamID id, Steinberg::Vst::ParamValue value);
 	void ProcessInputEvents(Steinberg::Vst::IEventList* pInputEvents, Steinberg::int32 nEvents);
+	void FlushParamChanges(Steinberg::Vst::IParameterChanges* pParamChanges, Steinberg::int32 nChanges);
 
 	/* (IPlugVST3_Effect*) */ void* const mEffect;
 

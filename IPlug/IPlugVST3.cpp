@@ -11,6 +11,8 @@ using namespace Steinberg;
 static const Vst::ParamID kMidiCtrlParamID = 0x40000000;
 static const int kNumMidiCtrlParams = 16*256; // >= 16*(128 + 3)
 
+static const Vst::ParamID kBypassParamID = kMidiCtrlParamID - 1;
+
 #ifndef IPLUG_NO_MIDI_CC_PARAMS
 
 static Vst::ParamID GetMidiCtrlParamID(const int ch, const int cc)
@@ -80,9 +82,14 @@ public:
 
 			#ifndef IPLUG_NO_MIDI_CC_PARAMS
 			addMidiChUnits();
-			addMidiCCParams();
 			#endif
 		}
+
+		addBypassParam();
+
+		#ifndef IPLUG_NO_MIDI_CC_PARAMS
+		if (doesMidiIn) addMidiCCParams();
+		#endif
 
 		return mPlug->VSTInitialize(context);
 	}
@@ -210,6 +217,27 @@ private:
 			addUnit(new Vst::Unit(info));
 		}
 	}
+
+	#endif // IPLUG_NO_MIDI_CC_PARAMS
+
+	void addBypassParam()
+	{
+		Vst::ParameterInfo info;
+		info.id = kBypassParamID;
+
+		strcpy16(info.title, STR16("Host Bypass"));
+		strcpy16(info.shortTitle, STR16("Bypass"));
+
+		info.units[0] = 0;
+		info.stepCount = 1;
+		info.defaultNormalizedValue = 0.0;
+		info.unitId = Vst::kRootUnitId;
+		info.flags = Vst::ParameterInfo::kCanAutomate | Vst::ParameterInfo::kIsBypass;
+
+		parameters.addParameter(info);
+	}
+
+	#ifndef IPLUG_NO_MIDI_CC_PARAMS
 
 	void addMidiCCParams()
 	{
@@ -445,6 +473,8 @@ tresult IPlugVST3::VSTProcess(Vst::ProcessData& data)
 		}
 	}
 
+	if (nChanges) FlushParamChanges(pParamChanges, nChanges);
+
 	mMutex.Leave();
 	return kResultOk;
 }
@@ -508,7 +538,30 @@ void IPlugVST3::ProcessParamChanges(Vst::IParameterChanges* const pParamChanges,
 				}
 			}
 		}
+		else
 		#endif // IPLUG_NO_MIDI_CC_PARAMS
+
+		if (nPoints > 0 && pParamQueue->getPoint(0, ofs, value) == kResultOk)
+		{
+			IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
+			const Vst::ParamValue oldValue = pEffect->getParameterObject(id)->getNormalized();
+
+			value = (value - oldValue) / (Vst::ParamValue)++ofs + oldValue;
+			ProcessParamChange(id, value);
+		}
+	}
+}
+
+void IPlugVST3::ProcessParamChange(const Vst::ParamID id, const Vst::ParamValue value)
+{
+	if (id == kBypassParamID)
+	{
+		const bool bypass = value >= 0.5;
+		if (IsBypassed() != bypass)
+		{
+			mPlugFlags ^= IPlugBase::kPlugFlagsBypass;
+			OnBypass(bypass);
+		}
 	}
 }
 
@@ -563,6 +616,31 @@ void IPlugVST3::ProcessInputEvents(Vst::IEventList* const pInputEvents, const in
 				ProcessMidiMsg(&msg);
 				break;
 			}
+		}
+	}
+}
+
+void IPlugVST3::FlushParamChanges(Vst::IParameterChanges* const pParamChanges, const int32 nChanges)
+{
+	for (int32 i = 0; i < nChanges; ++i)
+	{
+		Vst::IParamValueQueue* const pParamQueue = pParamChanges->getParameterData(i);
+		if (!pParamQueue) continue;
+
+		const Vst::ParamID id = pParamQueue->getParameterId();
+
+		#ifndef IPLUG_NO_MIDI_CC_PARAMS
+		if (GetMidiCtrlParamIdx(id) < kNumMidiCtrlParams) continue;
+		#endif
+
+		const int32 point = pParamQueue->getPointCount() - 1;
+
+		Vst::ParamValue value;
+		int32 ofs;
+
+		if (point >= 0 && pParamQueue->getPoint(point, ofs, value) == kResultOk && ofs > 0)
+		{
+			ProcessParamChange(id, value);
 		}
 	}
 }
