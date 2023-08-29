@@ -543,6 +543,18 @@ void IPlugVST3::ProcessInputEvents(Vst::IEventList* const pInputEvents, const in
 				break;
 			}
 
+			case Vst::Event::kDataEvent:
+			{
+				const uint32 size = event.data.size, type = event.data.type;
+
+				if (type == Vst::DataEvent::kMidiSysEx)
+				{
+					const ISysEx sysex(ofs, event.data.bytes, size);
+					ProcessSysEx(&sysex);
+				}
+				break;
+			}
+
 			case Vst::Event::kPolyPressureEvent:
 			{
 				const int pressure = (int)(event.polyPressure.pressure * 127.0f + 0.5f);
