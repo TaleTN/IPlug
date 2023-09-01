@@ -9,6 +9,8 @@
 
 using namespace Steinberg;
 
+static const size_t kVstString128Count = sizeof(Vst::String128) / sizeof(Vst::TChar);
+
 static const Vst::ParamID kMidiCtrlParamID = 0x40000000;
 static const int kNumMidiCtrlParams = 16*256; // >= 16*(128 + 3)
 
@@ -86,6 +88,7 @@ public:
 			#endif
 		}
 
+		addPlugParams();
 		addBypassParam();
 
 		#ifndef IPLUG_NO_MIDI_CC_PARAMS
@@ -236,6 +239,55 @@ private:
 		info.flags = Vst::ParameterInfo::kCanAutomate | Vst::ParameterInfo::kIsBypass;
 
 		parameters.addParameter(info);
+	}
+
+	void addPlugParams()
+	{
+		Vst::ParameterInfo info;
+
+		const int n = mPlug->NParams();
+		for (int i = 0; i < n; ++i)
+		{
+			const IParam* const pParam = mPlug->GetParam(i);
+
+			info.id = i;
+			static const int32 maxLen = (int32)kVstString128Count - 1;
+
+			str8ToStr16(info.title, pParam->GetNameForHost(), maxLen);
+			str8ToStr16(info.shortTitle, pParam->GetNameForHost(8), maxLen);
+			str8ToStr16(info.units, pParam->GetLabelForHost(), maxLen);
+
+			int32 flags = Vst::ParameterInfo::kCanAutomate;
+
+			switch (pParam->Type())
+			{
+				case IParam::kTypeBool:
+				{
+					info.stepCount = 1;
+					break;
+				}
+
+				case IParam::kTypeEnum:
+				{
+					const IEnumParam* const pEnumParam = (const IEnumParam*)pParam;
+					info.stepCount = pEnumParam->NEnums() - 1;
+					flags |= info.stepCount > 1 ? Vst::ParameterInfo::kIsList : 0;
+					break;
+				}
+
+				default:
+				{
+					info.stepCount = 0;
+					break;
+				}
+			}
+
+			info.defaultNormalizedValue = pParam->GetNormalized();
+			info.unitId = Vst::kRootUnitId;
+			info.flags = flags;
+
+			parameters.addParameter(info);
+		}
 	}
 
 	#ifndef IPLUG_NO_MIDI_CC_PARAMS
