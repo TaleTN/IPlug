@@ -5,6 +5,8 @@
 #include "VST3_SDK/public.sdk/source/vst/vstaudioprocessoralgo.h"
 
 #include <assert.h>
+#include <string.h>
+
 #include "WDL/wdlcstring.h"
 
 using namespace Steinberg;
@@ -96,6 +98,12 @@ public:
 		#endif
 
 		return mPlug->VSTInitialize(context);
+	}
+
+	tresult PLUGIN_API getParamStringByValue(const Vst::ParamID id, const Vst::ParamValue valueNormalized,
+		Vst::String128 string) SMTG_OVERRIDE
+	{
+		return mPlug->VSTGetParamStringByValue(id, valueNormalized, string);
 	}
 
 	tresult PLUGIN_API setActive(const TBool state) SMTG_OVERRIDE
@@ -435,6 +443,58 @@ tresult IPlugVST3::VSTInitialize(FUnknown* /* context */)
 
 	mMutex.Leave();
 	return kResultOk;
+}
+
+tresult IPlugVST3::VSTGetParamStringByValue(const Vst::ParamID id, const Vst::ParamValue valueNormalized,
+	Vst::String128 string)
+{
+	char str8[kVstString128Count];
+
+	#ifndef IPLUG_NO_MIDI_CC_PARAMS
+	if (GetMidiCtrlParamIdx(id) < kNumMidiCtrlParams)
+	{
+		static const char* const unipolar = "%d";
+		const char* fmt;
+
+		Vst::ParamValue scale;
+		int ofs = 0;
+
+		if (GetMidiCtrlNo(id) != Vst::kPitchBend)
+		{
+			fmt = unipolar;
+			scale = 127.0;
+		}
+		else
+		{
+			fmt = "%+d";
+			scale = 16383.0;
+			ofs = -8192;
+		}
+
+		const int midiValue = (int)(valueNormalized * scale + 0.5) + ofs;
+		fmt = midiValue ? fmt : unipolar;
+
+		snprintf(str8, kVstString128Count, fmt, midiValue);
+	}
+	else
+	#endif // IPLUG_NO_MIDI_CC_PARAMS
+
+	if (NParams(id))
+	{
+		GetParam(id)->GetDisplayForHost(valueNormalized, str8, (int)kVstString128Count);
+	}
+	else if (id == kBypassParamID)
+	{
+		memcpy(string, valueNormalized >= 0.5 ? STR16("On\0") : STR16("Off"), 4 * sizeof(Vst::TChar));
+		return kResultTrue;
+	}
+	else
+	{
+		return kResultFalse;
+	}
+
+	str8ToStr16(string, str8);
+	return kResultTrue;
 }
 
 tresult IPlugVST3::VSTSetActive(const TBool state)
