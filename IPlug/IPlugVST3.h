@@ -68,6 +68,8 @@ public:
 	Steinberg::tresult VSTInitialize(Steinberg::FUnknown* context);
 	Steinberg::tresult VSTGetParamStringByValue(Steinberg::Vst::ParamID id, Steinberg::Vst::ParamValue valueNormalized,
 		Steinberg::Vst::String128 string);
+	Steinberg::tresult VSTGetParamValueByString(Steinberg::Vst::ParamID id, const Steinberg::Vst::TChar* string,
+		Steinberg::Vst::ParamValue& valueNormalized);
 	Steinberg::tresult VSTSetActive(Steinberg::TBool state);
 	Steinberg::tresult VSTSetupProcessing(Steinberg::Vst::ProcessSetup& setup);
 	Steinberg::tresult VSTProcess(Steinberg::Vst::ProcessData& data);

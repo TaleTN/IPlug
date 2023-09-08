@@ -5,9 +5,11 @@
 #include "VST3_SDK/public.sdk/source/vst/vstaudioprocessoralgo.h"
 
 #include <assert.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "WDL/wdlcstring.h"
+#include "WDL/wdlutf8.h"
 
 using namespace Steinberg;
 
@@ -43,6 +45,34 @@ static int GetMidiChName(Vst::TChar* const name)
 }
 
 #endif // IPLUG_NO_MIDI_CC_PARAMS
+
+static void Str16ToMBStr(char* const dest, const Vst::TChar* const src, const int destSize)
+{
+	for (int i = 0, j = 0;;)
+	{
+		const int c = src[i++];
+		const int n = wdl_utf8_makechar(c, &dest[j], destSize - j);
+
+		if (!c) break;
+
+		if (n > 0)
+		{
+			const int k = j + n;
+			if (k < destSize)
+			{
+				j = k;
+				continue;
+			}
+		}
+		else if (n < 0)
+		{
+			continue;
+		}
+
+		dest[j] = 0;
+		break;
+	}
+}
 
 class IPlugVST3_Effect:
 	public Vst::SingleComponentEffect
@@ -104,6 +134,12 @@ public:
 		Vst::String128 string) SMTG_OVERRIDE
 	{
 		return mPlug->VSTGetParamStringByValue(id, valueNormalized, string);
+	}
+
+	tresult PLUGIN_API getParamValueByString(const Vst::ParamID id, Vst::TChar* const string,
+		Vst::ParamValue& valueNormalized) SMTG_OVERRIDE
+	{
+		return mPlug->VSTGetParamValueByString(id, string, valueNormalized);
 	}
 
 	tresult PLUGIN_API setActive(const TBool state) SMTG_OVERRIDE
@@ -495,6 +531,63 @@ tresult IPlugVST3::VSTGetParamStringByValue(const Vst::ParamID id, const Vst::Pa
 
 	str8ToStr16(string, str8);
 	return kResultTrue;
+}
+
+tresult IPlugVST3::VSTGetParamValueByString(const Vst::ParamID id, const Vst::TChar* const string,
+	Vst::ParamValue& valueNormalized)
+{
+	char str8[kVstString128Count];
+	Str16ToMBStr(str8, string, kVstString128Count);
+
+	if (NParams(id))
+	{
+		const IParam* const pParam = GetParam(id);
+		double v;
+
+		const bool mapped = pParam->MapDisplayText(str8, &v);
+		if (!mapped)
+		{
+			v = strtod(str8, NULL);
+			if (pParam->DisplayIsNegated()) v = -v;
+			v = pParam->GetNormalized(v);
+		}
+
+		valueNormalized = v;
+		return kResultTrue;
+	}
+	else if (id == kBypassParamID)
+	{
+		const double v = strtod(str8, NULL);
+		valueNormalized = (Vst::ParamValue)(v >= 0.5);
+		return kResultTrue;
+	}
+
+	#ifndef IPLUG_NO_MIDI_CC_PARAMS
+	else if (GetMidiCtrlParamIdx(id) < kNumMidiCtrlParams)
+	{
+		Vst::ParamValue scale;
+		int i = atoi(str8), maxVal = 127;
+
+		if (GetMidiCtrlNo(id) != Vst::kPitchBend)
+		{
+			scale = 0.0078740157480314961; // 1/127
+		}
+		else
+		{
+			scale = 6.1038881767686016e-05; // 1/16383
+			i += 8192;
+			maxVal = 16383;
+		}
+
+		i = wdl_min(i, maxVal);
+		i = wdl_max(i, 0);
+
+		valueNormalized = (Vst::ParamValue)i * scale;
+		return kResultTrue;
+	}
+	#endif
+
+	return kResultFalse;
 }
 
 tresult IPlugVST3::VSTSetActive(const TBool state)
