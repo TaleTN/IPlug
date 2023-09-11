@@ -74,6 +74,30 @@ static void Str16ToMBStr(char* const dest, const Vst::TChar* const src, const in
 	}
 }
 
+class IPlugVST3_View: public Vst::EditorView
+{
+public:
+	IPlugVST3_View(
+		Vst::EditController* const controller,
+		ViewRect* const size = nullptr
+	):
+		Vst::EditorView(controller, size)
+	{}
+
+	tresult PLUGIN_API isPlatformTypeSupported(FIDString const type) SMTG_OVERRIDE
+	{
+		#ifdef _WIN32
+		if (FIDStringsEqual(type, kPlatformTypeHWND)) return kResultTrue;
+		#elif defined(__APPLE__)
+		if (FIDStringsEqual(type, kPlatformTypeNSView)) return kResultTrue;
+		#endif
+
+		return kInvalidArgument;
+	}
+
+	inline void* getSystemWindow() const { return systemWindow; }
+};
+
 class IPlugVST3_Effect:
 	public Vst::SingleComponentEffect
 
@@ -83,7 +107,8 @@ class IPlugVST3_Effect:
 {
 public:
 	IPlugVST3_Effect():
-		mPlug(NULL)
+		mPlug(NULL),
+		mView(NULL)
 	{}
 
 	virtual ~IPlugVST3_Effect()
@@ -140,6 +165,39 @@ public:
 		Vst::ParamValue& valueNormalized) SMTG_OVERRIDE
 	{
 		return mPlug->VSTGetParamValueByString(id, string, valueNormalized);
+	}
+
+	IPlugView* PLUGIN_API createView(FIDString const name) SMTG_OVERRIDE
+	{
+		IPlugView* editor = nullptr;
+
+		if (FIDStringsEqual(name, Vst::ViewType::kEditor))
+		{
+			editor = mPlug->VSTCreateView(name);
+			mView = (IPlugVST3_View*)editor;
+		}
+
+		return editor;
+	}
+
+	void editorAttached(Vst::EditorView* const editor) SMTG_OVERRIDE
+	{
+		IPlugVST3_View* const pView = (IPlugVST3_View*)editor;
+		IGraphics* const pGraphics = mPlug->GetGUI();
+		if (pGraphics && pGraphics->OpenWindow(pView->getSystemWindow()))
+		{
+			mPlug->OnGUIOpen();
+		}
+	}
+
+	void editorRemoved(Vst::EditorView* const editor) SMTG_OVERRIDE
+	{
+		IGraphics* const pGraphics = mPlug->GetGUI();
+		if (pGraphics)
+		{
+			mPlug->OnGUIClose();
+			pGraphics->CloseWindow();
+		}
 	}
 
 	tresult PLUGIN_API setActive(const TBool state) SMTG_OVERRIDE
@@ -242,6 +300,7 @@ public:
 	#endif // IPLUG_NO_MIDI_CC_PARAMS
 
 	inline void setIPlugVST3(IPlugVST3* const pPlug) { mPlug = pPlug; }
+	inline IPlugVST3_View* getEditor() { return mView; }
 
 private:
 	#ifndef IPLUG_NO_MIDI_CC_PARAMS
@@ -424,6 +483,7 @@ private:
 	#endif // IPLUG_NO_MIDI_CC_PARAMS
 
 	IPlugVST3* mPlug;
+	IPlugVST3_View* mView;
 };
 
 FUnknown* IPlugVST3::VSTCreateInstance(void* /* context */)
@@ -467,7 +527,26 @@ IPlugBase(
 	SetInputChannelConnections(0, nInputs, true);
 	SetOutputChannelConnections(0, nOutputs, true);
 
+	mGUIWidth = mGUIHeight = 0;
+
 	SetBlockSize(kDefaultBlockSize);
+}
+
+void IPlugVST3::ResizeGraphics(const int w, const int h)
+{
+	IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
+
+	// BD: "I used to care, but..."
+	const bool thingsHaveChanged = mGUIWidth != w || mGUIHeight != h;
+
+	mGUIWidth = w;
+	mGUIHeight = h;
+
+	if (thingsHaveChanged && GetGUI())
+	{
+		ViewRect newSize(0, 0, w, h);
+		pEffect->getEditor()->onSize(&newSize);
+	}
 }
 
 tresult IPlugVST3::VSTInitialize(FUnknown* /* context */)
@@ -588,6 +667,25 @@ tresult IPlugVST3::VSTGetParamValueByString(const Vst::ParamID id, const Vst::TC
 	#endif
 
 	return kResultFalse;
+}
+
+IPlugView* IPlugVST3::VSTCreateView(FIDString /* name */)
+{
+	IGraphics* const pGraphics = GetGUI();
+	if (!pGraphics) return NULL;
+
+	IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
+	int w = mGUIWidth, h = mGUIHeight;
+
+	if (!(w & h))
+	{
+		const int scale = pGraphics->Scale();
+		mGUIWidth = w = pGraphics->Width() >> scale;
+		mGUIHeight = h = pGraphics->Height() >> scale;
+	}
+
+	ViewRect size(0, 0, w, h);
+	return new IPlugVST3_View(pEffect, &size);
 }
 
 tresult IPlugVST3::VSTSetActive(const TBool state)

@@ -46,7 +46,7 @@ public:
 
 	// Tell the host that the graphics resized.
 	// Should be called only by the graphics object when it resizes itself.
-	void ResizeGraphics(int w, int h) {}
+	void ResizeGraphics(int w, int h);
 
 protected:
 	void HostSpecificInit() {}
@@ -62,6 +62,8 @@ private:
 
 	/* (IPlugVST3_Effect*) */ void* const mEffect;
 
+	int mGUIWidth, mGUIHeight;
+
 public:
 	static Steinberg::FUnknown* VSTCreateInstance(void* context);
 
@@ -70,6 +72,7 @@ public:
 		Steinberg::Vst::String128 string);
 	Steinberg::tresult VSTGetParamValueByString(Steinberg::Vst::ParamID id, const Steinberg::Vst::TChar* string,
 		Steinberg::Vst::ParamValue& valueNormalized);
+	Steinberg::IPlugView* VSTCreateView(Steinberg::FIDString name);
 	Steinberg::tresult VSTSetActive(Steinberg::TBool state);
 	Steinberg::tresult VSTSetupProcessing(Steinberg::Vst::ProcessSetup& setup);
 	Steinberg::tresult VSTProcess(Steinberg::Vst::ProcessData& data);
