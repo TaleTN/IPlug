@@ -78,10 +78,12 @@ class IPlugVST3_View: public Vst::EditorView
 {
 public:
 	IPlugVST3_View(
+		IGraphics* const pGraphics,
 		Vst::EditController* const controller,
 		ViewRect* const size = nullptr
 	):
-		Vst::EditorView(controller, size)
+		Vst::EditorView(controller, size),
+		mGraphics(pGraphics)
 	{}
 
 	tresult PLUGIN_API isPlatformTypeSupported(FIDString const type) SMTG_OVERRIDE
@@ -95,7 +97,15 @@ public:
 		return kInvalidArgument;
 	}
 
+	tresult PLUGIN_API onWheel(const float distance) SMTG_OVERRIDE
+	{
+		return mGraphics->ProcessMouseWheel(distance) ? kResultTrue : kResultFalse;
+	}
+
 	inline void* getSystemWindow() const { return systemWindow; }
+
+private:
+	IGraphics* const mGraphics;
 };
 
 class IPlugVST3_Effect:
@@ -685,7 +695,7 @@ IPlugView* IPlugVST3::VSTCreateView(FIDString /* name */)
 	}
 
 	ViewRect size(0, 0, w, h);
-	return new IPlugVST3_View(pEffect, &size);
+	return new IPlugVST3_View(pGraphics, pEffect, &size);
 }
 
 tresult IPlugVST3::VSTSetActive(const TBool state)
