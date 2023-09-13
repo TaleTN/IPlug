@@ -312,6 +312,12 @@ public:
 	inline void setIPlugVST3(IPlugVST3* const pPlug) { mPlug = pPlug; }
 	inline IPlugVST3_View* getEditor() { return mView; }
 
+	void updateParamNormalized(const Vst::ParamID id, const Vst::ParamValue value)
+	{
+		getParameterObject(id)->setNormalized(value);
+		performEdit(id, value);
+	}
+
 private:
 	#ifndef IPLUG_NO_MIDI_CC_PARAMS
 
@@ -540,6 +546,54 @@ IPlugBase(
 	mGUIWidth = mGUIHeight = 0;
 
 	SetBlockSize(kDefaultBlockSize);
+}
+
+void IPlugVST3::OnParamReset()
+{
+	IPlugBase::OnParamReset();
+
+	int n = NParams();
+	IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
+
+	const int m = pEffect->getParameterCount();
+	n = wdl_min(n, m);
+
+	for (int i = 0; i < n; ++i)
+	{
+		pEffect->updateParamNormalized(i, GetParam(i)->GetNormalized());
+	}
+}
+
+void IPlugVST3::BeginInformHostOfParamChange(const int idx, const bool lockMutex)
+{
+	if (lockMutex) mMutex.Enter();
+
+	EndDelayedInformHostOfParamChange(false);
+
+	IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
+	pEffect->beginEdit(idx);
+
+	if (lockMutex) mMutex.Leave();
+}
+
+void IPlugVST3::InformHostOfParamChange(const int idx, const double normalizedValue, const bool lockMutex)
+{
+	if (lockMutex) mMutex.Enter();
+
+	IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
+	pEffect->updateParamNormalized(idx, normalizedValue);
+
+	if (lockMutex) mMutex.Leave();
+}
+
+void IPlugVST3::EndInformHostOfParamChange(const int idx, const bool lockMutex)
+{
+	if (lockMutex) mMutex.Enter();
+
+	IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
+	pEffect->endEdit(idx);
+
+	if (lockMutex) mMutex.Leave();
 }
 
 void IPlugVST3::ResizeGraphics(const int w, const int h)

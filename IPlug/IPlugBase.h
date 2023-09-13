@@ -175,7 +175,7 @@ public:
 
 	void SetParameterFromGUI(int idx, double normalizedValue);
 
-	void OnParamReset(); // Calls OnParamChange(each param).
+	virtual void OnParamReset(); // Calls OnParamChange(each param).
 	void RedrawParamControls(); // Called after restoring state.
 
 	// If a parameter change comes from the GUI, midi, or external input,
