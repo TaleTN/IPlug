@@ -1,6 +1,7 @@
 #include "IPlugVST3.h"
 #include "IGraphics.h"
 
+#include "VST3_SDK/base/source/fstreamer.h"
 #include "VST3_SDK/pluginterfaces/vst/ivstmidicontrollers.h"
 #include "VST3_SDK/public.sdk/source/vst/vstaudioprocessoralgo.h"
 
@@ -213,6 +214,16 @@ public:
 	tresult PLUGIN_API setActive(const TBool state) SMTG_OVERRIDE
 	{
 		return mPlug->VSTSetActive(state);
+	}
+
+	tresult PLUGIN_API setState(IBStream* const state) SMTG_OVERRIDE
+	{
+		return mPlug->VSTSetState(state);
+	}
+
+	tresult PLUGIN_API getState(IBStream* const state) SMTG_OVERRIDE
+	{
+		return mPlug->VSTGetState(state);
 	}
 
 	tresult PLUGIN_API canProcessSampleSize(const int32 symbolicSampleSize) SMTG_OVERRIDE
@@ -548,6 +559,19 @@ IPlugBase(
 	SetBlockSize(kDefaultBlockSize);
 }
 
+bool IPlugVST3::AllocStateChunk(int chunkSize)
+{
+	if (chunkSize < 0) chunkSize = GetParamsChunkSize(0, NParams());
+	chunkSize += sizeof(WDL_UINT64); // Bypass
+	return mState.Alloc(chunkSize) == chunkSize;
+}
+
+bool IPlugVST3::AllocBankChunk(const int chunkSize)
+{
+	if (chunkSize < 0 && mPresetChunkSize < 0) AllocPresetChunk();
+	return true;
+}
+
 void IPlugVST3::OnParamReset()
 {
 	IPlugBase::OnParamReset();
@@ -767,6 +791,95 @@ tresult IPlugVST3::VSTSetActive(const TBool state)
 
 	mMutex.Leave();
 	return kResultOk;
+}
+
+tresult IPlugVST3::VSTSetState(IBStream* const state)
+{
+	mMutex.Enter();
+
+	IBStreamer streamer(state);
+	const int64 size = streamer.seek(0, kSeekEnd);
+	streamer.seek(0, kSeekSet);
+
+	ByteChunk* const pChunk = &mState;
+	tresult ok = kResultOk;
+
+	if (pChunk->Size() != size)
+	{
+		pChunk->Resize((int)size);
+		ok = pChunk->Size() == size ? ok : kResultFalse;
+	}
+
+	if (ok == kResultOk)
+	{
+		const TSize n = streamer.readRaw(pChunk->GetBytes(), size);
+		ok = n == size ? ok : kResultFalse;
+	}
+
+	if (ok == kResultOk)
+	{
+		WDL_INT64 bitmask = 1;
+		int pos = pChunk->GetInt64(&bitmask, 0);
+		const bool bypass = !!(bitmask & 1);
+
+		if (IsBypassed() != bypass)
+		{
+			mPlugFlags ^= IPlugBase::kPlugFlagsBypass;
+			OnBypass(bypass);
+
+			IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
+			pEffect->updateParamNormalized(kBypassParamID, (Vst::ParamValue)bypass);
+		}
+
+		if (pos >= 0)
+		{
+			pos = UnserializeState(pChunk, pos);
+			ok = pos >= 0 ? ok : kResultFalse;
+			OnParamReset();
+		}
+	}
+
+	RedrawParamControls();
+
+	mMutex.Leave();
+	return ok;
+}
+
+tresult IPlugVST3::VSTGetState(IBStream* const state)
+{
+	mMutex.Enter();
+
+	IBStreamer streamer(state);
+	ByteChunk* const pChunk = &mState;
+
+	tresult ok = pChunk->AllocSize() || AllocStateChunk() ? kResultOk : kResultFalse;
+	pChunk->Clear();
+
+	if (ok == kResultOk)
+	{
+		const WDL_UINT64 bitmask = IsBypassed();
+
+		static const int vst2PrivateChunkID = 0x57747356;
+		assert((int)bitmask != vst2PrivateChunkID);
+
+		ok = pChunk->PutInt64(bitmask) ? ok : kResultFalse;
+	}
+
+	if (ok == kResultOk)
+	{
+		ok = SerializeState(pChunk) ? ok : kResultFalse;
+
+		void* const pData = pChunk->GetBytes();
+		const int size = pChunk->Size();
+
+		if (ok == kResultOk)
+		{
+			ok = streamer.writeRaw(pData, size) == size ? ok : kResultFalse;
+		}
+	}
+
+	mMutex.Leave();
+	return ok;
 }
 
 tresult IPlugVST3::VSTSetupProcessing(Vst::ProcessSetup& setup)

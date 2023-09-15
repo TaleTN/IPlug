@@ -28,8 +28,8 @@ public:
 	// Default implementation to mimic original IPlug VST2 behavior.
 	void OnActivate(const bool active) { if (!active) Reset(); }
 
-	bool AllocStateChunk(int chunkSize = -1) { return false; }
-	bool AllocBankChunk(int chunkSize = -1) { return false; }
+	bool AllocStateChunk(int chunkSize = -1);
+	bool AllocBankChunk(int chunkSize = -1);
 
 	void OnParamReset();
 
@@ -64,6 +64,8 @@ private:
 
 	/* (IPlugVST3_Effect*) */ void* const mEffect;
 
+	ByteChunk mState; // Persistent storage if the host asks for plugin state.
+
 	int mGUIWidth, mGUIHeight;
 
 public:
@@ -76,6 +78,8 @@ public:
 		Steinberg::Vst::ParamValue& valueNormalized);
 	Steinberg::IPlugView* VSTCreateView(Steinberg::FIDString name);
 	Steinberg::tresult VSTSetActive(Steinberg::TBool state);
+	Steinberg::tresult VSTSetState(Steinberg::IBStream* state);
+	Steinberg::tresult VSTGetState(Steinberg::IBStream* state);
 	Steinberg::tresult VSTSetupProcessing(Steinberg::Vst::ProcessSetup& setup);
 	Steinberg::tresult VSTProcess(Steinberg::Vst::ProcessData& data);
 
