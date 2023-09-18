@@ -1,5 +1,6 @@
 #include "IPlugVST3.h"
 #include "IGraphics.h"
+#include "IControl.h"
 
 #include "VST3_SDK/base/source/fstreamer.h"
 #include "VST3_SDK/pluginterfaces/vst/ivstmidicontrollers.h"
@@ -73,6 +74,22 @@ static void Str16ToMBStr(char* const dest, const Vst::TChar* const src, const in
 		dest[j] = 0;
 		break;
 	}
+}
+
+static int GetMouseCapture(const IGraphics* const pGraphics)
+{
+	int paramIdx = -1;
+
+	if (pGraphics)
+	{
+		const int controlIdx = pGraphics->GetMouseCapture();
+		if (controlIdx >= 0)
+		{
+			paramIdx = pGraphics->GetControl(controlIdx)->ParamIdx();
+		}
+	}
+
+	return paramIdx;
 }
 
 class IPlugVST3_View: public Vst::EditorView
@@ -600,9 +617,15 @@ void IPlugVST3::BeginInformHostOfParamChange(const int idx, const bool lockMutex
 	if (lockMutex) mMutex.Leave();
 }
 
-void IPlugVST3::InformHostOfParamChange(const int idx, const double normalizedValue, const bool lockMutex)
+void IPlugVST3::InformHostOfParamChange(const int idx, double normalizedValue, const bool lockMutex)
 {
+	const int mouseCap = GetMouseCapture(GetGUI());
+
 	if (lockMutex) mMutex.Enter();
+
+	// TN: While dragging GUI control use clamped parameter value rather
+	// than continuous GUI value; fixes automation for stepped values.
+	if (idx == mouseCap) normalizedValue = GetParam(idx)->GetNormalized();
 
 	IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
 	pEffect->updateParamNormalized(idx, normalizedValue);
@@ -962,6 +985,10 @@ tresult IPlugVST3::VSTProcess(Vst::ProcessData& data)
 
 void IPlugVST3::ProcessParamChanges(Vst::IParameterChanges* const pParamChanges, const int32 nChanges)
 {
+	// TN: While dragging GUI control ignore parameter changes; fixes
+	// automation for stepped values.
+	const int mouseCap = GetMouseCapture(GetGUI());
+
 	for (int32 i = 0; i < nChanges; ++i)
 	{
 		Vst::IParamValueQueue* const pParamQueue = pParamChanges->getParameterData(i);
@@ -1022,7 +1049,7 @@ void IPlugVST3::ProcessParamChanges(Vst::IParameterChanges* const pParamChanges,
 		else
 		#endif // IPLUG_NO_MIDI_CC_PARAMS
 
-		if (nPoints > 0 && pParamQueue->getPoint(0, ofs, value) == kResultOk)
+		if (id != mouseCap && nPoints > 0 && pParamQueue->getPoint(0, ofs, value) == kResultOk)
 		{
 			IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
 			const Vst::ParamValue oldValue = pEffect->getParameterObject(id)->getNormalized();
