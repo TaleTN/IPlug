@@ -137,7 +137,9 @@ public:
 	IPlugVST3_Effect():
 		mPlug(NULL),
 		mView(NULL)
-	{}
+	{
+		processContextRequirements.flags |= kNeedTempo | kNeedTimeSignature;
+	}
 
 	virtual ~IPlugVST3_Effect()
 	{
@@ -571,6 +573,11 @@ IPlugBase(
 	SetInputChannelConnections(0, nInputs, true);
 	SetOutputChannelConnections(0, nOutputs, true);
 
+	mProcessContextState = 0;
+	mSamplePos = 0;
+	mTempo = 0.0;
+	memset(mTimeSig, 0, sizeof(mTimeSig));
+
 	mGUIWidth = mGUIHeight = 0;
 
 	SetBlockSize(kDefaultBlockSize);
@@ -641,6 +648,41 @@ void IPlugVST3::EndInformHostOfParamChange(const int idx, const bool lockMutex)
 	pEffect->endEdit(idx);
 
 	if (lockMutex) mMutex.Leave();
+}
+
+double IPlugVST3::GetSamplePos()
+{
+	return (double)wdl_max(mSamplePos, 0);
+}
+
+double IPlugVST3::GetTempo()
+{
+	double tempo = 0.0;
+
+	if (mProcessContextState & Vst::ProcessContext::kTempoValid)
+	{
+		tempo = wdl_max(mTempo, 0.0);
+	}
+
+	return tempo;
+}
+
+void IPlugVST3::GetTimeSig(int* const pNum, int* const pDenom)
+{
+	int num = 0, denom = 0;
+
+	if (mProcessContextState & Vst::ProcessContext::kTimeSigValid)
+	{
+		const int a = mTimeSig[0], b = mTimeSig[1];
+		if ((a | b) >= 0)
+		{
+			num = a;
+			denom = b;
+		}
+	}
+
+	*pNum = num;
+	*pDenom = denom;
 }
 
 void IPlugVST3::ResizeGraphics(const int w, const int h)
@@ -958,6 +1000,16 @@ tresult IPlugVST3::VSTProcess(Vst::ProcessData& data)
 		const int32 nEvents = pInputEvents->getEventCount();
 		if (nEvents) ProcessInputEvents(pInputEvents, nEvents);
 	}
+
+	const Vst::ProcessContext* const pProcessContext = data.processContext;
+	mProcessContextState = pProcessContext->state;
+	mSamplePos = pProcessContext->projectTimeSamples;
+
+	WDL_UINT64 tempo;
+	memcpy(&tempo, &pProcessContext->tempo, sizeof(double));
+	memcpy(&mTempo, &tempo, sizeof(double));
+
+	memcpy(mTimeSig, &pProcessContext->timeSigNumerator, 2 * sizeof(int32));
 
 	const int nInputs = NInChannels(), nOutputs = NOutChannels();
 

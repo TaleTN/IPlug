@@ -39,9 +39,9 @@ public:
 
 	void InformHostOfProgramChange() {}
 
-	double GetSamplePos() { return 0.0; } // Samples since start of project.
-	double GetTempo() { return 120.0; }
-	void GetTimeSig(int* pNum, int* pDenom) { *pNum = *pDenom = 0; }
+	double GetSamplePos(); // Samples since start of project.
+	double GetTempo();
+	void GetTimeSig(int* pNum, int* pDenom);
 
 	// Whether the plugin is being used for offline rendering.
 	bool IsRenderingOffline() { return false; }
@@ -63,6 +63,11 @@ private:
 	void FlushParamChanges(Steinberg::Vst::IParameterChanges* pParamChanges, Steinberg::int32 nChanges);
 
 	/* (IPlugVST3_Effect*) */ void* const mEffect;
+
+	Steinberg::uint32 mProcessContextState;
+	Steinberg::Vst::TSamples mSamplePos;
+	double WDL_FIXALIGN mTempo;
+	Steinberg::int32 mTimeSig[2];
 
 	ByteChunk mState; // Persistent storage if the host asks for plugin state.
 
