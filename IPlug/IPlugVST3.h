@@ -44,7 +44,7 @@ public:
 	void GetTimeSig(int* pNum, int* pDenom);
 
 	// Whether the plugin is being used for offline rendering.
-	bool IsRenderingOffline() { return false; }
+	bool IsRenderingOffline() { return IsOffline(); }
 
 	// Tell the host that the graphics resized.
 	// Should be called only by the graphics object when it resizes itself.

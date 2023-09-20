@@ -951,7 +951,10 @@ tresult IPlugVST3::VSTSetupProcessing(Vst::ProcessSetup& setup)
 {
 	mMutex.Enter();
 
-	const int flags = mPlugFlags;
+	const int offline = setup.processMode == Vst::kOffline ? kPlugFlagsOffline : 0;
+	const int flags = (mPlugFlags & ~kPlugFlagsOffline) | offline;
+
+	mPlugFlags = flags;
 	bool reset = false;
 
 	if (setup.sampleRate != GetSampleRate() || !(flags & kPlugInitSampleRate))
