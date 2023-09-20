@@ -702,8 +702,22 @@ void IPlugVST3::ResizeGraphics(const int w, const int h)
 	}
 }
 
-tresult IPlugVST3::VSTInitialize(FUnknown* /* context */)
+tresult IPlugVST3::VSTInitialize(FUnknown* const context)
 {
+	Vst::IHostApplication* pHost;
+	if (context->queryInterface(Vst::IHostApplication::iid, (void**)&pHost) == kResultOk)
+	{
+		Vst::String128 name;
+		if (pHost->getName(name) == kResultTrue)
+		{
+			char str8[kVstString128Count];
+			Str16ToMBStr(str8, name, (int)kVstString128Count);
+
+			// TN: Vst::IHostApplication doesn't provide host version.
+			SetHost(str8, mHostVersion);
+		}
+	}
+
 	mMutex.Enter();
 
 	HostSpecificInit();
