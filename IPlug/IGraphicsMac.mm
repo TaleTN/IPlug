@@ -523,5 +523,11 @@ void SWELL_MakeSetCurParms(float, float, float, float, HWND, bool, bool) {}
 HWND SWELL_MakeButton(int, const char*, int, int, int, int, int, int) { return NULL; }
 HWND SWELL_MakeLabel(int, const char*, int, int, int, int, int, int) { return NULL; }
 HWND SWELL_MakeCombo(int, int, int, int, int, int) { return NULL; }
+DWORD GetTickCount() { return 0; }
+int SWELL_GetOSXVersion() { return 0; }
+
+#ifdef IPLUG_NO_CARBON_SUPPORT
+extern "C" OSStatus HIThemeSetFill(SInt16, void*, CGContextRef, UInt32) { return noErr; }
+#endif
 
 #endif
