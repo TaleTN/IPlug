@@ -73,6 +73,7 @@ EXPORT int main(audioMasterCallback const hostCallback)
 
 #elif defined(VST3_API)
 
+#include "VST3_SDK/pluginterfaces/base/iplugincompatibility.h"
 #include "VST3_SDK/public.sdk/source/main/pluginfactory.h"
 
 #include <assert.h>
@@ -148,6 +149,47 @@ SMTG_EXPORT_SYMBOL Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
 
 		Steinberg::gPluginFactory->registerClass(&componentClass, IPlugVST3::VSTCreateInstance);
 
+		#ifdef VST3_COMPAT_GUID
+
+		const Steinberg::FUID compatUID(VST3_COMPAT_GUID);
+
+		/* DEF_CLASS2(
+			INLINE_UID_FROM_FUID(compatUID),
+			PClassInfo::kManyInstances,
+			kPluginCompatibilityClass,
+			PLUG_NAME,
+			classFlags,
+			Vst::PlugType::kFx,
+			VERSIONINFO_STR,
+			kVstVersionString,
+			IPlugVST3::VSTCreateCompatibilityInstance
+		) */
+
+		Steinberg::TUID ccid = INLINE_UID_FROM_FUID(compatUID);
+
+		static Steinberg::PClassInfo2 compatClass
+		(
+			ccid,
+			Steinberg::PClassInfo::kManyInstances,
+			kPluginCompatibilityClass,
+			PLUG_NAME,
+			classFlags,
+
+			#if PLUG_IS_INST
+			Steinberg::Vst::PlugType::kFxInstrument,
+			#else
+			Steinberg::Vst::PlugType::kFx,
+			#endif
+
+			NULL,
+			VERSIONINFO_STR,
+			kVstVersionString
+		);
+
+		Steinberg::gPluginFactory->registerClass(&compatClass, IPlugVST3::VSTCreateCompatibilityInstance);
+
+		#endif // VST3_COMPAT_GUID
+
 	// END_FACTORY
 	}
 	else Steinberg::gPluginFactory->addRef();
@@ -166,6 +208,31 @@ IPlug* MakeIPlugVST3(void* const instanceInfo)
 
 	sMutex.Leave();
 	return pPlug;
+}
+
+int GetVST3CompatibilityGUIDs(
+	#ifdef VST3_COMPAT_OLD_GUIDS
+	char* const pNew, const Steinberg::char8** const ppOld
+	#else
+	char* /* pNew */, const Steinberg::char8** /* ppOld */
+	#endif
+) {
+	#ifdef VST3_COMPAT_OLD_GUIDS
+	static const Steinberg::char8 guids[] = { VST3_COMPAT_OLD_GUIDS };
+
+	static const int nOld = ((int)sizeof(guids) / sizeof(guids[0]) - 1) / 32;
+	assert(sizeof(guids) == nOld * 32 + 1);
+
+	const Steinberg::FUID plugUID(PLUG_UNIQUE_GUID);
+	plugUID.toTUID(pNew);
+
+	*ppOld = guids;
+
+	#else
+	static const int nOld = 0;
+	#endif
+
+	return nOld;
 }
 
 #elif defined(AU_API)

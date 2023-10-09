@@ -75,6 +75,7 @@ private:
 
 public:
 	static Steinberg::FUnknown* VSTCreateInstance(void* context);
+	static Steinberg::FUnknown* VSTCreateCompatibilityInstance(void* context);
 
 	Steinberg::tresult VSTInitialize(Steinberg::FUnknown* context);
 	Steinberg::tresult VSTGetParamStringByValue(Steinberg::Vst::ParamID id, Steinberg::Vst::ParamValue valueNormalized,
@@ -92,3 +93,4 @@ public:
 };
 
 IPlugVST3* MakeIPlugVST3(void* instanceInfo);
+int GetVST3CompatibilityGUIDs(char* pNew, const Steinberg::char8** ppOld);

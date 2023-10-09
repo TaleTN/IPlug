@@ -3,6 +3,7 @@
 #include "IControl.h"
 
 #include "VST3_SDK/base/source/fstreamer.h"
+#include "VST3_SDK/pluginterfaces/base/iplugincompatibility.h"
 #include "VST3_SDK/pluginterfaces/vst/ivstmidicontrollers.h"
 #include "VST3_SDK/public.sdk/source/vst/vstaudioprocessoralgo.h"
 
@@ -532,11 +533,62 @@ private:
 	IPlugVST3_View* mView;
 };
 
+class IPlugVST3_Compatibility: public FObject, public IPluginCompatibility
+{
+public:
+	OBJ_METHODS(IPlugVST3_Compatibility, FObject)
+
+	DEFINE_INTERFACES
+		DEF_INTERFACE(IPluginCompatibility)
+	END_DEFINE_INTERFACES(FObject)
+
+	REFCOUNT_METHODS(FObject)
+
+	tresult PLUGIN_API getCompatibilityJSON(IBStream* const stream) override
+	{
+		TUID uid;
+		const char* pOld;
+
+		const int nOld = GetVST3CompatibilityGUIDs(uid, &pOld);
+		if (!nOld) return kResultTrue;
+
+		char buf[51];
+		lstrcpyn_safe(buf, "[{\"New\":\"", sizeof(buf));
+
+		const FUID plugUID = FUID::fromTUID(uid);
+		plugUID.toString(&buf[9]);
+
+		lstrcpyn_safe(&buf[41], "\",\"Old\":[", sizeof(buf) - 41);
+		tresult result = stream->write(buf, 50);
+
+		buf[33] = buf[0] = '"';
+		buf[34] = ',';
+
+		for (int i = 0; i < nOld && result == kResultTrue;)
+		{
+			memcpy(&buf[1], pOld, 32);
+			pOld += 32;
+
+			result = stream->write(buf, (++i < nOld) + 34);
+		}
+
+		memcpy(buf, "]}]", 4);
+		if (result == kResultTrue) result = stream->write(buf, 3);
+
+		return result;
+	}
+};
+
 FUnknown* IPlugVST3::VSTCreateInstance(void* /* context */)
 {
 	IPlugVST3_Effect* const pEffect = new IPlugVST3_Effect();
 	pEffect->setIPlugVST3(MakeIPlugVST3(pEffect));
 	return (Vst::IAudioProcessor*)pEffect;
+}
+
+FUnknown* IPlugVST3::VSTCreateCompatibilityInstance(void* /* context */)
+{
+	return (IPluginCompatibility*)new IPlugVST3_Compatibility;
 }
 
 IPlugVST3::IPlugVST3(
