@@ -89,7 +89,17 @@ public:
 	Steinberg::tresult VSTSetupProcessing(Steinberg::Vst::ProcessSetup& setup);
 	Steinberg::tresult VSTProcess(Steinberg::Vst::ProcessData& data);
 
+	#ifndef IPLUG_NO_VST3_VST2_COMPAT
+	Steinberg::tresult VSTSetState(const int8_t* data, size_t size, int32_t currentProgram, bool isBypassed);
+	#endif
+
 	inline bool VSTDoesMidiIn() const { return DoesMIDI(kPlugDoesMidiIn); }
+
+	#ifndef NDEBUG
+	// TN: In Cubase on Windows "plugin name" seems to mean DLL filename
+	// (without extension), but on macOS it seems to mean BUNDLE_NAME.
+	static char* VST2UniqueIDToGUID(int uniqueID, const char* plugName, char* buf, int bufSize = 33);
+	#endif
 };
 
 IPlugVST3* MakeIPlugVST3(void* instanceInfo);

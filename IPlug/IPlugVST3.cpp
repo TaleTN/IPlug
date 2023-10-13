@@ -6,6 +6,7 @@
 #include "VST3_SDK/pluginterfaces/base/iplugincompatibility.h"
 #include "VST3_SDK/pluginterfaces/vst/ivstmidicontrollers.h"
 #include "VST3_SDK/public.sdk/source/vst/vstaudioprocessoralgo.h"
+#include "VST3_SDK/public.sdk/source/vst/utility/vst2persistence.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -76,6 +77,23 @@ static void Str16ToMBStr(char* const dest, const Vst::TChar* const src, const in
 		break;
 	}
 }
+
+#ifndef IPLUG_NO_VST3_VST2_COMPAT
+
+static const int IPLUG_VERSION_MAGIC = 'pfft';
+
+static int GetIPlugVerFromChunk(const ByteChunk* const pChunk, int* const pPos)
+{
+	int magic, ver = 0;
+	const int pos = pChunk->GetInt32(&magic, *pPos);
+	if (pos > *pPos && magic == IPLUG_VERSION_MAGIC)
+	{
+		*pPos = pChunk->GetInt32(&ver, pos);
+	}
+	return ver;
+}
+
+#endif // IPLUG_NO_VST3_VST2_COMPAT
 
 static int GetMouseCapture(const IGraphics* const pGraphics)
 {
@@ -238,6 +256,14 @@ public:
 
 	tresult PLUGIN_API setState(IBStream* const state) SMTG_OVERRIDE
 	{
+		#ifndef IPLUG_NO_VST3_VST2_COMPAT
+		VST3::Optional<VST3::Vst2xState> vst2State = VST3::tryVst2StateLoad(*state);
+		if (vst2State)
+		{
+			return mPlug->VSTSetState(vst2State->chunk.data(), vst2State->chunk.size(), vst2State->currentProgram, vst2State->isBypassed);
+		}
+		#endif
+
 		return mPlug->VSTSetState(state);
 	}
 
@@ -924,6 +950,57 @@ tresult IPlugVST3::VSTSetActive(const TBool state)
 	return kResultOk;
 }
 
+#ifndef IPLUG_NO_VST3_VST2_COMPAT
+
+tresult IPlugVST3::VSTSetState(const int8_t* const data, const size_t size, const int32_t currentProgram, const bool isBypassed)
+{
+	mMutex.Enter();
+
+	ByteChunk* const pChunk = &mState;
+	tresult ok = kResultOk;
+	int pos;
+
+	if (pChunk->Size() != size)
+	{
+		pChunk->Resize((int)size);
+		ok = pChunk->Size() == size ? ok : kResultFalse;
+	}
+
+	if (ok == kResultOk)
+	{
+		memcpy(pChunk->GetBytes(), data, size);
+
+		pos = 0;
+		const int iplugVer = GetIPlugVerFromChunk(pChunk, &pos);
+		ok = iplugVer >= 0x010000 ? ok : kResultFalse;
+	}
+
+	if (ok == kResultOk)
+	{
+		pos = UnserializeBank(pChunk, pos);
+		ok = pos >= 0 ? ok : kResultFalse;
+
+		RestorePreset(ok == kResultOk ? currentProgram : -1);
+
+		if (IsBypassed() != isBypassed)
+		{
+			mPlugFlags ^= IPlugBase::kPlugFlagsBypass;
+			OnBypass(isBypassed);
+
+			IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
+			pEffect->updateParamNormalized(kBypassParamID, (Vst::ParamValue)isBypassed);
+		}
+	}
+
+	RedrawParamControls();
+
+	mMutex.Leave();
+	return ok;
+
+}
+
+#endif // IPLUG_NO_VST3_VST2_COMPAT
+
 tresult IPlugVST3::VSTSetState(IBStream* const state)
 {
 	mMutex.Enter();
@@ -1281,3 +1358,25 @@ void IPlugVST3::FlushParamChanges(Vst::IParameterChanges* const pParamChanges, c
 		}
 	}
 }
+
+#ifndef NDEBUG
+
+char* IPlugVST3::VST2UniqueIDToGUID(const int uniqueID, const char* const plugName, char* buf, const int bufSize)
+{
+	assert(bufSize >= 33);
+
+	memcpy(buf, "565354\0", 8); // VST
+	snprintf(&buf[6], 9, "%08X", uniqueID);
+	buf += 12;
+
+	for (int c = 1, i = 0; i < 9; ++i)
+	{
+		if (c) c = plugName[i];
+		if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
+		snprintf(buf += 2, 3, "%02X", c);
+	}
+
+	return &buf[-30];
+}
+
+#endif // NDEBUG
