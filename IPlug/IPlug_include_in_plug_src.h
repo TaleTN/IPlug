@@ -76,6 +76,10 @@ EXPORT int main(audioMasterCallback const hostCallback)
 #include "VST3_SDK/pluginterfaces/base/iplugincompatibility.h"
 #include "VST3_SDK/public.sdk/source/main/pluginfactory.h"
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 #include <assert.h>
 #include <string.h>
 
