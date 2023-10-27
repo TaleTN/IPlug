@@ -277,6 +277,11 @@ public:
 		return (unsigned int)symbolicSampleSize <= Vst::kSample64 ? kResultTrue : kResultFalse;
 	}
 
+	uint32 PLUGIN_API getLatencySamples() SMTG_OVERRIDE
+	{
+		return mPlug->GetLatency();
+	}
+
 	tresult PLUGIN_API setupProcessing(Vst::ProcessSetup& setup) SMTG_OVERRIDE
 	{
 		const tresult result = Vst::SingleComponentEffect::setupProcessing(setup);
