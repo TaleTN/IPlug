@@ -141,7 +141,7 @@ SMTG_EXPORT_SYMBOL Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
 			classFlags,
 
 			#if PLUG_IS_INST
-			Steinberg::Vst::PlugType::kFxInstrument,
+			Steinberg::Vst::PlugType::kInstrument,
 			#else
 			Steinberg::Vst::PlugType::kFx,
 			#endif
@@ -180,7 +180,7 @@ SMTG_EXPORT_SYMBOL Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
 			classFlags,
 
 			#if PLUG_IS_INST
-			Steinberg::Vst::PlugType::kFxInstrument,
+			Steinberg::Vst::PlugType::kInstrument,
 			#else
 			Steinberg::Vst::PlugType::kFx,
 			#endif
