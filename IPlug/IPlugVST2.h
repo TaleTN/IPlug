@@ -93,3 +93,5 @@ public:
 	static void VSTCALLBACK VSTSetParameter(AEffect* pEffect, VstInt32 idx, float value);
 	inline AEffect* GetAEffect() { return &mAEffect; }
 };
+
+const unsigned int* GetIPlugVST2UniqueGUID();

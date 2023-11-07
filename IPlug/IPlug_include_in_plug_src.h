@@ -71,6 +71,16 @@ EXPORT int main(audioMasterCallback const hostCallback)
 
 } // extern "C"
 
+const unsigned int* GetIPlugVST2UniqueGUID()
+{
+	#ifdef PLUG_UNIQUE_GUID
+	static const unsigned int guid[4] = { PLUG_UNIQUE_GUID };
+	return guid;
+	#else
+	return NULL;
+	#endif
+}
+
 #elif defined(VST3_API)
 
 #include "VST3_SDK/pluginterfaces/base/iplugincompatibility.h"

@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "WDL/wdlcstring.h"
+#include "WDL/wdlendian.h"
 #include "WDL/wdltypes.h"
 
 #define vst_strncpy(y, x, n) lstrcpyn_safe(y, x, n)
@@ -1032,18 +1033,55 @@ VstIntPtr IPlugVST2::VSTVendorSpecific(const VstInt32 idx, const VstIntPtr value
 			break;
 		}
 
-		// Mouse wheel, original source:
-		// http://asseca.com/vst-24-specs/efVendorSpecific.html
-
 		case 0x73744341: // 'stCA'
+		case 0x73744361: // 'stCa'
 		{
-			if (value == 0x57686565) // 'Whee'
+			switch (value)
 			{
-				IGraphics* const pGraphics = GetGUI();
-				if (pGraphics)
+				// Mouse wheel, original source:
+				// http://asseca.com/vst-24-specs/efVendorSpecific.html
+				case 0x57686565: // 'Whee'
 				{
-					// 1.0 = wheel-up, -1.0 = wheel-down
-					return pGraphics->ProcessMouseWheel(opt);
+					IGraphics* const pGraphics = GetGUI();
+					if (pGraphics)
+					{
+						// 1.0 = wheel-up, -1.0 = wheel-down
+						return pGraphics->ProcessMouseWheel(opt);
+					}
+					break;
+				}
+
+				// VST3 compatibility, source:
+				// https://steinbergmedia.github.io/vst3_dev_portal/pages/FAQ/Compatibility+with+VST+2.x+or+VST+1.html
+				case 0x46554944: // 'FUID'
+				{
+					const unsigned int* const src = GetIPlugVST2UniqueGUID();
+					char* const dest = (char*)ptr;
+					if (src && dest)
+					{
+						unsigned int l1 = src[0], l2 = src[1], l3 = src[2], l4 = src[3];
+
+						#if defined(WDL_BIG_ENDIAN) == defined(_WIN32)
+						l1 = WDL_bswap32(l1);
+						l2 = WDL_bswap32(l2);
+						#endif
+
+						#ifdef _WIN32
+						l2 = (l2 >> 16) | (l2 << 16);
+						#endif
+
+						#ifndef WDL_BIG_ENDIAN
+						l3 = WDL_bswap32(l3);
+						l4 = WDL_bswap32(l4);
+						#endif
+
+						memcpy(dest, &l1, 4);
+						memcpy(&dest[4], &l2, 4);
+						memcpy(&dest[8], &l3, 4);
+						memcpy(&dest[12], &l4, 4);
+						return 1;
+					}
+					break;
 				}
 			}
 			break;
