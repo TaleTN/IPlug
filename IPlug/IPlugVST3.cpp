@@ -4,9 +4,15 @@
 
 #include "VST3_SDK/base/source/fstreamer.h"
 #include "VST3_SDK/pluginterfaces/base/iplugincompatibility.h"
-#include "VST3_SDK/pluginterfaces/vst/ivstmidicontrollers.h"
 #include "VST3_SDK/public.sdk/source/vst/vstaudioprocessoralgo.h"
-#include "VST3_SDK/public.sdk/source/vst/utility/vst2persistence.h"
+
+#ifndef IPLUG_NO_MIDI_CC_PARAMS
+	#include "VST3_SDK/pluginterfaces/vst/ivstmidicontrollers.h"
+#endif
+
+#ifndef IPLUG_NO_VST3_VST2_COMPAT
+	#include "VST3_SDK/public.sdk/source/vst/utility/vst2persistence.h"
+#endif
 
 #include <assert.h>
 #include <stdlib.h>
