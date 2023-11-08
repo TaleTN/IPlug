@@ -697,8 +697,11 @@ void IPlugVST3::OnParamReset()
 
 	for (int i = 0; i < n; ++i)
 	{
-		pEffect->updateParamNormalized(i, GetParam(i)->GetNormalized());
+		pEffect->getParameterObject(i)->setNormalized(GetParam(i)->GetNormalized());
 	}
+
+	Vst::IComponentHandler* const componentHandler = pEffect->getComponentHandler();
+	if (componentHandler) componentHandler->restartComponent(Vst::kParamValuesChanged);
 }
 
 void IPlugVST3::BeginInformHostOfParamChange(const int idx, const bool lockMutex)
@@ -991,16 +994,16 @@ tresult IPlugVST3::VSTSetState(const int8_t* const data, const size_t size, cons
 		pos = UnserializeBank(pChunk, pos);
 		ok = pos >= 0 ? ok : kResultFalse;
 
-		RestorePreset(ok == kResultOk ? currentProgram : -1);
-
 		if (IsBypassed() != isBypassed)
 		{
 			mPlugFlags ^= IPlugBase::kPlugFlagsBypass;
 			OnBypass(isBypassed);
 
 			IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
-			pEffect->updateParamNormalized(kBypassParamID, (Vst::ParamValue)isBypassed);
+			pEffect->getParameterObject(kBypassParamID)->setNormalized((Vst::ParamValue)isBypassed);
 		}
+
+		RestorePreset(ok == kResultOk ? currentProgram : -1);
 	}
 
 	RedrawParamControls();
@@ -1047,7 +1050,7 @@ tresult IPlugVST3::VSTSetState(IBStream* const state)
 			OnBypass(bypass);
 
 			IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
-			pEffect->updateParamNormalized(kBypassParamID, (Vst::ParamValue)bypass);
+			pEffect->getParameterObject(kBypassParamID)->setNormalized((Vst::ParamValue)bypass);
 		}
 
 		if (pos >= 0)
