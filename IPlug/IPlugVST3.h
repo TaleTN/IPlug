@@ -103,4 +103,4 @@ public:
 };
 
 IPlugVST3* MakeIPlugVST3(void* instanceInfo);
-int GetVST3CompatibilityGUIDs(char* pNew, const Steinberg::char8** ppOld);
+int GetIPlugVST3CompatGUIDs(char* pNew, const Steinberg::char8** ppOld);

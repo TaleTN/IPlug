@@ -586,7 +586,7 @@ public:
 		TUID uid;
 		const char* pOld;
 
-		const int nOld = GetVST3CompatibilityGUIDs(uid, &pOld);
+		const int nOld = GetIPlugVST3CompatGUIDs(uid, &pOld);
 		if (!nOld) return kResultTrue;
 
 		char buf[51];

@@ -224,7 +224,7 @@ IPlug* MakeIPlugVST3(void* const instanceInfo)
 	return pPlug;
 }
 
-int GetVST3CompatibilityGUIDs(
+int GetIPlugVST3CompatGUIDs(
 	#ifdef VST3_COMPAT_OLD_GUIDS
 	char* const pNew, const Steinberg::char8** const ppOld
 	#else
