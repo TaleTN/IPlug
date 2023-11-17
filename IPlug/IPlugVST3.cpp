@@ -145,6 +145,11 @@ public:
 		return mGraphics->ProcessMouseWheel(distance) ? kResultTrue : kResultFalse;
 	}
 
+	tresult resizeView(ViewRect* const newSize)
+	{
+		return plugFrame ? plugFrame->resizeView(this, newSize) : kResultFalse;
+	}
+
 	inline void* getSystemWindow() const { return systemWindow; }
 
 private:
@@ -790,7 +795,7 @@ void IPlugVST3::ResizeGraphics(const int w, const int h)
 	if (thingsHaveChanged && GetGUI())
 	{
 		ViewRect newSize(0, 0, w, h);
-		pEffect->getEditor()->onSize(&newSize);
+		pEffect->getEditor()->resizeView(&newSize);
 	}
 }
 
