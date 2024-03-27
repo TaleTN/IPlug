@@ -316,9 +316,9 @@ void IPlugCLAP::ProcessInputEvents(const clap_input_events* const pInEvents, con
 				const clap_event_midi* const pMidiEvent = (const clap_event_midi*)pEvent;
 				if (pMidiEvent->port_index) break;
 
-				const uint8_t* const data = pMidiEvent->data;
+				IMidiMsg msg(ofs);
+				memcpy(&msg.mStatus, pMidiEvent->data, 3);
 
-				const IMidiMsg msg(ofs, data[0], data[1], data[2]);
 				ProcessMidiMsg(&msg);
 				break;
 			}
