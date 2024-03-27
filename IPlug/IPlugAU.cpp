@@ -632,7 +632,10 @@ ComponentResult IPlugAU::IPlugAUEntry(ComponentParameters* const params, void* c
 			const UInt32 data1 = GET_COMP_PARAM(UInt32, 2, 4);
 			const UInt32 data2 = GET_COMP_PARAM(UInt32, 1, 4);
 			const UInt32 offset = GET_COMP_PARAM(UInt32, 0, 4);
-			const IMidiMsg msg(offset, status, data1, data2);
+			IMidiMsg msg(offset);
+			msg.mStatus = status;
+			msg.mData1 = data1;
+			msg.mData2 = data2;
 			_this->ProcessMidiMsg(&msg);
 			break;
 		}
