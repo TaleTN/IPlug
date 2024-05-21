@@ -1209,9 +1209,7 @@ void CLAP_ABI IPlugCLAP::ClapGUIDestroy(const clap_plugin* const pPlug)
 	ClapGUIHide(pPlug);
 
 	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
-
 	_this->mGUIParent = NULL;
-	_this->mGUIWidth = _this->mGUIHeight = 0;
 }
 
 bool CLAP_ABI IPlugCLAP::ClapGUIGetSize(const clap_plugin* const pPlug, uint32_t* const pWidth, uint32_t* const pHeight)
