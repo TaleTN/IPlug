@@ -7,7 +7,10 @@
 #include "WDL/lice/lice.h"
 #include "WDL/lice/lice_text.h"
 
-#include "WDL/assocarray.h"
+#ifndef IPLUG_NO_LOOKUP_CONTROL
+	#include "WDL/assocarray.h"
+#endif
+
 #include "WDL/ptrlist.h"
 
 #if defined(__APPLE__) && defined(__LP64__) && !defined(IPLUG_NO_CARBON_SUPPORT)
@@ -165,11 +168,13 @@ public:
 		return mControls.Add(pControl) ? idx : -1;
 	}
 
+	#ifndef IPLUG_NO_LOOKUP_CONTROL
 	int AttachControl(IControl* const pControl, const int ID)
 	{
 		mControlIDs.Insert(ID, pControl);
 		return AttachControl(pControl);
 	}
+	#endif
 
 	// Returns control index, or -1 if not found.
 	int FindControl(const IControl* const pControl) const
@@ -177,10 +182,12 @@ public:
 		return mControls.Find(pControl);
 	}
 
+	#ifndef IPLUG_NO_LOOKUP_CONTROL
 	IControl* LookupControl(const int ID) const
 	{
 		return mControlIDs.Get(ID, NULL);
 	}
+	#endif
 
 	IControl* GetControl(const int idx) const { return mControls.Get(idx); }
 	IControl** GetControls() const { return mControls.GetList(); }
@@ -305,7 +312,10 @@ public:
 	}
 
 protected:
+	#ifndef IPLUG_NO_LOOKUP_CONTROL
 	WDL_IntKeyedArray<IControl*> mControlIDs;
+	#endif
+
 	WDL_PtrList<IControl> mControls;
 	IPlugBase* mPlug;
 
