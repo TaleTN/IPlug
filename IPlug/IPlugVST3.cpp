@@ -1155,9 +1155,13 @@ tresult IPlugVST3::VSTProcess(Vst::ProcessData& data)
 	const Vst::AudioBusBuffers* const outBus = data.numOutputs ? &data.outputs[0] : &emptyBus;
 
 	Vst::IParameterChanges* const pParamChanges = data.inputParameterChanges;
-	const int32 nChanges = pParamChanges->getParameterCount();
+	int32 nChanges = 0;
 
-	if (nChanges) ProcessParamChanges(pParamChanges, nChanges);
+	if (pParamChanges)
+	{
+		nChanges = pParamChanges->getParameterCount();
+		if (nChanges) ProcessParamChanges(pParamChanges, nChanges);
+	}
 
 	Vst::IEventList* const pInputEvents = data.inputEvents;
 	if (pInputEvents)
