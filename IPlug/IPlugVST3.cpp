@@ -1171,14 +1171,17 @@ tresult IPlugVST3::VSTProcess(Vst::ProcessData& data)
 	}
 
 	const Vst::ProcessContext* const pProcessContext = data.processContext;
-	mProcessContextState = pProcessContext->state;
-	mSamplePos = pProcessContext->projectTimeSamples;
+	if (pProcessContext)
+	{
+		mProcessContextState = pProcessContext->state;
+		mSamplePos = pProcessContext->projectTimeSamples;
 
-	WDL_UINT64 tempo;
-	memcpy(&tempo, &pProcessContext->tempo, sizeof(double));
-	memcpy(&mTempo, &tempo, sizeof(double));
+		WDL_UINT64 tempo;
+		memcpy(&tempo, &pProcessContext->tempo, sizeof(double));
+		memcpy(&mTempo, &tempo, sizeof(double));
 
-	memcpy(mTimeSig, &pProcessContext->timeSigNumerator, 2 * sizeof(int32));
+		memcpy(mTimeSig, &pProcessContext->timeSigNumerator, 2 * sizeof(int32));
+	}
 
 	const int nInputs = NInChannels(), nOutputs = NOutChannels();
 
