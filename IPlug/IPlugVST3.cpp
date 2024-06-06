@@ -283,6 +283,31 @@ public:
 		return mPlug->VSTGetState(state);
 	}
 
+	tresult PLUGIN_API setBusArrangements(Vst::SpeakerArrangement* const inputs, const int32 numIns, Vst::SpeakerArrangement* const outputs, const int32 numOuts)
+	{
+		if (numIns < 0 || numOuts < 0) return kInvalidArgument;
+
+		if (!(audioInputs.size() == numIns && audioOutputs.size() == numOuts))
+		{
+			return kResultFalse;
+		}
+
+		assert(numIns == 0 || numIns == 1);
+		assert(numOuts == 0 || numOuts == 1);
+
+		if (numIns && inputs[0] != Vst::SpeakerArr::kStereo)
+		{
+			return kResultFalse;
+		}
+
+		if (numOuts && outputs[0] != Vst::SpeakerArr::kStereo)
+		{
+			return kResultFalse;
+		}
+
+		return Vst::SingleComponentEffect::setBusArrangements(inputs, numIns, outputs, numOuts);
+	}
+
 	tresult PLUGIN_API canProcessSampleSize(const int32 symbolicSampleSize) SMTG_OVERRIDE
 	{
 		return (unsigned int)symbolicSampleSize <= Vst::kSample64 ? kResultTrue : kResultFalse;
