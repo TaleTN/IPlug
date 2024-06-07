@@ -283,7 +283,7 @@ public:
 		return mPlug->VSTGetState(state);
 	}
 
-	tresult PLUGIN_API setBusArrangements(Vst::SpeakerArrangement* const inputs, const int32 numIns, Vst::SpeakerArrangement* const outputs, const int32 numOuts)
+	tresult PLUGIN_API setBusArrangements(Vst::SpeakerArrangement* const inputs, const int32 numIns, Vst::SpeakerArrangement* const outputs, const int32 numOuts) SMTG_OVERRIDE
 	{
 		if (numIns < 0 || numOuts < 0) return kInvalidArgument;
 
