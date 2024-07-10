@@ -34,7 +34,8 @@ enum EHost
 	kHostBitwig,
 	kHostAudacity,
 	kHostSAVIHost,
-	kHostVSTHost
+	kHostVSTHost,
+	kHostWaveLab
 
 	// These hosts don't report the host name:
 	// EnergyXT2

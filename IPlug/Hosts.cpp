@@ -56,6 +56,7 @@ static const LookUpTbl sLookUpTbl[] =
 	WIN_ONLY(kHostSAVIHost, "savihost")
 	WIN_ONLY(kHostVSTHost, "vsthost")
 	ANY_OS(kHostProTools, "pro tools")
+	ANY_OS(kHostWaveLab, "wavelab")
 };
 
 static size_t ToLower(char* const cDest, const char* const cSrc, const size_t n)
