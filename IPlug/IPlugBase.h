@@ -188,6 +188,7 @@ public:
 	void EndDelayedInformHostOfParamChange(bool lockMutex = true);
 
 	virtual void InformHostOfProgramChange() = 0;
+	void InformHostOfParamReset();
 
 	// ----------------------------------------
 	// Useful stuff for your plugin class or an outsider to call,
@@ -291,7 +292,8 @@ protected:
 	{
 		kPlugFlagsActive = 32,
 		kPlugFlagsBypass = 64,
-		kPlugFlagsOffline = 128
+		kPlugFlagsOffline = 128,
+		kPlugFlagsParamReset = 256
 	};
 
 	inline bool IsActive() const { return !!(mPlugFlags & kPlugFlagsActive); }
@@ -383,6 +385,8 @@ protected:
 	void ProcessBuffers(float /* sampleType */, int nFrames);
 	void ProcessBuffersAccumulating(float /* sampleType */, int nFrames);
 	void PassThroughBuffers(float /* sampleType */, int nFrames);
+
+	virtual void InformHostOfParamChanges() {} // See InformHostOfParamReset().
 
 	WDL_PtrList_DeleteOnDestroy<IParam> mParams;
 	WDL_PtrList_DeleteOnDestroy<IPreset> mPresets;

@@ -425,6 +425,15 @@ void IPlugBase::EndDelayedInformHostOfParamChange(const bool lockMutex)
 	if (lockMutex) mMutex.Leave();
 }
 
+void IPlugBase::InformHostOfParamReset()
+{
+	if (mPlugFlags & kPlugFlagsParamReset)
+	{
+		mPlugFlags &= ~kPlugFlagsParamReset;
+		InformHostOfParamChanges();
+	}
+}
+
 // Default passthrough.
 void IPlugBase::ProcessDoubleReplacing(const double* const* const inputs, double* const* const outputs, const int nFrames)
 {

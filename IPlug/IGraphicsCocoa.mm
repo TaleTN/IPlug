@@ -140,6 +140,8 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent, const bool right,
 {
 	if (pTimer == mTimer && mGraphics)
 	{
+		mGraphics->GetPlug()->InformHostOfParamReset();
+
 		if (mGraphics->ScaleNeedsUpdate() && mGraphics->UpdateScale())
 		{
 			const int w = mGraphics->Width(), h = mGraphics->Height();

@@ -92,6 +92,8 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 		{
 			if (wParam == IPLUG_TIMER_ID)
 			{
+				pGraphics->GetPlug()->InformHostOfParamReset();
+
 				if (pGraphics->TimerEnabled())
 				{
 					pGraphics->GetPlug()->OnGUITimer();

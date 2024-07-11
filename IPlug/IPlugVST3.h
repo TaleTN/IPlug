@@ -56,6 +56,8 @@ protected:
 	bool SendMidiMsg(const IMidiMsg* pMsg) { return false; }
 	bool SendSysEx(const ISysEx* pSysEx) { return false; }
 
+	void InformHostOfParamChanges();
+
 private:
 	void ProcessParamChanges(Steinberg::Vst::IParameterChanges* pParamChanges, Steinberg::int32 nChanges);
 	void ProcessParamChange(Steinberg::Vst::ParamID id, Steinberg::Vst::ParamValue value);

@@ -730,8 +730,7 @@ void IPlugVST3::OnParamReset()
 		pEffect->getParameterObject(i)->setNormalized(GetParam(i)->GetNormalized());
 	}
 
-	Vst::IComponentHandler* const componentHandler = pEffect->getComponentHandler();
-	if (componentHandler) componentHandler->restartComponent(Vst::kParamValuesChanged);
+	mPlugFlags |= kPlugFlagsParamReset;
 }
 
 void IPlugVST3::BeginInformHostOfParamChange(const int idx, const bool lockMutex)
@@ -770,6 +769,14 @@ void IPlugVST3::EndInformHostOfParamChange(const int idx, const bool lockMutex)
 	pEffect->endEdit(idx);
 
 	if (lockMutex) mMutex.Leave();
+}
+
+void IPlugVST3::InformHostOfParamChanges()
+{
+	IPlugVST3_Effect* const pEffect = (IPlugVST3_Effect*)mEffect;
+
+	Vst::IComponentHandler* const componentHandler = pEffect->getComponentHandler();
+	if (componentHandler) componentHandler->restartComponent(Vst::kParamValuesChanged);
 }
 
 double IPlugVST3::GetSamplePos()
