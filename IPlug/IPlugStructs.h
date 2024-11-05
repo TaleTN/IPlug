@@ -234,11 +234,25 @@ struct IRECT
 
 struct IMouseMod
 {
-	unsigned int L:1, R:1, S:1, C:1, A:1, W:1, _unused:26;
-	inline IMouseMod(): L(0), R(0), S(0), C(0), A(0), W(0), _unused(0) {}
+	union
+	{
+		struct { unsigned int L:1, R:1, S:1, C:1, A:1, W:1, _unused:26; };
+		unsigned int _flags;
+	};
+
+	inline IMouseMod(): _flags(0) {}
 
 	IMouseMod(const bool l, const bool r = false, const bool s = false, const bool c = false, const bool a = false, const bool w = false)
-	: L(l), R(r), S(s), C(c), A(a), W(w), _unused(0) {}
+	{
+		_flags = 0;
+
+		L = l;
+		R = R;
+		S = s;
+		C = c;
+		A = a;
+		W = w;
+	}
 
 	unsigned int Get() const
 	{
@@ -247,7 +261,14 @@ struct IMouseMod
 
 	void Set(const unsigned int i)
 	{
-		*this = IMouseMod(i & 1, (i >> 1) & 1, (i >> 2) & 1, (i >> 3) & 1, (i >> 4) & 1, (i >> 5) & 1);
+		_flags = 0;
+
+		L = i & 1;
+		R = (i >> 1) & 1;
+		S = (i >> 2) & 1;
+		C = (i >> 3) & 1;
+		A = (i >> 4) & 1;
+		W = (i >> 5) & 1;
 	}
 };
 
