@@ -27,20 +27,11 @@ public:
 		const int paramIdx = -1
 	):
 		mPlug(pPlug),
-		mParamIdx(paramIdx),
-		mDirty(1),
-		mRedraw(0),
-		mHide(0),
-		mGrayed(0),
-		mDisablePrompt(0),
-		mDblAsSingleClick(0),
-		mReverse(0),
-		mDirection(0),
-		mAutoUpdate(0),
-		mReadOnly(0),
-		mBypass(0),
-		_unused(0)
+		mParamIdx(paramIdx)
 	{
+		_flags = 0;
+		mDirty = 1;
+
 		if (pR) mRECT = *pR;
 	}
 
@@ -139,7 +130,13 @@ public:
 protected:
 	IPlugBase* mPlug;
 	int mParamIdx;
-	unsigned int mDirty:1, mRedraw:1, mHide:1, mGrayed:1, mDisablePrompt:1, mDblAsSingleClick:1, mReverse:1, mDirection:1, mAutoUpdate:1, mReadOnly:1, mBypass:1, _unused:21;
+
+	union
+	{
+		struct { unsigned int mDirty:1, mRedraw:1, mHide:1, mGrayed:1, mDisablePrompt:1, mDblAsSingleClick:1, mReverse:1, mDirection:1, mAutoUpdate:1, mReadOnly:1, mBypass:1, _unused:21; };
+		unsigned int _flags;
+	};
+
 	IRECT mRECT;
 };
 
