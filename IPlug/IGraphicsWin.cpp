@@ -279,9 +279,9 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND const hWnd, const UINT msg, const WP
 				pGraphics->HideTooltip();
 
 				const IMouseMod mod = GetMouseMod(wParam, canHandle >= 0);
-				const IMouseMod mask(false, false, true, true, true, true);
+				static const unsigned int mask = 0x3C; // (W << 5) | (A << 4) | (C << 3) | (S << 2)
 
-				if (mod.Get() & mask.Get())
+				if (mod.Get() & mask)
 				{
 					const float d = (float)GET_WHEEL_DELTA_WPARAM(wParam) / (float)WHEEL_DELTA;
 					const POINT p = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
@@ -1195,9 +1195,9 @@ int IGraphicsWin::ProcessMouseWheel(const float delta)
 			HideTooltip();
 
 			const IMouseMod mod = GetKeyMod(canHandle >= 0);
-			const IMouseMod mask(false, false, true, true, true, true);
+			static const unsigned int mask = 0x3C; // (W << 5) | (A << 4) | (C << 3) | (S << 2)
 
-			if (mod.Get() & mask.Get())
+			if (mod.Get() & mask)
 			{
 				ScaleMouseWheel(hWnd, &p, mod, delta);
 				return 1;
