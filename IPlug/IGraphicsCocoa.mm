@@ -280,9 +280,9 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent, const bool right,
 	if (mGraphics && (canHandle = mGraphics->CanHandleMouseWheel()))
 	{
 		const IMouseMod mod = GetRightMouseMod(pEvent, false, canHandle >= 0);
-		const IMouseMod mask(false, false, true, true, true, true);
+		static const unsigned int mask = 0x3C; // (W << 5) | (A << 4) | (C << 3) | (S << 2)
 
-		if (mod.Get() & mask.Get())
+		if (mod.Get() & mask)
 		{
 			int x, y;
 			[self getMouseXY: pEvent x: &x y: &y];
