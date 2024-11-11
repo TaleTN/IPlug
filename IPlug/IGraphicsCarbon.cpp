@@ -191,9 +191,9 @@ pascal OSStatus IGraphicsCarbon::CarbonEventHandler(EventHandlerCallRef const pH
 						if (canHandle)
 						{
 							mmod.W = canHandle >= 0;
-							const IMouseMod mask(false, false, true, true, true, true);
+							static const unsigned int mask = 0x3C; // (W << 5) | (A << 4) | (C << 3) | (S << 2)
 
-							if (mmod.Get() & mask.Get())
+							if (mmod.Get() & mask)
 							{
 								SInt32 d;
 								GetEventParameter(pEvent, kEventParamMouseWheelDelta, typeSInt32, NULL, sizeof(SInt32), NULL, &d);
