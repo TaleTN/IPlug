@@ -247,7 +247,7 @@ struct IMouseMod
 		_flags = 0;
 
 		L = l;
-		R = R;
+		R = r;
 		S = s;
 		C = c;
 		A = a;
