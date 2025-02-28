@@ -588,7 +588,7 @@ public:
 
 	bool Serialize(ByteChunk* pChunk) const;
 	int Unserialize(const ByteChunk* pChunk, int startPos);
-	int GetSize() const { return (int)sizeof(double); }
+	int Size() const { return (int)sizeof(double); }
 
 protected:
 	double WDL_FIXALIGN mValue;
