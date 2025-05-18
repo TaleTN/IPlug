@@ -35,11 +35,40 @@ public:
 		return delta;
 	}
 
+	int PutBuf(void** const ppBuf, const int size)
+	{
+		#ifndef NDEBUG
+		AssertSize(size);
+		#endif
+
+		const int oldSize = mSize, newSize = oldSize + size;
+		const int delta = newSize > mBytes.GetSize() ? 0 : size;
+
+		if (delta)
+		{
+			mSize = newSize;
+			*ppBuf = (char*)mBytes.GetFast() + oldSize;
+		}
+
+		return delta;
+	}
+
 	int GetBytes(void* const pBuf, const int size, const int startPos) const
 	{
 		int endPos = startPos + size;
 		if (startPos >= 0 && endPos <= mBytes.GetSize())
 			memcpy(pBuf, (const char*)mBytes.GetFast() + startPos, size);
+		else
+			endPos = -1;
+
+		return endPos;
+	}
+
+	int GetBuf(const void** const ppBuf, const int size, const int startPos) const
+	{
+		int endPos = startPos + size;
+		if (startPos >= 0 && endPos <= mBytes.GetSize())
+			*ppBuf = (const char*)mBytes.GetFast() + startPos;
 		else
 			endPos = -1;
 
