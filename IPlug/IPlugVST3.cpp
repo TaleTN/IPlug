@@ -975,9 +975,9 @@ IPlugView* IPlugVST3::VSTCreateView(FIDString /* name */)
 
 	if (!(w & h))
 	{
-		const int scale = pGraphics->Scale();
-		mGUIWidth = w = pGraphics->Width() >> scale;
-		mGUIHeight = h = pGraphics->Height() >> scale;
+		pGraphics->GetInitialSize(&w, &h);
+		mGUIWidth = w;
+		mGUIHeight = h;
 	}
 
 	ViewRect size(0, 0, w, h);
