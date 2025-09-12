@@ -293,8 +293,9 @@ protected:
 		#ifdef __APPLE__
 		if (pGraphics)
 		{
-			static const int scale = IGraphicsMac::kScaleOS;
-			pPlug->ResizeGraphics(pGraphics->Width() >> scale, pGraphics->Height() >> scale);
+			int w, h;
+			pGraphics->GetInitialSize(&w, &h);
+			pPlug->ResizeGraphics(w, h);
 		}
 		#endif
 	}
