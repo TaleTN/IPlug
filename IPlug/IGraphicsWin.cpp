@@ -468,7 +468,6 @@ IGraphicsWin::IGraphicsWin(
 	// mMainWnd = NULL;
 
 	mTooltipBuf[0] = 0;
-	mForceDPI = 0;
 	mCoInit = false;
 }
 
@@ -612,7 +611,7 @@ void* IGraphicsWin::OpenWindow(void* const pParentWnd)
 	int x = 0, y = 0, w = Width(), h = Height();
 	mParentWnd = (HWND)pParentWnd;
 
-	int dpi = mForceDPI;
+	int dpi = ForceDPI();
 	if (!dpi) dpi = mGetDpiForWindow ? mGetDpiForWindow(mParentWnd) : USER_DEFAULT_SCREEN_DPI;
 	mDPI = dpi;
 
