@@ -291,15 +291,12 @@ void IPlugVST2::AttachGraphics(IGraphics* const pGraphics)
 		IPlugBase::AttachGraphics(pGraphics);
 		mAEffect.flags |= effFlagsHasEditor;
 
-		#ifdef __APPLE__
-		static const int scale = IGraphicsMac::kScaleOS;
-		#else
-		const int scale = pGraphics->Scale();
-		#endif
+		int w, h;
+		pGraphics->GetInitialSize(&w, &h);
 
 		mEditRect.left = mEditRect.top = 0;
-		mEditRect.right = pGraphics->Width() >> scale;
-		mEditRect.bottom = pGraphics->Height() >> scale;
+		mEditRect.right = w;
+		mEditRect.bottom = h;
 	}
 }
 
