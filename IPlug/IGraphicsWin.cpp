@@ -566,6 +566,27 @@ void IGraphicsWin::Resize(int w, int h)
 	}
 } */
 
+void IGraphicsWin::GetInitialSize(int* const pWidth, int* const pHeight)
+{
+	int w = Width(), h = Height();
+	const int dpi = ForceDPI();
+
+	if (!dpi)
+	{
+		const int scale = Scale();
+		w >>= scale;
+		h >>= scale;
+	}
+	else
+	{
+		w = MulDiv(w, dpi, IPLUG_DEFAULT_DPI);
+		h = MulDiv(h, dpi, IPLUG_DEFAULT_DPI);
+	}
+
+	*pWidth = w;
+	*pHeight = h;
+}
+
 void IGraphicsWin::DrawScreen(const IRECT* const pR)
 {
 	HWND const hWnd = (HWND)GetWindow();

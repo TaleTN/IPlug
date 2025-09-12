@@ -53,6 +53,10 @@ public:
 	// IRECT GetWindowRECT();
 	void SetWindowTitle(const char* str);
 
+	// Returns initial GUI size, based on Width(), Height(), Scale(), and
+	// ForceDPI().
+	void GetInitialSize(int* pWidth, int* pHeight);
+
 protected:
 	LICE_IBitmap* OSLoadBitmap(int ID, const char* name);
 	bool OSLoadFont(int ID, const char* name);
