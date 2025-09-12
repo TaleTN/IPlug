@@ -316,6 +316,10 @@ public:
 	inline void ForceDPI(const int dpi) { mForceDPI = dpi; }
 	inline int ForceDPI() const { return mForceDPI; }
 
+	// Returns initial GUI size, typically based on Width(), Height(),
+	// Scale(), and ForceDPI().
+	virtual void GetInitialSize(int* pWidth, int* pHeight) = 0;
+
 protected:
 	#ifndef IPLUG_NO_LOOKUP_CONTROL
 	WDL_IntKeyedArray<IControl*> mControlIDs;
