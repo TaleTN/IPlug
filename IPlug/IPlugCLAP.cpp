@@ -1217,24 +1217,13 @@ bool CLAP_ABI IPlugCLAP::ClapGUIGetSize(const clap_plugin* const pPlug, uint32_t
 	IPlugCLAP* const _this = (IPlugCLAP*)pPlug->plugin_data;
 	_this->mMutex.Enter();
 
-	const IGraphics* const pGraphics = _this->GetGUI();
+	IGraphics* const pGraphics = _this->GetGUI();
 	bool ret = false;
 
 	if (pGraphics)
 	{
 		int w = _this->mGUIWidth, h = _this->mGUIHeight;
-
-		if (!(w & h))
-		{
-			#ifdef __APPLE__
-			static const int scale = IGraphicsMac::kScaleOS;
-			#else
-			const int scale = pGraphics->Scale();
-			#endif
-
-			w = pGraphics->Width() >> scale;
-			h = pGraphics->Height() >> scale;
-		}
+		if (!(w & h)) pGraphics->GetInitialSize(&w, &h);
 
 		*pWidth = w;
 		*pHeight = h;
