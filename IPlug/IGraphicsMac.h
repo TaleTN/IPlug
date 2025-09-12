@@ -59,6 +59,9 @@ public:
 	static int GetUserOSVersion(); // Returns a number like 0x1050 (10.5).
 	static double GetUserFoundationVersion(); // Returns a number like 677.00 (10.5).
 
+	// Returns initial GUI size based on Width() and Height().
+	void GetInitialSize(int* pWidth, int* pHeight);
+
 	static const int kAudioUnitProperty_PlugInObject = 0x1a45ffe9;
 
 protected:

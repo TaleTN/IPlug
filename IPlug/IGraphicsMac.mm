@@ -90,6 +90,12 @@ bool IGraphicsMac::OSLoadFont(int /* ID */, const char* const name)
 	return resourceFileName ? !!AddFontResourceEx(resourceFileName, FR_PRIVATE, NULL) : NULL;
 }
 
+void IGraphicsMac::GetInitialSize(int* const pWidth, int* const pHeight)
+{
+	*pWidth = Width() >> kScaleOS;
+	*pHeight = Height() >> kScaleOS;
+}
+
 void IGraphicsMac::DrawScreen(const IRECT* /* pR */)
 {
 	CGContextRef pCGC = NULL;
