@@ -311,6 +311,11 @@ public:
 		return pOldBuf;
 	}
 
+	// Defaults to 0, which means auto detect.
+	enum EForceDPI { kForceScaleHalf = 96, kForceScaleFull = 192 };
+	inline void ForceDPI(const int dpi) { mForceDPI = dpi; }
+	inline int ForceDPI() const { return mForceDPI; }
+
 protected:
 	#ifndef IPLUG_NO_LOOKUP_CONTROL
 	WDL_IntKeyedArray<IControl*> mControlIDs;
@@ -345,6 +350,8 @@ private:
 	#ifdef IPLUG_USE_IDLE_CALLS
 	int mIdleTicks;
 	#endif
+
+	int mForceDPI;
 };
 
 #ifndef NDEBUG

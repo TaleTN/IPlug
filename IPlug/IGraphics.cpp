@@ -156,11 +156,13 @@ IGraphics::IGraphics(
 	mHandleMouseOver(false),
 	mEnableTooltips(false),
 	mHandleMouseWheel(kMouseWheelEnable),
-	mEnableTimer(false)
+	mEnableTimer(false),
 
 	#ifdef IPLUG_USE_IDLE_CALLS
-	, mIdleTicks(0)
+	mIdleTicks(0),
 	#endif
+
+	mForceDPI(0)
 {
 }
 
