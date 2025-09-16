@@ -90,16 +90,29 @@ bool IGraphicsMac::OSLoadFont(int /* ID */, const char* const name)
 	return resourceFileName ? !!AddFontResourceEx(resourceFileName, FR_PRIVATE, NULL) : NULL;
 }
 
+int IGraphicsMac::ScaleForceDPI(const int dpi)
+{
+	const int scale = dpi > kForceScaleHalf ? kScaleFull : kScaleHalf;
+	return !dpi ? kScaleOS : scale;
+}
+
 void IGraphicsMac::GetInitialSize(int* const pWidth, int* const pHeight)
 {
-	*pWidth = Width() >> kScaleOS;
-	*pHeight = Height() >> kScaleOS;
+	const int w = Width(), h = Height();
+	const int scale = ScaleForceDPI();
+
+	*pWidth = w >> scale;
+	*pHeight = h >> scale;
 }
 
 void IGraphicsMac::DrawScreen(const IRECT* /* pR */)
 {
+	int w = Width(), h = Height();
+	const int dpi = ForceDPI();
+
 	CGContextRef pCGC = NULL;
-	CGRect r = CGRectMake(0.0f, 0.0f, (CGFloat)(Width() >> kScaleOS), (CGFloat)(Height() >> kScaleOS));
+	int scale = ScaleForceDPI(dpi);
+	CGRect r = CGRectMake(0.0f, 0.0f, (CGFloat)(w >> scale), (CGFloat)(h >> scale));
 
 	if (mGraphicsCocoa)
 	{
@@ -107,9 +120,12 @@ void IGraphicsMac::DrawScreen(const IRECT* /* pR */)
 		NSGraphicsContext* const gc = [NSGraphicsContext graphicsContextWithGraphicsPort: pCGC flipped: YES];
 		pCGC = (CGContextRef)[gc graphicsPort];
 
-		const CGSize retina = CGContextConvertSizeToDeviceSpace(pCGC, CGSizeMake(1.0f, 1.0f));
-		const int wantScale = retina.width > 1.0f ? kScaleFull : kScaleHalf;
-		if (wantScale != mWantScale) mWantScale = wantScale;
+		if (!dpi)
+		{
+			const CGSize retina = CGContextConvertSizeToDeviceSpace(pCGC, CGSizeMake(1.0f, 1.0f));
+			const int wantScale = retina.width > 1.0f ? kScaleFull : kScaleHalf;
+			if (wantScale != mWantScale) mWantScale = wantScale;
+		}
 	}
 	#ifndef IPLUG_NO_CARBON_SUPPORT
 	else if (mGraphicsCarbon)
@@ -128,11 +144,14 @@ void IGraphicsMac::DrawScreen(const IRECT* /* pR */)
 	// both kScaleFull and kScaleHalf, so clipping isn't necessary. Do note
 	// that after downsizing GUI clipping will always be necessary, because
 	// LICE_SysBitmap doesn't actually resize down.
-	const int w = mBackBuf.getWidth();
+	w = mBackBuf.getWidth();
 	if (mBackBuf.getRowSpan() > w)
 	{
-		const int h = mBackBuf.getHeight();
-		const int scale = kScaleOS - Scale();
+		h = mBackBuf.getHeight();
+
+		scale = kScaleOS - Scale();
+		scale = !dpi ? scale : 0;
+
 		const CGRect clip = CGRectMake(0.0f, 0.0f, (CGFloat)(w >> scale), (CGFloat)(h >> scale));
 		if (img)
 		{
@@ -151,8 +170,10 @@ bool IGraphicsMac::InitScale()
 {
 	if (mWantScale < 0)
 	{
-		if (!PreloadScale(kScaleOS)) return false;
-		mWantScale = mPrevScale = kScaleOS;
+		const int scale = ScaleForceDPI();
+
+		if (!PreloadScale(scale)) return false;
+		mWantScale = mPrevScale = scale;
 	}
 	return true;
 }

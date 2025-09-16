@@ -26,18 +26,18 @@
 - (BOOL) becomeFirstResponder;
 @end
 
-static NSRect ToNSRect(const IGraphics* const pGraphics, const IRECT* const pR)
+static NSRect ToNSRect(const IGraphicsMac* const pGraphics, const IRECT* const pR)
 {
-	static const int scale = IGraphicsMac::kScaleOS;
+	const int scale = pGraphics->ScaleForceDPI();
 	const int B = pGraphics->Height() - pR->B;
 
 	return NSMakeRect((CGFloat)(pR->L >> scale), (CGFloat)(B >> scale),
 	(CGFloat)(pR->W() >> scale), (CGFloat)(pR->H() >> scale));
 }
 
-static IRECT ToIRECT(const IGraphics* const pGraphics, const NSRect* const pR)
+static IRECT ToIRECT(const IGraphicsMac* const pGraphics, const NSRect* const pR)
 {
-	static const int scale = IGraphicsMac::kScaleOS;
+	const int scale = pGraphics->ScaleForceDPI();
 
 	const int x = (int)pR->origin.x << scale, y = (int)pR->origin.y << scale,
 	w = (int)pR->size.width << scale, h = (int)pR->size.height << scale;
@@ -90,9 +90,10 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent, const bool right,
 - (id) initWithIGraphics: (IGraphicsMac*)pGraphics
 {
 	mGraphics = pGraphics;
-	static const int scale = IGraphicsMac::kScaleOS;
-	const int w = pGraphics->Width(), h = pGraphics->Height();
-	const NSRect r = NSMakeRect(0.0f, 0.0f, (CGFloat)(w >> scale), (CGFloat)(h >> scale));
+
+	int w, h;
+	pGraphics->GetInitialSize(&w, &h);
+	const NSRect r = NSMakeRect(0.0f, 0.0f, (CGFloat)w, (CGFloat)h);
 	self = [super initWithFrame: r];
 
 	const double sec = 1.0 / (double)pGraphics->FPS();
@@ -185,7 +186,7 @@ static IMouseMod GetRightMouseMod(const NSEvent* const pEvent, const bool right,
 - (void) getMouseXY: (NSEvent*)pEvent x: (int*)pX y: (int*)pY
 {
 	const NSPoint pt = [self convertPoint: [pEvent locationInWindow] fromView: nil];
-	const CGFloat scale = (CGFloat)(1 << IGraphicsMac::kScaleOS);
+	const CGFloat scale = (CGFloat)(1 << mGraphics->ScaleForceDPI());
 	*pX = (int)(pt.x * scale);
 	*pY = mGraphics->Height() - (int)(pt.y * scale);
 }
@@ -393,7 +394,7 @@ static const int PARAM_EDIT_H = 21;
 	}
 
 	static const int kPromptCustomHeight = IGraphics::kPromptCustomRect ^ IGraphics::kPromptCustomWidth;
-	static const int scale = IGraphicsMac::kScaleOS;
+	const int scale = mGraphics->ScaleForceDPI();
 
 	const int gh = mGraphics->Height() >> scale;
 	if (!pR) pR = pControl->GetTargetRECT();
