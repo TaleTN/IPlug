@@ -35,7 +35,7 @@ struct CStrLocal
 	char* mCStr;
 	CStrLocal(CFStringRef const cfStr)
 	{
-		const int n = CFStringGetLength(cfStr) + 1;
+		const CFIndex n = CFStringGetLength(cfStr) + 1;
 		mCStr = (char*)malloc(n);
 		CFStringGetCString(cfStr, mCStr, n, kCFStringEncodingUTF8);
 	}
@@ -1713,10 +1713,10 @@ static bool GetDataFromDict(CFDictionaryRef const pDict, const char* const key, 
 	CFDataRef const pData = (CFDataRef)CFDictionaryGetValue(pDict, cfKey.mCFStr);
 	if (pData)
 	{
-		const int n = CFDataGetLength(pData);
+		const CFIndex n = CFDataGetLength(pData);
 		if (pChunk->Size() != n)
 		{
-			pChunk->Resize(n);
+			pChunk->Resize((int)n);
 			if (pChunk->Size() != n) return false;
 		}
 		memcpy(pChunk->GetBytes(), CFDataGetBytePtr(pData), n);
