@@ -761,10 +761,11 @@ void IPlugAAX::AAXUpdateParam(AAX_CParamID const id, const double value, AAX_EUp
 
 	if (!strncmp(id, "Param", 5) && id[5])
 	{
-		const unsigned long int idx = strtoul(&id[5], NULL, 10) - 1;
+		const unsigned long int ul = strtoul(&id[5], NULL, 10) - 1;
 
-		if (idx < (unsigned long int)NParams())
+		if (ul < (unsigned long int)NParams())
 		{
+			const int idx = (int)ul;
 			IGraphics* const pGraphics = GetGUI();
 			if (pGraphics) pGraphics->SetParameterFromPlug(idx, value, true);
 
