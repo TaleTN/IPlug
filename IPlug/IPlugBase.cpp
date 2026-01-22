@@ -670,6 +670,13 @@ const char* IPlugBase::GetPresetName(int idx) const
 	return pPreset ? pPreset->mName.Get() : "";
 }
 
+void IPlugBase::SetPresetName(int idx, const char* const name)
+{
+	if (idx < 0) idx = GetCurrentPresetIdx();
+	IPreset* const pPreset = mPresets.Get(idx);
+	if (pPreset) pPreset->SetName(name);
+}
+
 void IPlugBase::ModifyCurrentPreset(const char* const name)
 {
 	IPreset* const pPreset = mPresets.Get(mCurrentPresetIdx);

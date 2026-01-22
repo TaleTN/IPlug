@@ -142,7 +142,7 @@ public:
 	inline int GetCurrentPresetIdx() const { return mCurrentPresetIdx; }
 	const char* GetPresetName(int idx = -1) const;
 
-	virtual void SetPresetName(int idx, const char* name) {}
+	virtual void SetPresetName(int idx, const char* name);
 	void SetPresetName(const char* name) { SetPresetName(-1, name); }
 
 	bool MakeDefaultPreset(const char* name = NULL, int nPresets = 1);
