@@ -376,7 +376,7 @@ public:
 	{
 		tresult result = kResultFalse;
 
-		if ((unsigned int)listId < 16 && (unsigned int)programIndex < 128)
+		if ((unsigned int)(listId - 1) < 16 && (unsigned int)programIndex < 128)
 		{
 			strcpy16(name, STR16("Program "));
 			static const int len = 8; // strlen16("Program ")
