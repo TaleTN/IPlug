@@ -394,7 +394,9 @@ static const int PARAM_EDIT_H = 21;
 	}
 
 	static const int kPromptCustomHeight = IGraphics::kPromptCustomRect ^ IGraphics::kPromptCustomWidth;
+
 	const int scale = mGraphics->ScaleForceDPI();
+	const int force = scale == IGraphics::kScaleFull;
 
 	const int gh = mGraphics->Height() >> scale;
 	if (!pR) pR = pControl->GetTargetRECT();
@@ -403,7 +405,7 @@ static const int PARAM_EDIT_H = 21;
 	if (!(flags & IGraphics::kPromptCustomWidth))
 	{
 		const int cX = (pR->L + pR->R) >> scale;
-		w = PARAM_EDIT_W;
+		w = PARAM_EDIT_W << force;
 		x = (cX - w) / 2;
 	}
 	else
@@ -415,7 +417,7 @@ static const int PARAM_EDIT_H = 21;
 	if (!(flags  & kPromptCustomHeight))
 	{
 		const int cY = (pR->T + pR->B) >> scale;
-		h = PARAM_EDIT_H;
+		h = PARAM_EDIT_H << force;
 		y = (cY + h) / 2;
 	}
 	else
@@ -428,7 +430,7 @@ static const int PARAM_EDIT_H = 21;
 	const IText* const pFont = pTxt ? pTxt : &kDefaultFont;
 
 	int fontSize = pFont->mSize >> scale;
-	const CGFloat sz = fontSize ? (CGFloat)fontSize : (CGFloat)PARAM_EDIT_H * (11.0f / 21.0f);
+	const CGFloat sz = fontSize ? (CGFloat)fontSize : (CGFloat)(PARAM_EDIT_H << force) * (11.0f / 21.0f);
 
 	NSFont* font = [NSFont fontWithName: ToNSString(pFont->mFont) size: sz];
 	if (fontSize)
