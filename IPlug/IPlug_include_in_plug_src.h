@@ -163,7 +163,7 @@ SMTG_EXPORT_SYMBOL Steinberg::IPluginFactory* PLUGIN_API GetPluginFactory()
 
 		Steinberg::gPluginFactory->registerClass(&componentClass, IPlugVST3::VSTCreateInstance);
 
-		#ifdef VST3_COMPAT_GUID
+		#if defined(VST3_COMPAT_GUID) && defined(VST3_COMPAT_OLD_GUIDS)
 
 		const Steinberg::FUID compatUID(VST3_COMPAT_GUID);
 
