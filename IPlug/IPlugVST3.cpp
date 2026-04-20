@@ -617,30 +617,45 @@ public:
 		const char* pOld;
 
 		const int nOld = GetIPlugVST3CompatGUIDs(uid, &pOld);
-		if (!nOld) return kResultTrue;
+		tresult result = kResultTrue;
 
+		int len;
 		char buf[51];
-		lstrcpyn_safe(buf, "[{\"New\":\"", sizeof(buf));
 
-		const FUID plugUID = FUID::fromTUID(uid);
-		plugUID.toString(&buf[9]);
-
-		lstrcpyn_safe(&buf[41], "\",\"Old\":[", sizeof(buf) - 41);
-		tresult result = stream->write(buf, 50);
-
-		buf[33] = buf[0] = '"';
-		buf[34] = ',';
-
-		for (int i = 0; i < nOld && result == kResultTrue;)
+		if (nOld > 0)
 		{
-			memcpy(&buf[1], pOld, 32);
-			pOld += 32;
+			memcpy(buf, "[{\"New\":", 8);
+			buf[8] = '"';
 
-			result = stream->write(buf, (++i < nOld) + 34);
+			const FUID plugUID = FUID::fromTUID(uid);
+			plugUID.toString(&buf[9]);
+
+			memcpy(&buf[41], "\",\"Old\":", 8);
+			buf[49] = '[';
+
+			result = stream->write(buf, 50);
+
+			buf[0] = '"';
+			memcpy(&buf[33], "\",", 2);
+
+			for (int i = 0; i < nOld && result == kResultTrue;)
+			{
+				memcpy(&buf[1], pOld, 32);
+				pOld += 32;
+
+				result = stream->write(buf, (++i < nOld) + 34);
+			}
+
+			len = 3;
+			memcpy(buf, "]}]", 4);
+		}
+		else
+		{
+			len = 2;
+			memcpy(buf, "[]", 2);
 		}
 
-		memcpy(buf, "]}]", 4);
-		if (result == kResultTrue) result = stream->write(buf, 3);
+		if (result == kResultTrue) result = stream->write(buf, len);
 
 		return result;
 	}
