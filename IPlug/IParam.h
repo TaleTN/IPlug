@@ -53,9 +53,10 @@ public:
 		return wantSize <= 8 && mShortName[0] ? mShortName : mName.Get();
 	}
 
+	inline char* GetShortName() { return mShortName; }
 	void SetShortName(const char* name);
-	virtual const char* GetLabelForHost() const { return ""; }
 
+	virtual const char* GetLabelForHost() const { return ""; }
 	virtual int GetNDisplayTexts() const { return 0; }
 
 	// Reverse map back to value.
