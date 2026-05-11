@@ -121,6 +121,18 @@ public:
 	template <class T> T* GetParam(const int idx) const { return (T*)mParams.Get(idx); }
 	IParam* GetParam(const int idx) const { return mParams.Get(idx); }
 
+	#ifndef NDEBUG
+	template <class T> T* GetParam(const IParam* const* const pParams, const int paramIdx) const
+	#else
+	template <class T> static inline T* GetParam(const IParam* const* const pParams, const int paramIdx)
+	#endif
+	{
+		#ifndef NDEBUG
+		if (mParams.GetList() == pParams) assert(paramIdx >= 0 && paramIdx < NParams());
+		#endif
+		return (T*)pParams[(unsigned int)paramIdx];
+	}
+
 	template <class T> T* AddParam(const int idx, T* const pParam)
 	{
 		#ifndef NDEBUG
