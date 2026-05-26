@@ -436,7 +436,7 @@ static const int PARAM_EDIT_H = 21;
 	if (fontSize)
 	{
 		// See DrawText() in WDL/swell/swell-gdi.mm.
-		int lineHeight = (int)([font ascender] - [font descender] + [font leading] + 1.5f);
+		int lineHeight = (int)([font ascender] - [font descender] + [font leading] + 0.5f);
 		if (lineHeight && ++lineHeight != fontSize)
 		{
 			// See IGraphics::CacheFont().
