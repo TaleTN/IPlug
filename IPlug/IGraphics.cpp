@@ -624,7 +624,7 @@ int IGraphics::DrawIText(IText* const pTxt, const char* const str, const IRECT* 
 	}
 
 	// TN: Quick patch to fix vertical offset.
-	#ifdef __APPLE__
+	#if defined(__APPLE__) && defined(IPLUG_LEGACY_DRAW_TEXT)
 	R.top--;
 	#endif
 
